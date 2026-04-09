@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from dna_to_text.sequence_fetcher import fetch_cds
-from dna_to_text.encoder_runner import embed_all
+from data_loader.sequence_fetcher import fetch_cds
+from data_loader.encoder_runner import embed_all
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"

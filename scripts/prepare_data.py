@@ -8,12 +8,12 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from dna_to_text.dataset_loader import (
+from data_loader.dataset_loader import (
     FAMILIES,
     analyze_genept,
     build_gene_table,
 )
-from dna_to_text.sequence_fetcher import fetch_all
+from data_loader.sequence_fetcher import fetch_all
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"

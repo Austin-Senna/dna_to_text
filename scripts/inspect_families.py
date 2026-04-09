@@ -13,7 +13,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from dna_to_text.dataset_loader import (
+from data_loader.dataset_loader import (
     FAMILIES,
     filter_family,
     load_genept_embeddings,
