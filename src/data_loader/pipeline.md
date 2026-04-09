@@ -3,15 +3,6 @@
 How `prepare_data.py` and `run_encoder.py` build `data/dataset.parquet`.
 
 ## Inputs
-
-| Source | What | Where |
-|---|---|---|
-| **GenePT** | `{gene_symbol → 1536-d embedding}` of NCBI summary text (OpenAI ada-002) | `GenePT_emebdding_v2/GenePT_gene_embedding_ada_text.pickle` |
-| **GenePT summaries** | `{gene_symbol → NCBI summary text}` | `GenePT_emebdding_v2/NCBI_summary_of_genes.json` |
-| **HGNC complete set** | One row per human gene with official symbol, Ensembl ID, gene group annotations | downloaded once to `data/hgnc/hgnc_complete_set.tsv` |
-| **Ensembl REST** | Canonical CDS sequence per Ensembl gene ID | live API, cached to `data/sequences/{ENSG…}.fa` |
-| **DNABERT-2** | `zhihan1996/DNABERT-2-117M` from Hugging Face | downloaded on first encoder run |
-
 ## Two databases, two roles
 
 - **HGNC** = naming + family annotations (no DNA). Tells us "this gene is officially `FCGR1A`, it's an Fc receptor."
@@ -88,17 +79,6 @@ Everything intermediate is cached so reruns are cheap:
 | `data/embeddings/{ENSG}.npy` | one 768-d vector per gene | manually |
 | `data/gene_table.parquet` | post-prepare table | rebuilt by `prepare_data.py` |
 | `data/dataset.parquet` | final table | rebuilt by `run_encoder.py` |
-
-## Inspecting / fact-checking
-
-| Tool | Purpose |
-|---|---|
-| `scripts/inspect_families.py` | preview each family's HGNC matches and GenePT intersection before running the pipeline |
-| `scripts/inspect_data.py` | inspect any artifact after the pipeline runs (`hgnc`, `gene_table`, `sequences`, `embeddings`, `dataset`) |
-| `pd.read_csv("data/hgnc/hgnc_complete_set.tsv", sep="\t")` | grep the raw HGNC TSV directly |
-| https://www.genecards.org/cgi-bin/carddisp.pl?gene=SYMBOL | sanity-check any individual symbol |
-| https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=ENSG... | verify any Ensembl ID externally |
-| Manning kinome / Lambert TF census / IUPHAR | gold-standard family lists for overlap comparison |
 
 ## Run order
 
