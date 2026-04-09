@@ -1,25 +1,73 @@
-"""Load GenePT artifacts, HGNC family lists, and join them into a gene table."""
+"""Load GenePT artifacts, HGNC complete set, and join them into a gene table.
+
+We use the HGNC complete TSV (one row per gene, with a `gene_group` text column
+that lists every gene group the gene belongs to) and substring-match against
+that field per family. This is more robust than chasing single group IDs, since
+HGNC has no master "all kinases" / "all TFs" group — only many small subgroups.
+"""
 from __future__ import annotations
 
 import pickle
+import re
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import requests
 
-# (hgnc_group_id, short_name, display_name)
-# Group IDs are best-guess starting points; verify against
-# https://www.genenames.org/data/genegroup/ on first run.
-FAMILIES: list[tuple[int, str, str]] = [
-    (694, "kinase", "Protein kinases"),
-    (1722, "tf", "Transcription factors"),
-    (177, "ion", "Ion channels"),
-    (139, "gpcr", "GPCRs"),
-    (590, "immune", "Immune receptors"),
+# Each family: (short_name, display_name, [include_regexes], [exclude_regexes])
+# Regexes are matched (case-insensitive) against the HGNC `gene_group` text,
+# which is a "|"-separated list of group names per gene. Excludes win.
+FAMILIES: list[tuple[str, str, list[str], list[str]]] = [
+    (
+        "kinase", "Protein kinases",
+        [r"\bkinase"],
+        [r"kinase inhibitor", r"kinase regulator", r"kinase substrate", r"pseudokinase"],
+    ),
+    (
+        "tf", "Transcription factors",
+        [
+            r"zinc finger", r"homeobox", r"basic helix-loop-helix", r"\bbZIP\b",
+            r"forkhead box", r"high mobility group", r"nuclear receptor",
+            r"T-box", r"SOX transcription", r"ETS transcription",
+            r"transcription factor",
+        ],
+        [r"transcription factor binding", r"cofactor"],
+    ),
+    (
+        "ion", "Ion channels",
+        [r"\bchannel"],
+        [r"channel regulat", r"channel auxiliary", r"channel interacting"],
+    ),
+    (
+        "gpcr", "GPCRs",
+        [
+            r"G protein-coupled receptor", r"adrenoceptor",
+            r"5-hydroxytryptamine receptor", r"dopamine receptor",
+            r"muscarinic", r"opioid receptor", r"chemokine receptor",
+            r"olfactory receptor",
+        ],
+        [],
+    ),
+    (
+        "immune", "Immune receptors",
+        [
+            r"toll like receptor",
+            r"interleukin .* receptor",
+            r"\bFc receptor",
+            r"NOD-like receptor", r"NLR family",
+            r"killer cell immunoglobulin",
+            r"T cell receptor", r"B cell receptor",
+            r"C-type lectin domain",
+            r"immunoglobulin like receptor",
+        ],
+        [r"binding"],
+    ),
 ]
 
-HGNC_URL = "https://www.genenames.org/cgi-bin/genegroup/download?id={group_id}&type=branch"
+HGNC_COMPLETE_URL = (
+    "https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt"
+)
 
 
 def analyze_genept(pickle_path: str | Path) -> dict:
@@ -32,12 +80,11 @@ def analyze_genept(pickle_path: str | Path) -> dict:
 
     keys = list(obj.keys())
     sample_keys = keys[:10]
-    first_val = obj[keys[0]]
-    arr = np.asarray(first_val)
+    arr = np.asarray(obj[keys[0]])
     sample = sample_keys[0] if sample_keys else ""
     if sample.startswith("ENSG"):
         key_format = "ensembl_gene_id"
-    elif sample.isupper() and sample.isalnum():
+    elif sample.isupper() and sample.replace("-", "").isalnum():
         key_format = "gene_symbol"
     else:
         key_format = "unknown"
@@ -63,7 +110,6 @@ def load_genept_embeddings(pickle_path: str | Path) -> dict[str, np.ndarray]:
 
 
 def load_genept_summaries(summaries_path: str | Path) -> dict[str, str]:
-    """Load NCBI summaries. Accepts JSON dict or pickle dict keyed by gene."""
     p = Path(summaries_path)
     if p.suffix == ".json":
         import json
@@ -73,36 +119,47 @@ def load_genept_summaries(summaries_path: str | Path) -> dict[str, str]:
         return pickle.load(f)
 
 
-def load_hgnc_family(group_id: int, short_name: str, cache_dir: str | Path) -> pd.DataFrame:
-    """Download (or load from cache) an HGNC gene group as a DataFrame."""
+def load_hgnc_complete(cache_dir: str | Path) -> pd.DataFrame:
+    """Download (once, then cached) the full HGNC TSV. Returns symbol/ensembl/gene_group."""
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
-    cache_file = cache_dir / f"hgnc_{group_id}.tsv"
+    cache_file = cache_dir / "hgnc_complete_set.tsv"
 
     if not cache_file.exists():
-        url = HGNC_URL.format(group_id=group_id)
-        r = requests.get(url, timeout=60)
+        print(f"  downloading HGNC complete set -> {cache_file}")
+        r = requests.get(HGNC_COMPLETE_URL, timeout=120)
         r.raise_for_status()
-        cache_file.write_text(r.text)
+        cache_file.write_bytes(r.content)
 
-    df = pd.read_csv(cache_file, sep="\t")
-    # HGNC TSV columns include: 'Approved symbol', 'Ensembl gene ID', ...
-    sym_col = next((c for c in df.columns if "symbol" in c.lower() and "approved" in c.lower()), None)
-    ens_col = next((c for c in df.columns if "ensembl" in c.lower() and "gene" in c.lower()), None)
-    if sym_col is None or ens_col is None:
-        raise ValueError(f"Unexpected HGNC columns: {list(df.columns)}")
+    df = pd.read_csv(cache_file, sep="\t", low_memory=False, dtype=str)
+    keep = ["symbol", "ensembl_gene_id", "gene_group", "locus_group"]
+    df = df[keep].rename(columns={"ensembl_gene_id": "ensembl_id"})
+    df["gene_group"] = df["gene_group"].fillna("")
+    # protein-coding only — we want CDS sequences
+    df = df[df["locus_group"] == "protein-coding gene"]
+    return df.reset_index(drop=True)
 
-    out = df[[sym_col, ens_col]].rename(columns={sym_col: "symbol", ens_col: "ensembl_id"})
-    out = out.dropna(subset=["symbol"]).copy()
-    out["family"] = short_name
-    return out
+
+def filter_family(
+    hgnc: pd.DataFrame,
+    includes: list[str],
+    excludes: list[str],
+) -> pd.DataFrame:
+    inc_re = re.compile("|".join(includes), re.IGNORECASE) if includes else None
+    exc_re = re.compile("|".join(excludes), re.IGNORECASE) if excludes else None
+    if inc_re is None:
+        return hgnc.iloc[0:0]
+    mask = hgnc["gene_group"].str.contains(inc_re, na=False)
+    if exc_re is not None:
+        mask &= ~hgnc["gene_group"].str.contains(exc_re, na=False)
+    return hgnc[mask].copy()
 
 
 def build_gene_table(
     genept_pickle: str | Path,
     summaries_path: str | Path,
     hgnc_cache: str | Path,
-    families: list[tuple[int, str, str]] | None = None,
+    families: list | None = None,
     per_family_limit: int | None = None,
 ) -> pd.DataFrame:
     """Join HGNC families with GenePT coverage. Returns a single DataFrame."""
@@ -112,24 +169,27 @@ def build_gene_table(
     summaries = load_genept_summaries(summaries_path)
     embed_keys = set(embeddings.keys())
 
+    hgnc = load_hgnc_complete(hgnc_cache)
+
     rows = []
-    for group_id, short_name, display_name in families:
-        fam = load_hgnc_family(group_id, short_name, hgnc_cache)
-        # GenePT is typically keyed by gene symbol; fall back to ensembl_id if needed.
-        fam = fam[fam["symbol"].isin(embed_keys) | fam["ensembl_id"].isin(embed_keys)].copy()
+    seen_ensembl: set[str] = set()
+    for short_name, display_name, includes, excludes in families:
+        fam = filter_family(hgnc, includes, excludes)
+        fam = fam.dropna(subset=["ensembl_id"])
+        fam = fam[fam["symbol"].isin(embed_keys)]
+        fam = fam[~fam["ensembl_id"].isin(seen_ensembl)]
         if per_family_limit:
             fam = fam.head(per_family_limit)
-        print(f"  {display_name:25s}: {len(fam):4d} genes (HGNC ∩ GenePT)")
+        seen_ensembl.update(fam["ensembl_id"].tolist())
+        print(f"  {display_name:25s}: {len(fam):4d} genes (after HGNC ∩ GenePT ∩ ensembl)")
         for _, r in fam.iterrows():
-            key = r["symbol"] if r["symbol"] in embed_keys else r["ensembl_id"]
+            sym = r["symbol"]
             rows.append({
-                "symbol": r["symbol"],
+                "symbol": sym,
                 "ensembl_id": r["ensembl_id"],
                 "family": short_name,
-                "summary": summaries.get(key, ""),
-                "y_embedding": embeddings[key],
+                "summary": summaries.get(sym, ""),
+                "y_embedding": embeddings[sym],
             })
 
-    df = pd.DataFrame(rows)
-    df = df.dropna(subset=["ensembl_id"]).drop_duplicates(subset=["ensembl_id"])
-    return df.reset_index(drop=True)
+    return pd.DataFrame(rows).reset_index(drop=True)
