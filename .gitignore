@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.ipynb_checkpoints/
+
+# data caches
+data/sequences/
+data/embeddings/
+data/hgnc/
+GenePT_emebdding_v2/
+data/dataset.parquet
+data/gene_table.parquet
