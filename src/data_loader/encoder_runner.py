@@ -1,21 +1,75 @@
 """Run DNABERT-2 over CDS sequences with chunk-and-mean-pool aggregation."""
 from __future__ import annotations
 
+from contextlib import contextmanager
 from pathlib import Path
 
 import numpy as np
 import torch
+from huggingface_hub import snapshot_download
 from tqdm import tqdm
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoConfig, AutoModelForMaskedLM, AutoTokenizer, BertConfig as HFBertConfig
+from transformers import dynamic_module_utils
 
 MODEL_NAME = "zhihan1996/DNABERT-2-117M"
+MODEL_REVISION = "7bce263b15377fc15361f52cfab88f8b586abda0"
+OPTIONAL_REMOTE_IMPORTS = {"flash_attn_triton"}
+
+
+def _auto_device() -> str:
+    if torch.cuda.is_available():
+        return "cuda"
+    if torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+
+@contextmanager
+def _ignore_optional_remote_imports(names: set[str]):
+    """Skip optional relative imports that old remote model code marks as hard deps."""
+    original = dynamic_module_utils.get_relative_imports
+
+    def patched(module_file: str | Path) -> list[str]:
+        imports = original(module_file)
+        return [name for name in imports if name not in names]
+
+    dynamic_module_utils.get_relative_imports = patched
+    try:
+        yield
+    finally:
+        dynamic_module_utils.get_relative_imports = original
 
 
 def load_model(device: str | None = None):
     if device is None:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
-    model = AutoModel.from_pretrained(MODEL_NAME, trust_remote_code=True)
+        device = _auto_device()
+
+    snapshot_dir = Path(snapshot_download(MODEL_NAME, revision=MODEL_REVISION))
+
+    with _ignore_optional_remote_imports(OPTIONAL_REMOTE_IMPORTS):
+        config = AutoConfig.from_pretrained(
+            snapshot_dir,
+            trust_remote_code=True,
+        )
+        tokenizer = AutoTokenizer.from_pretrained(
+            snapshot_dir,
+            trust_remote_code=True,
+        )
+        defaults = HFBertConfig().to_dict()
+        for key, value in defaults.items():
+            if not hasattr(config, key):
+                setattr(config, key, value)
+        if getattr(config, "pad_token_id", None) is None:
+            config.pad_token_id = tokenizer.pad_token_id
+        masked_lm = AutoModelForMaskedLM.from_config(
+            config,
+            trust_remote_code=True,
+        )
+    weights_path = snapshot_dir / "pytorch_model.bin"
+    state_dict = torch.load(weights_path, map_location="cpu", weights_only=True)
+    masked_lm.load_state_dict(state_dict)
+    model = masked_lm.bert
+
     model.to(device).eval()
     return model, tokenizer, device
 
@@ -83,6 +137,7 @@ def embed_all(
         return out
 
     model, tokenizer, device = load_model(device)
+    print(f"  encoding pending sequences: {len(pending)} on {device}")
     for eid, seq in tqdm(pending, desc="DNABERT-2 embed"):
         vec = embed_sequence(seq, model, tokenizer, device)
         np.save(cache_dir / f"{eid}.npy", vec)

@@ -16,7 +16,7 @@ DATA = REPO_ROOT / "data"
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gene-table", default=str(DATA / "gene_table.parquet"))
-    ap.add_argument("--device", default=None, choices=[None, "cuda", "cpu", "mps"])
+    ap.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu", "mps"])
     ap.add_argument("--out", default=str(DATA / "dataset.parquet"))
     args = ap.parse_args()
 
@@ -33,7 +33,8 @@ def main():
     print(f"  with CDS on disk: {len(df)}")
 
     print("\n=== embed with DNABERT-2 ===")
-    x_vecs = embed_all(cds, DATA / "embeddings", device=args.device)
+    device = None if args.device == "auto" else args.device
+    x_vecs = embed_all(cds, DATA / "embeddings", device=device)
     df["x"] = df["ensembl_id"].map(lambda e: x_vecs[e])
     df = df.rename(columns={"y_embedding": "y"})
 
