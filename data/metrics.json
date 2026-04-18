@@ -69,5 +69,41 @@
     "test_mean_cosine": 0.9128212332725525,
     "test_median_cosine": 0.9130746722221375,
     "test_r2_macro": -0.0025184873957186937
+  },
+  {
+    "run_id": "kmer_baseline_2026-04-18T20:25:47+00:00",
+    "timestamp": "2026-04-18T20:25:47+00:00",
+    "model": "kmer_baseline_4",
+    "feature_dim": 256,
+    "alpha": 0.01,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.929939329624176
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9282291531562805
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9201191663742065
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9134601950645447
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9121851921081543
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9120441675186157
+      }
+    ],
+    "test_mean_cosine": 0.93062824010849,
+    "test_median_cosine": 0.9222804307937622,
+    "test_r2_macro": 0.1742565631866455
   }
 ]
