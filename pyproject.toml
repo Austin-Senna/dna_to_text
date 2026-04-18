@@ -12,6 +12,7 @@ dependencies = [
     "numpy>=1.26",
     "tqdm>=4.66",
     "einops>=0.7",
+    "scikit-learn>=1.4",
 ]
 
 [build-system]
