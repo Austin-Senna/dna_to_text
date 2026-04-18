@@ -33,5 +33,41 @@
     "test_mean_cosine": 0.9312981367111206,
     "test_median_cosine": 0.922146201133728,
     "test_r2_macro": 0.18121564388275146
+  },
+  {
+    "run_id": "anti_baseline_2026-04-18T20:16:21+00:00",
+    "timestamp": "2026-04-18T20:16:21+00:00",
+    "model": "anti_baseline_shuffled_y",
+    "shuffle_seed": 42,
+    "alpha": 1000.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8647781014442444
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8845170736312866
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.903187096118927
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.910003662109375
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9116684794425964
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9119493365287781
+      }
+    ],
+    "test_mean_cosine": 0.9128212332725525,
+    "test_median_cosine": 0.9130746722221375,
+    "test_r2_macro": -0.0025184873957186937
   }
 ]
