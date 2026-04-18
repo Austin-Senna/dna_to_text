@@ -36,14 +36,16 @@ def _append_metrics(path: Path, entry: dict) -> None:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--alphas", type=float, nargs="+", default=DEFAULT_ALPHAS)
+    ap.add_argument("--dataset", default=str(DATA / "dataset.parquet"))
     ap.add_argument("--probe-out", default=str(DATA / "probe.npz"))
     ap.add_argument("--metrics-out", default=str(DATA / "metrics.json"))
     args = ap.parse_args()
 
-    print("=== loading splits ===")
-    X_tr, Y_tr, _ = load_split("train")
-    X_val, Y_val, _ = load_split("val")
-    X_te, Y_te, _ = load_split("test")
+    dataset_path = Path(args.dataset)
+    print(f"=== loading splits from {dataset_path.name} ===")
+    X_tr, Y_tr, _ = load_split("train", dataset_path=dataset_path)
+    X_val, Y_val, _ = load_split("val", dataset_path=dataset_path)
+    X_te, Y_te, _ = load_split("test", dataset_path=dataset_path)
     print(f"  train={X_tr.shape} val={X_val.shape} test={X_te.shape}")
 
     print("\n=== alpha sweep (mean cosine on val) ===")
@@ -80,6 +82,7 @@ def main():
         "run_id": f"probe_{ts}",
         "timestamp": ts,
         "model": "linear_probe",
+        "dataset": dataset_path.name,
         "alpha": best_alpha,
         "alpha_sweep": sweep,
         "test_mean_cosine": test_mean_cos,

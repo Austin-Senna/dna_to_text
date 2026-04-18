@@ -7,7 +7,9 @@ __pycache__/
 # data caches
 data/sequences/
 data/embeddings/
+data/embeddings_nt_v2/
 data/hgnc/
 GenePT_emebdding_v2/
 data/dataset.parquet
+data/dataset_nt_v2.parquet
 data/gene_table.parquet

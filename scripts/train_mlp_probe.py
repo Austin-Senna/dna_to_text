@@ -51,16 +51,18 @@ def main():
         help="Hidden sizes to sweep; repeat flag for multiple (e.g. --hidden 256 --hidden 512).",
     )
     ap.add_argument("--alphas", type=float, nargs="+", default=DEFAULT_ALPHAS)
+    ap.add_argument("--dataset", default=str(DATA / "dataset.parquet"))
     ap.add_argument("--metrics-out", default=str(DATA / "metrics.json"))
     args = ap.parse_args()
 
     hidden_configs = [tuple(h) for h in args.hidden] if args.hidden else DEFAULT_HIDDEN
     configs = [{"hidden": h, "alpha": a} for h, a in product(hidden_configs, args.alphas)]
 
-    print("=== loading splits ===")
-    X_tr, Y_tr, _ = load_split("train")
-    X_val, Y_val, _ = load_split("val")
-    X_te, Y_te, _ = load_split("test")
+    dataset_path = Path(args.dataset)
+    print(f"=== loading splits from {dataset_path.name} ===")
+    X_tr, Y_tr, _ = load_split("train", dataset_path=dataset_path)
+    X_val, Y_val, _ = load_split("val", dataset_path=dataset_path)
+    X_te, Y_te, _ = load_split("test", dataset_path=dataset_path)
     print(f"  train={X_tr.shape} val={X_val.shape} test={X_te.shape}")
 
     print(f"\n=== MLP sweep (mean cosine on val) — {len(configs)} configs ===")
@@ -98,6 +100,7 @@ def main():
         "run_id": f"mlp_probe_{ts}",
         "timestamp": ts,
         "model": "mlp_probe",
+        "dataset": dataset_path.name,
         "hidden": list(best_cfg["hidden"]),
         "alpha": best_cfg["alpha"],
         "sweep": sweep_results,

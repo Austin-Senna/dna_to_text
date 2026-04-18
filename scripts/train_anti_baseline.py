@@ -43,13 +43,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--alphas", type=float, nargs="+", default=DEFAULT_ALPHAS)
     ap.add_argument("--shuffle-seed", type=int, default=42)
+    ap.add_argument("--dataset", default=str(DATA / "dataset.parquet"))
     ap.add_argument("--metrics-out", default=str(DATA / "metrics.json"))
     args = ap.parse_args()
 
-    print("=== loading splits (Y shuffled in train + val; test Y untouched) ===")
-    X_tr, Y_tr_shuf, _ = load_shuffled_y("train", seed=args.shuffle_seed)
-    X_val, Y_val_shuf, _ = load_shuffled_y("val", seed=args.shuffle_seed)
-    X_te, Y_te, _ = load_split("test")
+    dataset_path = Path(args.dataset)
+    print(f"=== loading splits from {dataset_path.name} (Y shuffled in train + val) ===")
+    X_tr, Y_tr_shuf, _ = load_shuffled_y("train", seed=args.shuffle_seed, dataset_path=dataset_path)
+    X_val, Y_val_shuf, _ = load_shuffled_y("val", seed=args.shuffle_seed, dataset_path=dataset_path)
+    X_te, Y_te, _ = load_split("test", dataset_path=dataset_path)
     print(f"  train={X_tr.shape} val={X_val.shape} test={X_te.shape}")
 
     print("\n=== alpha sweep on shuffled data (mean cosine on shuffled val) ===")
@@ -83,6 +85,7 @@ def main():
         "run_id": f"anti_baseline_{ts}",
         "timestamp": ts,
         "model": "anti_baseline_shuffled_y",
+        "dataset": dataset_path.name,
         "shuffle_seed": args.shuffle_seed,
         "alpha": best_alpha,
         "alpha_sweep": sweep,
