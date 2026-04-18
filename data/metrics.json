@@ -1,0 +1,37 @@
+[
+  {
+    "run_id": "probe_2026-04-18T19:53:58+00:00",
+    "timestamp": "2026-04-18T19:53:58+00:00",
+    "model": "linear_probe",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8980533480644226
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9130592942237854
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9269936680793762
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9308423399925232
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9292813539505005
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.923684298992157
+      }
+    ],
+    "test_mean_cosine": 0.9312981367111206,
+    "test_median_cosine": 0.922146201133728,
+    "test_r2_macro": 0.18121564388275146
+  }
+]
