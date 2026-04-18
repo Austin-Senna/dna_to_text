@@ -55,7 +55,19 @@ This is a real result under the setup used, but three honest follow-ups could ch
 
 1. **Pooling choice.** We mean-pool DNABERT-2 chunk embeddings. CLS or max-pool could extract different signal. `next_steps.md` flagged this as the specific knob to revisit if cosine plateaus near baseline — which is what happened.
 2. **Target quality.** GenePT summaries vary wildly in informativeness. Many are short or boilerplate. If the target itself is too noisy, a linear probe cannot separate genes even when X carries the signal.
-3. ~~**Linear-only.** Restricting to a linear map is deliberate (it's what "linear alignment" means), but a small MLP probe would reveal whether there is non-linear signal that the linear probe cannot reach. That would stop being a clean alignment claim but is informative on its own.~~ **Checked.** A 1-hidden-layer MLP (256 units, alpha=0.01) lands at test cosine 0.930 / R² 0.162 — effectively tied with the linear probe. No detectable non-linear signal the linear probe is missing. This strengthens the informative-negative framing: the ceiling is not the probe's capacity, it's the representation itself.
+3. ~~**Linear-only.** Restricting to a linear map is deliberate (it's what "linear alignment" means), but a small MLP probe would reveal whether there is non-linear signal that the linear probe cannot reach. That would stop being a clean alignment claim but is informative on its own.~~ **Checked.** A 1-hidden-layer MLP (256 units, alpha=0.01) lands at test cosine 0.930 / R² 0.162 — effectively tied with the linear probe. No detectable non-linear signal the linear probe is missing.
+
+   **Checked at depth too.** Swept 1–3 hidden layers with varying width and regularisation:
+
+   | hidden | alpha | val cos |
+   |---|---|---|
+   | (256,) | 1e-2 | 0.9291 |
+   | (512, 256) | 1e-2 | 0.9297 |
+   | (1024, 512) | 1e-2 | 0.9298 |
+   | (512, 256, 128) | 1e-2 | 0.9301 |
+   | (1024, 512, 256) | 1e-2 | 0.9303 |
+
+   Total spread across all MLP configs is 0.0018 — well inside noise, and all configs land within ±0.002 of the linear probe. Depth doesn't rescue it. This strengthens the informative-negative framing: the ceiling is not the probe's capacity, it's the representation itself.
 
 Model choice is a separate axis to vary: Nucleotide Transformer v2, HyenaDNA, Caduceus, and GENA-LM are all plausible drop-in replacements that would test whether a different DNA encoder changes the conclusion.
 
