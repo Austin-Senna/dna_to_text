@@ -14,11 +14,12 @@ Commits: `572b034` (splits), `88112c6` (probe), `6b601ce` (anti-baseline), `5aaf
 
 ## Results
 
-| Run | Mean cosine | Median cosine | R² macro | Best α |
+| Run | Mean cosine | Median cosine | R² macro | Best config |
 |---|---|---|---|---|
-| anti-baseline (shuffled Y) | 0.9128 | 0.9131 | **−0.003** | 1000 |
-| kmer baseline (4-mer, 256-d) | 0.9306 | 0.9223 | 0.1743 | 0.01 |
-| **linear probe (DNABERT-2, 768-d)** | **0.9313** | 0.9221 | **0.1812** | 10 |
+| anti-baseline (shuffled Y) | 0.9128 | 0.9131 | **−0.003** | α=1000 |
+| kmer baseline (4-mer, 256-d) | 0.9306 | 0.9223 | 0.1743 | α=0.01 |
+| **linear probe (DNABERT-2, 768-d)** | **0.9313** | 0.9221 | **0.1812** | α=10 |
+| mlp probe (1 hidden, 256 units) | 0.9300 | 0.9220 | 0.1616 | hidden=(256,), α=0.01 |
 
 Deltas that matter:
 
@@ -26,6 +27,7 @@ Deltas that matter:
 |---|---|---|
 | probe − anti-baseline | +0.019 | +0.184 |
 | **probe − kmer baseline** | **+0.001** | **+0.007** |
+| **mlp − linear probe** | **−0.001** | **−0.020** |
 
 ## Interpretation
 
@@ -53,7 +55,7 @@ This is a real result under the setup used, but three honest follow-ups could ch
 
 1. **Pooling choice.** We mean-pool DNABERT-2 chunk embeddings. CLS or max-pool could extract different signal. `next_steps.md` flagged this as the specific knob to revisit if cosine plateaus near baseline — which is what happened.
 2. **Target quality.** GenePT summaries vary wildly in informativeness. Many are short or boilerplate. If the target itself is too noisy, a linear probe cannot separate genes even when X carries the signal.
-3. **Linear-only.** Restricting to a linear map is deliberate (it's what "linear alignment" means), but a small MLP probe would reveal whether there is non-linear signal that the linear probe cannot reach. That would stop being a clean alignment claim but is informative on its own.
+3. ~~**Linear-only.** Restricting to a linear map is deliberate (it's what "linear alignment" means), but a small MLP probe would reveal whether there is non-linear signal that the linear probe cannot reach. That would stop being a clean alignment claim but is informative on its own.~~ **Checked.** A 1-hidden-layer MLP (256 units, alpha=0.01) lands at test cosine 0.930 / R² 0.162 — effectively tied with the linear probe. No detectable non-linear signal the linear probe is missing. This strengthens the informative-negative framing: the ceiling is not the probe's capacity, it's the representation itself.
 
 Model choice is a separate axis to vary: Nucleotide Transformer v2, HyenaDNA, Caduceus, and GENA-LM are all plausible drop-in replacements that would test whether a different DNA encoder changes the conclusion.
 
