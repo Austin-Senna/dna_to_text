@@ -105,5 +105,159 @@
     "test_mean_cosine": 0.93062824010849,
     "test_median_cosine": 0.9222804307937622,
     "test_r2_macro": 0.1742565631866455
+  },
+  {
+    "run_id": "mlp_probe_2026-04-18T20:44:12+00:00",
+    "timestamp": "2026-04-18T20:44:12+00:00",
+    "model": "mlp_probe",
+    "hidden": [
+      512
+    ],
+    "alpha": 0.01,
+    "sweep": [
+      {
+        "hidden": [
+          256
+        ],
+        "alpha": 0.0001,
+        "mean_cosine": 0.7977299690246582
+      },
+      {
+        "hidden": [
+          256
+        ],
+        "alpha": 0.001,
+        "mean_cosine": 0.827761173248291
+      },
+      {
+        "hidden": [
+          256
+        ],
+        "alpha": 0.01,
+        "mean_cosine": 0.88241046667099
+      },
+      {
+        "hidden": [
+          512
+        ],
+        "alpha": 0.0001,
+        "mean_cosine": 0.7018575668334961
+      },
+      {
+        "hidden": [
+          512
+        ],
+        "alpha": 0.001,
+        "mean_cosine": 0.702695369720459
+      },
+      {
+        "hidden": [
+          512
+        ],
+        "alpha": 0.01,
+        "mean_cosine": 0.8957870602607727
+      },
+      {
+        "hidden": [
+          1024
+        ],
+        "alpha": 0.0001,
+        "mean_cosine": 0.6123491525650024
+      },
+      {
+        "hidden": [
+          1024
+        ],
+        "alpha": 0.001,
+        "mean_cosine": 0.6122055649757385
+      },
+      {
+        "hidden": [
+          1024
+        ],
+        "alpha": 0.01,
+        "mean_cosine": 0.6156311631202698
+      }
+    ],
+    "test_mean_cosine": 0.8961817622184753,
+    "test_median_cosine": 0.8935846090316772,
+    "test_r2_macro": -0.2877643406391144
+  },
+  {
+    "run_id": "mlp_probe_2026-04-18T20:50:17+00:00",
+    "timestamp": "2026-04-18T20:50:17+00:00",
+    "model": "mlp_probe",
+    "hidden": [
+      256
+    ],
+    "alpha": 0.01,
+    "sweep": [
+      {
+        "hidden": [
+          256
+        ],
+        "alpha": 0.0001,
+        "mean_cosine": 0.9283865690231323
+      },
+      {
+        "hidden": [
+          256
+        ],
+        "alpha": 0.001,
+        "mean_cosine": 0.928485631942749
+      },
+      {
+        "hidden": [
+          256
+        ],
+        "alpha": 0.01,
+        "mean_cosine": 0.9291268587112427
+      },
+      {
+        "hidden": [
+          512
+        ],
+        "alpha": 0.0001,
+        "mean_cosine": 0.928278923034668
+      },
+      {
+        "hidden": [
+          512
+        ],
+        "alpha": 0.001,
+        "mean_cosine": 0.928715705871582
+      },
+      {
+        "hidden": [
+          512
+        ],
+        "alpha": 0.01,
+        "mean_cosine": 0.9287674427032471
+      },
+      {
+        "hidden": [
+          1024
+        ],
+        "alpha": 0.0001,
+        "mean_cosine": 0.9272441267967224
+      },
+      {
+        "hidden": [
+          1024
+        ],
+        "alpha": 0.001,
+        "mean_cosine": 0.9272191524505615
+      },
+      {
+        "hidden": [
+          1024
+        ],
+        "alpha": 0.01,
+        "mean_cosine": 0.927962601184845
+      }
+    ],
+    "test_mean_cosine": 0.9299684166908264,
+    "test_median_cosine": 0.9219503998756409,
+    "test_r2_macro": 0.16159264743328094
   }
 ]
