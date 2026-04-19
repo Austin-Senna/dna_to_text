@@ -259,5 +259,156 @@
     "test_mean_cosine": 0.9299684166908264,
     "test_median_cosine": 0.9219503998756409,
     "test_r2_macro": 0.16159264743328094
+  },
+  {
+    "run_id": "probe_2026-04-18T22:58:59+00:00",
+    "timestamp": "2026-04-18T22:58:59+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2.parquet",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9168339371681213
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9217696189880371
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9291210174560547
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9317314028739929
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9305021166801453
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9257081747055054
+      }
+    ],
+    "test_mean_cosine": 0.9323520064353943,
+    "test_median_cosine": 0.9254471063613892,
+    "test_r2_macro": 0.19256477057933807
+  },
+  {
+    "run_id": "anti_baseline_2026-04-18T22:59:05+00:00",
+    "timestamp": "2026-04-18T22:59:05+00:00",
+    "model": "anti_baseline_shuffled_y",
+    "dataset": "dataset_nt_v2.parquet",
+    "shuffle_seed": 42,
+    "alpha": 1000.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8872559070587158
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8937456011772156
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9043342471122742
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.909955620765686
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9116213321685791
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9119653701782227
+      }
+    ],
+    "test_mean_cosine": 0.9130444526672363,
+    "test_median_cosine": 0.9140700697898865,
+    "test_r2_macro": -0.00037485422217287123
+  },
+  {
+    "run_id": "mlp_probe_2026-04-18T23:50:32+00:00",
+    "timestamp": "2026-04-18T23:50:32+00:00",
+    "model": "mlp_probe",
+    "dataset": "dataset_nt_v2.parquet",
+    "hidden": [
+      1024
+    ],
+    "alpha": 0.01,
+    "sweep": [
+      {
+        "hidden": [
+          256
+        ],
+        "alpha": 0.0001,
+        "mean_cosine": 0.9307641983032227
+      },
+      {
+        "hidden": [
+          256
+        ],
+        "alpha": 0.001,
+        "mean_cosine": 0.9313979744911194
+      },
+      {
+        "hidden": [
+          256
+        ],
+        "alpha": 0.01,
+        "mean_cosine": 0.9312883615493774
+      },
+      {
+        "hidden": [
+          512
+        ],
+        "alpha": 0.0001,
+        "mean_cosine": 0.9297571778297424
+      },
+      {
+        "hidden": [
+          512
+        ],
+        "alpha": 0.001,
+        "mean_cosine": 0.9302530884742737
+      },
+      {
+        "hidden": [
+          512
+        ],
+        "alpha": 0.01,
+        "mean_cosine": 0.9308902621269226
+      },
+      {
+        "hidden": [
+          1024
+        ],
+        "alpha": 0.0001,
+        "mean_cosine": 0.9304676651954651
+      },
+      {
+        "hidden": [
+          1024
+        ],
+        "alpha": 0.001,
+        "mean_cosine": 0.9310266971588135
+      },
+      {
+        "hidden": [
+          1024
+        ],
+        "alpha": 0.01,
+        "mean_cosine": 0.9315818548202515
+      }
+    ],
+    "test_mean_cosine": 0.9324889779090881,
+    "test_median_cosine": 0.9253184199333191,
+    "test_r2_macro": 0.18884681165218353
   }
 ]
