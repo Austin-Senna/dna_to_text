@@ -1,76 +1,67 @@
 # Next Steps
 
-Phase 1 (data + embeddings) is done: `data/dataset.parquet` exists with `x (768)` and `y (1536)` for every gene across the 5 families. Everything below is downstream of that file.
+Living project log. Phases 1–3 are done; phase 4 carries the deck's Week 4–5 deliverables; phase 5 collects the open scientific questions surfaced by `findings.md`.
 
-## Phase 2 — Splits and controls
+## Phase 1 — Data pipeline   ✅ done   (deck Weeks 1–2)
 
-Blocks everything else. Must land before modelling starts.
+- 3244 genes, 5 families: tf 1743, gpcr 591, kinase 558, ion 198, immune 154
+- HGNC TSV cached (`data/hgnc/hgnc_complete_set.tsv`); Ensembl CDS cached (3244 FASTAs in `data/sequences/`)
+- Stratified 70/15/15 split frozen in `data/splits.json` (2270 / 487 / 487)
+- Code: `src/data_loader/`, `src/splits/`, `scripts/prepare_data.py`, `scripts/make_splits.py`
 
-- [ ] `src/dna_to_text/splits.py`: stratified 70/15/15 on `family`, seeded. Dump `data/splits.json` as `{train: [ensembl_id...], val: [...], test: [...]}`.
-- [ ] Carve out zero-shot set (~20–30 genes). Candidates: genes with empty / very short summaries, or outside the 5 families. Save to `data/zero_shot.parquet`.
-- [ ] Helper: `load_split(name) -> (X, Y, meta)` so every downstream script reads the same arrays.
-- [ ] Shuffled-`y` control set ready to use as a sanity run in phase 3.
+## Phase 2 — Encoder embeddings   ✅ done   (deck Week 2)
 
-## Phase 3 — Probe + baseline + sanity
+- DNABERT-2:  3244 × 768  →  `data/embeddings/`, `data/dataset.parquet`
+- NT-v2 100M: 3244 × 512  →  `data/embeddings_nt_v2/`, `data/dataset_nt_v2.parquet`
 
-Primary modelling work. Probe, baseline, and shuffled control can run in parallel once phase 2 lands.
+NT-v2 was added beyond the original deck plan as a second encoder so we have converging-evidence on any ceiling we hit.
 
-- [ ] `src/dna_to_text/probe.py`: thin wrapper around `sklearn.linear_model.Ridge` with `.fit(X, Y)`, `.predict(X)`, `.save(path)`, `.load(path)`.
-- [ ] `scripts/train_probe.py`:
-  - Load splits.
-  - Sweep `alpha in [1e-2, 1e-1, 1, 10, 100, 1000]` on val, pick best by mean cosine.
-  - Refit on train+val at chosen alpha.
-  - Write `data/probe.npz` (W, b, alpha) and append to `data/metrics.json`.
-- [ ] `src/dna_to_text/baseline.py`: 4-mer frequency featuriser over CDS (256-d, L1-normalised).
-- [ ] `scripts/train_baseline.py`: same shape as `train_probe.py`, same metrics schema.
-- [ ] `src/dna_to_text/metrics.py`: cosine (mean, median), macro R², retrieval@1/5/10, family-classification accuracy.
-- [ ] Shuffled-`y` control run — should score near zero. If not, pipeline is leaking; stop and debug.
-- [ ] Gate: probe beats 4-mer baseline on cosine and retrieval@k?
+Code: `src/data_loader/{encoder_runner,nt_v2_encoder}.py`, `scripts/run_encoder.py`, `scripts/run_nt_v2_encoder.py`.
 
-## Phase 4 — Zero-shot demo
+## Phase 3 — Probe + baseline + sanity   ✅ done   (deck Week 3)
 
-Depends on phase 3 (needs trained probe).
+| Run | Encoder | Test cos | Test R² | Best config |
+|---|---|---:|---:|---|
+| Linear probe | DNABERT-2 | 0.9313 | 0.181 | α=10 |
+| Linear probe | NT-v2 | 0.9324 | 0.193 | α=10 |
+| 4-mer baseline | — | 0.9306 | 0.174 | α=0.01 |
+| Anti-baseline | DNABERT-2 | 0.9128 | −0.003 | α=1000 |
+| Anti-baseline | NT-v2 | 0.9130 | −0.000 | α=1000 |
+| MLP probe | DNABERT-2 | 0.9300 | 0.162 | hidden=(256,), α=0.01 |
+| MLP probe | NT-v2 | 0.9325 | 0.189 | hidden=(1024,), α=0.01 |
 
-- [ ] `scripts/zero_shot.py`: load `zero_shot.parquet` + `probe.npz`, project `x -> y_hat`, k-NN against the training `y` matrix, majority-vote family among top-5, report neighbour symbols + cosines.
-- [ ] Pick 3–5 illustrative genes for the write-up.
-- [ ] Emit a markdown table of predictions → neighbours for the report.
+Outcome: **informative negative** per `framework.md` § Success / failure criteria — both encoders tie the 4-mer baseline within ±0.002 cosine. Anti-baseline R² ≈ 0 confirms the pipeline is honest. MLP depth doesn't move the number, so the ceiling is the representation, not the probe's capacity. See `findings.md` for the full read.
 
-## Phase 5 — Visualisation
+Code: `src/linear_trainer/`, `src/kmer_baseline/`, `scripts/train_{probe,baseline,anti_baseline,mlp_probe}.py`.
 
-Can start as soon as phase 3 has a trained probe; independent of phase 4.
+## Phase 4 — Qualitative deliverables   ⏳ open   (deck Weeks 4–5)
 
-- [ ] `src/dna_to_text/viz.py`: PCA and UMAP helpers that take an `(N, D)` matrix + labels and return a figure.
-- [ ] `scripts/make_plots.py`: DNA space (`x`), text space (`y`), projected space (`y_hat` on test). Two projections (PCA, UMAP) × three spaces = 6 panels, consistent colour map across panels. Save to `data/figures/`.
+These are the deck's Week 4–5 commitments that have not yet shipped.
 
-## Phase 6 — Interpretability
+- [ ] **Retrieval@k metric** (k = 1, 5, 10) on linear-probe test predictions for both encoders.
+- [ ] **Family-classification accuracy** — logistic regression on `y_hat → family`, compared to the same classifier on real `y`. Measures how much class-level structure survives the projection.
+- [ ] **Zero-shot demo** — pick 3–5 uncharacterised genes (poorly annotated or with very short summaries), embed → project → k-NN → predicted family + neighbour symbols + cosines. Markdown table for the write-up.
+- [ ] **Visualisation** — PCA + UMAP for DNA space (`x`), text space (`y`), projected space (`y_hat`), colour-coded by family. Six panels total. Save to `data/figures/`.
+- [ ] **Captum Integrated Gradients** (Hayden's slot in the deck) — one figure per family, attributions over the CDS for 1–2 representative genes, scalar target = cosine to the family centroid in GenePT space. Look for motif enrichment in high-attribution windows.
+- [ ] **Write-up** — intro (from `project.md`) → methods (point at `framework.md` and `src/data_loader/pipeline.md`) → results table + figures from above → discussion in informative-negative framing.
 
-Depends on phase 3 probe + phase 5 plots for context.
+## Phase 5 — Optional ceiling-breaker experiments   🔬 open, lower priority
 
-- [ ] `src/dna_to_text/interpret.py`: stack DNABERT-2 + fixed probe so the output is a scalar (cosine to a chosen family centroid in GenePT space). Wrap with Captum IG.
-- [ ] Pick 1–2 genes per family; attribute at the token level; map tokens back to nucleotide spans.
-- [ ] Look for motif enrichment in high-attribution spans (manual inspection first; proper enrichment test is bonus).
-- [ ] One figure per family showing attribution over the CDS.
+Strictly after Phase 4. These address the three caveats in `findings.md`.
 
-## Phase 7 — Write-up
+- [ ] **Pooling sweep** — CLS / max-pool / attention-weighted variants on both encoders. The mean-pool ceiling could be smearing out per-position signal.
+- [ ] **Window sweep** — full transcript (promoter + UTR + CDS) instead of CDS-only. CDS is the most composition-homogenous part of a gene because of codon usage; promoters and UTRs may carry more function-discriminating signal.
+- [ ] **Optional third encoder** — HyenaDNA, Caduceus, or GENA-LM. Not required: convergence is already cross-encoder with two. Each additional encoder hitting the same ceiling further strengthens the read.
 
-Final phase. Consumes outputs of 3–6.
+## Resolved / archived
 
-- [ ] Intro (condense from `project.md`).
-- [ ] Methods (point at `framework.md` and `src/data_loader/pipeline.md`).
-- [ ] Results table: probe vs baseline vs shuffled control.
-- [ ] Figures: UMAP panel, zero-shot table, one IG figure.
-- [ ] Discussion: positive / informative-negative framing depending on the numbers.
+- **Mean-of-chunks pooling vs CLS / max-pool?** → Unresolved empirically; deferred to Phase 5. Cosine plateaued at the 4-mer baseline on both encoders, which was the trigger condition.
+- **Five families enough resolution?** → Yes for the current corpus and probe. Sub-family classification is a Phase 4-or-later ask after we see the cluster figures.
+- **Version `dataset.parquet` if pooling changes?** → Handled implicitly by adding `dataset_nt_v2.parquet` as a sibling artefact rather than mutating in place. Future encoder/pooling variants follow the same convention.
 
 ## Dependency graph
 
 ```
-[2 splits] ──► [3 probe + baseline + sanity] ──┬─► [4 zero-shot] ─┐
-                                                │                  │
-                                                └─► [5 viz] ──► [6 interp] ──► [7 write-up]
+[1 data] → [2 encoders] → [3 probe + baseline + sanity] → [4 deliverables] → [5 ceiling-breakers]
+                                                                  └→ write-up
 ```
-
-## Open questions
-
-- Mean-of-chunks pooling (current) vs CLS / max-pool variants? Decide after first probe run; only revisit if cosine plateaus well below baseline.
-- 5 families enough resolution, or add sub-family labels for a harder classification test? Defer until cluster separation is visible.
-- Version `dataset.parquet` if pooling changes? For now, no — single frozen version in `data/`.

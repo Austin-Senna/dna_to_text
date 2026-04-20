@@ -19,7 +19,7 @@ GenePT symbol  ──────►  HGNC symbol  ──────►  Ensemb
 
 ## Family selection
 
-We don't use HGNC group IDs (they're fragmented — no master "all kinases" group). Instead we substring-match the `gene_group` text column in the HGNC TSV. Each family in `src/dna_to_text/dataset_loader.py::FAMILIES` is:
+We don't use HGNC group IDs (they're fragmented — no master "all kinases" group). Instead we substring-match the `gene_group` text column in the HGNC TSV. Each family in `src/data_loader/dataset_loader.py::FAMILIES` is:
 
 ```python
 (short_name, display_name, [include_regexes], [exclude_regexes])

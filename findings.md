@@ -4,6 +4,8 @@ We test whether a simple linear map can transport DNA-language-model embeddings 
 
 Relevant commits: `572b034` splits, `88112c6` probe, `6b601ce` anti-baseline, `5aaf631` kmer baseline, `d3c1a40` MLP probe, `f7577c9` NT-v2 encoder, `2895ad4` NT-v2 experiments.
 
+> Methods detail: see `framework.md`. Forward-looking work: see `next_steps.md`.
+
 ## Setup
 
 - **Corpus.** 3244 human protein-coding genes spanning 5 functional families (TF, GPCR, kinase, ion channel, immune receptor). Split 70/15/15 stratified by family.
