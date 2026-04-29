@@ -53,7 +53,7 @@ For each task, also run three baselines (encoder-independent or below-encoder):
 2. **Shuffled-label anti-baseline.** Permute y in train+val, evaluate on real test labels. Should land near chance: ~50% accuracy / ~0.50 macro-F1 for balanced binary, ~20% accuracy / ~0.10–0.20 macro-F1 for the imbalanced 5-way. Run once per task (pick one X — NT-v2, since the result is X-agnostic). Pipeline sanity gate.
 3. **CDS length only.** Single feature: `len(cds)` → logistic. Catches the embarrassing "encoder is just a length proxy" failure. Length distributions differ across families (kinase domains short, ion channels long) so this baseline may already be informative.
 
-No MLP probe up front. Add one only if logistic ties 4-mer on a given task — same diagnostic role as in Phase 3.
+No MLP probe at all. Phase 3 already showed that MLP depth/width doesn't move the number on these encoders (1–3 hidden layers all tied the linear probe within ±0.002 cosine). Re-running an MLP diagnostic on the classification reframing would not surprise. If logistic ties 4-mer, the answer is pooling re-extraction (Phase 4b), not more probe capacity.
 
 ## Run matrix
 
