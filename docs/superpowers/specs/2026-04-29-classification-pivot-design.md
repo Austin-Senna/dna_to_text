@@ -37,11 +37,25 @@ The two binary tasks test the same hypothesis under cleaner balance: one on biol
 
 A single binary task is fragile to family choice: tf-vs-gpcr is *biologically* easy (codon composition diverges sharply between membrane and nuclear proteins) which makes it *too easy* for the 4-mer baseline. tf-vs-kinase is harder for k-mer (both intracellular soluble) but biologically less obvious. Running both gives a contrast — if the encoder beats k-mer on one but not the other, the difference itself is informative.
 
-### Pooling deferred
+### Pooling deferred (Phase 4a) — strategy locked for Phase 4b
 
-Hayden's "chunks don't have meaning" critique is parked. Run all three tasks on the *existing* mean-pooled embeddings first. If classification ties 4-mer (same outcome as regression), invest in alternative pooling. If classification beats 4-mer with mean-pool, pooling was not the bottleneck and the negative-result framing already had escape valves we can now close.
+Hayden's "chunks don't have meaning" critique is parked for Phase 4a. Run all three tasks on the *existing* mean-pooled embeddings first. If classification ties 4-mer (same outcome as regression), Phase 4b re-extracts pooled embeddings using a fixed pre-decided strategy. If classification beats 4-mer with mean-pool, pooling was not the bottleneck and the negative-result framing already had escape valves we can now close.
 
 This is a sequencing decision: pooling re-extraction is a 1–2 day commitment per encoder, and it's only worth it if the simpler intervention fails.
+
+**Phase 4b strategy (locked, not yet implemented).** When Phase 4b triggers, run two pooling variants in parallel against the existing mean→mean baseline:
+
+- **D (minimal):** `concat[mean_tokens(first_chunk), mean_tokens(last_chunk), mean_chunks(mean_tokens(chunk_i))]` — 3× the per-chunk dim. Tests terminal asymmetry (N-terminal signal peptide, C-terminal motifs) cheaply.
+- **G (richer):** D plus `max_chunks(mean_tokens(chunk_i))` — 4× the per-chunk dim. Adds a "did any chunk fire strongly on this dim" channel, testing whether one local domain carries the label.
+
+Mean→mean stays as the baseline so we have a clean A/B against the Phase 4a numbers. **No learned attention pooling in Phase 4b** — adding a trainable head would no longer be a clean frozen-representation test, and we want to know whether the *frozen embedding itself* contains the signal vs whether a pooling head learned the task. Attention pooling is reserved for a hypothetical Phase 4c if D/G also tie.
+
+Rationale for D/G specifically (over the brainstormed B/C/E alternatives):
+- D is the cheapest test of terminal asymmetry without giving up cross-chunk averaging.
+- G adds the only other parameter-free axis that reliably surfaces sparse motifs (per-dim max across chunks).
+- Both are pure re-extraction — same probe code, same metrics, same eval — so the comparison to Phase 4a is apples-to-apples.
+
+Phase 4b gets its own spec and plan when triggered. It is not part of this spec's run matrix.
 
 ## Probes and baselines
 
@@ -175,7 +189,7 @@ Three branches, decided after the run matrix is filled:
 | Outcome | Branch |
 |---|---|
 | Either encoder beats 4-mer (Δ macro-F1 ≥ 0.02) on at least one task | **Write up.** Positive result on classification reframing. No pooling work needed. Note in the discussion that the previous regression negative was likely target-noise driven. |
-| Both encoders tie 4-mer (within ±0.02 macro-F1) on every task | **Phase 4b: pooling re-extraction.** Pick from the brainstormed menu (max-pool, first-chunk, concat[first,last,mean], or per-token attention head). Re-embed once, re-run the same probe matrix. |
+| Both encoders tie 4-mer (within ±0.02 macro-F1) on every task | **Phase 4b: pooling re-extraction (D + G in parallel).** Re-embed both encoders with strategy D and strategy G as defined above, re-run the same probe matrix against the mean→mean Phase 4a numbers. No learned pooling head. |
 | Encoder loses to 4-mer (Δ ≤ −0.02) on every task | **Stop and debug.** Pipeline issue or feature collapse. Check anti-baseline first, then re-verify the cached embeddings haven't been corrupted. |
 
 The decision gate is *part* of the spec, not deferred. The write-up framing depends on which branch we land in.
@@ -191,8 +205,8 @@ Roughly one week.
 
 **Phase 4b — Pooling (conditional, Days 4–6)**
 - Triggered only by the "both tie 4-mer" branch above.
-- Pick one pooling alternative (cheapest first), re-embed, re-run the matrix.
-- Each additional pooling alternative is a half-day cost — budget for at most two.
+- Re-embed both encoders with strategy D (3× dim) and strategy G (4× dim) as defined in "Pooling deferred". Both runs in parallel — same probe code, same matrix.
+- D and G share most of the re-extraction cost (G is D + one extra reduction across chunks); plan as one re-extract pass producing both feature sets.
 
 **Phase 4c — Write-up (Days 6–7)**
 - Results table (15 cells, plus any 4b cells).
