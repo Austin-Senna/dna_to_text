@@ -34,24 +34,35 @@ Outcome: **informative negative** per `framework.md` § Success / failure criter
 
 Code: `src/linear_trainer/`, `src/kmer_baseline/`, `scripts/train_{probe,baseline,anti_baseline,mlp_probe}.py`.
 
-## Phase 4 — Qualitative deliverables   ⏳ open   (deck Weeks 4–5)
+## Phase 4 — Classification reframing   (deck Weeks 4–5)
 
-These are the deck's Week 4–5 commitments that have not yet shipped.
+Original Phase 4 (retrieval@k, IG attribution, family-classification-on-`y_hat`, zero-shot demo, viz, write-up) was superseded by the 2026-04-29 classification-pivot spec — see `docs/superpowers/specs/2026-04-29-classification-pivot-design.md`.
 
-- [ ] **Retrieval@k metric** (k = 1, 5, 10) on linear-probe test predictions for both encoders.
-- [ ] **Family-classification accuracy** — logistic regression on `y_hat → family`, compared to the same classifier on real `y`. Measures how much class-level structure survives the projection.
-- [ ] **Zero-shot demo** — pick 3–5 uncharacterised genes (poorly annotated or with very short summaries), embed → project → k-NN → predicted family + neighbour symbols + cosines. Markdown table for the write-up.
-- [ ] **Visualisation** — PCA + UMAP for DNA space (`x`), text space (`y`), projected space (`y_hat`), colour-coded by family. Six panels total. Save to `data/figures/`.
-- [ ] **Captum Integrated Gradients** (Hayden's slot in the deck) — one figure per family, attributions over the CDS for 1–2 representative genes, scalar target = cosine to the family centroid in GenePT space. Look for motif enrichment in high-attribution windows.
-- [ ] **Write-up** — intro (from `project.md`) → methods (point at `framework.md` and `src/data_loader/pipeline.md`) → results table + figures from above → discussion in informative-negative framing.
+### Phase 4a — Classification probes   ✅ done
+
+15-cell run matrix (3 tasks × 5 feature sources). Headline: **NT-v2 5-way macro-F1 = 0.803 vs 4-mer baseline 0.672 (+0.131)**. Decision gate landed in Branch 1 — encoder beats 4-mer; Phase 4b pooling re-extraction is **skipped**. Full results in `findings.md` § "Phase 4 — Classification reframing".
+
+Code: `src/binary_tasks/`, `src/length_baseline/`, `src/linear_trainer/logistic_probe.py`, `scripts/{make_binary_subsets,train_logistic_probe}.py`.
+
+Artefacts: `data/binary_tf_vs_gpcr.json`, `data/binary_tf_vs_kinase.json`, `data/confusion_5way_{dnabert2,nt_v2}.json`, 15 entries in `data/metrics.json` with `model == "logistic_probe"`.
+
+### Phase 4b — Pooling re-extraction   skipped
+
+Decision gate from `findings.md` landed in Branch 1 (encoder beats 4-mer). The spec's pooling menu (mean→D, mean→G, max→mean, CLS→mean against the mean→mean baseline) remains documented in the spec for reference but is not triggered.
+
+### Phase 4c — Write-up   ⏳ open
+
+- [x] Results table (15 cells) in `findings.md`
+- [x] 5-way confusion matrix per encoder (saved as JSON, embedded in `findings.md`)
+- [ ] Slide-deck write-up: intro (from `project.md`) → methods (point at `framework.md`) → Phase 3 informative-negative + Phase 4 classification result → discussion of the encoder gap (NT-v2 vs DNABERT-2)
 
 ## Phase 5 — Optional ceiling-breaker experiments   🔬 open, lower priority
 
-Strictly after Phase 4. These address the three caveats in `findings.md`.
+Strictly after Phase 4c. These address the three caveats in `findings.md`.
 
-- [ ] **Pooling sweep** — CLS / max-pool / attention-weighted variants on both encoders. The mean-pool ceiling could be smearing out per-position signal.
+- [ ] **Pooling sweep** — the spec's Phase 4b menu (mean→D, mean→G, max→mean, CLS→mean) could still be informative as an ablation even though the headline doesn't require it. Would establish whether DNABERT-2's gap to NT-v2 is recoverable by better pooling.
 - [ ] **Window sweep** — full transcript (promoter + UTR + CDS) instead of CDS-only. CDS is the most composition-homogenous part of a gene because of codon usage; promoters and UTRs may carry more function-discriminating signal.
-- [ ] **Optional third encoder** — HyenaDNA, Caduceus, or GENA-LM. Not required: convergence is already cross-encoder with two. Each additional encoder hitting the same ceiling further strengthens the read.
+- [ ] **Optional third encoder** — HyenaDNA, Caduceus, or GENA-LM. Lowest priority now that NT-v2 has demonstrated the encoder is doing real work; a third encoder would test whether the NT-v2 result generalises or is architecture-specific.
 
 ## Resolved / archived
 

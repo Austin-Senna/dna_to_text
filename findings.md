@@ -98,6 +98,92 @@ Per `framework.md` §Success / failure criteria, this is the **informative negat
 
 Whatever information these DNA encoders carry about human gene function — *as measured by linear alignment into GenePT text space, trained on CDS only* — is largely already present in the raw nucleotide composition of the CDS. Two independent pretrained transformers, built on different tokenisations and different pretraining corpora, both land within 0.002 mean cosine of a 256-d 4-mer histogram. Two encoders converging on the same ceiling is stronger evidence for the compositional-ceiling read than any single model would be.
 
+## Phase 4 — Classification reframing
+
+Per the 2026-04-29 classification-pivot spec, we re-ran the question as a *classification* task on the same cached embeddings. Three tasks:
+
+- **5-way:** predict family ∈ {tf, gpcr, kinase, ion, immune} on the full 3244-gene corpus, original 70/15/15 split.
+- **tf-vs-gpcr (binary):** 591 of each, downsampled tf, frozen split in `data/binary_tf_vs_gpcr.json`.
+- **tf-vs-kinase (binary):** 558 of each, frozen split in `data/binary_tf_vs_kinase.json`.
+
+Probe: logistic regression (L2, multinomial for 5-way), C swept on val over `[1e-2 … 1e3]`, refit on train+val, evaluated once on test. Headline metric: macro-F1.
+
+Relevant commits: `e99f5f3` binary subsets, `679af53` length baseline, `b0b2df5` logistic probe + matrix script, `14be331` matrix run.
+
+### Results
+
+| Task | Encoder / baseline | C | Test macro-F1 | Test bal. acc | Test acc |
+|---|---|---:|---:|---:|---:|
+| **5-way** | **NT-v2** | 1.0 | **0.8031** | 0.7748 | 0.8727 |
+| 5-way | 4-mer | 1000 | 0.6722 | 0.6319 | 0.8172 |
+| 5-way | DNABERT-2 | 10 | 0.6490 | 0.6170 | 0.7721 |
+| 5-way | shuffled-label | 100 | 0.2078 | 0.2119 | 0.4353 |
+| 5-way | length-only | 0.1 | 0.1382 | 0.1954 | 0.5236 |
+| **tf-vs-gpcr** | **NT-v2** | 0.1 | **0.9775** | 0.9775 | 0.9775 |
+| tf-vs-gpcr | 4-mer | 1000 | 0.9607 | 0.9607 | 0.9607 |
+| tf-vs-gpcr | DNABERT-2 | 1.0 | 0.9381 | 0.9382 | 0.9382 |
+| tf-vs-gpcr | length-only | 1.0 | 0.7341 | 0.7360 | 0.7360 |
+| tf-vs-gpcr | shuffled-label | 0.1 | 0.4659 | 0.4663 | 0.4663 |
+| **tf-vs-kinase** | **NT-v2** | 100 | **0.8444** | 0.8452 | 0.8452 |
+| tf-vs-kinase | 4-mer | 1000 | 0.8392 | 0.8393 | 0.8393 |
+| tf-vs-kinase | DNABERT-2 | 1.0 | 0.8330 | 0.8333 | 0.8333 |
+| tf-vs-kinase | length-only | 0.01 | 0.6427 | 0.6429 | 0.6429 |
+| tf-vs-kinase | shuffled-label | 0.1 | 0.5474 | 0.5476 | 0.5476 |
+
+Δ macro-F1 vs the 4-mer baseline:
+
+| Task | NT-v2 − 4-mer | DNABERT-2 − 4-mer |
+|---|---:|---:|
+| 5-way | **+0.1308** | −0.0232 |
+| tf-vs-gpcr | +0.0169 | −0.0226 |
+| tf-vs-kinase | +0.0052 | −0.0063 |
+
+### Read
+
+The classification reframing surfaced signal that regression hid — but only for the stronger encoder. **NT-v2 beats the 4-mer baseline on the 5-way task by +0.131 macro-F1**, well above the 0.02 decision threshold. NT-v2 also beats kmer on tf-vs-gpcr (+0.017) and ties on tf-vs-kinase (+0.005). DNABERT-2 ties or loses to kmer on every task, consistent with the Phase 3 read.
+
+Two things changed at once between Phase 3 and Phase 4: the target (1536-d GenePT vector → categorical family) and the metric (R² / cosine → macro-F1). Either could in principle have surfaced the NT-v2 signal. Practically the target change is the bigger lever — GenePT summaries vary wildly in informativeness, and a noisy 1536-d target dilutes every gene's contribution to the regression loss. A categorical label has no such noise floor.
+
+The encoder-level divergence is the more interesting finding. NT-v2 (850 genome pretraining, rotary embeddings, GLU FFN, 6-mer non-overlapping tokeniser, 100M params) carries family-discriminative information that survives mean-pooling and a linear probe; DNABERT-2 (135 genome pretraining, ALiBi, BPE, 117M params) does not. The two encoders are nominally similar in size and both pretrained on multi-species genomes; the 7× larger pretraining corpus and the architectural changes are the candidates for the gap.
+
+### Confusion (5-way)
+
+NT-v2 confusion matrix (`data/confusion_5way_nt_v2.json`, rows = true, cols = pred, classes alphabetical):
+
+```
+         gpcr immune  ion kinase   tf
+gpcr       83      1    4      1    0
+immune      1     16    1      3    2
+ion         2      0   16      4    8
+kinase      0      1    0     65   18
+tf          3      0    1     12  245
+```
+
+DNABERT-2 (`data/confusion_5way_dnabert2.json`):
+
+```
+         gpcr immune  ion kinase   tf
+gpcr       76      0    3      3    7
+immune      0     10    0      7    6
+ion         4      1    9      9    7
+kinase      0      1    2     52   29
+tf          2      2    2     26  229
+```
+
+DNABERT-2 collapses much of the kinase population into tf (29/84 misclassified as tf vs NT-v2's 18/84) and underperforms across every minority class. NT-v2 holds clean diagonals on tf (94%), gpcr (93%), kinase (77%), immune (70%); ion is the weakest at 53%, and most ion misclassifications go to tf or kinase rather than gpcr — biologically reasonable since ion channels are a structurally heterogeneous group.
+
+### Anti-baseline
+
+Shuffled-label runs landed at macro-F1 0.208 / 0.466 / 0.547 for {family5, tf-vs-gpcr, tf-vs-kinase} — analytical chance ≈ 0.20 / 0.50 / 0.50. All within ±0.05 of chance. Pipeline is honest.
+
+### Length baseline
+
+CDS log-length alone hits 0.138 / 0.734 / 0.643. The 0.73 on tf-vs-gpcr is a real asymmetry (membrane vs nuclear protein length distributions differ), but it's well below kmer (0.961) and well below the encoders. The encoder is not a length proxy.
+
+### Decision gate outcome
+
+Per the spec: **Branch 1 (write up)** — at least one encoder beat 4-mer by ≥ 0.02 macro-F1 on at least one task. Phase 4b pooling re-extraction is **skipped**. The negative-result framing from Phase 3 is now bounded: it applies to DNABERT-2 + regression + GenePT-as-target; it does not generalise to NT-v2 + classification + family-as-target.
+
 ## Caveats
 
 Three axes that could change the conclusion:
