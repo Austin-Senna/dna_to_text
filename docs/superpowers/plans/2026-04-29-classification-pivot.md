@@ -1054,11 +1054,13 @@ Code: `src/binary_tasks/`, `src/length_baseline/`, `src/linear_trainer/logistic_
 
 [STATUS = "⏳ open" if 4a tied 4-mer; "skipped" if 4a beat 4-mer.]
 
-[If open: re-embed both encoders with pooling strategy D
-(`concat[mean(first_chunk), mean(last_chunk), mean(all_chunks)]`, 3× per-chunk dim)
-and strategy G (D + `max_chunks` along each dim, 4× per-chunk dim) in parallel.
-Re-run the same Phase 4a 15-cell matrix. Strategy is locked in the spec —
-no learned pooling head, no other variants in 4b.]
+[If open: re-embed both encoders with five pooling variants in parallel —
+mean→mean (the Phase 4a baseline, kept for A/B), mean→D
+(`concat[first,last,mean]`, 3× dim), mean→G (D + `max_chunks`, 4× dim),
+max→mean (max-pool tokens per chunk, then mean across chunks), and CLS→mean
+(CLS token per chunk, then mean across chunks). Re-run the same 15-cell
+probe matrix. Strategy is locked in the spec — no learned pooling head, no
+other variants in 4b.]
 
 ### Phase 4c — Write-up   ⏳ open
 
@@ -1087,7 +1089,7 @@ Per the spec, after Task 4.3 the project is in one of three branches:
 | Outcome | Action |
 |---|---|
 | Any encoder beats 4-mer by Δ macro-F1 ≥ 0.02 on at least one task | **Stop here.** Task 5 wraps up Phase 4a as the headline result. Phase 4b is skipped. The write-up frames the pivot as having surfaced signal that regression hid. |
-| Both encoders tie 4-mer (within ±0.02) on every task | **Trigger Phase 4b** (separate spec/plan). Strategy is locked in the spec § "Pooling deferred — strategy locked for Phase 4b": re-embed both encoders with pooling strategy D (`concat[mean(first), mean(last), mean(all)]`, 3× dim) and strategy G (D + `max_chunks(...)`, 4× dim) in parallel. Re-run the same probe matrix. No learned pooling head. |
+| Both encoders tie 4-mer (within ±0.02) on every task | **Trigger Phase 4b** (separate spec/plan). Strategy is locked in the spec § "Pooling deferred — strategy locked for Phase 4b": re-embed both encoders with five pooling variants in parallel — `mean→mean` (Phase 4a baseline), `mean→D = concat[first,last,mean]` (3× dim), `mean→G = concat[first,last,mean,max]` (4× dim), `max→mean` (max-pool tokens then mean across chunks), and `CLS→mean` (CLS token per chunk then mean across chunks). Re-run the same probe matrix. No learned pooling head. |
 | Encoder loses to 4-mer on every task | **Stop and debug** before continuing. Re-check anti-baseline, then verify the cached embeddings haven't been corrupted (regenerate from `scripts/run_encoder.py` and `scripts/run_nt_v2_encoder.py` if needed). |
 
 Phase 4b is **out of scope for this plan** — if needed, it gets its own spec + plan.
