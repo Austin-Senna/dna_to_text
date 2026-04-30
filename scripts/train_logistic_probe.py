@@ -41,6 +41,12 @@ DATASET_PATHS = {
     "dnabert2": DATA / "dataset.parquet",
     "nt_v2":    DATA / "dataset_nt_v2.parquet",
 }
+# Phase 4b pooling variants (one parquet per encoder x variant).
+for _enc in ("dnabert2", "nt_v2"):
+    for _v in ("meanmean", "maxmean", "clsmean", "meanD", "meanG"):
+        DATASET_PATHS[f"{_enc}_{_v}"] = DATA / f"dataset_{_enc}_{_v}.parquet"
+del _enc, _v
+
 META_PARQUET = DATASET_PATHS["dnabert2"]
 
 
@@ -163,7 +169,7 @@ def _append_metrics(path: Path, entry: dict) -> None:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", required=True,
-                    choices=["dnabert2", "nt_v2", "kmer", "length"])
+                    choices=sorted(set(DATASET_PATHS.keys()) | {"kmer", "length"}))
     ap.add_argument("--task", required=True,
                     choices=["family5", "tf_vs_gpcr", "tf_vs_kinase"])
     ap.add_argument("--shuffle-labels", action="store_true",
