@@ -2490,5 +2490,365 @@
       "0": 0.9047619047619048,
       "1": 0.7976190476190477
     }
+  },
+  {
+    "run_id": "probe_2026-04-30T07:38:29+00:00",
+    "timestamp": "2026-04-30T07:38:29+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_meanmean.parquet",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9119435548782349
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9255174994468689
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9325350522994995
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9328256845474243
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9288539290428162
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9192837476730347
+      }
+    ],
+    "test_mean_cosine": 0.9332756400108337,
+    "test_median_cosine": 0.9244959950447083,
+    "test_r2_macro": 0.20289850234985352
+  },
+  {
+    "run_id": "probe_2026-04-30T07:38:30+00:00",
+    "timestamp": "2026-04-30T07:38:30+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_maxmean.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8995053172111511
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9010655879974365
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9111177921295166
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9278733134269714
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9290764927864075
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9201031923294067
+      }
+    ],
+    "test_mean_cosine": 0.9292553067207336,
+    "test_median_cosine": 0.9206721782684326,
+    "test_r2_macro": 0.16062964498996735
+  },
+  {
+    "run_id": "probe_2026-04-30T07:38:30+00:00",
+    "timestamp": "2026-04-30T07:38:30+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_clsmean.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9025104641914368
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9081611633300781
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9211491346359253
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9299374222755432
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9316758513450623
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9276788830757141
+      }
+    ],
+    "test_mean_cosine": 0.9321852326393127,
+    "test_median_cosine": 0.9234837889671326,
+    "test_r2_macro": 0.191070094704628
+  },
+  {
+    "run_id": "probe_2026-04-30T07:38:32+00:00",
+    "timestamp": "2026-04-30T07:38:32+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_meanD.parquet",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8943995833396912
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9170662760734558
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9302550554275513
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9334319233894348
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9314523339271545
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9241938591003418
+      }
+    ],
+    "test_mean_cosine": 0.9339601397514343,
+    "test_median_cosine": 0.925741970539093,
+    "test_r2_macro": 0.20998696982860565
+  },
+  {
+    "run_id": "probe_2026-04-30T07:38:33+00:00",
+    "timestamp": "2026-04-30T07:38:33+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_meanG.parquet",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8945422172546387
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9151462912559509
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9293227791786194
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9334308505058289
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9319550395011902
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9254741072654724
+      }
+    ],
+    "test_mean_cosine": 0.9340037107467651,
+    "test_median_cosine": 0.9258754253387451,
+    "test_r2_macro": 0.21035628020763397
+  },
+  {
+    "run_id": "probe_2026-04-30T07:38:34+00:00",
+    "timestamp": "2026-04-30T07:38:34+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_meanmean.parquet",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9171402454376221
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9219462871551514
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9292247295379639
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9317748546600342
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9305423498153687
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9256651401519775
+      }
+    ],
+    "test_mean_cosine": 0.932412326335907,
+    "test_median_cosine": 0.9255432486534119,
+    "test_r2_macro": 0.19315965473651886
+  },
+  {
+    "run_id": "probe_2026-04-30T07:38:35+00:00",
+    "timestamp": "2026-04-30T07:38:35+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_maxmean.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9108476638793945
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9109201431274414
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.911616325378418
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9166241884231567
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9266942739486694
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9253777265548706
+      }
+    ],
+    "test_mean_cosine": 0.9271479845046997,
+    "test_median_cosine": 0.9204649329185486,
+    "test_r2_macro": 0.13551191985607147
+  },
+  {
+    "run_id": "probe_2026-04-30T07:38:36+00:00",
+    "timestamp": "2026-04-30T07:38:36+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_clsmean.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9092117547988892
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.909645140171051
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9128473401069641
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9210881590843201
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9254560470581055
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9228054881095886
+      }
+    ],
+    "test_mean_cosine": 0.9251418709754944,
+    "test_median_cosine": 0.9191345572471619,
+    "test_r2_macro": 0.11716404557228088
+  },
+  {
+    "run_id": "probe_2026-04-30T07:38:37+00:00",
+    "timestamp": "2026-04-30T07:38:37+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_meanD.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9148634672164917
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9178903102874756
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9258272051811218
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9312559962272644
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9314978122711182
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9287685751914978
+      }
+    ],
+    "test_mean_cosine": 0.93189537525177,
+    "test_median_cosine": 0.9251985549926758,
+    "test_r2_macro": 0.18817661702632904
+  },
+  {
+    "run_id": "probe_2026-04-30T07:38:39+00:00",
+    "timestamp": "2026-04-30T07:38:39+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_meanG.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9150009751319885
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9173174500465393
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9247638583183289
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9308904409408569
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9316321611404419
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9293168783187866
+      }
+    ],
+    "test_mean_cosine": 0.9320908784866333,
+    "test_median_cosine": 0.9250916838645935,
+    "test_r2_macro": 0.19019196927547455
   }
 ]
