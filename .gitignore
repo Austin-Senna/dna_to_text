@@ -13,3 +13,11 @@ GenePT_emebdding_v2/
 data/dataset.parquet
 data/dataset_nt_v2.parquet
 data/gene_table.parquet
+
+# Phase 4b per-chunk reduction caches — large, fully regeneratable from
+# `scripts/run_multi_pool_extract.py --encoder {dnabert2,nt_v2}`
+data/chunk_reductions_dnabert2/
+data/chunk_reductions_nt_v2/
+
+# Pitch deck PDF — kept locally, not authoritative source
+Genomics Project (1).pdf
