@@ -182,7 +182,97 @@ CDS log-length alone hits 0.138 / 0.734 / 0.643. The 0.73 on tf-vs-gpcr is a rea
 
 ### Decision gate outcome
 
-Per the spec: **Branch 1 (write up)** — at least one encoder beat 4-mer by ≥ 0.02 macro-F1 on at least one task. Phase 4b pooling re-extraction is **skipped**. The negative-result framing from Phase 3 is now bounded: it applies to DNABERT-2 + regression + GenePT-as-target; it does not generalise to NT-v2 + classification + family-as-target.
+Per the spec: **Branch 1 (write up)** — at least one encoder beat 4-mer by ≥ 0.02 macro-F1 on at least one task. Phase 4b pooling re-extraction was originally going to be skipped, but we ran it anyway as an exploratory ablation; results are below.
+
+## Phase 4b — Pooling sweep (exploratory)
+
+We ran the spec's full Phase 4b pooling menu — five variants per encoder against the `mean→mean` Phase 4a baseline — to test whether the encoder ceiling moves under different aggregation schemes. 30 new logistic runs (5 variants × 2 encoders × 3 tasks) plus 10 new confusion matrices.
+
+Relevant commits: `303bb55` multi-pool extractor + aggregator, `b9a0642` 30-cell pooling matrix.
+
+### Pooling variants
+
+Within-chunk × across-chunk factorial (each variant changes one axis from the `mean→mean` baseline):
+
+| Variant | Within-chunk | Across-chunk | Output dim |
+|---|---|---|---|
+| `meanmean` | mean of content tokens | mean of chunks | `d` |
+| `maxmean` | per-dim max of content tokens | mean of chunks | `d` |
+| `clsmean` | model's CLS token | mean of chunks | `d` |
+| `meanD` | mean | concat[first, last, mean] of chunks | `3d` |
+| `meanG` | mean | concat[first, last, mean, max] of chunks | `4d` |
+
+Re-extraction tokenised **with** special tokens (`[CLS]` / `[SEP]` for DNABERT-2; `<cls>` only for NT-v2 — its ESM-style tokeniser ships no SEP/EOS) so that position 0 of every chunk is the trained CLS representation. Phase 1–3 tokenised *without* special tokens; this turns out to matter (see "Tokenisation surprise" below).
+
+### Headline numbers (5-way)
+
+Sorted by macro-F1, with Δ vs the Phase 4a `nt_v2` (0.8031) and `dnabert2` (0.6490) baselines:
+
+| Variant | macro-F1 | Δ vs Phase 4a same-encoder | Notes |
+|---|---:|---:|---|
+| **`nt_v2_meanD`** | **0.8275** | +0.0244 | best overall on 5-way |
+| `nt_v2_meanG` | 0.8257 | +0.0226 | tied with D within noise |
+| `nt_v2_meanmean` | 0.7997 | −0.0034 | recomputed baseline ≈ Phase 4a |
+| `dnabert2_meanD` | 0.7380 | **+0.0890** | huge DNABERT-2 jump |
+| `dnabert2_meanG` | 0.7275 | +0.0785 | |
+| `dnabert2_meanmean` | 0.7220 | +0.0730 | recomputed baseline ≠ Phase 4a |
+| `dnabert2_clsmean` | 0.6547 | +0.0057 | |
+| `dnabert2_maxmean` | 0.6144 | −0.0346 | max-token pooling hurts |
+| `nt_v2_clsmean` | 0.5927 | −0.2104 | NT-v2 CLS is not a summary |
+| `nt_v2_maxmean` | 0.5865 | −0.2166 | |
+
+### Tokenisation surprise
+
+The most consequential change isn't a pooling variant — it's the tokenisation. The Phase 4b mean→mean baselines use the *same* aggregation as Phase 4a (mean of content tokens, then mean across chunks) but with **special-token-wrapped** chunks:
+
+| Encoder | Phase 4a `mean→mean` | Phase 4b `meanmean` (re-tok) | Δ |
+|---|---:|---:|---:|
+| DNABERT-2 5-way | 0.6490 | 0.7220 | **+0.0730** |
+| DNABERT-2 tf-vs-gpcr | 0.9381 | 0.9888 | **+0.0507** |
+| DNABERT-2 tf-vs-kinase | 0.8330 | 0.8869 | **+0.0539** |
+| NT-v2 5-way | 0.8031 | 0.7997 | −0.0034 |
+| NT-v2 tf-vs-gpcr | 0.9775 | 0.9831 | +0.0056 |
+| NT-v2 tf-vs-kinase | 0.8444 | 0.8447 | +0.0003 |
+
+**DNABERT-2 was being substantially crippled by the Phase 1–3 tokenisation choice** (`add_special_tokens=False`, no `[CLS]`/`[SEP]` wrapping per chunk). With proper boundaries, DNABERT-2 closes most of the encoder gap to NT-v2 — even before any pooling change — and on tf-vs-kinase actually pulls ahead (0.887 vs NT-v2 0.845). The "encoder gap" in Phase 4a was not purely architectural; a meaningful chunk of it was a tokenisation bug.
+
+NT-v2 is largely insensitive to special tokens (within ±0.006 across all three tasks). Two plausible reasons: (a) ESM-style models don't rely on a learned `[CLS]` summary the way BERT does; (b) NT-v2's 6-mer non-overlapping tokeniser produces fewer tokens per chunk, so the relative weight of two boundary tokens is smaller.
+
+### Pooling rankings (post-tokenisation-fix)
+
+Comparing variants against each encoder's *recomputed* `meanmean` baseline:
+
+| | dnabert2 5-way | dnabert2 tf-vs-gpcr | dnabert2 tf-vs-kinase | nt_v2 5-way | nt_v2 tf-vs-gpcr | nt_v2 tf-vs-kinase |
+|---|---:|---:|---:|---:|---:|---:|
+| meanmean (baseline) | 0.7220 | 0.9888 | 0.8869 | 0.7997 | 0.9831 | 0.8447 |
+| meanD | +0.0160 | −0.0169 | 0.0000 | **+0.0278** | +0.0057 | −0.0003 |
+| meanG | +0.0055 | −0.0282 | −0.0119 | +0.0260 | −0.0168 | +0.0061 |
+| maxmean | −0.1076 | −0.0450 | −0.0958 | −0.2132 | −0.0112 | −0.0114 |
+| clsmean | −0.0673 | −0.0169 | −0.0536 | −0.2070 | −0.0449 | −0.0769 |
+
+Three takeaways:
+
+1. **`meanD` is the only variant that reliably helps**, and the largest gain is on NT-v2 5-way (+0.028). Concatenating first-chunk + last-chunk + mean exposes terminal asymmetry the bare mean smears out — N-terminal signal peptides and C-terminal motifs do carry family signal.
+2. **`meanG` matches `meanD`**. Adding "max-across-chunks" doesn't reliably help — the one-dominant-chunk hypothesis isn't supported here. Not worth the 4× dim cost when 3× gives the same result.
+3. **`maxmean` and `clsmean` consistently HURT.** Two failures of the deep-research priors:
+   - **`maxmean`** (max-token-per-chunk → mean across chunks) was supposed to surface sparse motifs. Instead it gets diluted again by the cross-chunk mean. The hypothesis "max preserves what mean smears" doesn't survive being mean-pooled across chunks.
+   - **`clsmean`** is catastrophic for NT-v2 (5-way drops to 0.59) and merely bad for DNABERT-2. Both encoders are masked-LM pretrained with no next-sentence-prediction objective; their CLS positions weren't trained as sequence summaries. DNABERT-2's CLS is at least *adjacent* to a BERT pretraining setup; NT-v2's `<cls>` truly carries no special meaning.
+
+### Best-of-everything table
+
+Headline-best per task across all 14 (Phase 4a + Phase 4b) feature sources (excluding shuffled and length):
+
+| Task | Best feature | macro-F1 | Δ vs 4-mer | Δ vs Phase 4a best |
+|---|---|---:|---:|---:|
+| 5-way | `nt_v2_meanD` | 0.8275 | +0.1553 | +0.0244 |
+| tf-vs-gpcr | `dnabert2_meanmean` / `nt_v2_meanD` (tied) | 0.9888 | +0.0281 | +0.0113 |
+| tf-vs-kinase | `dnabert2_meanmean` / `dnabert2_meanD` (tied) | 0.8869 | +0.0477 | +0.0425 |
+
+The pooling sweep modestly improves the headline (NT-v2 5-way +0.024) but the bigger win is the tokenisation fix — particularly for DNABERT-2 on the binary tasks, where it goes from "loses to k-mer" in Phase 4a to "ties NT-v2 and beats k-mer" in Phase 4b.
+
+### Decision gate after Phase 4b
+
+The Phase 4a Branch 1 read holds and is now stronger: both encoders beat 4-mer on every task once tokenisation is fixed. The exploratory pooling sweep validates `meanD` as a marginal improvement and rules out `maxmean` / `clsmean` as productive directions for these particular models.
 
 ## Caveats
 

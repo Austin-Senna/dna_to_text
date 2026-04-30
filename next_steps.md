@@ -46,9 +46,18 @@ Code: `src/binary_tasks/`, `src/length_baseline/`, `src/linear_trainer/logistic_
 
 Artefacts: `data/binary_tf_vs_gpcr.json`, `data/binary_tf_vs_kinase.json`, `data/confusion_5way_{dnabert2,nt_v2}.json`, 15 entries in `data/metrics.json` with `model == "logistic_probe"`.
 
-### Phase 4b — Pooling re-extraction   skipped
+### Phase 4b — Pooling sweep   ✅ done (exploratory)
 
-Decision gate from `findings.md` landed in Branch 1 (encoder beats 4-mer). The spec's pooling menu (mean→D, mean→G, max→mean, CLS→mean against the mean→mean baseline) remains documented in the spec for reference but is not triggered.
+Originally going to be skipped (Phase 4a already cleared the decision gate), but ran the full menu anyway as an ablation. Results in `findings.md` § "Phase 4b — Pooling sweep (exploratory)".
+
+Headline outcomes:
+- **Tokenisation fix is the biggest win.** Re-tokenising with special tokens (`[CLS]`/`[SEP]` for DNABERT-2, `<cls>` for NT-v2) lifts DNABERT-2 substantially even at the mean→mean baseline. Phase 1–3 was tokenising without specials and crippling DNABERT-2.
+- **`meanD` is the only pooling variant that reliably helps.** Best 5-way: `nt_v2_meanD` 0.828 (+0.024 vs Phase 4a NT-v2).
+- **`maxmean` and `clsmean` consistently hurt.** Both failures of deep-research priors.
+
+Code: `src/data_loader/multi_pool.py`, `src/data_loader/pooling_aggregator.py`, `scripts/run_multi_pool_extract.py`, `scripts/build_pooling_datasets.py`.
+
+Artefacts: `data/chunk_reductions_{dnabert2,nt_v2}/` (per-chunk reductions cache), 10 new `data/dataset_{encoder}_{variant}.parquet` files, 30 new entries in `data/metrics.json`, 10 new `data/confusion_5way_{encoder}_{variant}.json`.
 
 ### Phase 4c — Write-up   ⏳ open
 
@@ -58,11 +67,11 @@ Decision gate from `findings.md` landed in Branch 1 (encoder beats 4-mer). The s
 
 ## Phase 5 — Optional ceiling-breaker experiments   🔬 open, lower priority
 
-Strictly after Phase 4c. These address the three caveats in `findings.md`.
+Strictly after Phase 4c. The three remaining caveats in `findings.md`.
 
-- [ ] **Pooling sweep** — the spec's Phase 4b menu (mean→D, mean→G, max→mean, CLS→mean) could still be informative as an ablation even though the headline doesn't require it. Would establish whether DNABERT-2's gap to NT-v2 is recoverable by better pooling.
+- [ ] **Re-run Phase 1–3 with proper tokenisation.** The Phase 4b finding shows DNABERT-2 was being significantly underutilised by tokenising without `[CLS]`/`[SEP]`. The Phase 3 regression numbers may now be a poor lower bound on DNABERT-2's real ceiling. Cheap to repeat — embeddings are already cached as the new `dataset_dnabert2_meanmean.parquet`; just re-run the Ridge probe + 4-mer baseline on it.
 - [ ] **Window sweep** — full transcript (promoter + UTR + CDS) instead of CDS-only. CDS is the most composition-homogenous part of a gene because of codon usage; promoters and UTRs may carry more function-discriminating signal.
-- [ ] **Optional third encoder** — HyenaDNA, Caduceus, or GENA-LM. Lowest priority now that NT-v2 has demonstrated the encoder is doing real work; a third encoder would test whether the NT-v2 result generalises or is architecture-specific.
+- [ ] **Optional third encoder** — HyenaDNA, Caduceus, or GENA-LM. Lowest priority now that both pretrained transformers have demonstrated they're doing real work; a third encoder would test whether the result generalises or is architecture-specific.
 
 ## Resolved / archived
 
