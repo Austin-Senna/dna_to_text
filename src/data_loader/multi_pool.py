@@ -52,12 +52,20 @@ def embed_sequence_multi_pool(
 
     Returns: {"mean": (n_chunks, d), "max": (n_chunks, d), "cls": (n_chunks, d)}.
     """
+    # CLS/BOS at start is required (we use position 0 as the CLS pool).
+    # SEP/EOS at end is optional — NT-v2's tokeniser ships CLS only, no SEP.
     cls_id = tokenizer.cls_token_id
+    if cls_id is None:
+        cls_id = tokenizer.bos_token_id
     sep_id = tokenizer.sep_token_id
-    if cls_id is None or sep_id is None:
+    if sep_id is None:
+        sep_id = tokenizer.eos_token_id
+    if cls_id is None:
         raise RuntimeError(
-            f"tokenizer missing cls/sep token (cls={cls_id} sep={sep_id})"
+            f"tokenizer missing cls/bos token "
+            f"(cls={tokenizer.cls_token_id} bos={tokenizer.bos_token_id})"
         )
+    has_sep = sep_id is not None
 
     enc = tokenizer(seq, add_special_tokens=False, return_tensors=None)
     content_ids = enc["input_ids"]
@@ -68,16 +76,18 @@ def embed_sequence_multi_pool(
     cls_per_chunk: list[np.ndarray] = []
 
     for chunk_content in chunks:
-        chunk_ids = [cls_id] + chunk_content + [sep_id]
+        chunk_ids = [cls_id] + chunk_content + ([sep_id] if has_sep else [])
         input_ids = torch.tensor([chunk_ids], dtype=torch.long, device=device)
         attention_mask = torch.ones_like(input_ids)
         out = model(input_ids=input_ids, attention_mask=attention_mask)
         hidden = out[0] if isinstance(out, tuple) else out.last_hidden_state
-        # hidden: (1, n_tokens, d)
-        cls_vec = hidden[:, 0, :].squeeze(0)              # (d,)
-        content = hidden[:, 1:-1, :]                       # exclude CLS and SEP
-        mean_vec = content.mean(dim=1).squeeze(0)          # (d,)
-        max_vec = content.max(dim=1).values.squeeze(0)     # (d,)
+        # hidden: (1, n_tokens, d). Position 0 is CLS; position -1 is SEP only
+        # if we appended one. Slice content accordingly.
+        cls_vec = hidden[:, 0, :].squeeze(0)
+        content_end = -1 if has_sep else hidden.shape[1]
+        content = hidden[:, 1:content_end, :]
+        mean_vec = content.mean(dim=1).squeeze(0)
+        max_vec = content.max(dim=1).values.squeeze(0)
 
         mean_per_chunk.append(mean_vec.float().cpu().numpy())
         max_per_chunk.append(max_vec.float().cpu().numpy())
