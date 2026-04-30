@@ -274,6 +274,43 @@ The pooling sweep modestly improves the headline (NT-v2 5-way +0.024) but the bi
 
 The Phase 4a Branch 1 read holds and is now stronger: both encoders beat 4-mer on every task once tokenisation is fixed. The exploratory pooling sweep validates `meanD` as a marginal improvement and rules out `maxmean` / `clsmean` as productive directions for these particular models.
 
+## Phase 5a — Regression re-run on the new variants
+
+Same Phase 3 recipe (Ridge → GenePT 1536-d, alpha sweep on val, refit on train+val, test eval) but with the 10 new pooling-variant parquets from Phase 4b. Tests whether the Phase 3 informative-negative regression result was — like the Phase 4a classification result — partly a tokenisation artefact.
+
+Relevant commit: `2d78221`.
+
+### Results
+
+Phase 3 baseline reference (from "Per-encoder" table above): DNABERT-2 R² = 0.181, NT-v2 R² = 0.193, 4-mer = 0.174. The 4-mer number is encoder-independent and stays at 0.174 — it's not re-run here.
+
+| Variant | α | Test cos | Test R² | Δ R² vs Phase 3 same-encoder |
+|---|---:|---:|---:|---:|
+| **`dnabert2_meanG`** | 10 | 0.9340 | **0.2104** | **+0.0294** |
+| `dnabert2_meanD` | 10 | 0.9340 | 0.2100 | +0.0290 |
+| `dnabert2_meanmean` | 10 | 0.9333 | 0.2029 | +0.0219 |
+| `nt_v2_meanmean` | 10 | 0.9324 | 0.1932 | +0.0002 |
+| `dnabert2_clsmean` | 100 | 0.9322 | 0.1911 | +0.0101 |
+| `nt_v2_meanG` | 100 | 0.9321 | 0.1902 | −0.0028 |
+| `nt_v2_meanD` | 100 | 0.9319 | 0.1882 | −0.0048 |
+| `dnabert2_maxmean` | 100 | 0.9293 | 0.1606 | −0.0204 |
+| `nt_v2_maxmean` | 100 | 0.9271 | 0.1355 | −0.0575 |
+| `nt_v2_clsmean` | 100 | 0.9251 | 0.1172 | −0.0758 |
+
+### Read
+
+1. **DNABERT-2's Phase 3 informative-negative was an undercount.** `dnabert2_meanmean` regression R² is 0.203 (+0.022 over Phase 3's 0.181), and `dnabert2_meanG` reaches 0.210 (+0.029). Δ vs the 4-mer baseline goes from Phase 3's "+0.007 (within noise)" to **+0.036 (decisively beats)**. The same tokenisation surprise that lifted classification numbers also lifts regression.
+
+2. **NT-v2 regression is unchanged by tokenisation OR pooling.** `nt_v2_meanmean` R² = 0.193 vs Phase 3 NT-v2 0.193 — within 0.0002. Even `meanD` and `meanG`, which gave NT-v2 a +0.025 classification boost, are slightly *worse* in regression (−0.005 / −0.003).
+
+3. **The classification gain from `meanD` is family-specific, not signal-general.** NT-v2 `meanD` improves family classification by +0.025 macro-F1 but does not improve recovery of the full 1536-d GenePT vector. Translation: terminal asymmetry helps the model decide *which family* a gene belongs to, but doesn't recover the rest of the gene's described function.
+
+4. **`maxmean` / `clsmean` hurt regression too**, mirroring the classification pattern. `nt_v2_clsmean` is the worst variant in both modalities (R² 0.117 vs meanmean 0.193; macro-F1 0.59 vs meanmean 0.80).
+
+5. **The encoder gap reverses when you fix DNABERT-2.** With proper tokenisation, DNABERT-2 (all variants combined ≥ 0.16 R²) is competitive with or above NT-v2 (≤ 0.19 R²) on regression. NT-v2's pretraining and architecture advantages don't translate into a regression win once tokenisation is honest.
+
+The regression ceiling (~0.21 R²) is still modest — a lot of the GenePT 1536-d target is noise that no DNA encoder of this size can recover. The classification reframing is still the right framing for the headline. But Phase 3's "DNABERT-2 ties 4-mer" claim is no longer true and should be revised in any further write-up.
+
 ## Caveats
 
 Three axes that could change the conclusion:

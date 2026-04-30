@@ -65,11 +65,22 @@ Artefacts: `data/chunk_reductions_{dnabert2,nt_v2}/` (per-chunk reductions cache
 - [x] 5-way confusion matrix per encoder (saved as JSON, embedded in `findings.md`)
 - [ ] Slide-deck write-up: intro (from `project.md`) → methods (point at `framework.md`) → Phase 3 informative-negative + Phase 4 classification result → discussion of the encoder gap (NT-v2 vs DNABERT-2)
 
+## Phase 5a — Regression re-run on new variants   ✅ done
+
+Ridge probe (Ridge → GenePT 1536-d) re-run on all 10 new pooling-variant parquets. Results in `findings.md` § "Phase 5a — Regression re-run on the new variants".
+
+Headline:
+- **`dnabert2_meanG` R² = 0.210**, +0.036 vs 4-mer baseline (vs Phase 3's +0.007). DNABERT-2's Phase 3 informative-negative was an undercount.
+- NT-v2 regression unchanged by tokenisation or pooling — confirms the regression ceiling for NT-v2 is real.
+- Classification gain from `meanD` for NT-v2 is family-specific, not signal-general (doesn't recover the full GenePT vector).
+
+Code: `scripts/train_probe.py` (no changes — already accepts `--dataset`).
+Artefacts: 10 new `data/probe_{encoder}_{variant}.npz`, 10 new entries in `data/metrics.json` with `model == "linear_probe"`.
+
 ## Phase 5 — Optional ceiling-breaker experiments   🔬 open, lower priority
 
-Strictly after Phase 4c. The three remaining caveats in `findings.md`.
+The two remaining caveats in `findings.md`.
 
-- [ ] **Re-run Phase 1–3 with proper tokenisation.** The Phase 4b finding shows DNABERT-2 was being significantly underutilised by tokenising without `[CLS]`/`[SEP]`. The Phase 3 regression numbers may now be a poor lower bound on DNABERT-2's real ceiling. Cheap to repeat — embeddings are already cached as the new `dataset_dnabert2_meanmean.parquet`; just re-run the Ridge probe + 4-mer baseline on it.
 - [ ] **Window sweep** — full transcript (promoter + UTR + CDS) instead of CDS-only. CDS is the most composition-homogenous part of a gene because of codon usage; promoters and UTRs may carry more function-discriminating signal.
 - [ ] **Optional third encoder** — HyenaDNA, Caduceus, or GENA-LM. Lowest priority now that both pretrained transformers have demonstrated they're doing real work; a third encoder would test whether the result generalises or is architecture-specific.
 
