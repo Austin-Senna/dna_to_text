@@ -34,24 +34,55 @@ Outcome: **informative negative** per `framework.md` § Success / failure criter
 
 Code: `src/linear_trainer/`, `src/kmer_baseline/`, `scripts/train_{probe,baseline,anti_baseline,mlp_probe}.py`.
 
-## Phase 4 — Qualitative deliverables   ⏳ open   (deck Weeks 4–5)
+## Phase 4 — Classification reframing   (deck Weeks 4–5)
 
-These are the deck's Week 4–5 commitments that have not yet shipped.
+Original Phase 4 (retrieval@k, IG attribution, family-classification-on-`y_hat`, zero-shot demo, viz, write-up) was superseded by the 2026-04-29 classification-pivot spec — see `docs/superpowers/specs/2026-04-29-classification-pivot-design.md`.
 
-- [ ] **Retrieval@k metric** (k = 1, 5, 10) on linear-probe test predictions for both encoders.
-- [ ] **Family-classification accuracy** — logistic regression on `y_hat → family`, compared to the same classifier on real `y`. Measures how much class-level structure survives the projection.
-- [ ] **Zero-shot demo** — pick 3–5 uncharacterised genes (poorly annotated or with very short summaries), embed → project → k-NN → predicted family + neighbour symbols + cosines. Markdown table for the write-up.
-- [ ] **Visualisation** — PCA + UMAP for DNA space (`x`), text space (`y`), projected space (`y_hat`), colour-coded by family. Six panels total. Save to `data/figures/`.
-- [ ] **Captum Integrated Gradients** (Hayden's slot in the deck) — one figure per family, attributions over the CDS for 1–2 representative genes, scalar target = cosine to the family centroid in GenePT space. Look for motif enrichment in high-attribution windows.
-- [ ] **Write-up** — intro (from `project.md`) → methods (point at `framework.md` and `src/data_loader/pipeline.md`) → results table + figures from above → discussion in informative-negative framing.
+### Phase 4a — Classification probes   ✅ done
+
+15-cell run matrix (3 tasks × 5 feature sources). Headline: **NT-v2 5-way macro-F1 = 0.803 vs 4-mer baseline 0.672 (+0.131)**. Decision gate landed in Branch 1 — encoder beats 4-mer; Phase 4b pooling re-extraction is **skipped**. Full results in `findings.md` § "Phase 4 — Classification reframing".
+
+Code: `src/binary_tasks/`, `src/length_baseline/`, `src/linear_trainer/logistic_probe.py`, `scripts/{make_binary_subsets,train_logistic_probe}.py`.
+
+Artefacts: `data/binary_tf_vs_gpcr.json`, `data/binary_tf_vs_kinase.json`, `data/confusion_5way_{dnabert2,nt_v2}.json`, 15 entries in `data/metrics.json` with `model == "logistic_probe"`.
+
+### Phase 4b — Pooling sweep   ✅ done (exploratory)
+
+Originally going to be skipped (Phase 4a already cleared the decision gate), but ran the full menu anyway as an ablation. Results in `findings.md` § "Phase 4b — Pooling sweep (exploratory)".
+
+Headline outcomes:
+- **Tokenisation fix is the biggest win.** Re-tokenising with special tokens (`[CLS]`/`[SEP]` for DNABERT-2, `<cls>` for NT-v2) lifts DNABERT-2 substantially even at the mean→mean baseline. Phase 1–3 was tokenising without specials and crippling DNABERT-2.
+- **`meanD` is the only pooling variant that reliably helps.** Best 5-way: `nt_v2_meanD` 0.828 (+0.024 vs Phase 4a NT-v2).
+- **`maxmean` and `clsmean` consistently hurt.** Both failures of deep-research priors.
+
+Code: `src/data_loader/multi_pool.py`, `src/data_loader/pooling_aggregator.py`, `scripts/run_multi_pool_extract.py`, `scripts/build_pooling_datasets.py`.
+
+Artefacts: `data/chunk_reductions_{dnabert2,nt_v2}/` (per-chunk reductions cache), 10 new `data/dataset_{encoder}_{variant}.parquet` files, 30 new entries in `data/metrics.json`, 10 new `data/confusion_5way_{encoder}_{variant}.json`.
+
+### Phase 4c — Write-up   ⏳ open
+
+- [x] Results table (15 cells) in `findings.md`
+- [x] 5-way confusion matrix per encoder (saved as JSON, embedded in `findings.md`)
+- [ ] Slide-deck write-up: intro (from `project.md`) → methods (point at `framework.md`) → Phase 3 informative-negative + Phase 4 classification result → discussion of the encoder gap (NT-v2 vs DNABERT-2)
+
+## Phase 5a — Regression re-run on new variants   ✅ done
+
+Ridge probe (Ridge → GenePT 1536-d) re-run on all 10 new pooling-variant parquets. Results in `findings.md` § "Phase 5a — Regression re-run on the new variants".
+
+Headline:
+- **`dnabert2_meanG` R² = 0.210**, +0.036 vs 4-mer baseline (vs Phase 3's +0.007). DNABERT-2's Phase 3 informative-negative was an undercount.
+- NT-v2 regression unchanged by tokenisation or pooling — confirms the regression ceiling for NT-v2 is real.
+- Classification gain from `meanD` for NT-v2 is family-specific, not signal-general (doesn't recover the full GenePT vector).
+
+Code: `scripts/train_probe.py` (no changes — already accepts `--dataset`).
+Artefacts: 10 new `data/probe_{encoder}_{variant}.npz`, 10 new entries in `data/metrics.json` with `model == "linear_probe"`.
 
 ## Phase 5 — Optional ceiling-breaker experiments   🔬 open, lower priority
 
-Strictly after Phase 4. These address the three caveats in `findings.md`.
+The two remaining caveats in `findings.md`.
 
-- [ ] **Pooling sweep** — CLS / max-pool / attention-weighted variants on both encoders. The mean-pool ceiling could be smearing out per-position signal.
 - [ ] **Window sweep** — full transcript (promoter + UTR + CDS) instead of CDS-only. CDS is the most composition-homogenous part of a gene because of codon usage; promoters and UTRs may carry more function-discriminating signal.
-- [ ] **Optional third encoder** — HyenaDNA, Caduceus, or GENA-LM. Not required: convergence is already cross-encoder with two. Each additional encoder hitting the same ceiling further strengthens the read.
+- [ ] **Optional third encoder** — HyenaDNA, Caduceus, or GENA-LM. Lowest priority now that both pretrained transformers have demonstrated they're doing real work; a third encoder would test whether the result generalises or is architecture-specific.
 
 ## Resolved / archived
 
