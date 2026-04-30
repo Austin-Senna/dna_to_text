@@ -311,6 +311,26 @@ Phase 3 baseline reference (from "Per-encoder" table above): DNABERT-2 R² = 0.1
 
 The regression ceiling (~0.21 R²) is still modest — a lot of the GenePT 1536-d target is noise that no DNA encoder of this size can recover. The classification reframing is still the right framing for the headline. But Phase 3's "DNABERT-2 ties 4-mer" claim is no longer true and should be revised in any further write-up.
 
+## Cohen's κ — chance-corrected view of the headlines
+
+macro-F1 is the headline metric, but it isn't chance-corrected. The empirical chance level for our 5-way task (heavily imbalanced) is ~0.20 macro-F1 — the anti-baseline (shuffled labels) hit 0.208. To give a single chance-corrected scalar that respects the actual class distribution, we report Cohen's κ alongside macro-F1.
+
+κ = (p_observed − p_expected) / (1 − p_expected). Computed from the saved 5-way confusion matrices for `family5` cells; for binary tasks the probe is refit at the recorded best C and κ is computed on test predictions via `sklearn.metrics.cohen_kappa_score`. Full table at `data/kappa_summary.md`.
+
+| Task | Best variant | macro-F1 | **κ** | k-mer F1 / κ | shuffled-label κ |
+|---|---|---:|---:|---:|---:|
+| 5-way | `nt_v2_meanD` | 0.828 | **0.821** | 0.672 / 0.702 | +0.048 |
+| tf-vs-gpcr | `dnabert2_meanmean` / `nt_v2_meanD` | 0.989 | **0.978** | 0.961 / 0.921 | −0.067 |
+| tf-vs-kinase | `dnabert2_meanmean` / `dnabert2_meanD` | 0.887 | **0.774** | 0.839 / 0.679 | +0.095 |
+
+Two notes:
+
+1. **κ does not always rank cells the same way as macro-F1.** On 5-way, k-mer's macro-F1 (0.672) is below the worst encoder + variant (`nt_v2_clsmean` at 0.593), but k-mer's κ (0.702) beats `nt_v2_clsmean`'s κ (0.569). The reason is class imbalance: macro-F1 weighs each class equally, κ weighs by the *expected* coincidence rate per class. k-mer happens to be calibrated against the majority class (tf), which lifts its κ relative to macro-F1.
+
+2. **κ × class-balance interaction in the binary tasks.** tf-vs-gpcr (κ = 0.978 best) is genuinely "almost perfectly chance-corrected agreement"; the encoders nearly always agree with the true label. tf-vs-kinase is harder (κ = 0.774 best) — same balanced-binary task, lower ceiling, consistent with the harder family pair.
+
+The shuffled-label κ values (≈ 0 across tasks) confirm that nothing in the pipeline gives a free κ — when X carries no information about y, κ collapses to 0 as expected.
+
 ## Caveats
 
 Three axes that could change the conclusion:

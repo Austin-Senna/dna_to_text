@@ -9,14 +9,16 @@ A pre-trained DNA language model can be linearly aligned to gene-function semant
 
 ## Headline numbers (lead with these)
 
-| | Headline metric | Best result | Strongest baseline | Margin |
-|---|---|---:|---:|---:|
-| **Family classification (5-way)** | macro-F1 | NT-v2 + `meanD` pooling = **0.828** | 4-mer baseline = 0.672 | **+0.156** |
-| **Binary classification (tf-vs-gpcr)** | macro-F1 | DNABERT-2 / NT-v2 (best variant) = **0.989** | 4-mer = 0.961 | +0.028 |
-| **Binary classification (tf-vs-kinase)** | macro-F1 | DNABERT-2 + `meanmean`/`meanD` = **0.887** | 4-mer = 0.839 | +0.048 |
-| **Regression (predict GenePT 1536-d)** | R² macro | DNABERT-2 + `meanG` pooling = **0.210** | 4-mer = 0.174 | +0.036 |
+| | Best result | macro-F1 | Cohen's κ | 4-mer baseline | Margin (F1) |
+|---|---|---:|---:|---:|---:|
+| **Family classification (5-way)** | NT-v2 + `meanD` | **0.828** | **0.821** | 0.672 (κ=0.702) | **+0.156** |
+| **Binary classification (tf-vs-gpcr)** | DNABERT-2 / NT-v2 (best variant) | **0.989** | **0.978** | 0.961 (κ=0.921) | +0.028 |
+| **Binary classification (tf-vs-kinase)** | DNABERT-2 + `meanmean`/`meanD` | **0.887** | **0.774** | 0.839 (κ=0.679) | +0.048 |
+| **Regression (predict GenePT 1536-d)** | DNABERT-2 + `meanG` | R² = **0.210** | — | R² = 0.174 | +0.036 R² |
 
-These supersede the original Phase 3 "informative negative" framing. With the right target and the right tokenisation, both encoders carry meaningful gene-function signal that a 4-mer composition baseline cannot reach.
+Cohen's κ is chance-corrected (0 = chance, 1 = perfect). R² is chance-corrected by construction (R² = 0 ≡ predict-the-mean). Anti-baseline (shuffled labels) lands at κ ≈ 0.05 / −0.07 / +0.10 across the three classification tasks — pipeline is honest. Full table: `data/kappa_summary.md`.
+
+These numbers supersede the original Phase 3 "informative negative" framing. With the right target and the right tokenisation, both encoders carry meaningful gene-function signal that a 4-mer composition baseline cannot reach.
 
 ## Setup (one slide)
 
@@ -108,7 +110,7 @@ Three reads:
 
 If we get only three sentences, these are them:
 
-1. **NT-v2 carries family-discriminative signal beyond raw nucleotide composition** — 5-way macro-F1 = 0.828 vs 4-mer baseline 0.672 (+0.156). Pretrained DNA encoders are doing real work, when you ask the right question.
+1. **NT-v2 carries family-discriminative signal beyond raw nucleotide composition** — 5-way macro-F1 = 0.828 (Cohen's κ = 0.821) vs 4-mer baseline 0.672 (κ = 0.702) and shuffled-label chance κ ≈ 0.05. Pretrained DNA encoders are doing real work, when you ask the right question.
 
 2. **DNABERT-2 was being silently degraded by missing special tokens.** A boundary-token-tokenisation fix lifted its classification by +0.05–0.07 macro-F1 across all three tasks and lifted its regression R² by +0.022 (from "ties 4-mer" to "beats 4-mer by 5×"). The encoder-architecture gap we initially attributed to NT-v2's bigger pretraining corpus was largely this.
 
