@@ -1,153 +1,138 @@
-# Cross-Modal Alignment of DNA Encoders into Gene Function — Write-up
+# Writeup — direction document
 
-**Audience:** the team's slide deck reviewers; in-class presentation.
-**Source of truth for numbers:** `findings.md`. This file restages the same numbers as a presentation narrative.
+This is the **structure and content guide** for the project writeup, formatted as a *Bioinformatics* Application Note (≤2 pages main text + supplementary). It is not the final prose — fill each section against this scaffold using the numbers in `findings.md`, `data/full_table.md`, `data/kappa_summary.md`, and the figures in `viz/figures/` and `demo/`.
 
-## Thesis (one line)
+**Audience:** a stranger with a general understanding of the field but no knowledge of this project. Self-contained.
 
-A pre-trained DNA language model can be linearly aligned to gene-function semantics — but whether you *see* that depends entirely on (a) how you tokenise the input and (b) what target you train the probe to predict.
+**Submission:** compressed folder uploaded to Courseworks containing the writeup PDF, all source code/scripts, sample input/output files, list of large public files, and a `README` (covered in the deliverables section below).
 
-## Headline numbers (lead with these)
+---
 
-| | Best result | macro-F1 | Cohen's κ | 4-mer baseline | Margin (F1) |
-|---|---|---:|---:|---:|---:|
-| **Family classification (5-way)** | NT-v2 + `meanD` | **0.828** | **0.821** | 0.672 (κ=0.702) | **+0.156** |
-| **Binary classification (tf-vs-gpcr)** | DNABERT-2 / NT-v2 (best variant) | **0.989** | **0.978** | 0.961 (κ=0.921) | +0.028 |
-| **Binary classification (tf-vs-kinase)** | DNABERT-2 + `meanmean`/`meanD` | **0.887** | **0.774** | 0.839 (κ=0.679) | +0.048 |
-| **Regression (predict GenePT 1536-d)** | DNABERT-2 + `meanG` | R² = **0.210** | — | R² = 0.174 | +0.036 R² |
+## Bioinformatics Application Note format (target structure)
 
-Cohen's κ is chance-corrected (0 = chance, 1 = perfect). R² is chance-corrected by construction (R² = 0 ≡ predict-the-mean). Anti-baseline (shuffled labels) lands at κ ≈ 0.05 / −0.07 / +0.10 across the three classification tasks — pipeline is honest. Full table: `data/kappa_summary.md`.
+Author guidelines: <https://academic.oup.com/bioinformatics/pages/author-guidelines>. Application Notes are short — main text ≤2 pages including all display items, plus optional supplementary. Use these section headings.
 
-These numbers supersede the original Phase 3 "informative negative" framing. With the right target and the right tokenisation, both encoders carry meaningful gene-function signal that a 4-mer composition baseline cannot reach.
+### Title
+One descriptive sentence. Working title:
+> *Linear probing of pretrained DNA encoders for cross-modal alignment to gene function*
 
-## Setup (one slide)
+Keep under ~100 characters. Avoid the word "novel."
 
-- 3244 human protein-coding genes, 5 functional families (TF 1743, GPCR 591, kinase 558, ion channel 198, immune receptor 154).
-- Two pretrained DNA encoders: **DNABERT-2** (117M, BPE, 768-d) and **NT-v2 100M multi-species** (100M, 6-mer non-overlapping, 512-d). Both run on the canonical CDS only.
-- Frozen 70/15/15 split stratified by family, seed 42.
-- One linear probe per `(encoder, target)` pair. `Ridge` for regression, `LogisticRegression` for classification. C/α swept on val, refit on train+val, evaluated once on test.
+### Authors and affiliations
+Austin Senna · Andrew · Hayden · Columbia University, Department of [TBD] · contact email.
 
-## The story arc (4 slides)
+### Abstract (≤150 words; four labelled paragraphs)
 
-### Slide 1 — Phase 3: a clean informative negative (and what it missed)
+- **Motivation.** One paragraph (~50 words). State the gap: pretrained DNA language models (DNABERT-2, NT-v2) claim to learn general genomic representations from raw sequence, but it is unclear whether their frozen embeddings already carry function-level semantics that a *linear* map can recover. Cross-modal alignment to gene-summary text embeddings (GenePT) provides a direct test.
+- **Results.** One paragraph (~50 words). Headline numbers in this order: (1) 5-way family classification — best macro-F1 0.828 / κ 0.821 (NT-v2 + meanD pooling) vs 4-mer baseline 0.672 / 0.702, Δκ +0.119; (2) DNA→text regression — best R² 0.210 (DNABERT-2) vs 4-mer 0.174, ΔR² +0.036; (3) the two encoders' rankings flip across tasks, consistent with their different pretraining recipes (BPE vs 6-mer tokenizer · 135 vs 850 genomes · 512 vs ~6000-token context).
+- **Availability and implementation.** One short paragraph. GitHub URL, license (MIT), language (Python ≥3.10), key dependencies (PyTorch, transformers, scikit-learn).
+- **Contact.** Corresponding author email.
+- **Supplementary information.** "Supplementary data are available at *Bioinformatics* online" (or, for this submission, in the compressed folder).
 
-Original hypothesis: a linear map from DNA encoder space into the GenePT 1536-d text-embedding space recovers gene function. Result: both encoders barely cleared the 4-mer baseline (Δ R² ≤ +0.018). Two converging encoders + an MLP probe sweep + a working anti-baseline together pointed at the *representation* as the ceiling, not the probe.
+### 1 Introduction (~250 words)
 
-Read at the time: "DNA encoders' extra capacity over a 4-mer histogram is compositional, not functional."
+Three short paragraphs. No deep literature review — this is an Application Note.
 
-That read had two unexamined assumptions: GenePT is the right target, and the existing tokenisation is the right tokenisation. Phase 4 broke both.
+- **Paragraph 1 — what's already established.** Pretrained DNA encoders learn from raw sequence via masked-LM. They produce dense embeddings claimed to capture biological structure. Cite DNABERT-2 (Zhou et al. 2024) and Nucleotide Transformer v2 (Dalla-Torre et al. 2024).
+- **Paragraph 2 — the gap.** Whether frozen embeddings already encode function-level semantics in a *linearly-readable* form has not been systematically tested across tasks. Linear probing is the standard tool for this question; existing benchmarks focus on tagging tasks and rarely cross modalities.
+- **Paragraph 3 — what this work does.** We linearly probe two frozen DNA encoders against (i) a 5-way gene-family classification target and (ii) a 1536-d gene-summary text-embedding target (GenePT, Chen & Zou 2024). We anchor every comparison to a 4-mer composition baseline and a shuffled-label anti-baseline. The two encoders share the masked-LM objective but differ on tokenizer, hidden dim, context window, and pretraining corpus — letting us read out which task each recipe favours.
 
-### Slide 2 — Phase 4a: pivot to classification
+### 2 Approach / Methods (~400 words, condensed)
 
-Two changes at once:
-1. **Target.** GenePT 1536-d → categorical family label (5-way + two binary tasks).
-2. **Metric.** R² macro → macro-F1.
+The detail is in the GitHub repo; this section gives the reader enough to evaluate the claims. Keep ≤4 short paragraphs.
 
-Same cached embeddings. Same probe discipline. Three tasks, four feature sources + shuffled-label control = 15 cells.
+- **Dataset.** 3244 human protein-coding genes from 5 functional families (TF 1743 · GPCR 591 · kinase 558 · ion channel 198 · immune receptor 154), drawn from HGNC ∩ GenePT. Stratified 70/15/15 train/val/test split on family, seed 42, frozen in `data/splits.json`. Reference Table 1 (family counts).
+- **Encoders.** DNABERT-2 117M (BPE tokenizer, 768-d, 512-token context) and NT-v2 multi-species 100M (fixed 6-mer non-overlapping tokenizer, 512-d, ~6000-token context). Both frozen. Each canonical CDS is chunked, encoded, and reduced to a single dense vector via across-chunk mean (the `meanmean` baseline pooling) or one of four alternatives (`meanD` = concat[first, last, mean]; `meanG` = D + max-across-chunks; `maxmean`; `clsmean`). See `src/data_loader/multi_pool.py` and `src/data_loader/pooling_aggregator.py`.
+- **Probes.** Ridge regression for the 1536-d GenePT target (metric: macro R²); logistic regression for classification (metrics: macro-F1, Cohen's κ). Regularisation swept on val, refit on train+val, evaluated **once** on test. Source: `src/linear_trainer/`.
+- **Baselines and controls.** (i) 4-mer composition: 256-d L1-normalised k-mer histogram, same probe recipe — encoder-independent floor. (ii) Length-only: log(CDS length), 1 feature — tests trivial size cues. (iii) Shuffled-label anti-baseline: labels permuted in train+val only — tests pipeline honesty. Anti-baseline κ lands within ±0.10 of zero on every classification task.
 
-Result: NT-v2 5-way macro-F1 = **0.803** (κ = 0.798) vs k-mer 0.672 (κ = 0.702) — **+0.131 macro-F1, +0.096 κ**. DNABERT-2 still tied or lost to k-mer on every task. The pivot helped only the stronger encoder.
+### 3 Results (~600 words, organised around two display items)
 
-| Task | Δ F1 NT-v2 − 4-mer | Δ κ NT-v2 − 4-mer | Δ F1 DNABERT-2 − 4-mer | Δ κ DNABERT-2 − 4-mer |
-|---|---:|---:|---:|---:|
-| 5-way | **+0.131** | **+0.096** | −0.023 | −0.067 |
-| tf-vs-gpcr | +0.017 | +0.034 | −0.023 | −0.045 |
-| tf-vs-kinase | +0.005 | +0.012 | −0.006 | −0.012 |
+This is the longest section. Two figures + one table is plenty.
 
-What this told us at the time: the regression target was masking signal; classification surfaces it. But the encoder gap (NT-v2 ≫ DNABERT-2) looked architectural — bigger pretraining corpus, rotary, GLU.
+- **Section 3.1 — Family classification.** Lead with the strong result. Reference **Table 2** (5-way classification, best variant per encoder + 4-mer + length + shuffled, columns: macro-F1, κ, Δκ vs 4-mer). Numbers in `data/full_table.md`. State: NT-v2 + meanD reaches macro-F1 0.828 / κ 0.821, Δκ +0.119 over k-mer; DNABERT-2 best is +0.020. Anti-baseline κ +0.048 — the headroom is real. **Figure 1**: UMAP of NT-v2 meanD embeddings coloured by family, showing five clean clusters (`viz/figures/umap_nt_v2_meanD.png`).
+- **Section 3.2 — Cross-modal alignment to text.** Honest result. Best DNABERT-2 R² 0.210 vs 4-mer 0.174 (ΔR² +0.036); NT-v2 0.193. Note the encoder ranking *flips* between tasks. Frame this as evidence that pretraining recipe shapes which downstream task each encoder wins — not as a contradiction. R² of 0.21 is modest and bounded by target noise; this is a partial, not decisive, recovery.
+- **Section 3.3 — Recipe-shape-readout.** Brief paragraph connecting the per-task encoder rankings back to the recipe table from Section 2. NT-v2's broader pretraining (850 species) and longer context favour global family signal; DNABERT-2's BPE may favour finer-grained motif units that align with text. **Figure 2** (optional, supplementary if space): two-panel UMAP showing DNABERT-2 before / after the chunk-boundary tokenisation fix (`viz/figures/umap_dnabert2_tokenisation_compare.png`) — concrete illustration that recipe details (here, whether CLS was pretrained as a sequence summary) gate what a linear probe can read out.
+- **Section 3.4 — Zero-shot demo.** One sentence. Four held-out / sparsely-annotated genes (e.g., ZNF839, ZNHIT2) classified correctly via the family-classifier head. Reference `demo/output.md` for full predictions.
 
-### Slide 3 — Phase 4b: the tokenisation surprise
+### 4 Discussion (~150 words)
 
-Phase 4b was supposed to be a pooling ablation (mean→D, mean→G, max→mean, CLS→mean against the existing mean→mean baseline). It surfaced something we weren't looking for.
+Three short points.
+1. **What's supported.** A linear probe over a frozen DNA encoder recovers gene family identity well beyond k-mer composition (Δκ +0.12). For cross-modal regression to text, the gain over k-mer is real but small (ΔR² +0.04) — alignment is partial, not decisive.
+2. **What's not.** No single encoder dominates. Whether tokenizer, corpus, or context window is the responsible axis cannot be isolated without a controlled study (matched-recipe pairs varying one axis at a time).
+3. **Limitations.** One organism (human), CDS-only (no UTR / promoter), two encoders, ~3.2k genes. A third encoder (HyenaDNA / Caduceus / GENA-LM) would test whether the family-recovery claim is architecture-general. Larger / longer-context encoders would test whether the regression ceiling moves.
 
-The Phase 1–3 pipeline tokenised CDS with `add_special_tokens=False` — no `[CLS]` / `[SEP]` wrapping per chunk. The Phase 4b re-extraction (which had to wrap chunks with special tokens to define a "CLS" pool) accidentally fixed this. Result:
+### Acknowledgements
+Course staff; any compute provider.
 
-| Encoder × Task | F1 (4a) | F1 (4b) | Δ F1 | κ (4a) | κ (4b) | Δ κ |
-|---|---:|---:|---:|---:|---:|---:|
-| **DNABERT-2 5-way** | 0.649 | 0.722 | **+0.073** | 0.636 | 0.709 | **+0.074** |
-| DNABERT-2 tf-vs-gpcr | 0.938 | 0.989 | **+0.051** | 0.876 | 0.978 | **+0.101** |
-| DNABERT-2 tf-vs-kinase | 0.833 | 0.887 | **+0.054** | 0.667 | 0.774 | **+0.107** |
-| NT-v2 5-way | 0.803 | 0.800 | −0.003 | 0.798 | 0.798 | 0.000 |
-| NT-v2 tf-vs-gpcr | 0.978 | 0.983 | +0.006 | 0.955 | 0.966 | +0.011 |
-| NT-v2 tf-vs-kinase | 0.844 | 0.845 | +0.000 | 0.691 | 0.691 | 0.000 |
+### Funding
+None / N/A.
 
-The κ columns make the asymmetry sharper: DNABERT-2 picks up Δ κ between +0.07 and +0.11 from the tokenisation fix; NT-v2 stays within ±0.011 of zero on every task. The largest single Δ in the matrix is DNABERT-2 tf-vs-kinase Δ κ = **+0.107** — the chance-corrected reading actually makes the tokenisation fix look *more* significant than the macro-F1 reading does.
+### References
+Use the *Bioinformatics* numeric or author-year style. At minimum:
+- Zhou *et al.* 2024 — DNABERT-2.
+- Dalla-Torre *et al.* 2024 — Nucleotide Transformer v2.
+- Chen & Zou 2024 — GenePT.
+- Pedregosa *et al.* 2011 — scikit-learn.
+- McInnes *et al.* 2018 — UMAP.
 
-**The encoder gap from Phase 4a was largely a tokenisation artefact.** With proper tokenisation, DNABERT-2 either ties NT-v2 (5-way, tf-vs-gpcr) or beats it (tf-vs-kinase). NT-v2 is insensitive to special tokens — likely because its ESM-style architecture doesn't pretrain `<cls>` as a sequence summary, so adding/removing boundary tokens barely shifts its representation.
+---
 
-This is the single most important finding of the project: a 50-line tokenisation choice silently capped one encoder's apparent ability.
+## Display items
 
-### Slide 4 — Phase 4b: pooling sweep results
+**Tables (in main text):**
+- **Table 1.** Dataset composition by family (count, HGNC selection rule). Source: `project.md` table.
+- **Table 2.** Headline results — best variant per encoder vs baselines, three classification tasks + regression in one matrix; columns include macro-F1, κ, R², and Δ vs 4-mer. Condense from `data/full_table.md`.
 
-Five variants per encoder against the recomputed `meanmean` baseline. Three takeaways:
+**Figures (in main text):**
+- **Figure 1.** UMAP of NT-v2 meanD embeddings, coloured by family. File: `viz/figures/umap_nt_v2_meanD.png`.
+- **Figure 2.** Two-panel before/after tokenisation UMAP for DNABERT-2 (or move to supplementary). File: `viz/figures/umap_dnabert2_tokenisation_compare.png`.
 
-1. **`meanD` (concat[first, last, mean] across chunks) is the only variant that reliably helps.** Best on the headline 5-way for NT-v2: 0.800 → **0.828** (+0.028). Concatenating positional anchors exposes terminal asymmetry — N-terminal signal peptides and C-terminal motifs do carry family-discriminative signal that bare cross-chunk mean smears out.
+**Supplementary (in compressed folder):**
+- **Supp. Table S1.** Full results matrix — every (encoder × pooling × task) cell, both metrics. Use `data/full_table.md`.
+- **Supp. Table S2.** Cohen's κ summary per task. Use `data/kappa_summary.md`.
+- **Supp. Note S1.** Pooling sweep details and the chunk-boundary tokenisation finding. Source: `findings.md` Phase 4b.
+- **Supp. Note S2.** Zero-shot demo predictions on poorly-characterised genes. Source: `demo/output.md`.
 
-2. **`meanG` (D + max-across-chunks) ≈ `meanD`.** The "one dominant chunk" hypothesis isn't supported. Not worth the 4× dim cost.
+---
 
-3. **`maxmean` and `clsmean` consistently HURT.** Two failures of the prior literature:
-   - `maxmean` was supposed to surface sparse motifs (per-dim max within chunk). It does — but the cross-chunk mean then averages them right back into noise.
-   - `clsmean` is catastrophic for NT-v2 (5-way drops to 0.59) and merely bad for DNABERT-2. Both encoders are masked-LM pretrained without next-sentence prediction; their CLS positions weren't trained as sequence summaries, so pooling on them throws away signal.
+## Submission deliverables (per assignment)
 
-### Slide 5 — Phase 5a: the regression view, re-run
+The compressed folder uploaded to Courseworks must contain:
 
-Same 10 new pooling-variant parquets, but back to the original Phase 3 regression task (Ridge → GenePT 1536-d).
+1. **The writeup PDF.** Compiled from this scaffold.
+2. **Pointer to the GitHub repo.** Add the URL prominently in the abstract's "Availability and implementation" line and again in the README.
+3. **All source code / scripts.** Already in the repo. Includes:
+   - `src/` — data loader, pooling, probes, baselines.
+   - `scripts/` — runners for each phase, including `build_full_table.py`, `compute_kappa.py`, `train_logistic_probe.py`, `train_ridge_probe.py`.
+   - `viz/` — code that generates Figures 1–2.
+   - `demo/zero_shot.py` — code for the zero-shot demo.
+4. **Sample small input and output files.** Make sure the repo includes:
+   - A small input sample (e.g., a 10-gene parquet slice or the first N rows of `data/dataset.parquet`).
+   - The corresponding output (small `metrics.json` slice, a sample confusion matrix, the demo `output.md`).
+   - If these don't yet exist as small standalone files, add `data/sample_input.parquet` and `data/sample_output.json` (or equivalent) with a few rows so a reviewer can run the pipeline end-to-end without the full corpus.
+5. **List of large public files.** In the README, name the large files the project operates on and where to get them:
+   - `data/dataset.parquet` — built from HGNC complete gene set + Ensembl CDS fetches + GenePT embedding table. Provide the build command (likely `scripts/build_dataset.py` or similar) and the public sources.
+   - GenePT embedding table — Chen & Zou 2024 release URL.
+   - DNABERT-2 / NT-v2 model weights — Hugging Face repo IDs (`zhihan1996/DNABERT-2-117M`, `InstaDeepAI/nucleotide-transformer-v2-100m-multi-species`).
+6. **README file.** Must specify:
+   - **What each top-level file/dir is.** One-line description per item.
+   - **System requirements.** Python ≥3.10; PyTorch ≥2.0; CUDA optional; Apple Silicon MPS supported. Single consumer GPU sufficient (DNABERT-2 117M and NT-v2 100M both fit).
+   - **Dependencies.** Reference `requirements.txt` or `pyproject.toml`. Include exact versions for `torch`, `transformers`, `scikit-learn`, `pandas`, `umap-learn`.
+   - **How to test-run on sample inputs.** Concrete command sequence: `pip install -r requirements.txt` → `python scripts/build_dataset.py --sample` (or pre-shipped sample) → `python scripts/train_logistic_probe.py --encoder nt_v2 --task family5 --sample` → expected output (specific metric values within tolerance).
+   - **How to run on the full data.** Replace `--sample` with full-data flags; note expected wall-clock per phase.
+   - **Parameters / flags.** Document every CLI argument used in the writeup's reproducibility line.
 
-| Variant | Test R² | Δ R² vs Phase 3 same-encoder |
-|---|---:|---:|
-| **`dnabert2_meanG`** | **0.2104** | **+0.029** |
-| `dnabert2_meanD` | 0.2100 | +0.029 |
-| `dnabert2_meanmean` | 0.2029 | +0.022 |
-| `nt_v2_meanmean` | 0.1932 | +0.000 |
-| `nt_v2_meanG` | 0.1902 | −0.003 |
-| `nt_v2_meanD` | 0.1882 | −0.005 |
-| `nt_v2_clsmean` | 0.1172 | −0.076 |
+---
 
-Three reads:
+## Working order
 
-- **DNABERT-2's Phase 3 informative-negative was an undercount.** Δ vs 4-mer goes from +0.007 (Phase 3) to **+0.036** (now). With proper tokenisation DNABERT-2 decisively beats the 4-mer baseline in regression too — not just classification.
-- **NT-v2 regression is unchanged.** `meanmean` R² = 0.193 = Phase 3's 0.193. Confirms NT-v2's regression ceiling is real, not a tokenisation artefact.
-- **`meanD`'s classification gain for NT-v2 does NOT translate to regression.** NT-v2 + `meanD` is +0.025 macro-F1 in classification but −0.005 R² in regression. Translation: terminal asymmetry helps the model decide *which family* a gene belongs to, but doesn't recover *what the gene does* in the full GenePT description.
+Suggested fill-in order (highest to lowest leverage):
 
-## Three things to say in the talk
-
-If we get only three sentences, these are them:
-
-1. **NT-v2 carries family-discriminative signal beyond raw nucleotide composition** — 5-way macro-F1 = 0.828 (Cohen's κ = 0.821) vs 4-mer baseline 0.672 (κ = 0.702) and shuffled-label chance κ ≈ 0.05. Pretrained DNA encoders are doing real work, when you ask the right question.
-
-2. **DNABERT-2 was being silently degraded by missing special tokens.** A boundary-token-tokenisation fix lifted its classification by +0.05–0.07 macro-F1 across all three tasks and lifted its regression R² by +0.022 (from "ties 4-mer" to "beats 4-mer by 5×"). The encoder-architecture gap we initially attributed to NT-v2's bigger pretraining corpus was largely this.
-
-3. **Pooling matters less than people think, except for one variant.** Across 30 pooling-variant cells, only `meanD` (concat first + last + mean across chunks) reliably helped — and only modestly. Two priors from the literature (`max-pool tokens` and `CLS pool`) actually *hurt* both encoders in this setting. The right takeaway: **tokenisation > pooling > architecture** as levers in this regime.
-
-## Caveats (slide if asked)
-
-1. **One corpus, five families, one organism.** All numbers are on a 3244-gene human dataset selected by HGNC family regex. The classification task structure favours family-level signal over fine-grained function.
-2. **CDS only.** Promoter and UTR sequences may carry more function-discriminating signal than the codon-bias-dominated CDS; not tested here.
-3. **No third encoder.** Two-encoder convergence weakens slightly because we now know one was a tokenisation bug. A HyenaDNA / Caduceus / GENA-LM run would re-establish whether the "encoders carry function signal" claim is architecture-general.
-4. **Regression ceiling is still modest.** Best R² = 0.21 — most of GenePT's 1536-d target is noise no DNA encoder of this size will recover. Classification is the right framing; regression is the diagnostic.
-
-## What stays in vs what gets cut
-
-For a 5–7 minute slot:
-
-| Slide | Keep / cut | Why |
-|---|---|---|
-| Thesis + headlines | KEEP | Anchor the talk |
-| Setup (corpus, encoders, probes) | KEEP | One slide, fast |
-| Phase 3 informative negative | KEEP, brief | Sets up the pivot |
-| Phase 4a classification | KEEP | The first pivot win |
-| Phase 4b tokenisation surprise | KEEP — this is the talk | Single biggest finding |
-| Phase 4b pooling sweep | KEEP | Validates `meanD`, rules out two bad priors |
-| Phase 5a regression re-run | KEEP | Closes the loop with Phase 3 |
-| Three headline takeaways | KEEP | The "if you remember nothing else" slide |
-| Caveats | optional | Have ready for Q&A |
-| Confusion matrices | optional | Per-class accuracy nuance |
-
-For a 3-minute pitch: drop Phase 3 setup and Phase 4b pooling sweep; lead with Phase 4a result + Phase 4b tokenisation surprise + Phase 5a regression re-run.
-
-## Full results table
-
-For the deck appendix or to defend any individual cell, the complete `(feature source × task × metric)` matrix lives in `data/full_table.md` — every baseline, every encoder, every pooling variant, every classification + regression metric in one place. Generated by `scripts/build_full_table.py`.
-
-## Provenance
-
-All numbers in this write-up trace to `data/metrics.json` (per-cell entries) and `data/confusion_5way_*.json` (per-encoder, per-variant 5-way confusion matrices). Each metrics entry has a `run_id` of form `{model}_{encoder}_{task_or_dataset}_{utc_timestamp}` so any number in the tables above can be located in one grep. Cohen's κ values in this write-up come from `data/kappa_summary.md`; the wider sweep across all 15 feature sources lives in `data/full_table.md`.
+1. Lock the abstract numbers — those gate every other section.
+2. Methods (Section 2) — write to half the target length, then trim.
+3. Results (Section 3.1, 3.2) — these carry the paper. Get Table 2 + Figure 1 typeset before writing prose around them.
+4. Introduction (Section 1) — easier once results are concrete.
+5. Discussion (Section 4) — keep it short; resist scope creep.
+6. README + sample I/O files — required for submission, easy to underestimate.
+7. Final pass: check ≤2 pages including display items, all references resolve, GitHub link works, sample run reproduces a sample number.

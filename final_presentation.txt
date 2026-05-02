@@ -1,0 +1,27 @@
+
+COMS 4761: Project Final Presentations
+Deadline: Presentation on May 4th
+Slides due May 4th, 2026 at Noon (upload files as assignment submission)
+Your assigned sessions are provided here; as always, please confirm!
+Time format is the as other presentations:
+• Solo projects: 5 minute presentation + 1 minute Q&A
+• Pairs: 7 minute presentation + 1 minute Q&A
+• Triplets: 8 minute presentation + 1 minute Q&A
+Time is short, so be focused and well-prepared. An acceptable strategy is to present an overview, but
+to drill into details of only one of the items, e.g., “We had done X, Y, and Z; I will focus on X as it was
+the most challenging/fruitful”. Prioritize narrative over a log: better to highlight the most meaningful
+results and tell the story about how you got them, rather than a list of actions you took without a coherent
+objective.
+As in typical scientific papers, a typical project presentation will have distinct parts of:
+1. Introduction (what is the problem we tackled? Why is it interesting?)
+2. Methods (what have we actually done?)
+3. Results (what did we find out? Charts and tables of benchmarks go here)
+4. Conclusions (summary, limitations, prospective future work)
+Please note that compared to previous presentations, more emphasis should be given to
+- Validity (of methods/results/conclusions), so think about how you evaluate any claims you make
+- Presentation & visuals
+Moderation will pursue the format of previous presentations.
+Please further note that this is your final presentation. While the report is to be submitted at a later date,
+the time between submissions is for report preparation, rather than adding significant content to the
+project, as there will be no opportunity for feedback on such added content.
+Good luck!
