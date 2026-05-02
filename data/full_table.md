@@ -40,3 +40,45 @@ Row groups: **baselines** (shuffled-label, length-only, 4-mer) → **Phase 1–3
 | tf-vs-kinase κ | `dnabert2_meanmean` | **0.7738** |
 | Ridge R² | `dnabert2_meanG` | **0.2104** |
 
+## Δ vs 4-mer baseline
+
+Same matrix, but each cell is `(value) − (kmer value)` in the same column. Positive = beats k-mer composition; negative = worse than k-mer; zero = tied. k-mer's own row reads zero by construction. Reading this table answers *"how much extra signal does the encoder + pooling carry over a 256-d 4-mer histogram?"*
+
+| Feature source | Δ 5-way F1 | Δ 5-way κ | Δ tf-vs-gpcr F1 | Δ tf-vs-gpcr κ | Δ tf-vs-kinase F1 | Δ tf-vs-kinase κ | Δ Ridge R² |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `shuffled` | -0.4644 | -0.6541 | -0.4948 | -0.9888 | -0.2919 | -0.5833 | — |
+| `length` | -0.5340 | -0.7130 | -0.2266 | -0.4494 | -0.1966 | -0.3929 | — |
+| `kmer` | +0.0000 | +0.0000 | +0.0000 | +0.0000 | +0.0000 | +0.0000 | +0.0000 |
+| `dnabert2` | -0.0232 | -0.0667 | -0.0226 | -0.0449 | -0.0063 | -0.0119 | +0.0070 |
+| `dnabert2_meanmean` | +0.0497 | +0.0067 | +0.0281 | +0.0562 | +0.0477 | +0.0952 | +0.0286 |
+| `dnabert2_meanD` | +0.0657 | +0.0202 | +0.0112 | +0.0225 | +0.0477 | +0.0952 | +0.0357 |
+| `dnabert2_meanG` | +0.0552 | +0.0042 | -0.0000 | +0.0000 | +0.0358 | +0.0714 | +0.0361 |
+| `dnabert2_maxmean` | -0.0578 | -0.1207 | -0.0169 | -0.0337 | -0.0482 | -0.0952 | -0.0136 |
+| `dnabert2_clsmean` | -0.0175 | -0.0407 | +0.0112 | +0.0225 | -0.0059 | -0.0119 | +0.0168 |
+| `nt_v2` | +0.1308 | +0.0960 | +0.0169 | +0.0337 | +0.0052 | +0.0119 | +0.0183 |
+| `nt_v2_meanmean` | +0.1274 | +0.0959 | +0.0225 | +0.0449 | +0.0055 | +0.0119 | +0.0189 |
+| `nt_v2_meanD` | +0.1553 | +0.1190 | +0.0281 | +0.0562 | +0.0052 | +0.0119 | +0.0139 |
+| `nt_v2_meanG` | +0.1535 | +0.1155 | +0.0056 | +0.0112 | +0.0115 | +0.0238 | +0.0159 |
+| `nt_v2_maxmean` | -0.0857 | -0.0925 | +0.0112 | +0.0225 | -0.0059 | -0.0119 | -0.0387 |
+| `nt_v2_clsmean` | -0.0795 | -0.1335 | -0.0225 | -0.0449 | -0.0714 | -0.1429 | -0.0571 |
+
+**Cells beating 4-mer by Δ macro-F1 ≥ 0.02** (the spec's decision-gate threshold from `2026-04-29-classification-pivot-design.md`):
+
+| Feature source | 5-way | tf-vs-gpcr | tf-vs-kinase |
+|---|:-:|:-:|:-:|
+| `length` | ❌ | ❌ | ❌ |
+| `dnabert2` | ❌ | ❌ | ≈ |
+| `dnabert2_meanmean` | ✅ | ✅ | ✅ |
+| `dnabert2_meanD` | ✅ | ≈ | ✅ |
+| `dnabert2_meanG` | ✅ | ≈ | ✅ |
+| `dnabert2_maxmean` | ❌ | ≈ | ❌ |
+| `dnabert2_clsmean` | ≈ | ≈ | ≈ |
+| `nt_v2` | ✅ | ≈ | ≈ |
+| `nt_v2_meanmean` | ✅ | ✅ | ≈ |
+| `nt_v2_meanD` | ✅ | ✅ | ≈ |
+| `nt_v2_meanG` | ✅ | ≈ | ≈ |
+| `nt_v2_maxmean` | ❌ | ≈ | ≈ |
+| `nt_v2_clsmean` | ❌ | ❌ | ❌ |
+
+Legend: ✅ beats k-mer (Δ ≥ +0.02); ≈ ties (within ±0.02); ❌ loses (Δ ≤ −0.02).
+

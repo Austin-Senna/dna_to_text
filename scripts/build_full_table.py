@@ -268,6 +268,61 @@ def main():
             f.write(f"| {col_label} | `{best['label']}` | **{best[col_key]:.4f}** |\n")
         f.write("\n")
 
+        # ---- Delta vs k-mer table ----
+        kmer_row = next(r for r in rows if r["label"] == "kmer")
+        f.write("## Δ vs 4-mer baseline\n\n")
+        f.write(
+            "Same matrix, but each cell is `(value) − (kmer value)` in the same column. "
+            "Positive = beats k-mer composition; negative = worse than k-mer; zero = tied. "
+            "k-mer's own row reads zero by construction. Reading this table answers "
+            "*\"how much extra signal does the encoder + pooling carry over a "
+            "256-d 4-mer histogram?\"*\n\n"
+        )
+        f.write("| Feature source | Δ 5-way F1 | Δ 5-way κ | Δ tf-vs-gpcr F1 | Δ tf-vs-gpcr κ | "
+                "Δ tf-vs-kinase F1 | Δ tf-vs-kinase κ | Δ Ridge R² |\n")
+        f.write("|---|---:|---:|---:|---:|---:|---:|---:|\n")
+
+        delta_keys = [
+            "family5_f1", "family5_k",
+            "tf_vs_gpcr_f1", "tf_vs_gpcr_k",
+            "tf_vs_kinase_f1", "tf_vs_kinase_k",
+            "r2",
+        ]
+
+        def _delta(row, key):
+            if row[key] is None or kmer_row.get(key) is None:
+                return None
+            return row[key] - kmer_row[key]
+
+        for row in rows:
+            cells = []
+            for key in delta_keys:
+                d = _delta(row, key)
+                cells.append("—" if d is None else f"{d:+.4f}")
+            f.write(f"| `{row['label']}` | " + " | ".join(cells) + " |\n")
+        f.write("\n")
+
+        # Highlight cells that meet the spec's "beats 4-mer" gate (Δ ≥ 0.02 macro-F1).
+        f.write("**Cells beating 4-mer by Δ macro-F1 ≥ 0.02** (the spec's decision-gate "
+                "threshold from `2026-04-29-classification-pivot-design.md`):\n\n")
+        f.write("| Feature source | 5-way | tf-vs-gpcr | tf-vs-kinase |\n|---|:-:|:-:|:-:|\n")
+        for row in rows:
+            if row["label"] in ("kmer", "shuffled"):
+                continue
+            marks = []
+            for f1_key in ("family5_f1", "tf_vs_gpcr_f1", "tf_vs_kinase_f1"):
+                d = _delta(row, f1_key)
+                if d is None:
+                    marks.append("—")
+                elif d >= 0.02:
+                    marks.append("✅")
+                elif d <= -0.02:
+                    marks.append("❌")
+                else:
+                    marks.append("≈")
+            f.write(f"| `{row['label']}` | " + " | ".join(marks) + " |\n")
+        f.write("\nLegend: ✅ beats k-mer (Δ ≥ +0.02); ≈ ties (within ±0.02); ❌ loses (Δ ≤ −0.02).\n\n")
+
     print(f"  wrote {OUT}")
 
 

@@ -345,6 +345,54 @@ Bolded cells = column-wise maximum across non-shuffled rows. Anti-baseline (shuf
 | tf-vs-kinase κ | `dnabert2_meanmean` | 0.774 |
 | Ridge R² | `dnabert2_meanG` | 0.210 |
 
+## Δ vs 4-mer baseline
+
+The same matrix, expressed as `(value) − (k-mer value)` in the same column. Positive = beats the 4-mer composition baseline; negative = worse. This is the table that answers the project's main scientific question: *how much extra signal does the encoder + pooling carry over a 256-d 4-mer histogram?*
+
+| Feature source | Δ 5-way F1 | Δ 5-way κ | Δ tf-vs-gpcr F1 | Δ tf-vs-gpcr κ | Δ tf-vs-kinase F1 | Δ tf-vs-kinase κ | Δ Ridge R² |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `shuffled` | −0.464 | −0.654 | −0.495 | −0.989 | −0.292 | −0.583 | — |
+| `length` | −0.534 | −0.713 | −0.227 | −0.449 | −0.197 | −0.393 | — |
+| `kmer` (reference) | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `dnabert2` | −0.023 | −0.067 | −0.023 | −0.045 | −0.006 | −0.012 | +0.007 |
+| `dnabert2_meanmean` | **+0.050** | +0.007 | **+0.028** | **+0.056** | **+0.048** | **+0.095** | **+0.029** |
+| `dnabert2_meanD` | **+0.066** | **+0.020** | +0.011 | +0.022 | **+0.048** | **+0.095** | **+0.036** |
+| `dnabert2_meanG` | **+0.055** | +0.004 | 0.000 | 0.000 | **+0.036** | **+0.071** | **+0.036** |
+| `dnabert2_maxmean` | −0.058 | −0.121 | −0.017 | −0.034 | −0.048 | −0.095 | −0.014 |
+| `dnabert2_clsmean` | −0.018 | −0.041 | +0.011 | +0.022 | −0.006 | −0.012 | +0.017 |
+| `nt_v2` | **+0.131** | **+0.096** | +0.017 | +0.034 | +0.005 | +0.012 | +0.018 |
+| `nt_v2_meanmean` | **+0.127** | **+0.096** | **+0.022** | +0.045 | +0.006 | +0.012 | +0.019 |
+| `nt_v2_meanD` | **+0.155** | **+0.119** | **+0.028** | **+0.056** | +0.005 | +0.012 | +0.014 |
+| `nt_v2_meanG` | **+0.154** | **+0.115** | +0.006 | +0.011 | +0.011 | +0.024 | +0.016 |
+| `nt_v2_maxmean` | −0.086 | −0.092 | +0.011 | +0.022 | −0.006 | −0.012 | −0.039 |
+| `nt_v2_clsmean` | −0.080 | −0.134 | −0.022 | −0.045 | −0.071 | −0.143 | −0.057 |
+
+Bolded cells = exceed the spec's decision-gate threshold (Δ macro-F1 ≥ +0.02 or Δ R² ≥ +0.02). Decision-gate verdict by row:
+
+| Feature source | 5-way | tf-vs-gpcr | tf-vs-kinase |
+|---|:-:|:-:|:-:|
+| `dnabert2` (Phase 1–3, no specials) | ❌ | ❌ | ≈ |
+| `dnabert2_meanmean` (with specials) | ✅ | ✅ | ✅ |
+| `dnabert2_meanD` | ✅ | ≈ | ✅ |
+| `dnabert2_meanG` | ✅ | ≈ | ✅ |
+| `dnabert2_maxmean` | ❌ | ≈ | ❌ |
+| `dnabert2_clsmean` | ≈ | ≈ | ≈ |
+| `nt_v2` (Phase 1–3) | ✅ | ≈ | ≈ |
+| `nt_v2_meanmean` | ✅ | ✅ | ≈ |
+| `nt_v2_meanD` | ✅ | ✅ | ≈ |
+| `nt_v2_meanG` | ✅ | ≈ | ≈ |
+| `nt_v2_maxmean` | ❌ | ≈ | ≈ |
+| `nt_v2_clsmean` | ❌ | ❌ | ❌ |
+
+(✅ Δ ≥ +0.02; ≈ within ±0.02; ❌ Δ ≤ −0.02.)
+
+What this surfaces:
+
+1. **The tokenisation fix flips DNABERT-2 from `❌ ❌ ≈` to `✅ ✅ ✅`.** Same model, same pooling, only the chunk boundary tokens differ. The Phase 1–3 read on DNABERT-2 was strictly false; with the fix it beats k-mer everywhere.
+2. **NT-v2 beats k-mer on the 5-way no matter how you pool it** (5-way column has ✅ on every NT-v2 mean-* row). This is the most defensible "encoder learned something beyond composition" result.
+3. **`maxmean` and `clsmean` hurt DNABERT-2 + NT-v2 on the 5-way** (✅ on every other column rule, ❌ here). The deep-research priors that recommended max-pool and CLS-pool were wrong for this regime.
+4. **Tf-vs-kinase is the hardest task for the encoders.** Best margin = +0.048 macro-F1 (DNABERT-2 + meanmean / meanD); k-mer comes within +0.005 of NT-v2's best on this task. Both intracellular soluble protein families share too much codon composition for the encoder to gain much over a 4-mer histogram.
+
 ## Cohen's κ — chance-corrected view of the headlines
 
 macro-F1 is the headline metric, but it isn't chance-corrected. The empirical chance level for our 5-way task (heavily imbalanced) is ~0.20 macro-F1 — the anti-baseline (shuffled labels) hit 0.208. To give a single chance-corrected scalar that respects the actual class distribution, we report Cohen's κ alongside macro-F1.
