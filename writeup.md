@@ -45,13 +45,13 @@ Two changes at once:
 
 Same cached embeddings. Same probe discipline. Three tasks, four feature sources + shuffled-label control = 15 cells.
 
-Result: NT-v2 5-way macro-F1 = **0.803** vs k-mer 0.672 (**+0.131**). DNABERT-2 still tied or lost to k-mer on every task. The pivot helped only the stronger encoder.
+Result: NT-v2 5-way macro-F1 = **0.803** (κ = 0.798) vs k-mer 0.672 (κ = 0.702) — **+0.131 macro-F1, +0.096 κ**. DNABERT-2 still tied or lost to k-mer on every task. The pivot helped only the stronger encoder.
 
-| Task | NT-v2 − 4-mer | DNABERT-2 − 4-mer |
-|---|---:|---:|
-| 5-way | **+0.131** | −0.023 |
-| tf-vs-gpcr | +0.017 | −0.023 |
-| tf-vs-kinase | +0.005 | −0.006 |
+| Task | Δ F1 NT-v2 − 4-mer | Δ κ NT-v2 − 4-mer | Δ F1 DNABERT-2 − 4-mer | Δ κ DNABERT-2 − 4-mer |
+|---|---:|---:|---:|---:|
+| 5-way | **+0.131** | **+0.096** | −0.023 | −0.067 |
+| tf-vs-gpcr | +0.017 | +0.034 | −0.023 | −0.045 |
+| tf-vs-kinase | +0.005 | +0.012 | −0.006 | −0.012 |
 
 What this told us at the time: the regression target was masking signal; classification surfaces it. But the encoder gap (NT-v2 ≫ DNABERT-2) looked architectural — bigger pretraining corpus, rotary, GLU.
 
@@ -61,14 +61,16 @@ Phase 4b was supposed to be a pooling ablation (mean→D, mean→G, max→mean, 
 
 The Phase 1–3 pipeline tokenised CDS with `add_special_tokens=False` — no `[CLS]` / `[SEP]` wrapping per chunk. The Phase 4b re-extraction (which had to wrap chunks with special tokens to define a "CLS" pool) accidentally fixed this. Result:
 
-| Encoder | Phase 4a `mean→mean` (no specials) | Phase 4b `meanmean` (with specials) | Δ |
-|---|---:|---:|---:|
-| **DNABERT-2 5-way** | 0.649 | 0.722 | **+0.073** |
-| DNABERT-2 tf-vs-gpcr | 0.938 | 0.989 | **+0.051** |
-| DNABERT-2 tf-vs-kinase | 0.833 | 0.887 | **+0.054** |
-| NT-v2 5-way | 0.803 | 0.800 | −0.003 |
-| NT-v2 tf-vs-gpcr | 0.978 | 0.983 | +0.006 |
-| NT-v2 tf-vs-kinase | 0.844 | 0.845 | +0.000 |
+| Encoder × Task | F1 (4a) | F1 (4b) | Δ F1 | κ (4a) | κ (4b) | Δ κ |
+|---|---:|---:|---:|---:|---:|---:|
+| **DNABERT-2 5-way** | 0.649 | 0.722 | **+0.073** | 0.636 | 0.709 | **+0.074** |
+| DNABERT-2 tf-vs-gpcr | 0.938 | 0.989 | **+0.051** | 0.876 | 0.978 | **+0.101** |
+| DNABERT-2 tf-vs-kinase | 0.833 | 0.887 | **+0.054** | 0.667 | 0.774 | **+0.107** |
+| NT-v2 5-way | 0.803 | 0.800 | −0.003 | 0.798 | 0.798 | 0.000 |
+| NT-v2 tf-vs-gpcr | 0.978 | 0.983 | +0.006 | 0.955 | 0.966 | +0.011 |
+| NT-v2 tf-vs-kinase | 0.844 | 0.845 | +0.000 | 0.691 | 0.691 | 0.000 |
+
+The κ columns make the asymmetry sharper: DNABERT-2 picks up Δ κ between +0.07 and +0.11 from the tokenisation fix; NT-v2 stays within ±0.011 of zero on every task. The largest single Δ in the matrix is DNABERT-2 tf-vs-kinase Δ κ = **+0.107** — the chance-corrected reading actually makes the tokenisation fix look *more* significant than the macro-F1 reading does.
 
 **The encoder gap from Phase 4a was largely a tokenisation artefact.** With proper tokenisation, DNABERT-2 either ties NT-v2 (5-way, tf-vs-gpcr) or beats it (tf-vs-kinase). NT-v2 is insensitive to special tokens — likely because its ESM-style architecture doesn't pretrain `<cls>` as a sequence summary, so adding/removing boundary tokens barely shifts its representation.
 

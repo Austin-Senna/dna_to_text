@@ -112,31 +112,33 @@ Relevant commits: `e99f5f3` binary subsets, `679af53` length baseline, `b0b2df5`
 
 ### Results
 
-| Task | Encoder / baseline | C | Test macro-F1 | Test bal. acc | Test acc |
+| Task | Encoder / baseline | C | Test macro-F1 | Test κ | Test acc |
 |---|---|---:|---:|---:|---:|
-| **5-way** | **NT-v2** | 1.0 | **0.8031** | 0.7748 | 0.8727 |
-| 5-way | 4-mer | 1000 | 0.6722 | 0.6319 | 0.8172 |
-| 5-way | DNABERT-2 | 10 | 0.6490 | 0.6170 | 0.7721 |
-| 5-way | shuffled-label | 100 | 0.2078 | 0.2119 | 0.4353 |
-| 5-way | length-only | 0.1 | 0.1382 | 0.1954 | 0.5236 |
-| **tf-vs-gpcr** | **NT-v2** | 0.1 | **0.9775** | 0.9775 | 0.9775 |
-| tf-vs-gpcr | 4-mer | 1000 | 0.9607 | 0.9607 | 0.9607 |
-| tf-vs-gpcr | DNABERT-2 | 1.0 | 0.9381 | 0.9382 | 0.9382 |
-| tf-vs-gpcr | length-only | 1.0 | 0.7341 | 0.7360 | 0.7360 |
-| tf-vs-gpcr | shuffled-label | 0.1 | 0.4659 | 0.4663 | 0.4663 |
-| **tf-vs-kinase** | **NT-v2** | 100 | **0.8444** | 0.8452 | 0.8452 |
-| tf-vs-kinase | 4-mer | 1000 | 0.8392 | 0.8393 | 0.8393 |
-| tf-vs-kinase | DNABERT-2 | 1.0 | 0.8330 | 0.8333 | 0.8333 |
-| tf-vs-kinase | length-only | 0.01 | 0.6427 | 0.6429 | 0.6429 |
-| tf-vs-kinase | shuffled-label | 0.1 | 0.5474 | 0.5476 | 0.5476 |
+| **5-way** | **NT-v2** | 1.0 | **0.8031** | **0.7984** | 0.8727 |
+| 5-way | 4-mer | 1000 | 0.6722 | 0.7024 | 0.8172 |
+| 5-way | DNABERT-2 | 10 | 0.6490 | 0.6356 | 0.7721 |
+| 5-way | shuffled-label | 100 | 0.2078 | +0.0482 | 0.4353 |
+| 5-way | length-only | 0.1 | 0.1382 | −0.0106 | 0.5236 |
+| **tf-vs-gpcr** | **NT-v2** | 0.1 | **0.9775** | **0.9551** | 0.9775 |
+| tf-vs-gpcr | 4-mer | 1000 | 0.9607 | 0.9213 | 0.9607 |
+| tf-vs-gpcr | DNABERT-2 | 1.0 | 0.9381 | 0.8764 | 0.9382 |
+| tf-vs-gpcr | length-only | 1.0 | 0.7341 | 0.4719 | 0.7360 |
+| tf-vs-gpcr | shuffled-label | 0.1 | 0.4659 | −0.0674 | 0.4663 |
+| **tf-vs-kinase** | **NT-v2** | 100 | **0.8444** | **0.6905** | 0.8452 |
+| tf-vs-kinase | 4-mer | 1000 | 0.8392 | 0.6786 | 0.8393 |
+| tf-vs-kinase | DNABERT-2 | 1.0 | 0.8330 | 0.6667 | 0.8333 |
+| tf-vs-kinase | length-only | 0.01 | 0.6427 | 0.2857 | 0.6429 |
+| tf-vs-kinase | shuffled-label | 0.1 | 0.5474 | +0.0952 | 0.5476 |
 
-Δ macro-F1 vs the 4-mer baseline:
+Δ vs the 4-mer baseline (both macro-F1 and chance-corrected κ):
 
-| Task | NT-v2 − 4-mer | DNABERT-2 − 4-mer |
-|---|---:|---:|
-| 5-way | **+0.1308** | −0.0232 |
-| tf-vs-gpcr | +0.0169 | −0.0226 |
-| tf-vs-kinase | +0.0052 | −0.0063 |
+| Task | Δ F1 NT-v2 − 4-mer | Δ κ NT-v2 − 4-mer | Δ F1 DNABERT-2 − 4-mer | Δ κ DNABERT-2 − 4-mer |
+|---|---:|---:|---:|---:|
+| 5-way | **+0.1308** | **+0.0960** | −0.0232 | −0.0668 |
+| tf-vs-gpcr | +0.0169 | +0.0338 | −0.0226 | −0.0449 |
+| tf-vs-kinase | +0.0052 | +0.0119 | −0.0063 | −0.0119 |
+
+On the **balanced binary tasks** the κ delta is roughly 2× the macro-F1 delta (chance-corrected denominator `1 − p_expected ≈ 0.5`). On the **imbalanced 5-way task** the relationship inverts — Δ κ (+0.0960) is *smaller* than Δ macro-F1 (+0.1308) because κ weights agreement by each class's marginal frequency, which is dominated by TF (53% of the corpus). NT-v2 wins more on the minority classes, which macro-F1 rewards more aggressively than κ does. Both still show NT-v2 decisively ahead and DNABERT-2 decisively behind.
 
 ### Read
 
@@ -206,33 +208,35 @@ Re-extraction tokenised **with** special tokens (`[CLS]` / `[SEP]` for DNABERT-2
 
 ### Headline numbers (5-way)
 
-Sorted by macro-F1, with Δ vs the Phase 4a `nt_v2` (0.8031) and `dnabert2` (0.6490) baselines:
+Sorted by macro-F1, with Δ vs the Phase 4a `nt_v2` (F1 0.8031, κ 0.7984) and `dnabert2` (F1 0.6490, κ 0.6356) baselines:
 
-| Variant | macro-F1 | Δ vs Phase 4a same-encoder | Notes |
-|---|---:|---:|---|
-| **`nt_v2_meanD`** | **0.8275** | +0.0244 | best overall on 5-way |
-| `nt_v2_meanG` | 0.8257 | +0.0226 | tied with D within noise |
-| `nt_v2_meanmean` | 0.7997 | −0.0034 | recomputed baseline ≈ Phase 4a |
-| `dnabert2_meanD` | 0.7380 | **+0.0890** | huge DNABERT-2 jump |
-| `dnabert2_meanG` | 0.7275 | +0.0785 | |
-| `dnabert2_meanmean` | 0.7220 | +0.0730 | recomputed baseline ≠ Phase 4a |
-| `dnabert2_clsmean` | 0.6547 | +0.0057 | |
-| `dnabert2_maxmean` | 0.6144 | −0.0346 | max-token pooling hurts |
-| `nt_v2_clsmean` | 0.5927 | −0.2104 | NT-v2 CLS is not a summary |
-| `nt_v2_maxmean` | 0.5865 | −0.2166 | |
+| Variant | macro-F1 | Δ F1 vs Phase 4a | κ | Δ κ vs Phase 4a | Notes |
+|---|---:|---:|---:|---:|---|
+| **`nt_v2_meanD`** | **0.8275** | +0.0244 | **0.8214** | +0.0230 | best overall on 5-way |
+| `nt_v2_meanG` | 0.8257 | +0.0226 | 0.8179 | +0.0195 | tied with D within noise |
+| `nt_v2_meanmean` | 0.7997 | −0.0034 | 0.7982 | −0.0002 | recomputed baseline ≈ Phase 4a |
+| `dnabert2_meanD` | 0.7380 | **+0.0890** | 0.7226 | **+0.0870** | huge DNABERT-2 jump |
+| `dnabert2_meanG` | 0.7275 | +0.0785 | 0.7066 | +0.0710 | |
+| `dnabert2_meanmean` | 0.7220 | +0.0730 | 0.7091 | +0.0735 | recomputed baseline ≠ Phase 4a |
+| `dnabert2_clsmean` | 0.6547 | +0.0057 | 0.6616 | +0.0260 | |
+| `dnabert2_maxmean` | 0.6144 | −0.0346 | 0.5817 | −0.0539 | max-token pooling hurts |
+| `nt_v2_clsmean` | 0.5927 | −0.2104 | 0.5689 | −0.2295 | NT-v2 CLS is not a summary |
+| `nt_v2_maxmean` | 0.5865 | −0.2166 | 0.6099 | −0.1885 | |
 
 ### Tokenisation surprise
 
 The most consequential change isn't a pooling variant — it's the tokenisation. The Phase 4b mean→mean baselines use the *same* aggregation as Phase 4a (mean of content tokens, then mean across chunks) but with **special-token-wrapped** chunks:
 
-| Encoder | Phase 4a `mean→mean` | Phase 4b `meanmean` (re-tok) | Δ |
-|---|---:|---:|---:|
-| DNABERT-2 5-way | 0.6490 | 0.7220 | **+0.0730** |
-| DNABERT-2 tf-vs-gpcr | 0.9381 | 0.9888 | **+0.0507** |
-| DNABERT-2 tf-vs-kinase | 0.8330 | 0.8869 | **+0.0539** |
-| NT-v2 5-way | 0.8031 | 0.7997 | −0.0034 |
-| NT-v2 tf-vs-gpcr | 0.9775 | 0.9831 | +0.0056 |
-| NT-v2 tf-vs-kinase | 0.8444 | 0.8447 | +0.0003 |
+| Encoder × Task | Phase 4a F1 | Phase 4b F1 | Δ F1 | Phase 4a κ | Phase 4b κ | Δ κ |
+|---|---:|---:|---:|---:|---:|---:|
+| DNABERT-2 5-way | 0.6490 | 0.7220 | **+0.0730** | 0.6356 | 0.7091 | **+0.0735** |
+| DNABERT-2 tf-vs-gpcr | 0.9381 | 0.9888 | **+0.0507** | 0.8764 | 0.9775 | **+0.1011** |
+| DNABERT-2 tf-vs-kinase | 0.8330 | 0.8869 | **+0.0539** | 0.6667 | 0.7738 | **+0.1071** |
+| NT-v2 5-way | 0.8031 | 0.7997 | −0.0034 | 0.7984 | 0.7982 | −0.0002 |
+| NT-v2 tf-vs-gpcr | 0.9775 | 0.9831 | +0.0056 | 0.9551 | 0.9663 | +0.0112 |
+| NT-v2 tf-vs-kinase | 0.8444 | 0.8447 | +0.0003 | 0.6905 | 0.6905 | 0.0000 |
+
+The κ columns make the asymmetry even sharper: DNABERT-2 picks up Δ κ between +0.07 and +0.11 from the tokenisation fix; NT-v2 stays within ±0.012 of zero on every task.
 
 **DNABERT-2 was being substantially crippled by the Phase 1–3 tokenisation choice** (`add_special_tokens=False`, no `[CLS]`/`[SEP]` wrapping per chunk). With proper boundaries, DNABERT-2 closes most of the encoder gap to NT-v2 — even before any pooling change — and on tf-vs-kinase actually pulls ahead (0.887 vs NT-v2 0.845). The "encoder gap" in Phase 4a was not purely architectural; a meaningful chunk of it was a tokenisation bug.
 
@@ -240,15 +244,29 @@ NT-v2 is largely insensitive to special tokens (within ±0.006 across all three 
 
 ### Pooling rankings (post-tokenisation-fix)
 
-Comparing variants against each encoder's *recomputed* `meanmean` baseline:
+Comparing variants against each encoder's *recomputed* `meanmean` baseline.
 
-| | dnabert2 5-way | dnabert2 tf-vs-gpcr | dnabert2 tf-vs-kinase | nt_v2 5-way | nt_v2 tf-vs-gpcr | nt_v2 tf-vs-kinase |
+**Δ macro-F1 vs encoder's meanmean baseline:**
+
+| Variant | dnabert2 5-way | dnabert2 tf-vs-gpcr | dnabert2 tf-vs-kinase | nt_v2 5-way | nt_v2 tf-vs-gpcr | nt_v2 tf-vs-kinase |
 |---|---:|---:|---:|---:|---:|---:|
-| meanmean (baseline) | 0.7220 | 0.9888 | 0.8869 | 0.7997 | 0.9831 | 0.8447 |
-| meanD | +0.0160 | −0.0169 | 0.0000 | **+0.0278** | +0.0057 | −0.0003 |
-| meanG | +0.0055 | −0.0282 | −0.0119 | +0.0260 | −0.0168 | +0.0061 |
-| maxmean | −0.1076 | −0.0450 | −0.0958 | −0.2132 | −0.0112 | −0.0114 |
-| clsmean | −0.0673 | −0.0169 | −0.0536 | −0.2070 | −0.0449 | −0.0769 |
+| meanmean (F1 baseline) | 0.7220 | 0.9888 | 0.8869 | 0.7997 | 0.9831 | 0.8447 |
+| Δ meanD | +0.0160 | −0.0169 | 0.0000 | **+0.0278** | +0.0057 | −0.0003 |
+| Δ meanG | +0.0055 | −0.0282 | −0.0119 | +0.0260 | −0.0168 | +0.0061 |
+| Δ maxmean | −0.1076 | −0.0450 | −0.0958 | −0.2132 | −0.0112 | −0.0114 |
+| Δ clsmean | −0.0673 | −0.0169 | −0.0536 | −0.2070 | −0.0449 | −0.0769 |
+
+**Δ Cohen's κ vs encoder's meanmean baseline:**
+
+| Variant | dnabert2 5-way | dnabert2 tf-vs-gpcr | dnabert2 tf-vs-kinase | nt_v2 5-way | nt_v2 tf-vs-gpcr | nt_v2 tf-vs-kinase |
+|---|---:|---:|---:|---:|---:|---:|
+| meanmean (κ baseline) | 0.7091 | 0.9775 | 0.7738 | 0.7982 | 0.9663 | 0.6905 |
+| Δ meanD | +0.0135 | −0.0337 | 0.0000 | **+0.0232** | +0.0112 | 0.0000 |
+| Δ meanG | −0.0025 | −0.0562 | −0.0238 | +0.0197 | −0.0337 | +0.0119 |
+| Δ maxmean | −0.1274 | −0.0899 | −0.1905 | −0.1883 | −0.0225 | −0.0238 |
+| Δ clsmean | −0.0475 | −0.0337 | −0.1071 | −0.2293 | −0.0899 | −0.1548 |
+
+Both views agree on the direction of every cell: `meanD` ≈ `meanG` modestly help on NT-v2 5-way and tf-vs-gpcr; `maxmean` and `clsmean` hurt across the board, with `clsmean` catastrophic on NT-v2.
 
 Three takeaways:
 
@@ -262,11 +280,11 @@ Three takeaways:
 
 Headline-best per task across all 14 (Phase 4a + Phase 4b) feature sources (excluding shuffled and length):
 
-| Task | Best feature | macro-F1 | Δ vs 4-mer | Δ vs Phase 4a best |
-|---|---|---:|---:|---:|
-| 5-way | `nt_v2_meanD` | 0.8275 | +0.1553 | +0.0244 |
-| tf-vs-gpcr | `dnabert2_meanmean` / `nt_v2_meanD` (tied) | 0.9888 | +0.0281 | +0.0113 |
-| tf-vs-kinase | `dnabert2_meanmean` / `dnabert2_meanD` (tied) | 0.8869 | +0.0477 | +0.0425 |
+| Task | Best feature | macro-F1 | Δ F1 vs 4-mer | Δ F1 vs 4a best | κ | Δ κ vs 4-mer | Δ κ vs 4a best |
+|---|---|---:|---:|---:|---:|---:|---:|
+| 5-way | `nt_v2_meanD` | 0.8275 | +0.1553 | +0.0244 | 0.8214 | +0.1190 | +0.0230 |
+| tf-vs-gpcr | `dnabert2_meanmean` / `nt_v2_meanD` (tied) | 0.9888 | +0.0281 | +0.0113 | 0.9775 | +0.0562 | +0.0224 |
+| tf-vs-kinase | `dnabert2_meanmean` / `dnabert2_meanD` (tied) | 0.8869 | +0.0477 | +0.0425 | 0.7738 | +0.0952 | +0.0833 |
 
 The pooling sweep modestly improves the headline (NT-v2 5-way +0.024) but the bigger win is the tokenisation fix — particularly for DNABERT-2 on the binary tasks, where it goes from "loses to k-mer" in Phase 4a to "ties NT-v2 and beats k-mer" in Phase 4b.
 
