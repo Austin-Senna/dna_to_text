@@ -1,11 +1,11 @@
 # dna_to_text
 
-Cross-modal probing of frozen DNA sequence representations against gene-family labels and GenePT text embeddings. The main paper path compares DNABERT-2, NT-v2, GENA-LM, and Caduceus-PS on a 3244-gene 5-family classification task, with Enformer reported separately as a supervised sequence-to-function comparator.
+Cross-modal probing of frozen DNA sequence representations against gene-family labels and GenePT text embeddings. The main paper path compares DNABERT-2, NT-v2, GENA-LM, HyenaDNA, and Caduceus-PS on a 3244-gene 5-family classification task, with Enformer reported separately as a supervised sequence-to-function comparator.
 
 **Where to start reading:**
 - `project.md` — original research idea and corpus.
 - `framework.md` — experimental design (probes, baselines, metrics).
-- `findings.md` — running results journal (Phase 3 regression, Phase 4a classification, Phase 4b pooling sweep, Phase 5a regression re-run).
+- `findings.md` — running results journal (Phase 3 regression, Phase 4 classification, Phase 5 encoder expansion).
 - `writeup.md` — presentation-style summary for the deck.
 - `next_steps.md` — phase log + what's open.
 
@@ -38,10 +38,12 @@ uv run python scripts/run_nt_v2_encoder.py --device auto # NT-v2     -> data/dat
 uv run python scripts/run_multi_pool_extract.py --encoder dnabert2
 uv run python scripts/run_multi_pool_extract.py --encoder nt_v2
 uv run python scripts/run_multi_pool_extract.py --encoder gena_lm
+uv run python scripts/run_multi_pool_extract.py --encoder hyena_dna
 uv run python scripts/run_multi_pool_extract.py --encoder caduceus_ps
 uv run python scripts/build_pooling_datasets.py --encoder dnabert2  # 5 variant parquets
 uv run python scripts/build_pooling_datasets.py --encoder nt_v2
 uv run python scripts/build_pooling_datasets.py --encoder gena_lm
+uv run python scripts/build_pooling_datasets.py --encoder hyena_dna
 uv run python scripts/build_pooling_datasets.py --encoder caduceus_ps
 
 # 4. Enformer supervised comparator features (optional, separate table)
@@ -56,6 +58,7 @@ uv run python scripts/make_binary_subsets.py
 uv run python scripts/train_probe.py --dataset data/dataset_nt_v2_meanD.parquet      # Ridge into GenePT
 uv run python scripts/train_logistic_probe.py --dataset nt_v2_meanD --task family5    # Logistic 5-way
 uv run python scripts/train_logistic_probe.py --dataset gena_lm_meanD --task family5
+uv run python scripts/train_logistic_probe.py --dataset hyena_dna_meanG --task family5
 uv run python scripts/train_logistic_probe.py --dataset caduceus_ps_meanD --task family5
 uv run python scripts/train_logistic_probe.py --dataset enformer_tracks_center --task family5
 uv run python scripts/build_family5_table.py
@@ -88,4 +91,5 @@ viz/                  UMAP figures for the deck.
 - `uv pip install triton` fails on Apple Silicon + Python 3.12: this is expected here. Triton wheels are not available for this platform combination.
 - DNABERT-2 on this repo does not actually require Triton for inference. The remote model code is supposed to fall back to plain PyTorch attention when Triton is missing.
 - The runtime failure came from a `transformers` remote-code import check that treated DNABERT-2's optional `flash_attn_triton` module as mandatory. The loader now works around that and pins the model revision used by the repo.
+- Caduceus-PS currently requires `mamba_ssm`, which needs a CUDA/NVCC build path. Use a CUDA machine or Hugging Face Job for the full Caduceus run; HyenaDNA is the local long-context fallback.
 - Do not try to speed this up by launching multiple concurrent encoder runs on the same `mps` or GPU device. Keep one encoder process per device; parallel fan-out is not the intended knob for this pipeline.

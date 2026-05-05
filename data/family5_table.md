@@ -15,6 +15,10 @@ Main DNA encoder comparison. Binary tasks are legacy/appendix only.
 | `gena_lm_meanmean` | 0.4940 | 0.4568 | 0.6550 | 0.1173 |
 | `gena_lm_meanD` | 0.4843 | 0.4668 | 0.6653 | 0.1084 |
 | `gena_lm_meanG` | 0.4853 | 0.4899 | 0.6961 | 0.1118 |
+| `hyena_dna` | 0.7103 | 0.6883 | 0.8049 | 0.1822 |
+| `hyena_dna_meanmean` | 0.7103 | 0.6883 | 0.8049 | 0.1822 |
+| `hyena_dna_meanD` | 0.6988 | 0.6830 | 0.8029 | 0.1818 |
+| `hyena_dna_meanG` | 0.7149 | 0.6944 | 0.8090 | 0.1792 |
 | `caduceus_ps` | - | - | - | - |
 | `caduceus_ps_meanmean` | - | - | - | - |
 | `caduceus_ps_meanD` | - | - | - | - |

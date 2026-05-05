@@ -23,6 +23,12 @@ Secondary cross-modal probe: frozen sequence features are mapped to 1536-d GeneP
 | `gena_lm_meanG` | 0.1118 | -0.0624 | 0.9245 | 0.9185 | 1000.000 |
 | `gena_lm_maxmean` | 0.0400 | -0.1342 | 0.9178 | 0.9135 | 1000.000 |
 | `gena_lm_clsmean` | 0.1093 | -0.0650 | 0.9242 | 0.9185 | 100.000 |
+| `hyena_dna` | 0.1822 | +0.0079 | 0.9313 | 0.9236 | 1.000 |
+| `hyena_dna_meanmean` | 0.1822 | +0.0079 | 0.9313 | 0.9236 | 1.000 |
+| `hyena_dna_meanD` | 0.1818 | +0.0075 | 0.9314 | 0.9235 | 1.000 |
+| `hyena_dna_meanG` | 0.1792 | +0.0049 | 0.9310 | 0.9233 | 10.000 |
+| `hyena_dna_maxmean` | 0.1329 | -0.0414 | 0.9266 | 0.9193 | 100.000 |
+| `hyena_dna_clsmean` | -0.0015 | -0.1758 | 0.9129 | 0.9131 | 0.010 |
 | `caduceus_ps` | - | - | - | - | - |
 | `caduceus_ps_meanmean` | - | - | - | - | - |
 | `caduceus_ps_meanD` | - | - | - | - | - |

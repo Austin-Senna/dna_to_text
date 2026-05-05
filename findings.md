@@ -104,6 +104,8 @@ Whatever information these DNA encoders carry about human gene function — *as 
 
 **GENA-LM addition.** GENA-LM base now runs through the same frozen CDS multi-pooling pipeline. On `family5`, `clsmean` is the best GENA-LM pooling cell by macro-F1 (0.4982), while `meanmean`/base reaches 0.4940. Ridge-to-GenePT is weaker than the CDS 4-mer baseline: base/`meanmean` R² = 0.1173 versus 4-mer R² = 0.1743. The dedicated regression summary is `data/regression_table.md`.
 
+**HyenaDNA addition.** HyenaDNA large now runs through the same frozen CDS multi-pooling pipeline as the transformer encoders. On `family5`, `meanG` is the best HyenaDNA cell (macro-F1 0.7149, kappa 0.6944, accuracy 0.8090), with base/`meanmean` close behind at macro-F1 0.7103. Ridge-to-GenePT lands just above the CDS 4-mer baseline: base/`meanmean` R² = 0.1822 versus 4-mer R² = 0.1743. `clsmean` collapses to the majority class on classification (macro-F1 0.1396, kappa 0) and below the anti-baseline on regression (R² = -0.0015), which is expected for a causal long-context model without a trained CLS-style summary token. Caduceus-PS remains queued for a CUDA run because its `mamba_ssm` dependency requires NVCC on macOS.
+
 Per the 2026-04-29 classification-pivot spec, we re-ran the question as a *classification* task on the same cached embeddings. Three tasks:
 
 - **5-way:** predict family ∈ {tf, gpcr, kinase, ion, immune} on the full 3244-gene corpus, original 70/15/15 split.

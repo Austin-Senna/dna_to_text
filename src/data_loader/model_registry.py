@@ -69,6 +69,17 @@ ENCODER_SPECS: dict[str, EncoderSpec] = {
         max_content_tokens=510,
         stride=64,
     ),
+    "hyena_dna": EncoderSpec(
+        name="hyena_dna",
+        display_name="HyenaDNA large",
+        model_name="LongSafari/hyenadna-large-1m-seqlen-hf",
+        model_kind="self_supervised_encoder",
+        cache_name="hyena_dna",
+        dataset_stem="hyena_dna",
+        loader_module="data_loader.hyena_dna_encoder",
+        max_content_tokens=8192,
+        stride=512,
+    ),
     "caduceus_ps": EncoderSpec(
         name="caduceus_ps",
         display_name="Caduceus-PS",

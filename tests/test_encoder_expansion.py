@@ -13,9 +13,10 @@ class EncoderRegistryTests(unittest.TestCase):
 
         self.assertEqual(
             main_encoder_names(),
-            ("dnabert2", "nt_v2", "gena_lm", "caduceus_ps"),
+            ("dnabert2", "nt_v2", "gena_lm", "hyena_dna", "caduceus_ps"),
         )
         self.assertEqual(get_encoder_spec("gena_lm").model_kind, "self_supervised_encoder")
+        self.assertEqual(get_encoder_spec("hyena_dna").max_content_tokens, 8192)
         self.assertEqual(get_encoder_spec("caduceus_ps").cache_name, "caduceus_ps")
         self.assertNotIn("length", family5_feature_sources())
         self.assertIn("kmer", family5_feature_sources())
@@ -200,6 +201,7 @@ class RegressionTableTests(unittest.TestCase):
         self.assertEqual(_dataset_name("dnabert2"), "dataset.parquet")
         self.assertEqual(_dataset_name("nt_v2"), "dataset_nt_v2.parquet")
         self.assertEqual(_dataset_name("gena_lm_meanD"), "dataset_gena_lm_meanD.parquet")
+        self.assertEqual(_dataset_name("hyena_dna_meanG"), "dataset_hyena_dna_meanG.parquet")
 
 
 if __name__ == "__main__":
