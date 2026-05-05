@@ -18,6 +18,8 @@ data/gene_table.parquet
 # `scripts/run_multi_pool_extract.py --encoder {dnabert2,nt_v2}`
 data/chunk_reductions_dnabert2/
 data/chunk_reductions_nt_v2/
+data/chunk_reductions_gena_lm/
+data/chunk_reductions_caduceus_ps/
 
 # Pitch deck PDF — kept locally, not authoritative source
 Genomics Project (1).pdf

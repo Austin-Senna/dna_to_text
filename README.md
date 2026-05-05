@@ -1,6 +1,6 @@
 # dna_to_text
 
-Cross-modal alignment between two pretrained DNA encoders (DNABERT-2 and NT-v2 100M multi-species) and the GenePT text-embedding space, evaluated on a 3244-gene 5-family classification task.
+Cross-modal probing of frozen DNA sequence representations against gene-family labels and GenePT text embeddings. The main paper path compares DNABERT-2, NT-v2, GENA-LM, and Caduceus-PS on a 3244-gene 5-family classification task, with Enformer reported separately as a supervised sequence-to-function comparator.
 
 **Where to start reading:**
 - `project.md` — original research idea and corpus.
@@ -34,21 +34,34 @@ uv run python scripts/prepare_data.py
 uv run python scripts/run_encoder.py --device auto       # DNABERT-2 -> data/dataset.parquet
 uv run python scripts/run_nt_v2_encoder.py --device auto # NT-v2     -> data/dataset_nt_v2.parquet
 
-# 3. Phase 4b: re-extract per-chunk reductions (mean / max / cls per chunk)
+# 3. Re-extract per-chunk reductions (mean / max / cls per chunk)
 uv run python scripts/run_multi_pool_extract.py --encoder dnabert2
 uv run python scripts/run_multi_pool_extract.py --encoder nt_v2
+uv run python scripts/run_multi_pool_extract.py --encoder gena_lm
+uv run python scripts/run_multi_pool_extract.py --encoder caduceus_ps
 uv run python scripts/build_pooling_datasets.py --encoder dnabert2  # 5 variant parquets
 uv run python scripts/build_pooling_datasets.py --encoder nt_v2
+uv run python scripts/build_pooling_datasets.py --encoder gena_lm
+uv run python scripts/build_pooling_datasets.py --encoder caduceus_ps
 
-# 4. Splits + frozen binary subsets
+# 4. Enformer supervised comparator features (optional, separate table)
+uv pip install enformer-pytorch
+uv run python scripts/run_enformer_features.py --device auto
+
+# 5. Splits; binary subsets are legacy/appendix only
 uv run python scripts/make_splits.py
 uv run python scripts/make_binary_subsets.py
 
-# 5. Probes + baselines (any cell of the matrix)
+# 6. Main probes + baselines (family5 is the paper headline task)
 uv run python scripts/train_probe.py --dataset data/dataset_nt_v2_meanD.parquet      # Ridge into GenePT
 uv run python scripts/train_logistic_probe.py --dataset nt_v2_meanD --task family5    # Logistic 5-way
+uv run python scripts/train_logistic_probe.py --dataset gena_lm_meanD --task family5
+uv run python scripts/train_logistic_probe.py --dataset caduceus_ps_meanD --task family5
+uv run python scripts/train_logistic_probe.py --dataset enformer_tracks_center --task family5
+uv run python scripts/build_family5_table.py
+uv run python scripts/build_regression_table.py
 
-# 6. Demo + visualisations for the deck
+# 7. Demo + visualisations for the deck
 uv run python demo/zero_shot.py                  # demo/output.md
 uv run python viz/umap_meanD.py                  # viz/figures/umap_nt_v2_meanD.png
 uv run python viz/umap_tokenisation_compare.py   # viz/figures/umap_dnabert2_tokenisation_compare.png
@@ -60,7 +73,7 @@ All caches (`data/sequences/`, `data/embeddings*/`, `data/chunk_reductions_*/`) 
 
 ```
 src/                  Reusable Python packages (data_loader, splits, linear_trainer, kmer_baseline,
-                      length_baseline, binary_tasks). One responsibility per package.
+                      binary_tasks). One responsibility per package.
 scripts/              CLI entrypoints — one script per experiment / run.
 data/                 Artefacts. Small ones (metrics.json, splits.json, binary subset JSONs,
                       confusion matrices) are tracked; large parquets/embeddings are gitignored.

@@ -77,12 +77,23 @@ Headline:
 Code: `scripts/train_probe.py` (no changes — already accepts `--dataset`).
 Artefacts: 10 new `data/probe_{encoder}_{variant}.npz`, 10 new entries in `data/metrics.json` with `model == "linear_probe"`.
 
-## Phase 5 — Optional ceiling-breaker experiments   🔬 open, lower priority
+## Phase 5 — Encoder expansion   🔬 in progress
 
-The two remaining caveats in `findings.md`.
+Revised paper path: keep the headline task to 5-way family classification plus Ridge-to-GenePT regression. Move `tf-vs-gpcr` and `tf-vs-kinase` to legacy/appendix, and do not run new length baselines.
 
-- [ ] **Window sweep** — full transcript (promoter + UTR + CDS) instead of CDS-only. CDS is the most composition-homogenous part of a gene because of codon usage; promoters and UTRs may carry more function-discriminating signal.
-- [ ] **Optional third encoder** — HyenaDNA, Caduceus, or GENA-LM. Lowest priority now that both pretrained transformers have demonstrated they're doing real work; a third encoder would test whether the result generalises or is architecture-specific.
+- [x] **Model registry** — central encoder specs for DNABERT-2, NT-v2, GENA-LM base, and Caduceus-PS.
+- [x] **GENA-LM + Caduceus plumbing** — multi-pool extraction and parquet materialisation use the registry.
+- [x] **Enformer comparator plumbing** — TSS-centered windows, internal trunk features, supervised output-track features, and matched TSS-window 4-mer dataset.
+- [x] **Focused table builder** — `scripts/build_family5_table.py` keeps the main table to family5 + Ridge R².
+- [x] **Run GENA-LM extraction** — cached 3,244 CDS embeddings and materialised all supported pooling datasets.
+- [x] **Run GENA-LM probes** — logistic family5 and Ridge-to-GenePT cells for `meanmean`, `meanD`, `meanG`, `maxmean`, and `clsmean`.
+- [x] **Regression table builder** — `scripts/build_regression_table.py` writes `data/regression_table.md`.
+- [ ] **Run remaining extraction** — execute Caduceus-PS and Enformer feature extraction on the full corpus.
+- [ ] **Run remaining probes** — logistic + Ridge cells for Caduceus-PS and Enformer, then rebuild `data/family5_table.md` and `data/regression_table.md`.
+
+Open caveat after encoder expansion:
+
+- [ ] **Window sweep for self-supervised encoders** — full transcript or promoter/UTR/CDS instead of CDS-only.
 
 ## Resolved / archived
 

@@ -100,6 +100,10 @@ Whatever information these DNA encoders carry about human gene function — *as 
 
 ## Phase 4 — Classification reframing
 
+**Legacy note.** The `tf-vs-gpcr` and `tf-vs-kinase` binary tasks below are retained as appendix/robustness evidence. The revised paper path uses `family5` as the single headline classification task, drops new length-baseline runs, and reports Enformer in a separate supervised sequence-to-function comparator table.
+
+**GENA-LM addition.** GENA-LM base now runs through the same frozen CDS multi-pooling pipeline. On `family5`, `clsmean` is the best GENA-LM pooling cell by macro-F1 (0.4982), while `meanmean`/base reaches 0.4940. Ridge-to-GenePT is weaker than the CDS 4-mer baseline: base/`meanmean` R² = 0.1173 versus 4-mer R² = 0.1743. The dedicated regression summary is `data/regression_table.md`.
+
 Per the 2026-04-29 classification-pivot spec, we re-ran the question as a *classification* task on the same cached embeddings. Three tasks:
 
 - **5-way:** predict family ∈ {tf, gpcr, kinase, ion, immune} on the full 3244-gene corpus, original 70/15/15 split.

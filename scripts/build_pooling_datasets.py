@@ -17,32 +17,38 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from data_loader.pooling_aggregator import aggregate, output_dim, POOLING_VARIANTS
+from data_loader.model_registry import (
+    BASE_DATASET_ALIASES,
+    get_encoder_spec,
+    main_encoder_names,
+)
+from data_loader.pooling_aggregator import (
+    POOLING_VARIANTS,
+    aggregate,
+    available_variants,
+    output_dim,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
 
-ENCODER_BASE_DATASETS = {
-    "dnabert2": DATA / "dataset.parquet",
-    "nt_v2":    DATA / "dataset_nt_v2.parquet",
-}
-
-
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--encoder", required=True, choices=sorted(ENCODER_BASE_DATASETS.keys()))
+    ap.add_argument("--encoder", required=True, choices=main_encoder_names())
+    ap.add_argument("--template-dataset", default=str(DATA / "dataset.parquet"))
     ap.add_argument(
         "--variants", nargs="+", default=list(POOLING_VARIANTS),
         choices=list(POOLING_VARIANTS),
     )
     args = ap.parse_args()
 
-    chunk_dir = DATA / f"chunk_reductions_{args.encoder}"
+    spec = get_encoder_spec(args.encoder)
+    chunk_dir = spec.chunk_dir
     if not chunk_dir.exists():
         raise FileNotFoundError(f"missing chunk reductions for {args.encoder}: {chunk_dir}")
 
-    base = pd.read_parquet(ENCODER_BASE_DATASETS[args.encoder])
-    print(f"=== {args.encoder}: {len(base)} genes from {ENCODER_BASE_DATASETS[args.encoder].name} ===")
+    base = pd.read_parquet(args.template_dataset)
+    print(f"=== {args.encoder}: {len(base)} genes from {Path(args.template_dataset).name} ===")
 
     # Pre-load all per-chunk reductions so we don't reread per variant.
     print(f"  loading chunk reductions from {chunk_dir}...")
@@ -54,7 +60,7 @@ def main():
             missing.append(eid)
             continue
         with np.load(f) as data:
-            per_gene[eid] = {k: data[k] for k in ("mean", "max", "cls")}
+            per_gene[eid] = {k: data[k] for k in ("mean", "max", "cls") if k in data.files}
     if missing:
         raise RuntimeError(
             f"chunk reductions missing for {len(missing)} genes: "
@@ -62,10 +68,14 @@ def main():
         )
 
     sample_d = next(iter(per_gene.values()))["mean"].shape[1]
+    supported = set(available_variants(next(iter(per_gene.values()))))
     print(f"  per-chunk dim d={sample_d}")
 
     for variant in args.variants:
-        out_path = DATA / f"dataset_{args.encoder}_{variant}.parquet"
+        if variant not in supported:
+            print(f"  skipping {variant}: not supported by cached reductions")
+            continue
+        out_path = spec.variant_dataset_path(variant)
         print(f"  building {variant} ({output_dim(variant, sample_d)} dim) -> {out_path.name}")
 
         x_col = []
@@ -79,6 +89,9 @@ def main():
             f"variant {variant}: dim mismatch in some rows"
         new_df.to_parquet(out_path)
         print(f"    wrote {len(new_df)} rows")
+        if variant == "meanmean" and args.encoder not in BASE_DATASET_ALIASES:
+            new_df.to_parquet(spec.base_dataset_path)
+            print(f"    wrote base alias -> {spec.base_dataset_path.name}")
 
 
 if __name__ == "__main__":

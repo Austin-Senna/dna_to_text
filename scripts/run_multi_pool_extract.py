@@ -8,10 +8,12 @@ are skipped on rerun. Materialise the per-pooling-variant datasets with
 from __future__ import annotations
 
 import argparse
+from importlib import import_module
 from pathlib import Path
 
 import pandas as pd
 
+from data_loader.model_registry import get_encoder_spec, main_encoder_names
 from data_loader.sequence_fetcher import fetch_cds
 from data_loader.multi_pool import embed_all_multi_pool
 
@@ -19,33 +21,22 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
 
 
-# Encoder-specific load functions and chunking. Content tokens = max - 2 to
-# leave room for CLS and SEP wrapped per chunk inside multi_pool.embed_sequence.
-def _load_dnabert2():
-    from data_loader.encoder_runner import load_model
-    return load_model, 510, 64  # 512 - 2 special tokens
-
-def _load_nt_v2():
-    from data_loader.nt_v2_encoder import load_model
-    return load_model, 998, 64  # 1000 - 2 special tokens
-
-
-ENCODERS = {
-    "dnabert2": _load_dnabert2,
-    "nt_v2":    _load_nt_v2,
-}
+def _load_encoder(name: str):
+    spec = get_encoder_spec(name)
+    module = import_module(spec.loader_module)
+    return spec, module.load_model
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--encoder", required=True, choices=sorted(ENCODERS.keys()))
+    ap.add_argument("--encoder", required=True, choices=main_encoder_names())
     ap.add_argument("--gene-table", default=str(DATA / "gene_table.parquet"))
     ap.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu", "mps"])
     args = ap.parse_args()
 
-    load_fn, max_tokens, stride = ENCODERS[args.encoder]()
-    cache_dir = DATA / f"chunk_reductions_{args.encoder}"
-    print(f"=== {args.encoder}: max_content_tokens={max_tokens} stride={stride} ===")
+    spec, load_fn = _load_encoder(args.encoder)
+    cache_dir = spec.chunk_dir
+    print(f"=== {spec.display_name}: max_content_tokens={spec.max_content_tokens} stride={spec.stride} ===")
     print(f"  cache dir: {cache_dir}")
 
     df = pd.read_parquet(args.gene_table)
@@ -63,8 +54,8 @@ def main():
         cds,
         load_model_fn=load_fn,
         cache_dir=cache_dir,
-        max_content_tokens=max_tokens,
-        stride=stride,
+        max_content_tokens=spec.max_content_tokens,
+        stride=spec.stride,
         device=device,
         desc=f"{args.encoder} multi-pool",
     )
