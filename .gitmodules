@@ -1,0 +1,3 @@
+[submodule "dna_to_text_paper"]
+	path = dna_to_text_paper
+	url = https://github.com/Austin-Senna/dna_to_text_paper.git
