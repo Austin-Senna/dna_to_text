@@ -3846,5 +3846,337 @@
     "test_mean_cosine": 0.9129231572151184,
     "test_median_cosine": 0.9130721092224121,
     "test_r2_macro": -0.0015016966499388218
+  },
+  {
+    "run_id": "logistic_enformer_tss_4mer_family5_2026-05-06T16:49:20+00:00",
+    "timestamp": "2026-05-06T16:49:20+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_tss_4mer",
+    "feature_source": "enformer_tss_4mer",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.24166889983715034
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.2603443999574815
+      }
+    ],
+    "test_macro_f1": 0.2452272727272727,
+    "test_kappa": 0.20503678918901358,
+    "test_balanced_accuracy": 0.27987429506220673,
+    "test_accuracy": 0.5872689938398358,
+    "test_per_class_accuracy": {
+      "gpcr": 0.4606741573033708,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.0,
+      "tf": 0.9386973180076629
+    }
+  },
+  {
+    "run_id": "probe_2026-05-06T16:49:59+00:00",
+    "timestamp": "2026-05-06T16:49:59+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_tss_4mer.parquet",
+    "alpha": 0.01,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.917532742023468
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9148486852645874
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9132041335105896
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9122186899185181
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9120485782623291
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9120302796363831
+      }
+    ],
+    "test_mean_cosine": 0.9173449277877808,
+    "test_median_cosine": 0.9148357510566711,
+    "test_r2_macro": 0.04134269431233406
+  },
+  {
+    "run_id": "logistic_enformer_trunk_global_family5_2026-05-06T19:55:57+00:00",
+    "timestamp": "2026-05-06T19:55:57+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_trunk_global",
+    "feature_source": "enformer_trunk_global",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.4016104787954732
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5498531981317891
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.576927813498641
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5236365381538954
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5229312795768147
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5329727037747561
+      }
+    ],
+    "test_macro_f1": 0.5449862223262111,
+    "test_kappa": 0.43922017585314066,
+    "test_balanced_accuracy": 0.5366402807157149,
+    "test_accuracy": 0.6447638603696099,
+    "test_per_class_accuracy": {
+      "gpcr": 0.6966292134831461,
+      "immune": 0.5217391304347826,
+      "ion": 0.3333333333333333,
+      "kinase": 0.36904761904761907,
+      "tf": 0.7624521072796935
+    }
+  },
+  {
+    "run_id": "logistic_enformer_trunk_center_family5_2026-05-06T19:56:13+00:00",
+    "timestamp": "2026-05-06T19:56:13+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_trunk_center",
+    "feature_source": "enformer_trunk_center",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.4831859109691622
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5641563977369605
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5588526591942009
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5606367497005428
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5694971454705361
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5585704196621418
+      }
+    ],
+    "test_macro_f1": 0.5127195848894834,
+    "test_kappa": 0.4540757102395214,
+    "test_balanced_accuracy": 0.5051226125834889,
+    "test_accuracy": 0.6529774127310062,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7528089887640449,
+      "immune": 0.391304347826087,
+      "ion": 0.16666666666666666,
+      "kinase": 0.4523809523809524,
+      "tf": 0.7624521072796935
+    }
+  },
+  {
+    "run_id": "logistic_enformer_tracks_center_family5_2026-05-06T19:58:01+00:00",
+    "timestamp": "2026-05-06T19:58:01+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_tracks_center",
+    "feature_source": "enformer_tracks_center",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.5123676276615792
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5123634934211969
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.49692422473804765
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.49347951232685433
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.48904110458656075
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.47394350282485875
+      }
+    ],
+    "test_macro_f1": 0.48621720354702447,
+    "test_kappa": 0.42641085183128,
+    "test_balanced_accuracy": 0.47955396833418495,
+    "test_accuracy": 0.6386036960985626,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7528089887640449,
+      "immune": 0.30434782608695654,
+      "ion": 0.23333333333333334,
+      "kinase": 0.3333333333333333,
+      "tf": 0.7739463601532567
+    }
+  },
+  {
+    "run_id": "probe_2026-05-06T19:58:13+00:00",
+    "timestamp": "2026-05-06T19:58:13+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_trunk_global.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.7620642781257629
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8446144461631775
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8985776901245117
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.922242283821106
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9281437993049622
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9268360137939453
+      }
+    ],
+    "test_mean_cosine": 0.9271116256713867,
+    "test_median_cosine": 0.9191821217536926,
+    "test_r2_macro": 0.13893455266952515
+  },
+  {
+    "run_id": "probe_2026-05-06T19:58:25+00:00",
+    "timestamp": "2026-05-06T19:58:25+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_trunk_center.parquet",
+    "alpha": 1000.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.699363648891449
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.7500174045562744
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8352223634719849
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8972731828689575
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9228438138961792
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9278952479362488
+      }
+    ],
+    "test_mean_cosine": 0.9274525046348572,
+    "test_median_cosine": 0.9200111031532288,
+    "test_r2_macro": 0.1424816995859146
+  },
+  {
+    "run_id": "probe_2026-05-06T19:58:37+00:00",
+    "timestamp": "2026-05-06T19:58:37+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_tracks_center.parquet",
+    "alpha": 1000.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8690288662910461
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8690169453620911
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8704545497894287
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8727037310600281
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.8982123732566833
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9165833592414856
+      }
+    ],
+    "test_mean_cosine": 0.917107105255127,
+    "test_median_cosine": 0.910784900188446,
+    "test_r2_macro": 0.01353320199996233
   }
 ]

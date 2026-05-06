@@ -50,11 +50,16 @@ def load_model(device: str | None = None):
         device = _auto_device()
     try:
         from enformer_pytorch import from_pretrained
+        from enformer_pytorch.modeling_enformer import Enformer
     except ImportError as exc:
         raise ImportError(
             "Enformer extraction requires the optional dependency "
             "`enformer-pytorch`. Install it with `uv pip install enformer-pytorch`."
         ) from exc
+    # enformer-pytorch 0.8.x does not call PreTrainedModel.post_init(), but
+    # Transformers 5 expects this map to exist while loading checkpoint shards.
+    if not hasattr(Enformer, "all_tied_weights_keys"):
+        Enformer.all_tied_weights_keys = {}
     model = from_pretrained(MODEL_NAME)
     model.to(device).eval()
     return model, device

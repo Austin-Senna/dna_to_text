@@ -28,7 +28,7 @@ Main DNA encoder comparison. Binary tasks are legacy/appendix only.
 
 | Feature source | 5-way F1 | 5-way kappa | 5-way acc | Ridge R2 |
 |---|---:|---:|---:|---:|
-| `enformer_tss_4mer` | - | - | - | - |
-| `enformer_trunk_global` | - | - | - | - |
-| `enformer_trunk_center` | - | - | - | - |
-| `enformer_tracks_center` | - | - | - | - |
+| `enformer_tss_4mer` | 0.2452 | 0.2050 | 0.5873 | 0.0413 |
+| `enformer_trunk_global` | 0.5450 | 0.4392 | 0.6448 | 0.1389 |
+| `enformer_trunk_center` | 0.5127 | 0.4541 | 0.6530 | 0.1425 |
+| `enformer_tracks_center` | 0.4862 | 0.4264 | 0.6386 | 0.0135 |

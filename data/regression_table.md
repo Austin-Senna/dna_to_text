@@ -38,10 +38,10 @@ Secondary cross-modal probe: frozen sequence features are mapped to 1536-d GeneP
 
 | Feature source | Ridge R2 | Delta vs 4-mer | Mean cosine | Median cosine | Alpha |
 |---|---:|---:|---:|---:|---:|
-| `enformer_tss_4mer` | - | - | - | - | - |
-| `enformer_trunk_global` | - | - | - | - | - |
-| `enformer_trunk_center` | - | - | - | - | - |
-| `enformer_tracks_center` | - | - | - | - | - |
+| `enformer_tss_4mer` | 0.0413 | -0.1329 | 0.9173 | 0.9148 | 0.010 |
+| `enformer_trunk_global` | 0.1389 | -0.0353 | 0.9271 | 0.9192 | 100.000 |
+| `enformer_trunk_center` | 0.1425 | -0.0318 | 0.9275 | 0.9200 | 1000.000 |
+| `enformer_tracks_center` | 0.0135 | -0.1607 | 0.9171 | 0.9108 | 1000.000 |
 
 ## Best Observed Regression Cell
 

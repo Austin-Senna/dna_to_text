@@ -68,6 +68,11 @@ uv run python scripts/build_regression_table.py
 uv run python demo/zero_shot.py                  # demo/output.md
 uv run python viz/umap_meanD.py                  # viz/figures/umap_nt_v2_meanD.png
 uv run python viz/umap_tokenisation_compare.py   # viz/figures/umap_dnabert2_tokenisation_compare.png
+
+# 8. Cached paper analysis bundle: tables + figures + manifest
+uv run python scripts/build_analysis_artifacts.py --overwrite
+# Fast smoke version without UMAP:
+uv run python scripts/build_analysis_artifacts.py --out /tmp/dna_analysis_smoke --skip-umap --overwrite
 ```
 
 All caches (`data/sequences/`, `data/embeddings*/`, `data/chunk_reductions_*/`) are reused on rerun.
@@ -80,6 +85,7 @@ src/                  Reusable Python packages (data_loader, splits, linear_trai
 scripts/              CLI entrypoints — one script per experiment / run.
 data/                 Artefacts. Small ones (metrics.json, splits.json, binary subset JSONs,
                       confusion matrices) are tracked; large parquets/embeddings are gitignored.
+analysis/             Generated paper-ready analysis bundle from `scripts/build_analysis_artifacts.py`.
 docs/superpowers/     Specs and implementation plans (`specs/`, `plans/`).
 demo/                 Zero-shot demo: predicted family + neighbours for sample test genes.
 viz/                  UMAP figures for the deck.

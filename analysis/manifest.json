@@ -1,0 +1,101 @@
+{
+  "generated_at": "2026-05-06T19:59:12+00:00",
+  "bundle": "paper",
+  "inputs": {
+    "metrics": "/Users/austinsenna/.config/superpowers/worktrees/dna_to_text/dna-encoder-expansion/data/metrics.json",
+    "splits": "/Users/austinsenna/.config/superpowers/worktrees/dna_to_text/dna-encoder-expansion/data/splits.json",
+    "data_dir": "/Users/austinsenna/.config/superpowers/worktrees/dna_to_text/dna-encoder-expansion/data"
+  },
+  "tables": [
+    "analysis/tables/dataset_composition.csv",
+    "analysis/tables/dataset_composition.md",
+    "analysis/tables/main_family5.csv",
+    "analysis/tables/main_family5.md",
+    "analysis/tables/main_regression.csv",
+    "analysis/tables/main_regression.md",
+    "analysis/tables/combined_model_summary.csv",
+    "analysis/tables/combined_model_summary.md",
+    "analysis/tables/pooling_sweep_family5.csv",
+    "analysis/tables/pooling_sweep_family5.md",
+    "analysis/tables/regression_full.csv",
+    "analysis/tables/regression_full.md",
+    "analysis/tables/legacy_binary_appendix.csv",
+    "analysis/tables/legacy_binary_appendix.md",
+    "analysis/tables/missing_cells.csv",
+    "analysis/tables/missing_cells.md"
+  ],
+  "figures": [
+    "analysis/figures/family5_macro_f1.png",
+    "analysis/figures/family5_kappa.png",
+    "analysis/figures/ridge_r2.png",
+    "analysis/figures/model_tradeoff_f1_vs_r2.png",
+    "analysis/figures/pooling_heatmap_family5.png",
+    "analysis/figures/confusion_best_family5.png",
+    "analysis/figures/umap_best_family5.png"
+  ],
+  "missing_cells": [
+    {
+      "artifact": "family5",
+      "feature_source": "caduceus_ps",
+      "reason": "missing cached logistic metric"
+    },
+    {
+      "artifact": "regression",
+      "feature_source": "caduceus_ps",
+      "reason": "missing cached Ridge metric"
+    },
+    {
+      "artifact": "family5",
+      "feature_source": "caduceus_ps_meanmean",
+      "reason": "missing cached logistic metric"
+    },
+    {
+      "artifact": "regression",
+      "feature_source": "caduceus_ps_meanmean",
+      "reason": "missing cached Ridge metric"
+    },
+    {
+      "artifact": "family5",
+      "feature_source": "caduceus_ps_maxmean",
+      "reason": "missing cached logistic metric"
+    },
+    {
+      "artifact": "regression",
+      "feature_source": "caduceus_ps_maxmean",
+      "reason": "missing cached Ridge metric"
+    },
+    {
+      "artifact": "family5",
+      "feature_source": "caduceus_ps_clsmean",
+      "reason": "missing cached logistic metric"
+    },
+    {
+      "artifact": "regression",
+      "feature_source": "caduceus_ps_clsmean",
+      "reason": "missing cached Ridge metric"
+    },
+    {
+      "artifact": "family5",
+      "feature_source": "caduceus_ps_meanD",
+      "reason": "missing cached logistic metric"
+    },
+    {
+      "artifact": "regression",
+      "feature_source": "caduceus_ps_meanD",
+      "reason": "missing cached Ridge metric"
+    },
+    {
+      "artifact": "family5",
+      "feature_source": "caduceus_ps_meanG",
+      "reason": "missing cached logistic metric"
+    },
+    {
+      "artifact": "regression",
+      "feature_source": "caduceus_ps_meanG",
+      "reason": "missing cached Ridge metric"
+    }
+  ],
+  "skipped": [
+    "umap_dnabert2_tokenisation_compare.png"
+  ]
+}

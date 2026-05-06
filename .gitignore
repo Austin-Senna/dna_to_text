@@ -3,6 +3,7 @@ __pycache__/
 *.egg-info/
 .venv/
 .ipynb_checkpoints/
+.DS_Store
 
 # data caches
 data/sequences
@@ -21,6 +22,8 @@ data/chunk_reductions_nt_v2/
 data/chunk_reductions_gena_lm/
 data/chunk_reductions_caduceus_ps/
 data/chunk_reductions_hyena_dna/
+data/enformer_windows/
+data/enformer_features/
 
 # Pitch deck PDF — kept locally, not authoritative source
 Genomics Project (1).pdf
