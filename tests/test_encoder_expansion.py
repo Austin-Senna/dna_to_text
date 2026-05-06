@@ -1,6 +1,12 @@
 import unittest
+from pathlib import Path
+import sys
 
 import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 class EncoderRegistryTests(unittest.TestCase):
@@ -13,11 +19,10 @@ class EncoderRegistryTests(unittest.TestCase):
 
         self.assertEqual(
             main_encoder_names(),
-            ("dnabert2", "nt_v2", "gena_lm", "hyena_dna", "caduceus_ps"),
+            ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"),
         )
         self.assertEqual(get_encoder_spec("gena_lm").model_kind, "self_supervised_encoder")
         self.assertEqual(get_encoder_spec("hyena_dna").max_content_tokens, 8192)
-        self.assertEqual(get_encoder_spec("caduceus_ps").cache_name, "caduceus_ps")
         self.assertNotIn("length", family5_feature_sources())
         self.assertIn("kmer", family5_feature_sources())
         self.assertIn("shuffled", family5_feature_sources())

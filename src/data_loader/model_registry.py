@@ -80,17 +80,6 @@ ENCODER_SPECS: dict[str, EncoderSpec] = {
         max_content_tokens=8192,
         stride=512,
     ),
-    "caduceus_ps": EncoderSpec(
-        name="caduceus_ps",
-        display_name="Caduceus-PS",
-        model_name="kuleshov-group/caduceus-ps_seqlen-131k_d_model-256_n_layer-16",
-        model_kind="self_supervised_encoder",
-        cache_name="caduceus_ps",
-        dataset_stem="caduceus_ps",
-        loader_module="data_loader.caduceus_encoder",
-        max_content_tokens=8192,
-        stride=512,
-    ),
 }
 
 BASE_DATASET_ALIASES = {

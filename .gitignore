@@ -20,8 +20,8 @@ data/gene_table.parquet
 data/chunk_reductions_dnabert2/
 data/chunk_reductions_nt_v2/
 data/chunk_reductions_gena_lm/
-data/chunk_reductions_caduceus_ps/
 data/chunk_reductions_hyena_dna/
+data/tss_chunk_reductions_*/
 data/enformer_windows/
 data/enformer_features/
 

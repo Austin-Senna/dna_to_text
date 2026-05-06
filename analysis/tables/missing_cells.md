@@ -4,15 +4,3 @@ Registered cells without cached metrics yet.
 
 | artifact | feature_source | reason |
 | --- | --- | --- |
-| family5 | caduceus_ps | missing cached logistic metric |
-| regression | caduceus_ps | missing cached Ridge metric |
-| family5 | caduceus_ps_meanmean | missing cached logistic metric |
-| regression | caduceus_ps_meanmean | missing cached Ridge metric |
-| family5 | caduceus_ps_maxmean | missing cached logistic metric |
-| regression | caduceus_ps_maxmean | missing cached Ridge metric |
-| family5 | caduceus_ps_clsmean | missing cached logistic metric |
-| regression | caduceus_ps_clsmean | missing cached Ridge metric |
-| family5 | caduceus_ps_meanD | missing cached logistic metric |
-| regression | caduceus_ps_meanD | missing cached Ridge metric |
-| family5 | caduceus_ps_meanG | missing cached logistic metric |
-| regression | caduceus_ps_meanG | missing cached Ridge metric |

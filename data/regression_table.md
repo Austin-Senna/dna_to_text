@@ -29,10 +29,17 @@ Secondary cross-modal probe: frozen sequence features are mapped to 1536-d GeneP
 | `hyena_dna_meanG` | 0.1792 | +0.0049 | 0.9310 | 0.9233 | 10.000 |
 | `hyena_dna_maxmean` | 0.1329 | -0.0414 | 0.9266 | 0.9193 | 100.000 |
 | `hyena_dna_clsmean` | -0.0015 | -0.1758 | 0.9129 | 0.9131 | 0.010 |
-| `caduceus_ps` | - | - | - | - | - |
-| `caduceus_ps_meanmean` | - | - | - | - | - |
-| `caduceus_ps_meanD` | - | - | - | - | - |
-| `caduceus_ps_meanG` | - | - | - | - | - |
+
+## TSS Self-Supervised Encoder Ablation
+
+| Feature source | Ridge R2 | Delta vs 4-mer | Mean cosine | Median cosine | Alpha |
+|---|---:|---:|---:|---:|---:|
+| `tss_nt_v2` | - | - | - | - | - |
+| `tss_nt_v2_meanmean` | - | - | - | - | - |
+| `tss_nt_v2_meanD` | - | - | - | - | - |
+| `tss_nt_v2_meanG` | - | - | - | - | - |
+| `tss_nt_v2_maxmean` | - | - | - | - | - |
+| `tss_nt_v2_clsmean` | - | - | - | - | - |
 
 ## Enformer Supervised Sequence-To-Function Comparator
 

@@ -26,7 +26,7 @@ from data_loader.pooling_aggregator import POOLING_VARIANTS
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
 
-PAPER_ENCODERS = ("dnabert2", "nt_v2", "gena_lm", "hyena_dna", "caduceus_ps")
+PAPER_ENCODERS = ("dnabert2", "nt_v2", "gena_lm", "hyena_dna")
 POOLING_ORDER = ("base", "meanmean", "meanD", "meanG", "maxmean", "clsmean")
 LEGACY_TASKS = ("tf_vs_gpcr", "tf_vs_kinase")
 ENFORMER_SOURCES = (

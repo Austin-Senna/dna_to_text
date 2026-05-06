@@ -81,16 +81,16 @@ Artefacts: 10 new `data/probe_{encoder}_{variant}.npz`, 10 new entries in `data/
 
 Revised paper path: keep the headline task to 5-way family classification plus Ridge-to-GenePT regression. Move `tf-vs-gpcr` and `tf-vs-kinase` to legacy/appendix, and do not run new length baselines.
 
-- [x] **Model registry** — central encoder specs for DNABERT-2, NT-v2, GENA-LM base, HyenaDNA, and Caduceus-PS.
-- [x] **GENA-LM + HyenaDNA + Caduceus plumbing** — multi-pool extraction and parquet materialisation use the registry.
+- [x] **Model registry** — central encoder specs for DNABERT-2, NT-v2, GENA-LM base, and HyenaDNA.
+- [x] **GENA-LM + HyenaDNA plumbing** — multi-pool extraction and parquet materialisation use the registry.
 - [x] **Enformer comparator plumbing** — TSS-centered windows, internal trunk features, supervised output-track features, and matched TSS-window 4-mer dataset.
 - [x] **Focused table builder** — `scripts/build_family5_table.py` keeps the main table to family5 + Ridge R².
 - [x] **Run GENA-LM extraction** — cached 3,244 CDS embeddings and materialised all supported pooling datasets.
 - [x] **Run GENA-LM probes** — logistic family5 and Ridge-to-GenePT cells for `meanmean`, `meanD`, `meanG`, `maxmean`, and `clsmean`.
 - [x] **Regression table builder** — `scripts/build_regression_table.py` writes `data/regression_table.md`.
 - [x] **Run HyenaDNA extraction/probes** — cached 3,244 CDS embeddings and ran family5 + Ridge-to-GenePT cells for `meanmean`, `meanD`, `meanG`, `maxmean`, and `clsmean`.
-- [ ] **Run remaining extraction** — execute Caduceus-PS on CUDA (`mamba_ssm` needs NVCC) and Enformer feature extraction on the full corpus.
-- [ ] **Run remaining probes** — logistic + Ridge cells for Caduceus-PS and Enformer, then rebuild `data/family5_table.md` and `data/regression_table.md`.
+- [x] **Run Enformer extraction/probes** — TSS windows, Enformer trunk/track datasets, matched TSS 4-mer, family5, and Ridge cells are cached.
+- [ ] **Run TSS self-supervised ablation** — execute NT-v2 on TSS windows, materialise TSS pooling datasets, and run family5 + Ridge probes.
 
 HyenaDNA checkpoint:
 

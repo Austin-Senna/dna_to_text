@@ -79,13 +79,13 @@ class AnalysisArtifactTests(unittest.TestCase):
             },
         ]
 
-        rows = best_family5_rows(latest_logistic_runs(metrics), ["nt_v2", "hyena_dna", "caduceus_ps"])
+        rows = best_family5_rows(latest_logistic_runs(metrics), ["nt_v2", "hyena_dna", "gena_lm"])
 
         self.assertEqual(rows.iloc[0]["encoder"], "nt_v2")
         self.assertEqual(rows.iloc[0]["feature_source"], "nt_v2_meanD")
         self.assertEqual(rows.iloc[1]["encoder"], "hyena_dna")
         self.assertEqual(rows.iloc[1]["feature_source"], "hyena_dna_meanG")
-        self.assertNotIn("caduceus_ps", rows["encoder"].tolist())
+        self.assertNotIn("gena_lm", rows["encoder"].tolist())
 
     def test_missing_cells_report_registered_unrun_family5_and_regression_cells(self):
         from scripts.build_analysis_artifacts import missing_cells_table
@@ -96,13 +96,13 @@ class AnalysisArtifactTests(unittest.TestCase):
         missing = missing_cells_table(
             logistic_latest,
             regression_latest,
-            registered_feature_sources=["nt_v2_meanD", "caduceus_ps_meanD"],
+            registered_feature_sources=["nt_v2_meanD", "gena_lm_meanD"],
             enformer_sources=["enformer_tracks_center"],
         )
 
         records = {(row.artifact, row.feature_source) for row in missing.itertuples()}
-        self.assertIn(("family5", "caduceus_ps_meanD"), records)
-        self.assertIn(("regression", "caduceus_ps_meanD"), records)
+        self.assertIn(("family5", "gena_lm_meanD"), records)
+        self.assertIn(("regression", "gena_lm_meanD"), records)
         self.assertIn(("family5", "enformer_tracks_center"), records)
         self.assertNotIn(("family5", "nt_v2_meanD"), records)
 

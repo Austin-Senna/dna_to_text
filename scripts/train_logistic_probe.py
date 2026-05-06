@@ -29,6 +29,7 @@ from binary_tasks import load_binary_split, BINARY_TASKS
 from kmer_baseline import featurize_cds
 from data_loader.sequence_fetcher import fetch_cds
 from data_loader.model_registry import dataset_paths
+from data_loader.pooling_aggregator import POOLING_VARIANTS
 from linear_trainer import fit_logistic, sweep_C
 from splits import load_split
 
@@ -45,6 +46,11 @@ DATASET_PATHS.update({
     "enformer_tracks_center": DATA / "dataset_enformer_tracks_center.parquet",
     "enformer_tss_4mer": DATA / "dataset_enformer_tss_4mer.parquet",
 })
+for _encoder in ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"):
+    DATASET_PATHS[f"tss_{_encoder}"] = DATA / f"dataset_tss_{_encoder}.parquet"
+    for _variant in POOLING_VARIANTS:
+        DATASET_PATHS[f"tss_{_encoder}_{_variant}"] = DATA / f"dataset_tss_{_encoder}_{_variant}.parquet"
+del _encoder, _variant
 
 META_PARQUET = DATASET_PATHS["dnabert2"]
 

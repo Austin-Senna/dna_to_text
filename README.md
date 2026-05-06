@@ -1,6 +1,6 @@
 # dna_to_text
 
-Cross-modal probing of frozen DNA sequence representations against gene-family labels and GenePT text embeddings. The main paper path compares DNABERT-2, NT-v2, GENA-LM, HyenaDNA, and Caduceus-PS on a 3244-gene 5-family classification task, with Enformer reported separately as a supervised sequence-to-function comparator.
+Cross-modal probing of frozen DNA sequence representations against gene-family labels and GenePT text embeddings. The main paper path compares DNABERT-2, NT-v2, GENA-LM, and HyenaDNA on a 3244-gene 5-family classification task, with Enformer reported separately as a supervised sequence-to-function comparator.
 
 **Where to start reading:**
 - `project.md` — original research idea and corpus.
@@ -39,12 +39,10 @@ uv run python scripts/run_multi_pool_extract.py --encoder dnabert2
 uv run python scripts/run_multi_pool_extract.py --encoder nt_v2
 uv run python scripts/run_multi_pool_extract.py --encoder gena_lm
 uv run python scripts/run_multi_pool_extract.py --encoder hyena_dna
-uv run python scripts/run_multi_pool_extract.py --encoder caduceus_ps
 uv run python scripts/build_pooling_datasets.py --encoder dnabert2  # 5 variant parquets
 uv run python scripts/build_pooling_datasets.py --encoder nt_v2
 uv run python scripts/build_pooling_datasets.py --encoder gena_lm
 uv run python scripts/build_pooling_datasets.py --encoder hyena_dna
-uv run python scripts/build_pooling_datasets.py --encoder caduceus_ps
 
 # 4. Enformer supervised comparator features (optional, separate table)
 uv pip install enformer-pytorch
@@ -59,7 +57,6 @@ uv run python scripts/train_probe.py --dataset data/dataset_nt_v2_meanD.parquet 
 uv run python scripts/train_logistic_probe.py --dataset nt_v2_meanD --task family5    # Logistic 5-way
 uv run python scripts/train_logistic_probe.py --dataset gena_lm_meanD --task family5
 uv run python scripts/train_logistic_probe.py --dataset hyena_dna_meanG --task family5
-uv run python scripts/train_logistic_probe.py --dataset caduceus_ps_meanD --task family5
 uv run python scripts/train_logistic_probe.py --dataset enformer_tracks_center --task family5
 uv run python scripts/build_family5_table.py
 uv run python scripts/build_regression_table.py
@@ -69,7 +66,12 @@ uv run python demo/zero_shot.py                  # demo/output.md
 uv run python viz/umap_meanD.py                  # viz/figures/umap_nt_v2_meanD.png
 uv run python viz/umap_tokenisation_compare.py   # viz/figures/umap_dnabert2_tokenisation_compare.png
 
-# 8. Cached paper analysis bundle: tables + figures + manifest
+# 8. Optional TSS-context self-supervised encoder ablation
+uv run python scripts/run_tss_multi_pool_extract.py --encoder nt_v2 --device auto
+uv run python scripts/build_tss_pooling_datasets.py --encoder nt_v2
+uv run python scripts/train_logistic_probe.py --dataset tss_nt_v2_meanD --task family5
+
+# 9. Cached paper analysis bundle: tables + figures + manifest
 uv run python scripts/build_analysis_artifacts.py --overwrite
 # Fast smoke version without UMAP:
 uv run python scripts/build_analysis_artifacts.py --out /tmp/dna_analysis_smoke --skip-umap --overwrite
@@ -97,5 +99,4 @@ viz/                  UMAP figures for the deck.
 - `uv pip install triton` fails on Apple Silicon + Python 3.12: this is expected here. Triton wheels are not available for this platform combination.
 - DNABERT-2 on this repo does not actually require Triton for inference. The remote model code is supposed to fall back to plain PyTorch attention when Triton is missing.
 - The runtime failure came from a `transformers` remote-code import check that treated DNABERT-2's optional `flash_attn_triton` module as mandatory. The loader now works around that and pins the model revision used by the repo.
-- Caduceus-PS currently requires `mamba_ssm`, which needs a CUDA/NVCC build path. Use a CUDA machine or Hugging Face Job for the full Caduceus run; HyenaDNA is the local long-context fallback.
 - Do not try to speed this up by launching multiple concurrent encoder runs on the same `mps` or GPU device. Keep one encoder process per device; parallel fan-out is not the intended knob for this pipeline.

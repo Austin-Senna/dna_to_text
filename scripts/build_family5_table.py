@@ -29,10 +29,12 @@ MAIN_ROWS = [
     "hyena_dna_meanmean",
     "hyena_dna_meanD",
     "hyena_dna_meanG",
-    "caduceus_ps",
-    "caduceus_ps_meanmean",
-    "caduceus_ps_meanD",
-    "caduceus_ps_meanG",
+]
+TSS_ROWS = [
+    "tss_nt_v2",
+    "tss_nt_v2_meanmean",
+    "tss_nt_v2_meanD",
+    "tss_nt_v2_meanG",
 ]
 ENFORMER_ROWS = [
     "enformer_tss_4mer",
@@ -126,6 +128,12 @@ def main():
         f.write("| Feature source | 5-way F1 | 5-way kappa | 5-way acc | Ridge R2 |\n")
         f.write("|---|---:|---:|---:|---:|\n")
         for label in MAIN_ROWS:
+            f.write(_row(label, by_metric, by_regression))
+
+        f.write("\n## TSS Self-Supervised Encoder Ablation\n\n")
+        f.write("| Feature source | 5-way F1 | 5-way kappa | 5-way acc | Ridge R2 |\n")
+        f.write("|---|---:|---:|---:|---:|\n")
+        for label in TSS_ROWS:
             f.write(_row(label, by_metric, by_regression))
 
         f.write("\n## Enformer Supervised Sequence-To-Function Comparator\n\n")

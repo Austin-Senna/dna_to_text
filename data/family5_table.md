@@ -19,10 +19,15 @@ Main DNA encoder comparison. Binary tasks are legacy/appendix only.
 | `hyena_dna_meanmean` | 0.7103 | 0.6883 | 0.8049 | 0.1822 |
 | `hyena_dna_meanD` | 0.6988 | 0.6830 | 0.8029 | 0.1818 |
 | `hyena_dna_meanG` | 0.7149 | 0.6944 | 0.8090 | 0.1792 |
-| `caduceus_ps` | - | - | - | - |
-| `caduceus_ps_meanmean` | - | - | - | - |
-| `caduceus_ps_meanD` | - | - | - | - |
-| `caduceus_ps_meanG` | - | - | - | - |
+
+## TSS Self-Supervised Encoder Ablation
+
+| Feature source | 5-way F1 | 5-way kappa | 5-way acc | Ridge R2 |
+|---|---:|---:|---:|---:|
+| `tss_nt_v2` | - | - | - | - |
+| `tss_nt_v2_meanmean` | - | - | - | - |
+| `tss_nt_v2_meanD` | - | - | - | - |
+| `tss_nt_v2_meanG` | - | - | - | - |
 
 ## Enformer Supervised Sequence-To-Function Comparator
 

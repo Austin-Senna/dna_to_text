@@ -37,10 +37,15 @@ ROWS = [
     "hyena_dna_meanG",
     "hyena_dna_maxmean",
     "hyena_dna_clsmean",
-    "caduceus_ps",
-    "caduceus_ps_meanmean",
-    "caduceus_ps_meanD",
-    "caduceus_ps_meanG",
+]
+
+TSS_ROWS = [
+    "tss_nt_v2",
+    "tss_nt_v2_meanmean",
+    "tss_nt_v2_meanD",
+    "tss_nt_v2_meanG",
+    "tss_nt_v2_maxmean",
+    "tss_nt_v2_clsmean",
 ]
 
 ENFORMER_ROWS = [
@@ -118,6 +123,12 @@ def main() -> None:
         for label in ROWS:
             f.write(_row(label, by_regression, baseline))
 
+        f.write("\n## TSS Self-Supervised Encoder Ablation\n\n")
+        f.write("| Feature source | Ridge R2 | Delta vs 4-mer | Mean cosine | Median cosine | Alpha |\n")
+        f.write("|---|---:|---:|---:|---:|---:|\n")
+        for label in TSS_ROWS:
+            f.write(_row(label, by_regression, baseline))
+
         f.write("\n## Enformer Supervised Sequence-To-Function Comparator\n\n")
         f.write("| Feature source | Ridge R2 | Delta vs 4-mer | Mean cosine | Median cosine | Alpha |\n")
         f.write("|---|---:|---:|---:|---:|---:|\n")
@@ -126,7 +137,7 @@ def main() -> None:
 
         scored = [
             (label, by_regression.get("kmer") if label == "kmer" else by_regression.get(_dataset_name(label) or ""))
-            for label in ROWS + ENFORMER_ROWS
+            for label in ROWS + TSS_ROWS + ENFORMER_ROWS
         ]
         scored = [(label, run) for label, run in scored if run and run.get("test_r2_macro") is not None]
         if scored:
