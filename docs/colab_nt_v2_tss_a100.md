@@ -55,21 +55,36 @@ adds the repo dependencies.
 !pip install -q -e .
 ```
 
-Optional but useful for Hugging Face cache persistence:
+## 3. Restore TSS Windows Cache From Drive
+
+Upload `tss_windows_cache.tar.gz` to Google Drive first. The cache bundle should
+contain `enformer_windows/` and ideally `dataset_enformer_tss_4mer.parquet` at
+the archive root; these extract under `data/` in Colab. If this restores `3244`
+FASTA files, skip the Ensembl fetch step entirely.
 
 ```python
 from google.colab import drive
 drive.mount("/content/drive")
 
+%cd /content/dna_to_text
+!tar -xzf /content/drive/MyDrive/tss_windows_cache.tar.gz -C data
+!find data/enformer_windows -maxdepth 1 -name '*.fa' | wc -l
+!ls -lh data/dataset_enformer_tss_4mer.parquet
+```
+
+Optional but useful for Hugging Face cache persistence:
+
+```python
 import os
 os.environ["HF_HOME"] = "/content/drive/MyDrive/hf_cache"
 os.environ["TRANSFORMERS_CACHE"] = "/content/drive/MyDrive/hf_cache"
 ```
 
-## 3. Fetch/Cache TSS Windows
+## 4. Optional Fallback: Fetch/Cache TSS Windows
 
-This builds `data/enformer_windows/` and rewrites the matched TSS 4-mer parquet.
-It does not load Enformer when `--skip-model` is set.
+Only use this if you do not have `tss_windows_cache.tar.gz`. This builds
+`data/enformer_windows/` and rewrites the matched TSS 4-mer parquet. It does
+not load Enformer when `--skip-model` is set.
 
 ```python
 !python scripts/run_enformer_features.py \
@@ -86,7 +101,7 @@ Quick sanity check:
 
 Expected window count: `3244`.
 
-## 4. Run NT-v2 TSS Extraction
+## 5. Run NT-v2 TSS Extraction
 
 Full run:
 
@@ -119,7 +134,7 @@ Sanity check:
 
 Expected final count: `3244`.
 
-## 5. Build TSS Pooling Datasets
+## 6. Build TSS Pooling Datasets
 
 ```python
 !python scripts/build_tss_pooling_datasets.py \
@@ -139,7 +154,7 @@ data/dataset_tss_nt_v2_maxmean.parquet
 data/dataset_tss_nt_v2_clsmean.parquet
 ```
 
-## 6. Run Family5 And Ridge Probes
+## 7. Run Family5 And Ridge Probes
 
 Run the main pooling variants first:
 
@@ -169,7 +184,7 @@ for v in maxmean clsmean; do
 done
 ```
 
-## 7. Rebuild Tables
+## 8. Rebuild Tables
 
 ```python
 !python scripts/build_family5_table.py
@@ -183,7 +198,7 @@ Inspect the TSS sections:
 !sed -n '/TSS Self-Supervised Encoder Ablation/,$p' data/regression_table.md | head -n 24
 ```
 
-## 8. Package Outputs
+## 9. Package Outputs
 
 Minimal bundle to bring back to the repo:
 

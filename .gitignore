@@ -27,3 +27,5 @@ data/enformer_features/
 
 # Pitch deck PDF — kept locally, not authoritative source
 Genomics Project (1).pdf
+tss_windows_cache.tar.gz
+ntv2_tss_*outputs.tar.gz
