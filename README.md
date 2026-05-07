@@ -5,11 +5,12 @@ Cross-modal probing of frozen DNA sequence representations against gene-family l
 Project repository: https://github.com/Austin-Senna/dna_to_text
 
 **Where to start reading:**
-- `project.md` — original research idea and corpus.
-- `framework.md` — experimental design (probes, baselines, metrics).
-- `findings.md` — running results journal (Phase 3 regression, Phase 4 classification, Phase 5 encoder expansion).
-- `writeup.md` — presentation-style summary for the deck.
-- `next_steps.md` — phase log + what's open.
+- `docs/project-history/project.md` — original research idea and corpus.
+- `docs/project-history/framework.md` — experimental design (probes, baselines, metrics).
+- `docs/findings/findings.md` — running results journal (Phase 3 regression, Phase 4 classification, Phase 5 encoder expansion).
+- `docs/project-history/writeup.md` — report planning scaffold.
+- `docs/presentation/presentation.md` — presentation narrative.
+- `docs/project-history/next_steps.md` — phase log and archived next steps.
 
 ## Setup
 
@@ -117,7 +118,7 @@ data/                 Artefacts. Small ones (metrics.json, splits.json, binary s
                       confusion matrices) plus selected paper-ready feature/probe caches are tracked;
                       intermediate sequence and chunk caches are gitignored.
 analysis/             Generated paper-ready analysis bundle from `scripts/build_analysis_artifacts.py`.
-docs/superpowers/     Specs and implementation plans (`specs/`, `plans/`).
+docs/                 Project notes, findings, presentation materials, and implementation plans.
 demo/                 Zero-shot demo: predicted family + neighbours for sample test genes.
 viz/                  UMAP figures for the deck.
 ```

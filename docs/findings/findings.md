@@ -4,7 +4,7 @@ We test whether a simple linear map can transport DNA-language-model embeddings 
 
 Relevant commits: `572b034` splits, `88112c6` probe, `6b601ce` anti-baseline, `5aaf631` kmer baseline, `d3c1a40` MLP probe, `f7577c9` NT-v2 encoder, `2895ad4` NT-v2 experiments.
 
-> Methods detail: see `framework.md`. Forward-looking work: see `next_steps.md`.
+> Methods detail: see `docs/project-history/framework.md`. Forward-looking work: see `docs/project-history/next_steps.md`.
 
 ## Setup
 
@@ -19,7 +19,7 @@ Relevant commits: `572b034` splits, `88112c6` probe, `6b601ce` anti-baseline, `5
   - **MLP probe** (diagnostic for non-linear signal): 1–3 hidden layers, ReLU, sklearn `MLPRegressor`, same sweep/refit/eval protocol.
 - **Controls.**
   - **4-mer histogram baseline.** 256-d L1-normalised 4-mer frequencies of the CDS fed through the same Ridge recipe. Encoder-independent — same numbers regardless of X.
-  - **Shuffled-Y anti-baseline.** Same Ridge recipe but Y permuted in train+val, then evaluated against real test Y. Sanity gate from `framework.md`: if this scores non-trivially, the pipeline is leaking.
+  - **Shuffled-Y anti-baseline.** Same Ridge recipe but Y permuted in train+val, then evaluated against real test Y. Sanity gate from `docs/project-history/framework.md`: if this scores non-trivially, the pipeline is leaking.
 - **Metrics.** Mean cosine, median cosine, macro R² on the 487-gene test split.
 
 ## Results
@@ -92,7 +92,7 @@ NT-v2 is the stronger encoder by a hair (+0.001 cos, +0.011 R² over DNABERT-2),
 A 1–3 hidden layer MLP ties the linear probe within 0.002 cosine on both encoders. Going wider or deeper does not move the number. That rules out the "there is non-linear signal the linear probe can't reach" hypothesis and localises the ceiling to the representation itself.
 
 ### What this means
-Per `framework.md` §Success / failure criteria, this is the **informative negative** outcome:
+Per `docs/project-history/framework.md` §Success / failure criteria, this is the **informative negative** outcome:
 
 > *probe matches or barely beats 4-mer baseline → DNA encoder's extra capacity is not functional, it is compositional. Still publishable as a limits-of-genomic-LLMs finding.*
 
@@ -441,7 +441,7 @@ The shuffled-label κ values (≈ 0 across tasks) confirm that nothing in the pi
 
 Three axes that could change the conclusion:
 
-1. **Pooling.** We mean-pool chunk embeddings on both encoders. CLS, max-pool, or attention-weighted pooling could surface signal that mean-pool smears out. `next_steps.md` flagged this as the specific knob to revisit if cosine plateaued at baseline — which it did.
+1. **Pooling.** We mean-pool chunk embeddings on both encoders. CLS, max-pool, or attention-weighted pooling could surface signal that mean-pool smears out. `docs/project-history/next_steps.md` flagged this as the specific knob to revisit if cosine plateaued at baseline — which it did.
 2. **Target quality.** GenePT summaries vary wildly in informativeness; many are short or boilerplate. If the target itself is noisy, a linear probe cannot separate genes even when X carries real signal. Filtering short or generic summaries before training would isolate this.
 3. **Input window.** We embed the canonical CDS only. CDS is the most composition-homogenous part of a gene because of codon usage. Promoter + UTRs may carry more function-discriminating signal; a fair test would embed the full transcript or gene body rather than CDS alone.
 

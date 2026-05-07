@@ -2,7 +2,7 @@
 
 **8-minute in-class talk · 9 content slides + 1 references slide.** Audience has not seen prior decks; this is a complete intro.
 
-Source of numbers: `findings.md`, `data/full_table.md`, `data/kappa_summary.md`. ~50 seconds per content slide; references slide is just visible while wrapping up.
+Source of numbers: `docs/findings/findings.md`, `data/full_table.md`, `data/kappa_summary.md`. ~50 seconds per content slide; references slide is just visible while wrapping up.
 
 ---
 

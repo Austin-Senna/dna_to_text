@@ -1,6 +1,6 @@
 # Writeup — direction document
 
-This is the **structure and content guide** for the project writeup, formatted as a *Bioinformatics* Application Note (≤2 pages main text + supplementary). It is not the final prose — fill each section against this scaffold using the numbers in `findings.md`, `data/full_table.md`, `data/kappa_summary.md`, and the figures in `viz/figures/` and `demo/`.
+This is the **structure and content guide** for the project writeup, formatted as a *Bioinformatics* Application Note (≤2 pages main text + supplementary). It is not the final prose — fill each section against this scaffold using the numbers in `docs/findings/findings.md`, `data/full_table.md`, `data/kappa_summary.md`, and the figures in `viz/figures/` and `demo/`.
 
 **Audience:** a stranger with a general understanding of the field but no knowledge of this project. Self-contained.
 
@@ -81,7 +81,7 @@ Use the *Bioinformatics* numeric or author-year style. At minimum:
 ## Display items
 
 **Tables (in main text):**
-- **Table 1.** Dataset composition by family (count, HGNC selection rule). Source: `project.md` table.
+- **Table 1.** Dataset composition by family (count, HGNC selection rule). Source: `docs/project-history/project.md` table.
 - **Table 2.** Headline results — best variant per encoder vs baselines, three classification tasks + regression in one matrix; columns include macro-F1, κ, R², and Δ vs 4-mer. Condense from `data/full_table.md`.
 
 **Figures (in main text):**
@@ -91,7 +91,7 @@ Use the *Bioinformatics* numeric or author-year style. At minimum:
 **Supplementary (in compressed folder):**
 - **Supp. Table S1.** Full results matrix — every (encoder × pooling × task) cell, both metrics. Use `data/full_table.md`.
 - **Supp. Table S2.** Cohen's κ summary per task. Use `data/kappa_summary.md`.
-- **Supp. Note S1.** Pooling sweep details and the chunk-boundary tokenisation finding. Source: `findings.md` Phase 4b.
+- **Supp. Note S1.** Pooling sweep details and the chunk-boundary tokenisation finding. Source: `docs/findings/findings.md` Phase 4b.
 - **Supp. Note S2.** Zero-shot demo predictions on poorly-characterised genes. Source: `demo/output.md`.
 
 ---

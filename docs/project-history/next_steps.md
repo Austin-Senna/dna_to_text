@@ -1,6 +1,6 @@
 # Next Steps
 
-Living project log. Phases 1–3 are done; phase 4 carries the deck's Week 4–5 deliverables; phase 5 collects the open scientific questions surfaced by `findings.md`.
+Living project log. Phases 1–3 are done; phase 4 carries the deck's Week 4–5 deliverables; phase 5 collects the open scientific questions surfaced by `docs/findings/findings.md`.
 
 ## Phase 1 — Data pipeline   ✅ done   (deck Weeks 1–2)
 
@@ -30,7 +30,7 @@ Code: `src/data_loader/{encoder_runner,nt_v2_encoder}.py`, `scripts/run_encoder.
 | MLP probe | DNABERT-2 | 0.9300 | 0.162 | hidden=(256,), α=0.01 |
 | MLP probe | NT-v2 | 0.9325 | 0.189 | hidden=(1024,), α=0.01 |
 
-Outcome: **informative negative** per `framework.md` § Success / failure criteria — both encoders tie the 4-mer baseline within ±0.002 cosine. Anti-baseline R² ≈ 0 confirms the pipeline is honest. MLP depth doesn't move the number, so the ceiling is the representation, not the probe's capacity. See `findings.md` for the full read.
+Outcome: **informative negative** per `docs/project-history/framework.md` § Success / failure criteria — both encoders tie the 4-mer baseline within ±0.002 cosine. Anti-baseline R² ≈ 0 confirms the pipeline is honest. MLP depth doesn't move the number, so the ceiling is the representation, not the probe's capacity. See `docs/findings/findings.md` for the full read.
 
 Code: `src/linear_trainer/`, `src/kmer_baseline/`, `scripts/train_{probe,baseline,anti_baseline,mlp_probe}.py`.
 
@@ -40,7 +40,7 @@ Original Phase 4 (retrieval@k, IG attribution, family-classification-on-`y_hat`,
 
 ### Phase 4a — Classification probes   ✅ done
 
-15-cell run matrix (3 tasks × 5 feature sources). Headline: **NT-v2 5-way macro-F1 = 0.803 vs 4-mer baseline 0.672 (+0.131)**. Decision gate landed in Branch 1 — encoder beats 4-mer; Phase 4b pooling re-extraction is **skipped**. Full results in `findings.md` § "Phase 4 — Classification reframing".
+15-cell run matrix (3 tasks × 5 feature sources). Headline: **NT-v2 5-way macro-F1 = 0.803 vs 4-mer baseline 0.672 (+0.131)**. Decision gate landed in Branch 1 — encoder beats 4-mer; Phase 4b pooling re-extraction is **skipped**. Full results in `docs/findings/findings.md` § "Phase 4 — Classification reframing".
 
 Code: `src/binary_tasks/`, `src/length_baseline/`, `src/linear_trainer/logistic_probe.py`, `scripts/{make_binary_subsets,train_logistic_probe}.py`.
 
@@ -48,7 +48,7 @@ Artefacts: `data/binary_tf_vs_gpcr.json`, `data/binary_tf_vs_kinase.json`, `data
 
 ### Phase 4b — Pooling sweep   ✅ done (exploratory)
 
-Originally going to be skipped (Phase 4a already cleared the decision gate), but ran the full menu anyway as an ablation. Results in `findings.md` § "Phase 4b — Pooling sweep (exploratory)".
+Originally going to be skipped (Phase 4a already cleared the decision gate), but ran the full menu anyway as an ablation. Results in `docs/findings/findings.md` § "Phase 4b — Pooling sweep (exploratory)".
 
 Headline outcomes:
 - **Tokenisation fix is the biggest win.** Re-tokenising with special tokens (`[CLS]`/`[SEP]` for DNABERT-2, `<cls>` for NT-v2) lifts DNABERT-2 substantially even at the mean→mean baseline. Phase 1–3 was tokenising without specials and crippling DNABERT-2.
@@ -61,13 +61,13 @@ Artefacts: `data/chunk_reductions_{dnabert2,nt_v2}/` (per-chunk reductions cache
 
 ### Phase 4c — Write-up   ⏳ open
 
-- [x] Results table (15 cells) in `findings.md`
-- [x] 5-way confusion matrix per encoder (saved as JSON, embedded in `findings.md`)
-- [ ] Slide-deck write-up: intro (from `project.md`) → methods (point at `framework.md`) → Phase 3 informative-negative + Phase 4 classification result → discussion of the encoder gap (NT-v2 vs DNABERT-2)
+- [x] Results table (15 cells) in `docs/findings/findings.md`
+- [x] 5-way confusion matrix per encoder (saved as JSON, embedded in `docs/findings/findings.md`)
+- [ ] Slide-deck write-up: intro (from `docs/project-history/project.md`) → methods (point at `docs/project-history/framework.md`) → Phase 3 informative-negative + Phase 4 classification result → discussion of the encoder gap (NT-v2 vs DNABERT-2)
 
 ## Phase 5a — Regression re-run on new variants   ✅ done
 
-Ridge probe (Ridge → GenePT 1536-d) re-run on all 10 new pooling-variant parquets. Results in `findings.md` § "Phase 5a — Regression re-run on the new variants".
+Ridge probe (Ridge → GenePT 1536-d) re-run on all 10 new pooling-variant parquets. Results in `docs/findings/findings.md` § "Phase 5a — Regression re-run on the new variants".
 
 Headline:
 - **`dnabert2_meanG` R² = 0.210**, +0.036 vs 4-mer baseline (vs Phase 3's +0.007). DNABERT-2's Phase 3 informative-negative was an undercount.

@@ -75,7 +75,7 @@ Computed on the held-out test split.
 | Retrieval@k | For each test `y_hat_i`, rank all real summaries; is `summary_i` in top-k? | Planned (Phase 4) |
 | Family classification accuracy | Logistic regression on `y_hat → family`; compare to same classifier on real `y` | Planned (Phase 4) |
 
-Cosine is misleading as a headline because of GenePT's anisotropy floor (mean-Y has cosine ≈ 0.91 with any real GenePT vector). R² is the honest signal — see `findings.md`.
+Cosine is misleading as a headline because of GenePT's anisotropy floor (mean-Y has cosine ≈ 0.91 with any real GenePT vector). R² is the honest signal — see `docs/findings/findings.md`.
 
 ## Zero-shot demo (planned, Phase 4)
 
@@ -105,7 +105,7 @@ Captum Integrated Gradients with the encoder + frozen probe stacked, scalar targ
 ## Success / failure criteria
 
 - **Positive result:** probe beats 4-mer baseline on cosine and retrieval@k, and family clusters are visibly preserved in projected space.
-- **Informative negative:** probe matches or barely beats 4-mer baseline → DNA encoder's extra capacity is not functional, it is compositional. Still publishable as a limits-of-genomic-LLMs finding. **This is the empirically observed outcome — see `findings.md`.**
+- **Informative negative:** probe matches or barely beats 4-mer baseline → DNA encoder's extra capacity is not functional, it is compositional. Still publishable as a limits-of-genomic-LLMs finding. **This is the empirically observed outcome — see `docs/findings/findings.md`.**
 - **Pipeline bug:** anti-baseline (shuffled `y`) scores non-trivially. Stop and debug before drawing any conclusion.
 
 ## Repo layout
