@@ -16,23 +16,28 @@ DATA = REPO_ROOT / "data"
 MAIN_ROWS = [
     "kmer",
     "dnabert2_meanmean",
+    "dnabert2_specialmean",
     "dnabert2_meanD",
     "dnabert2_meanG",
     "nt_v2_meanmean",
+    "nt_v2_specialmean",
     "nt_v2_meanD",
     "nt_v2_meanG",
     "gena_lm",
     "gena_lm_meanmean",
+    "gena_lm_specialmean",
     "gena_lm_meanD",
     "gena_lm_meanG",
     "hyena_dna",
     "hyena_dna_meanmean",
+    "hyena_dna_specialmean",
     "hyena_dna_meanD",
     "hyena_dna_meanG",
 ]
 TSS_ROWS = [
     "tss_nt_v2",
     "tss_nt_v2_meanmean",
+    "tss_nt_v2_specialmean",
     "tss_nt_v2_meanD",
     "tss_nt_v2_meanG",
 ]

@@ -39,6 +39,7 @@ class EncoderRegistryTests(unittest.TestCase):
             ("meanmean", "maxmean", "meanD", "meanG"),
         )
         self.assertNotIn("clsmean", available_variants(without_cls))
+        self.assertNotIn("specialmean", available_variants(without_cls))
         np.testing.assert_allclose(
             aggregate(without_cls, "meanD"),
             np.asarray([1.0, 2.0, 3.0, 4.0, 2.0, 3.0], dtype=np.float32),
@@ -46,6 +47,16 @@ class EncoderRegistryTests(unittest.TestCase):
 
         with_cls = {**without_cls, "cls": np.asarray([[9.0, 8.0]], dtype=np.float32)}
         self.assertIn("clsmean", available_variants(with_cls))
+
+        with_special = {
+            **with_cls,
+            "special_mean": np.asarray([[7.0, 8.0], [9.0, 10.0]], dtype=np.float32),
+        }
+        self.assertIn("specialmean", available_variants(with_special))
+        np.testing.assert_allclose(
+            aggregate(with_special, "specialmean"),
+            np.asarray([8.0, 9.0], dtype=np.float32),
+        )
 
     def test_multi_pool_allows_tokenizers_without_cls(self):
         import torch
@@ -72,7 +83,7 @@ class EncoderRegistryTests(unittest.TestCase):
             "ACGT", Model(), Tokenizer(), "cpu", max_content_tokens=4, stride=1
         )
 
-        self.assertEqual(set(reductions), {"mean", "max"})
+        self.assertEqual(set(reductions), {"mean", "special_mean", "max"})
 
     def test_multi_pool_allows_models_without_attention_mask_argument(self):
         import torch

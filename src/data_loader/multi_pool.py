@@ -1,9 +1,10 @@
 """Per-chunk reductions for the Phase 4b pooling sweep.
 
-Forward pass once per chunk; capture three per-chunk reductions in the same
-pass so disk + compute are amortised across all five pooling variants:
+Forward pass once per chunk; capture four per-chunk reductions in the same
+pass so disk + compute are amortised across all pooling variants:
 
     mean : per-dim mean over content tokens (excludes special tokens)
+    special_mean : per-dim mean over every model token (includes specials)
     max  : per-dim max  over content tokens (excludes special tokens)
     cls  : the model's CLS-token representation (position 0)
 
@@ -11,7 +12,7 @@ Tokenisation includes special tokens so position 0 IS the trained CLS
 representation. Content tokens are positions 1..-2 (excluding CLS at 0
 and SEP at -1).
 
-Output per gene: an .npz with three (n_chunks, d) arrays.
+Output per gene: an .npz with three or four (n_chunks, d) arrays.
 """
 from __future__ import annotations
 
@@ -21,6 +22,8 @@ from typing import Callable
 import numpy as np
 import torch
 from tqdm import tqdm
+
+REDUCTION_KEYS = ("mean", "special_mean", "max", "cls")
 
 
 def _chunk_ids(ids: list[int], max_tokens: int, stride: int) -> list[list[int]]:
@@ -50,7 +53,9 @@ def embed_sequence_multi_pool(
     """Tokenise the sequence, chunk into content windows, run forward with CLS+SEP
     wrapped per chunk, and return per-chunk reductions.
 
-    Returns: {"mean": (n_chunks, d), "max": (n_chunks, d), "cls": (n_chunks, d)}.
+    Returns: {"mean": (n_chunks, d), "special_mean": (n_chunks, d),
+    "max": (n_chunks, d), "cls": (n_chunks, d)}. The "cls" key is omitted
+    when the tokenizer has no CLS/BOS token.
     """
     # CLS/BOS at start is optional. BERT-family tokenizers expose a trained
     # summary position, but some long-context DNA tokenizers do not. If absent,
@@ -69,6 +74,7 @@ def embed_sequence_multi_pool(
     chunks = _chunk_ids(content_ids, max_content_tokens, stride)
 
     mean_per_chunk: list[np.ndarray] = []
+    special_mean_per_chunk: list[np.ndarray] = []
     max_per_chunk: list[np.ndarray] = []
     cls_per_chunk: list[np.ndarray] = []
 
@@ -87,16 +93,19 @@ def embed_sequence_multi_pool(
         content_start = 1 if has_cls else 0
         content_end = -1 if has_sep else hidden.shape[1]
         content = hidden[:, content_start:content_end, :]
+        special_mean_vec = hidden.mean(dim=1).squeeze(0)
         mean_vec = content.mean(dim=1).squeeze(0)
         max_vec = content.max(dim=1).values.squeeze(0)
 
         mean_per_chunk.append(mean_vec.float().cpu().numpy())
+        special_mean_per_chunk.append(special_mean_vec.float().cpu().numpy())
         max_per_chunk.append(max_vec.float().cpu().numpy())
         if cls_vec is not None:
             cls_per_chunk.append(cls_vec.float().cpu().numpy())
 
     reductions = {
         "mean": np.stack(mean_per_chunk, axis=0),
+        "special_mean": np.stack(special_mean_per_chunk, axis=0),
         "max":  np.stack(max_per_chunk, axis=0),
     }
     if cls_per_chunk:
@@ -127,7 +136,11 @@ def embed_all_multi_pool(
         cache_file = cache_dir / f"{eid}.npz"
         if cache_file.exists():
             with np.load(cache_file) as data:
-                out[eid] = {k: data[k] for k in ("mean", "max", "cls") if k in data.files}
+                cached = {k: data[k] for k in REDUCTION_KEYS if k in data.files}
+            if "special_mean" in cached:
+                out[eid] = cached
+            else:
+                pending.append((eid, seq))
         else:
             pending.append((eid, seq))
 

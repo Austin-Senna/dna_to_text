@@ -27,7 +27,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
 
 PAPER_ENCODERS = ("dnabert2", "nt_v2", "gena_lm", "hyena_dna")
-POOLING_ORDER = ("base", "meanmean", "meanD", "meanG", "maxmean", "clsmean")
+POOLING_ORDER = ("base", "meanmean", "specialmean", "meanD", "meanG", "maxmean", "clsmean")
 LEGACY_TASKS = ("tf_vs_gpcr", "tf_vs_kinase")
 ENFORMER_SOURCES = (
     "enformer_tss_4mer",
@@ -120,6 +120,10 @@ def latest_regression_runs(metrics: list[dict]) -> dict[str, dict]:
     for run in metrics:
         if run.get("model") == "kmer_baseline_4":
             _keep_latest(latest, "kmer", run)
+            continue
+        if run.get("model") == "anti_baseline_shuffled_y":
+            dataset = str(run.get("dataset") or "dataset.parquet")
+            _keep_latest(latest, f"shuffled_y:{dataset}", run)
             continue
         if run.get("model") != "linear_probe":
             continue
@@ -226,20 +230,35 @@ def _metric_value(run: dict | None, key: str) -> float | None:
     return float(run[key])
 
 
-def _family5_record(feature_source: str, run: dict, task: str = "family5") -> dict:
+def _family5_record(
+    feature_source: str,
+    run: dict,
+    task: str = "family5",
+    baseline: dict | None = None,
+) -> dict:
     kappa = _metric_value(run, "test_kappa")
     if kappa is None and task == "family5":
         kappa = _kappa_from_confusion(feature_source)
     if kappa is None:
         kappa = _kappa_from_summary(task, feature_source)
     encoder = encoder_for_feature(feature_source)
+    f1 = _metric_value(run, "test_macro_f1")
+    acc = _metric_value(run, "test_accuracy")
+    baseline_f1 = _metric_value(baseline, "test_macro_f1")
+    baseline_kappa = _metric_value(baseline, "test_kappa")
+    if baseline is not None and baseline_kappa is None and task == "family5":
+        baseline_kappa = _kappa_from_confusion("kmer") or _kappa_from_summary(task, "kmer")
+    baseline_acc = _metric_value(baseline, "test_accuracy")
     return {
         "encoder": encoder or feature_source,
         "pooling": pooling_for_feature(feature_source) or "baseline",
         "feature_source": feature_source,
-        "test_macro_f1": _metric_value(run, "test_macro_f1"),
+        "test_macro_f1": f1,
+        "delta_f1_vs_4mer": None if f1 is None or baseline_f1 is None else f1 - baseline_f1,
         "test_kappa": kappa,
-        "test_accuracy": _metric_value(run, "test_accuracy"),
+        "delta_kappa_vs_4mer": None if kappa is None or baseline_kappa is None else kappa - baseline_kappa,
+        "test_accuracy": acc,
+        "delta_accuracy_vs_4mer": None if acc is None or baseline_acc is None else acc - baseline_acc,
         "C": _metric_value(run, "C"),
         "timestamp": run.get("timestamp"),
     }
@@ -250,6 +269,7 @@ def best_family5_rows(
     encoder_names: Iterable[str] = PAPER_ENCODERS,
 ) -> pd.DataFrame:
     rows: list[dict] = []
+    baseline = latest_logistic.get(("kmer", "family5", False))
     for encoder in encoder_names:
         candidates = []
         for (feature_source, task, shuffled), run in latest_logistic.items():
@@ -263,7 +283,7 @@ def best_family5_rows(
             candidates,
             key=lambda item: _metric_value(item[1], "test_macro_f1") or float("-inf"),
         )
-        rows.append(_family5_record(best_feature, best_run))
+        rows.append(_family5_record(best_feature, best_run, baseline=baseline))
     return _ordered_encoder_frame(rows)
 
 
@@ -271,11 +291,11 @@ def main_family5_table(latest_logistic: dict[tuple[str, str, bool], dict]) -> pd
     rows = []
     kmer = latest_logistic.get(("kmer", "family5", False))
     if kmer:
-        rows.append(_family5_record("kmer", kmer))
+        rows.append(_family5_record("kmer", kmer, baseline=kmer))
     rows.extend(best_family5_rows(latest_logistic).to_dict("records"))
     shuffled = latest_logistic.get(("shuffled", "family5", True))
     if shuffled:
-        row = _family5_record("shuffled", shuffled)
+        row = _family5_record("shuffled", shuffled, baseline=kmer)
         row["pooling"] = "anti_baseline"
         rows.append(row)
     return pd.DataFrame(rows)
@@ -283,13 +303,14 @@ def main_family5_table(latest_logistic: dict[tuple[str, str, bool], dict]) -> pd
 
 def pooling_sweep_family5_table(latest_logistic: dict[tuple[str, str, bool], dict]) -> pd.DataFrame:
     rows = []
+    baseline = latest_logistic.get(("kmer", "family5", False))
     for (feature_source, task, shuffled), run in latest_logistic.items():
         if task != "family5" or shuffled:
             continue
         encoder = encoder_for_feature(feature_source)
         if encoder is None:
             continue
-        rows.append(_family5_record(feature_source, run))
+        rows.append(_family5_record(feature_source, run, baseline=baseline))
     return _ordered_encoder_frame(rows)
 
 
@@ -309,24 +330,52 @@ def _regression_record(feature_source: str, run: dict, baseline_r2: float | None
     }
 
 
+def _shuffled_regression_record(run: dict, baseline_r2: float | None) -> dict:
+    r2 = _metric_value(run, "test_r2_macro")
+    return {
+        "encoder": "shuffled_y",
+        "pooling": "-",
+        "feature_source": "shuffled_y",
+        "test_r2_macro": r2,
+        "delta_vs_4mer": None if r2 is None or baseline_r2 is None else r2 - baseline_r2,
+        "test_mean_cosine": _metric_value(run, "test_mean_cosine"),
+        "test_median_cosine": _metric_value(run, "test_median_cosine"),
+        "alpha": _metric_value(run, "alpha"),
+        "timestamp": run.get("timestamp"),
+    }
+
+
 def regression_full_table(latest_regression: dict[str, dict]) -> pd.DataFrame:
     rows = []
     baseline_r2 = _metric_value(latest_regression.get("kmer"), "test_r2_macro")
     if "kmer" in latest_regression:
         rows.append(_regression_record("kmer", latest_regression["kmer"], baseline_r2))
+    shuffled_runs: list[dict] = []
     for dataset, run in latest_regression.items():
         if dataset == "kmer":
+            continue
+        if dataset.startswith("shuffled_y:"):
+            shuffled_runs.append(run)
             continue
         feature = feature_from_dataset(dataset)
         if feature is None:
             continue
         rows.append(_regression_record(feature, run, baseline_r2))
+    if shuffled_runs:
+        best_shuffled = max(
+            shuffled_runs,
+            key=lambda run: _metric_value(run, "test_r2_macro") or float("-inf"),
+        )
+        rows.append(_shuffled_regression_record(best_shuffled, baseline_r2))
     return _ordered_encoder_frame(rows)
 
 
 def main_regression_table(latest_regression: dict[str, dict]) -> pd.DataFrame:
     full = regression_full_table(latest_regression)
     rows = []
+    shuffled = full[full["encoder"] == "shuffled_y"]
+    if not shuffled.empty:
+        rows.extend(shuffled.to_dict("records"))
     kmer = full[full["feature_source"] == "kmer"]
     if not kmer.empty:
         rows.append(kmer.iloc[0].to_dict())
@@ -344,7 +393,7 @@ def combined_model_summary_table(
     regression: pd.DataFrame,
 ) -> pd.DataFrame:
     rows = []
-    for label in ("kmer", *PAPER_ENCODERS, "shuffled"):
+    for label in ("kmer", "shuffled_y", *PAPER_ENCODERS, "shuffled"):
         fam = family5[family5["encoder"] == label]
         reg = regression[regression["encoder"] == label]
         rows.append(
@@ -474,7 +523,7 @@ def registered_feature_sources() -> list[str]:
 
 
 def _encoder_rank(encoder: str) -> int:
-    order = ("kmer", *PAPER_ENCODERS, "shuffled", "length")
+    order = ("shuffled_y", "kmer", *PAPER_ENCODERS, "shuffled", "length")
     try:
         return order.index(encoder)
     except ValueError:

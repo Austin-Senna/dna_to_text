@@ -60,7 +60,7 @@ def main():
             missing.append(eid)
             continue
         with np.load(f) as data:
-            per_gene[eid] = {k: data[k] for k in ("mean", "max", "cls") if k in data.files}
+            per_gene[eid] = {k: data[k] for k in ("mean", "special_mean", "max", "cls") if k in data.files}
     if missing:
         raise RuntimeError(
             f"chunk reductions missing for {len(missing)} genes: "

@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-05-07T05:12:42+00:00",
+  "generated_at": "2026-05-07T17:59:22+00:00",
   "bundle": "paper",
   "inputs": {
-    "metrics": "/Users/austinsenna/.config/superpowers/worktrees/dna_to_text/dna-encoder-expansion/data/metrics.json",
-    "splits": "/Users/austinsenna/.config/superpowers/worktrees/dna_to_text/dna-encoder-expansion/data/splits.json",
-    "data_dir": "/Users/austinsenna/.config/superpowers/worktrees/dna_to_text/dna-encoder-expansion/data"
+    "metrics": "/Users/austinsenna/Documents/projects/dna_to_text/data/metrics.json",
+    "splits": "/Users/austinsenna/Documents/projects/dna_to_text/data/splits.json",
+    "data_dir": "/Users/austinsenna/Documents/projects/dna_to_text/data"
   },
   "tables": [
     "analysis/tables/dataset_composition.csv",
@@ -33,11 +33,10 @@
     "analysis/figures/model_tradeoff_f1_vs_r2.png",
     "analysis/figures/context_ablation_cds_tss_enformer.png",
     "analysis/figures/pooling_heatmap_family5.png",
-    "analysis/figures/confusion_best_family5.png"
+    "analysis/figures/confusion_best_family5.png",
+    "analysis/figures/umap_best_family5.png",
+    "analysis/figures/umap_dnabert2_tokenisation_compare.png"
   ],
   "missing_cells": [],
-  "skipped": [
-    "umap_best_family5.png",
-    "umap_dnabert2_tokenisation_compare.png"
-  ]
+  "skipped": []
 }
