@@ -42,6 +42,14 @@ Public external inputs and where to get them:
 
 Tracked report artefacts include paper-ready tables/figures under `analysis/`, cached split/metric/confusion summaries under `data/`, and the LaTeX manuscript submodule in `dna_to_text_paper/`. Intermediate sequence, embedding, and chunk caches are generated locally and ignored.
 
+Minimal Courseworks upload:
+
+```bash
+uv run python scripts/build_submission_bundle.py
+```
+
+This writes `dist/coms4761_dna_to_text_report.zip`, containing only `main.pdf` and a short `README.md` that points back to this GitHub repository for source code, scripts, tests, sample files, generated tables, and generated figures.
+
 ## Pipeline (high-level)
 
 Three stages: CPU data prep → encoder embedding → probes / baselines / matrix runs.

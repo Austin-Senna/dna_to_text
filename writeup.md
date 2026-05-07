@@ -19,7 +19,7 @@ One descriptive sentence. Working title:
 Keep under ~100 characters. Avoid the word "novel."
 
 ### Authors and affiliations
-Austin Senna · Andrew · Hayden · Columbia University, Department of [TBD] · contact email.
+Austin Senna · Andrew · Hayden · Columbia University, Department of Computer Science · contact email.
 
 ### Abstract (≤150 words; four labelled paragraphs)
 
