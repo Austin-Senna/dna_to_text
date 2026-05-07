@@ -205,6 +205,46 @@ NT-v2 TSS pilot:
 - Runtime: 54.1 seconds for 5 genes on MPS.
 - Estimated full 3,244-gene runtime: roughly 9 to 10 hours.
 
+### Full NT-v2 TSS Run
+
+NT-v2 has now been run on the full set of 3,244 TSS-centered windows. This
+creates the cleanest CDS-vs-TSS ablation because the encoder is held fixed and
+only the input context changes.
+
+| Feature source | Input context | Macro-F1 | Kappa | Accuracy | Ridge R2 |
+|---|---|---:|---:|---:|---:|
+| CDS 4-mer | CDS | 0.6722 | 0.7024 | 0.8172 | 0.1743 |
+| NT-v2 meanD | CDS | 0.8275 | 0.8214 | 0.8871 | 0.1882 |
+| NT-v2 meanG | CDS | 0.8257 | 0.8179 | 0.8850 | 0.1902 |
+| NT-v2 meanmean | CDS | 0.7997 | 0.7982 | 0.8727 | 0.1932 |
+| TSS 4-mer | TSS window | 0.2452 | 0.2050 | 0.5873 | 0.0413 |
+| TSS NT-v2 meanmean | TSS window | 0.4468 | 0.3754 | 0.6407 | 0.1174 |
+| TSS NT-v2 meanD | TSS window | 0.3481 | 0.2629 | 0.5339 | 0.0545 |
+| TSS NT-v2 meanG | TSS window | 0.4127 | 0.2848 | 0.5524 | 0.0605 |
+| Enformer trunk global | TSS window | 0.5450 | 0.4392 | 0.6448 | 0.1389 |
+| Enformer trunk center | TSS window | 0.5127 | 0.4541 | 0.6530 | 0.1425 |
+| Enformer tracks center | TSS window | 0.4862 | 0.4264 | 0.6386 | 0.0135 |
+
+The important result is that NT-v2 is strong on CDS but weak on TSS windows.
+The same model falls from 0.8275 macro-F1 on CDS meanD to 0.4468 macro-F1 for
+the best TSS pooling cell. Ridge-to-GenePT also drops from roughly 0.19 R2 on
+CDS NT-v2 to 0.1174 R2 for the best TSS NT-v2 cell.
+
+This is not just a negative result. It clarifies the biological substrate of
+the benchmark. The family5 labels are mostly protein-family labels, so they are
+much more directly encoded in CDS than in broad promoter/regulatory context.
+Expanding from CDS to a 196,608 bp TSS-centered window does not automatically
+increase recoverable gene-family signal; it often dilutes the relevant signal
+with a large amount of non-coding context.
+
+The best TSS NT-v2 feature still improves over the matched TSS 4-mer baseline
+for family5 classification, 0.4468 vs 0.2452 macro-F1, so the self-supervised
+encoder is extracting some useful signal from TSS context. However, Enformer
+trunk embeddings are stronger on the same TSS input, reaching 0.5450 macro-F1
+and 0.1425 R2. That makes Enformer useful as a supervised regulatory-context
+comparator, while preserving the core finding that CDS encoders dominate this
+protein-family-oriented benchmark.
+
 ### Why TSS Runs Are Expensive
 
 A 196,608 bp window is much longer than most canonical CDS inputs. Current
@@ -216,7 +256,8 @@ tokenization estimates for one TSS window:
 - GENA-LM: about 49,153 tokens, many more short chunks.
 
 This makes a full TSS encoder run feasible, but overnight-scale on laptop
-hardware. NT-v2 or HyenaDNA should be the first full TSS DNA-encoder run.
+hardware. NT-v2 has now been completed; HyenaDNA is the most reasonable
+optional second TSS DNA-encoder run if we want a long-context comparison.
 
 ## Main Conclusions So Far
 
@@ -229,9 +270,10 @@ contain gene-family signal beyond simple composition.
 
 ### 2. The paper should not claim generic "gene function from sequence"
 
-The Enformer/TSS results show that "sequence" is not a single thing. CDS and
-TSS windows ask different biological questions. CDS is protein-domain-rich;
-TSS context is regulatory. The benchmark recovers much more signal from CDS.
+The Enformer/TSS and NT-v2 TSS results show that "sequence" is not a single
+thing. CDS and TSS windows ask different biological questions. CDS is
+protein-domain-rich; TSS context is regulatory. The benchmark recovers much
+more signal from CDS, even when the same NT-v2 encoder is run on both contexts.
 
 Better claim:
 
@@ -251,15 +293,9 @@ The answer is nuanced:
 - Enformer does not beat CDS encoders on a CDS/protein-family task.
 - Therefore, input context matters as much as model sophistication.
 
-### 4. We need one full self-supervised TSS encoder run
+### 4. The full TSS NT-v2 run turns Enformer into a stronger comparator
 
-To make the TSS/Enformer argument airtight, the next useful experiment is one
-full TSS run with a self-supervised DNA encoder:
-
-- Preferred first choice: NT-v2 on TSS windows.
-- Backup/alternative: HyenaDNA on TSS windows.
-
-This would create the clean comparison:
+The full TSS NT-v2 run creates the clean comparison:
 
 | Input | Model | Question |
 |---|---|---|
@@ -269,13 +305,16 @@ This would create the clean comparison:
 | CDS | 4-mer | How much signal is simple CDS composition? |
 | TSS | 4-mer | How much signal is simple TSS composition? |
 
-Possible outcomes:
+Observed outcome:
 
-- If TSS NT-v2 is low like Enformer, the limitation is mostly input context.
-- If TSS NT-v2 beats Enformer, self-supervised representations may preserve
-  broader sequence information than supervised regulatory outputs.
-- If Enformer beats TSS NT-v2, supervised regulatory pretraining helps, but not
-  enough to match CDS-based family recovery.
+- TSS NT-v2 is far below CDS NT-v2, so the limitation is mostly input context
+  for this family5 label set.
+- TSS NT-v2 still beats TSS 4-mer, so the encoder extracts some information
+  beyond local composition.
+- Enformer trunk embeddings beat TSS NT-v2, so supervised regulatory
+  pretraining helps on TSS context.
+- Enformer still does not approach CDS NT-v2, so regulatory context is not a
+  substitute for coding sequence on this benchmark.
 
 ### 5. Pooling geometry is a real result
 
@@ -298,7 +337,8 @@ model-name optimism.
 Across a 3,244-gene human benchmark, frozen DNA encoders recover 5-way
 gene-family signal from coding sequence, with NT-v2 reaching 0.8275 macro-F1
 and outperforming a strong CDS 4-mer baseline. However, this signal is highly
-dependent on genomic context and model architecture: GENA-LM underperforms
+dependent on genomic context and model architecture: the same NT-v2 encoder
+drops to 0.4468 macro-F1 on TSS-centered windows, GENA-LM underperforms
 composition, HyenaDNA is competitive but pooling-sensitive, and Enformer
 features from TSS-centered regulatory windows recover only partial family
 signal despite supervised sequence-to-function pretraining.
@@ -309,7 +349,9 @@ The contrast between CDS and TSS inputs suggests that this benchmark primarily
 measures coding-sequence and protein-domain information rather than generic
 gene function from arbitrary genomic context. TSS-centered windows contain
 regulatory information and can support partial recovery, but the strongest
-family signal remains concentrated in the coding sequence.
+family signal remains concentrated in the coding sequence. The NT-v2 CDS-vs-TSS
+ablation is the strongest evidence for this point because it holds the encoder
+constant and changes only the sequence context.
 
 ### Discussion Point: Enformer
 
@@ -334,15 +376,76 @@ probe, but its signal is muted by the geometry and noise of text-summary
 embeddings. Classification produces a clearer and more interpretable test of
 family-level recovery.
 
+## Encoder Architecture Notes For Methods
+
+These are the model details added to the paper Methods after checking the
+GENA-LM and HyenaDNA papers/configs. Use this section when revising the Methods
+table or answering reviewer questions about model comparability.
+
+### GENA-LM base
+
+- Model used: `AIRI-Institute/gena-lm-bert-base-t2t`.
+- Citation: Fishman et al., 2025, *Nucleic Acids Research*, "GENA-LM: a
+  family of open-source foundational DNA language models for long sequences."
+- Architecture: BERT-12L masked-language model.
+- Approximate size: 110M parameters.
+- Hidden size: 768.
+- Attention heads: 12.
+- Vocabulary/tokenizer: 32,000-token BPE vocabulary.
+- Context window: 512 tokens, reported by the paper as roughly 4.5 kb after
+  BPE compression for the BERT-base GENA-LM models.
+- Training data for the `t2t` checkpoint: human T2T genome assembly plus
+  1000 Genomes SNP augmentation.
+- Important interpretation: GENA-LM is not just "another DNABERT-2"; it has a
+  different BPE tokenizer/training corpus, and in our benchmark it is an
+  informative negative result because it falls below the CDS 4-mer baseline.
+
+Sources:
+- Paper: https://academic.oup.com/nar/article/53/2/gkae1310/7954523
+- Public config: https://huggingface.co/AIRI-Institute/gena-lm-bert-base-t2t/blob/main/config.json
+
+### HyenaDNA large
+
+- Model used: `LongSafari/hyenadna-large-1m-seqlen-hf`.
+- Citation: Nguyen et al., 2023, NeurIPS, "HyenaDNA: Long-Range Genomic
+  Sequence Modeling at Single Nucleotide Resolution."
+- Architecture: attention-free causal next-nucleotide model using Hyena
+  sequence operators.
+- Tokenization: single-nucleotide tokens.
+- Layers: 8.
+- Hidden size / width: 256.
+- Approximate size: about 6.6M parameters for the 8-layer, 256-width long
+  HyenaDNA family reported in the paper.
+- Context window: up to 1M nucleotides for the `large-1m` checkpoint.
+- Training objective/data: next-token prediction on the human reference genome.
+- Important interpretation: this is much smaller than transformer DNA encoders
+  such as DNABERT-2 and NT-v2, so its competitive family5 result is notable;
+  compare it as an architecture/context/tokenization contrast, not as a
+  parameter-matched model.
+
+Sources:
+- Paper: https://papers.nips.cc/paper_files/paper/2023/file/86ab6927ee4ae9bde4247793c46797c7-Paper-Conference.pdf
+- Public config: https://huggingface.co/LongSafari/hyenadna-large-1m-seqlen-hf/blob/main/config.json
+
+### Caveat
+
+GENA-LM's architecture and context details are directly supported by the
+GENA-LM paper and public config. For HyenaDNA, the paper gives the family-level
+model/training details and the public Hugging Face config gives the exact
+checkpoint fields (`d_model`, `n_layer`, `max_seq_len`). Treat those together
+when describing the checkpoint.
+
 ## Next Recommended Experiments
 
-1. Run one full TSS self-supervised DNA encoder experiment, preferably NT-v2.
-2. Materialize TSS NT-v2 pooling datasets and evaluate family5 plus Ridge.
-3. Add a small CDS-vs-TSS ablation table:
+1. Add a small CDS-vs-TSS ablation table:
    - CDS 4-mer.
    - CDS NT-v2.
    - TSS 4-mer.
    - TSS NT-v2.
    - TSS Enformer trunk.
    - TSS Enformer tracks.
+2. Inspect the TSS NT-v2 confusion matrices to identify whether specific
+   families, especially kinases and ion channels, drive the TSS drop.
+3. Optionally run TSS NT-v2 maxmean and clsmean for a complete pooling sweep,
+   but the main CDS-vs-TSS conclusion is already supported by meanmean/meanD/meanG.
 4. Keep binary tasks and length-only rows in appendix/legacy, not the main story.
