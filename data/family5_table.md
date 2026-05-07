@@ -25,9 +25,9 @@ Main DNA encoder comparison. Binary tasks are legacy/appendix only.
 | Feature source | 5-way F1 | 5-way kappa | 5-way acc | Ridge R2 |
 |---|---:|---:|---:|---:|
 | `tss_nt_v2` | - | - | - | - |
-| `tss_nt_v2_meanmean` | - | - | - | - |
-| `tss_nt_v2_meanD` | - | - | - | - |
-| `tss_nt_v2_meanG` | - | - | - | - |
+| `tss_nt_v2_meanmean` | 0.4468 | 0.3754 | 0.6407 | 0.1174 |
+| `tss_nt_v2_meanD` | 0.3481 | 0.2629 | 0.5339 | 0.0545 |
+| `tss_nt_v2_meanG` | 0.4127 | 0.2848 | 0.5524 | 0.0605 |
 
 ## Enformer Supervised Sequence-To-Function Comparator
 

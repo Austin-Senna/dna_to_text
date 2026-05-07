@@ -33,3 +33,6 @@ All cached Ridge cells with delta versus 4-mer.
 | enformer_trunk_center | baseline | enformer_trunk_center | 0.1425 | -0.0318 | 0.9275 | 0.9200 | 1000.0000 | 2026-05-06T19:58:25+00:00 |
 | enformer_trunk_global | baseline | enformer_trunk_global | 0.1389 | -0.0353 | 0.9271 | 0.9192 | 100.0000 | 2026-05-06T19:58:13+00:00 |
 | enformer_tss_4mer | baseline | enformer_tss_4mer | 0.0413 | -0.1329 | 0.9173 | 0.9148 | 0.0100 | 2026-05-06T16:49:59+00:00 |
+| tss_nt_v2_meanD | baseline | tss_nt_v2_meanD | 0.0545 | -0.1197 | 0.9190 | 0.9142 | 10.0000 | 2026-05-07T02:57:22+00:00 |
+| tss_nt_v2_meanG | baseline | tss_nt_v2_meanG | 0.0605 | -0.1138 | 0.9197 | 0.9146 | 10.0000 | 2026-05-07T03:15:01+00:00 |
+| tss_nt_v2_meanmean | baseline | tss_nt_v2_meanmean | 0.1174 | -0.0569 | 0.9252 | 0.9169 | 0.1000 | 2026-05-07T02:47:47+00:00 |

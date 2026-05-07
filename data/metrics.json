@@ -4178,5 +4178,254 @@
     "test_mean_cosine": 0.917107105255127,
     "test_median_cosine": 0.910784900188446,
     "test_r2_macro": 0.01353320199996233
+  },
+  {
+    "run_id": "logistic_tss_nt_v2_meanmean_family5_2026-05-07T02:47:46+00:00",
+    "timestamp": "2026-05-07T02:47:46+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_nt_v2_meanmean",
+    "feature_source": "tss_nt_v2_meanmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.18909963985594236
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.2830446859678231
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.31000018707223925
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.42805940264548414
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.4937248810828688
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.4736636665184134
+      }
+    ],
+    "test_macro_f1": 0.44684646358329605,
+    "test_kappa": 0.37539850637976646,
+    "test_balanced_accuracy": 0.4202371099094647,
+    "test_accuracy": 0.6406570841889117,
+    "test_per_class_accuracy": {
+      "gpcr": 0.6629213483146067,
+      "immune": 0.2608695652173913,
+      "ion": 0.13333333333333333,
+      "kinase": 0.16666666666666666,
+      "tf": 0.8773946360153256
+    }
+  },
+  {
+    "run_id": "probe_2026-05-07T02:47:47+00:00",
+    "timestamp": "2026-05-07T02:47:47+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_tss_nt_v2_meanmean.parquet",
+    "alpha": 0.1,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.920932412147522
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9254785776138306
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9252461194992065
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9221298098564148
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9177474975585938
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9146791100502014
+      }
+    ],
+    "test_mean_cosine": 0.9251552224159241,
+    "test_median_cosine": 0.916850745677948,
+    "test_r2_macro": 0.11735475063323975
+  },
+  {
+    "run_id": "logistic_tss_nt_v2_meanD_family5_2026-05-07T02:57:19+00:00",
+    "timestamp": "2026-05-07T02:57:19+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_nt_v2_meanD",
+    "feature_source": "tss_nt_v2_meanD",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.22226240707253364
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.2795463632728727
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.35276618512573565
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.36349710373080385
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.35740682082145503
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.3675826078879664
+      }
+    ],
+    "test_macro_f1": 0.3480881884480752,
+    "test_kappa": 0.26294770248286536,
+    "test_balanced_accuracy": 0.34262921508748034,
+    "test_accuracy": 0.5338809034907598,
+    "test_per_class_accuracy": {
+      "gpcr": 0.5393258426966292,
+      "immune": 0.08695652173913043,
+      "ion": 0.1,
+      "kinase": 0.2857142857142857,
+      "tf": 0.7011494252873564
+    }
+  },
+  {
+    "run_id": "probe_2026-05-07T02:57:22+00:00",
+    "timestamp": "2026-05-07T02:57:22+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_tss_nt_v2_meanD.parquet",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8661047220230103
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.894186794757843
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9136069416999817
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9191357493400574
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9175038933753967
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9150285124778748
+      }
+    ],
+    "test_mean_cosine": 0.919010579586029,
+    "test_median_cosine": 0.9141708612442017,
+    "test_r2_macro": 0.0545431487262249
+  },
+  {
+    "run_id": "logistic_tss_nt_v2_meanG_family5_2026-05-07T03:14:58+00:00",
+    "timestamp": "2026-05-07T03:14:58+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_nt_v2_meanG",
+    "feature_source": "tss_nt_v2_meanG",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.2702428117522457
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.30311849111805034
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.3739018420889932
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.38367956059088765
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.396071000906889
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.38507911563604474
+      }
+    ],
+    "test_macro_f1": 0.4126683786991526,
+    "test_kappa": 0.28478846672056046,
+    "test_balanced_accuracy": 0.3993819542877037,
+    "test_accuracy": 0.5523613963039015,
+    "test_per_class_accuracy": {
+      "gpcr": 0.5842696629213483,
+      "immune": 0.30434782608695654,
+      "ion": 0.13333333333333333,
+      "kinase": 0.27380952380952384,
+      "tf": 0.7011494252873564
+    }
+  },
+  {
+    "run_id": "probe_2026-05-07T03:15:01+00:00",
+    "timestamp": "2026-05-07T03:15:01+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_tss_nt_v2_meanG.parquet",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.814897894859314
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8728130459785461
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9092114567756653
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9205247759819031
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9190861582756042
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9159252643585205
+      }
+    ],
+    "test_mean_cosine": 0.919714629650116,
+    "test_median_cosine": 0.9146258234977722,
+    "test_r2_macro": 0.06049267575144768
   }
 ]

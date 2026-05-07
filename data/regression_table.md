@@ -35,9 +35,9 @@ Secondary cross-modal probe: frozen sequence features are mapped to 1536-d GeneP
 | Feature source | Ridge R2 | Delta vs 4-mer | Mean cosine | Median cosine | Alpha |
 |---|---:|---:|---:|---:|---:|
 | `tss_nt_v2` | - | - | - | - | - |
-| `tss_nt_v2_meanmean` | - | - | - | - | - |
-| `tss_nt_v2_meanD` | - | - | - | - | - |
-| `tss_nt_v2_meanG` | - | - | - | - | - |
+| `tss_nt_v2_meanmean` | 0.1174 | -0.0569 | 0.9252 | 0.9169 | 0.100 |
+| `tss_nt_v2_meanD` | 0.0545 | -0.1197 | 0.9190 | 0.9142 | 10.000 |
+| `tss_nt_v2_meanG` | 0.0605 | -0.1138 | 0.9197 | 0.9146 | 10.000 |
 | `tss_nt_v2_maxmean` | - | - | - | - | - |
 | `tss_nt_v2_clsmean` | - | - | - | - | - |
 
