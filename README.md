@@ -2,6 +2,8 @@
 
 Cross-modal probing of frozen DNA sequence representations against gene-family labels and GenePT text embeddings. The main paper path compares DNABERT-2, NT-v2, GENA-LM, and HyenaDNA on a 3244-gene 5-family classification task, with Enformer reported separately as a supervised sequence-to-function comparator.
 
+Project repository: https://github.com/Austin-Senna/dna_to_text
+
 **Where to start reading:**
 - `project.md` — original research idea and corpus.
 - `framework.md` — experimental design (probes, baselines, metrics).
@@ -10,6 +12,8 @@ Cross-modal probing of frozen DNA sequence representations against gene-family l
 - `next_steps.md` — phase log + what's open.
 
 ## Setup
+
+Requires Python 3.11 or newer.
 
 ```bash
 uv venv
@@ -21,6 +25,22 @@ Use `uv run ...` for commands unless you have already activated `.venv/`.
 GenePT artifacts live in `GenePT_emebdding_v2/` (gitignored):
 - `GenePT_gene_embedding_ada_text.pickle`
 - `NCBI_summary_of_genes.json`
+
+## Submission checklist
+
+Small sample run:
+- Input/code path: `demo/cross_modal.py` selects four held-out genes from the frozen split and cached feature tables.
+- Output file: `demo/output.md` is the tracked sample output for the report/demo.
+- Smoke analysis command: `uv run python scripts/build_analysis_artifacts.py --out /tmp/dna_analysis_smoke --skip-umap --overwrite`.
+
+Public external inputs and where to get them:
+- GenePT v2 artifacts: Zenodo DOI `10.5281/zenodo.10833191`; unzip `GenePT_emebdding_v2.zip` into `GenePT_emebdding_v2/`.
+- HGNC complete gene set: downloaded and cached by `src/data_loader/dataset_loader.py` from `https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt`.
+- Ensembl canonical CDS: fetched and cached by `src/data_loader/sequence_fetcher.py` from Ensembl REST `/lookup/id/{gene_id}` and `/sequence/id/{transcript_id}?type=cds`.
+- Encoder checkpoints: Hugging Face model IDs `zhihan1996/DNABERT-2-117M`, `InstaDeepAI/nucleotide-transformer-v2-100m-multi-species`, `AIRI-Institute/gena-lm-bert-base-t2t`, and `LongSafari/hyenadna-large-1m-seqlen-hf`.
+- Optional Enformer comparator: install `enformer-pytorch` with `uv pip install enformer-pytorch`.
+
+Tracked report artefacts include paper-ready tables/figures under `analysis/`, cached split/metric/confusion summaries under `data/`, and the LaTeX manuscript submodule in `dna_to_text_paper/`. Intermediate sequence, embedding, and chunk caches are generated locally and ignored.
 
 ## Pipeline (high-level)
 
@@ -86,7 +106,8 @@ src/                  Reusable Python packages (data_loader, splits, linear_trai
                       binary_tasks). One responsibility per package.
 scripts/              CLI entrypoints — one script per experiment / run.
 data/                 Artefacts. Small ones (metrics.json, splits.json, binary subset JSONs,
-                      confusion matrices) are tracked; large parquets/embeddings are gitignored.
+                      confusion matrices) plus selected paper-ready feature/probe caches are tracked;
+                      intermediate sequence and chunk caches are gitignored.
 analysis/             Generated paper-ready analysis bundle from `scripts/build_analysis_artifacts.py`.
 docs/superpowers/     Specs and implementation plans (`specs/`, `plans/`).
 demo/                 Zero-shot demo: predicted family + neighbours for sample test genes.
