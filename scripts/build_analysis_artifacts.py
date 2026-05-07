@@ -35,6 +35,48 @@ ENFORMER_SOURCES = (
     "enformer_trunk_center",
     "enformer_tracks_center",
 )
+CONTEXT_ABLATION_SPECS = (
+    {
+        "label": "CDS 4-mer",
+        "context": "CDS",
+        "model_group": "composition",
+        "family5_feature_source": "kmer",
+        "regression_dataset": "kmer",
+        "regression_feature_source": "kmer",
+    },
+    {
+        "label": "CDS NT-v2 meanD",
+        "context": "CDS",
+        "model_group": "self-supervised encoder",
+        "family5_feature_source": "nt_v2_meanD",
+        "regression_dataset": "dataset_nt_v2_meanD.parquet",
+        "regression_feature_source": "nt_v2_meanD",
+    },
+    {
+        "label": "TSS 4-mer",
+        "context": "TSS window",
+        "model_group": "composition",
+        "family5_feature_source": "enformer_tss_4mer",
+        "regression_dataset": "dataset_enformer_tss_4mer.parquet",
+        "regression_feature_source": "enformer_tss_4mer",
+    },
+    {
+        "label": "TSS NT-v2 meanmean",
+        "context": "TSS window",
+        "model_group": "self-supervised encoder",
+        "family5_feature_source": "tss_nt_v2_meanmean",
+        "regression_dataset": "dataset_tss_nt_v2_meanmean.parquet",
+        "regression_feature_source": "tss_nt_v2_meanmean",
+    },
+    {
+        "label": "Enformer trunk",
+        "context": "TSS window",
+        "model_group": "supervised comparator",
+        "family5_feature_source": "enformer_trunk_global",
+        "regression_dataset": "dataset_enformer_trunk_center.parquet",
+        "regression_feature_source": "enformer_trunk_center",
+    },
+)
 DATASET_CANDIDATES = (
     DATA / "dataset_nt_v2_meanD.parquet",
     DATA / "dataset_hyena_dna_meanG.parquet",
@@ -320,6 +362,40 @@ def combined_model_summary_table(
     return pd.DataFrame(rows).dropna(how="all", subset=["family5_feature_source", "regression_feature_source"])
 
 
+def _regression_run_for_dataset(latest_regression: dict[str, dict], dataset: str) -> dict | None:
+    if dataset in latest_regression:
+        return latest_regression[dataset]
+    data_prefixed = f"data/{dataset}"
+    if data_prefixed in latest_regression:
+        return latest_regression[data_prefixed]
+    return None
+
+
+def context_ablation_table(
+    latest_logistic: dict[tuple[str, str, bool], dict],
+    latest_regression: dict[str, dict],
+) -> pd.DataFrame:
+    rows = []
+    for spec in CONTEXT_ABLATION_SPECS:
+        family_feature = spec["family5_feature_source"]
+        family_run = latest_logistic.get((family_feature, "family5", False))
+        regression_run = _regression_run_for_dataset(latest_regression, spec["regression_dataset"])
+        rows.append(
+            {
+                "label": spec["label"],
+                "context": spec["context"],
+                "model_group": spec["model_group"],
+                "family5_feature_source": family_feature,
+                "regression_feature_source": spec["regression_feature_source"],
+                "family5_macro_f1": _metric_value(family_run, "test_macro_f1"),
+                "family5_kappa": None if family_run is None else _family5_record(family_feature, family_run)["test_kappa"],
+                "family5_accuracy": _metric_value(family_run, "test_accuracy"),
+                "ridge_r2_macro": _metric_value(regression_run, "test_r2_macro"),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def legacy_binary_appendix_table(latest_logistic: dict[tuple[str, str, bool], dict]) -> pd.DataFrame:
     rows = []
     for (feature_source, task, shuffled), run in latest_logistic.items():
@@ -537,6 +613,46 @@ def plot_tradeoff(combined: pd.DataFrame, out: Path, overwrite: bool) -> Path | 
     return _savefig(fig, out, overwrite)
 
 
+def plot_context_ablation(context: pd.DataFrame, out: Path, overwrite: bool) -> Path | None:
+    required = ["family5_macro_f1", "ridge_r2_macro"]
+    df = context.dropna(subset=required)
+    if df.empty:
+        return None
+    colours = {
+        "composition": "#7a7a7a",
+        "self-supervised encoder": "#2f6f9f",
+        "supervised comparator": "#3b7f5c",
+    }
+    y = np.arange(len(df))
+    fig, axes = plt.subplots(1, 2, figsize=(10.6, 4.8), sharey=True)
+    panels = (
+        (axes[0], "family5_macro_f1", "Family5 macro-F1", 1.0),
+        (axes[1], "ridge_r2_macro", "Ridge macro R2", 0.24),
+    )
+    for ax, metric, title, xmax in panels:
+        values = df[metric].astype(float).to_numpy()
+        bar_colours = [colours[group] for group in df["model_group"]]
+        ax.barh(y, values, color=bar_colours)
+        ax.set_xlim(0, xmax)
+        ax.set_xlabel(title)
+        ax.set_title(title)
+        for i, value in enumerate(values):
+            ax.text(value + xmax * 0.015, i, f"{value:.3f}", va="center", ha="left", fontsize=8)
+        ax.grid(axis="x", color="#dddddd", linewidth=0.6)
+        ax.set_axisbelow(True)
+    axes[0].set_yticks(y)
+    axes[0].set_yticklabels(df["label"].tolist())
+    axes[0].invert_yaxis()
+    handles = [
+        plt.Line2D([0], [0], marker="s", linestyle="", color=color, markersize=8, label=label)
+        for label, color in colours.items()
+    ]
+    fig.legend(handles=handles, loc="lower center", ncol=3, frameon=False)
+    fig.suptitle("Coding sequence vs TSS context")
+    fig.tight_layout(rect=[0, 0.08, 1, 0.95])
+    return _savefig(fig, out, overwrite)
+
+
 def plot_pooling_heatmap(pooling: pd.DataFrame, out: Path, overwrite: bool) -> Path | None:
     df = pooling.dropna(subset=["test_macro_f1"])
     if df.empty:
@@ -747,6 +863,7 @@ def build_analysis_artifacts(
     family5 = main_family5_table(latest_logistic)
     regression = main_regression_table(latest_regression)
     combined = combined_model_summary_table(family5, regression)
+    context_ablation = context_ablation_table(latest_logistic, latest_regression)
     pooling = pooling_sweep_family5_table(latest_logistic)
     regression_full = regression_full_table(latest_regression)
     legacy = legacy_binary_appendix_table(latest_logistic)
@@ -757,6 +874,12 @@ def build_analysis_artifacts(
         ("main_family5", family5, "Main Family5", "Best cached family5 cell per encoder plus baselines."),
         ("main_regression", regression, "Main Regression", "Best cached Ridge-to-GenePT cell per encoder plus 4-mer baseline."),
         ("combined_model_summary", combined, "Combined Model Summary", "Family5 and Ridge headline metrics side by side."),
+        (
+            "context_ablation",
+            context_ablation,
+            "Context Ablation",
+            "CDS, TSS, and Enformer context comparison for family5 and Ridge probes.",
+        ),
         ("pooling_sweep_family5", pooling, "Pooling Sweep Family5", "All cached encoder-pooling family5 cells."),
         ("regression_full", regression_full, "Regression Full", "All cached Ridge cells with delta versus 4-mer."),
         ("legacy_binary_appendix", legacy, "Legacy Binary Appendix", "Cached binary-task results retained for appendix use."),
@@ -771,6 +894,14 @@ def build_analysis_artifacts(
         ("family5_kappa.png", lambda: plot_family5_bar(family5, "test_kappa", figures_dir / "family5_kappa.png", overwrite)),
         ("ridge_r2.png", lambda: plot_ridge_r2(regression, figures_dir / "ridge_r2.png", overwrite)),
         ("model_tradeoff_f1_vs_r2.png", lambda: plot_tradeoff(combined, figures_dir / "model_tradeoff_f1_vs_r2.png", overwrite)),
+        (
+            "context_ablation_cds_tss_enformer.png",
+            lambda: plot_context_ablation(
+                context_ablation,
+                figures_dir / "context_ablation_cds_tss_enformer.png",
+                overwrite,
+            ),
+        ),
         ("pooling_heatmap_family5.png", lambda: plot_pooling_heatmap(pooling, figures_dir / "pooling_heatmap_family5.png", overwrite)),
         ("confusion_best_family5.png", lambda: plot_confusion_best_family5(family5, figures_dir / "confusion_best_family5.png", overwrite)),
     ]
