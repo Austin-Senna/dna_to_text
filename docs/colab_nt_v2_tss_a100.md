@@ -66,7 +66,12 @@ FASTA files, skip the Ensembl fetch step entirely.
 from google.colab import drive
 drive.mount("/content/drive")
 
+import shutil
+from pathlib import Path
+
 %cd /content/dna_to_text
+shutil.rmtree("data/enformer_windows", ignore_errors=True)
+Path("data/dataset_enformer_tss_4mer.parquet").unlink(missing_ok=True)
 !tar -xzf /content/drive/MyDrive/tss_windows_cache.tar.gz -C data
 !find data/enformer_windows -maxdepth 1 -name '*.fa' | wc -l
 !ls -lh data/dataset_enformer_tss_4mer.parquet
