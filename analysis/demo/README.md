@@ -14,9 +14,9 @@ characterised, calibration) and 2 with the shortest non-trivial summaries
 they are only used to choose which test genes to demo and to display the
 retrieved neighbours alongside their actual NCBI text.
 
-Output: `demo/output.md` (markdown, ready to drop into the deck).
+Output: `analysis/demo/output.md` (markdown, ready to drop into the deck).
 
-Generate: `uv run python demo/cross_modal.py`
+Generate: `uv run python analysis/demo/cross_modal.py`
 
 Latest run: 4/4 family predictions correct (JAK2/kinase 0.98, TRAF6/tf 0.76,
 ZNF839/tf 0.94, ZNHIT2/tf 0.90). The retrieved summaries are the more

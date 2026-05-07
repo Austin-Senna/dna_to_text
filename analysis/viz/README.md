@@ -11,7 +11,7 @@ Visible: clean TF cluster, clean GPCR cluster, more scattered kinase/ion/
 immune (consistent with the per-class accuracies in
 `data/confusion_5way_nt_v2_meanD.json`).
 
-Generate: `uv run python viz/umap_meanD.py`
+Generate: `uv run python analysis/viz/umap_meanD.py`
 
 ## `figures/umap_dnabert2_tokenisation_compare.png`
 
@@ -22,4 +22,4 @@ chunk boundary tokens differ. AFTER shows visibly more family separation,
 consistent with DNABERT-2's +0.05–0.07 macro-F1 lift on classification
 and +0.022 R² lift on regression.
 
-Generate: `uv run python viz/umap_tokenisation_compare.py`
+Generate: `uv run python analysis/viz/umap_tokenisation_compare.py`

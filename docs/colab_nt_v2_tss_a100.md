@@ -9,7 +9,8 @@ This is the Colab path for the CDS-vs-TSS ablation:
 The scripts cache one `.npz` per gene, so the extraction is resumable. If Colab
 disconnects, rerun the same extraction command and it will skip cached genes.
 
-Prefer an importable notebook? Use `notebooks/nt_v2_tss_a100_colab.ipynb`.
+The earlier importable notebook was removed; this document is the maintained
+Colab command log.
 
 ## 0. Start The Runtime
 

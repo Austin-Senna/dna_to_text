@@ -30,8 +30,8 @@ GenePT artifacts live in `GenePT_emebdding_v2/` (gitignored):
 ## Submission checklist
 
 Small sample run:
-- Input/code path: `demo/cross_modal.py` selects four held-out genes from the frozen split and cached feature tables.
-- Output file: `demo/output.md` is the tracked sample output for the report/demo.
+- Input/code path: `analysis/demo/cross_modal.py` selects four held-out genes from the frozen split and cached feature tables.
+- Output file: `analysis/demo/output.md` is the tracked sample output for the report/demo.
 - Smoke analysis command: `uv run python scripts/build_analysis_artifacts.py --out /tmp/dna_analysis_smoke --skip-umap --overwrite`.
 
 Public external inputs and where to get them:
@@ -49,7 +49,7 @@ Minimal Courseworks upload:
 uv run python scripts/build_submission_bundle.py
 ```
 
-This writes `dist/coms4761_dna_to_text_report.zip`, containing only `main.pdf` and a short `README.md` that points back to this GitHub repository for source code, scripts, tests, sample files, generated tables, and generated figures.
+This writes `dist/coms4761_dna_to_text_report.zip`, containing only `dna_to_text.pdf` and a short `README.md` that points back to this GitHub repository for source code, scripts, tests, sample files, generated tables, and generated figures.
 
 ## Pipeline (high-level)
 
@@ -91,9 +91,9 @@ uv run python scripts/build_family5_table.py
 uv run python scripts/build_regression_table.py
 
 # 7. Demo + visualisations for the deck
-uv run python demo/zero_shot.py                  # demo/output.md
-uv run python viz/umap_meanD.py                  # viz/figures/umap_nt_v2_meanD.png
-uv run python viz/umap_tokenisation_compare.py   # viz/figures/umap_dnabert2_tokenisation_compare.png
+uv run python analysis/demo/zero_shot.py                  # analysis/demo/output.md
+uv run python analysis/viz/umap_meanD.py                  # analysis/viz/figures/umap_nt_v2_meanD.png
+uv run python analysis/viz/umap_tokenisation_compare.py   # analysis/viz/figures/umap_dnabert2_tokenisation_compare.png
 
 # 8. Optional TSS-context self-supervised encoder ablation
 uv run python scripts/run_tss_multi_pool_extract.py --encoder nt_v2 --device auto
@@ -117,10 +117,12 @@ scripts/              CLI entrypoints — one script per experiment / run.
 data/                 Artefacts. Small ones (metrics.json, splits.json, binary subset JSONs,
                       confusion matrices) plus selected paper-ready feature/probe caches are tracked;
                       intermediate sequence and chunk caches are gitignored.
-analysis/             Generated paper-ready analysis bundle from `scripts/build_analysis_artifacts.py`.
+analysis/             Generated paper-ready tables/figures plus report-facing demos and visualisations.
+  demo/               Zero-shot demo: predicted family + neighbours for sample test genes.
+  figures/            Generated main and supplementary paper figures.
+  tables/             Generated CSV and Markdown analysis tables.
+  viz/                UMAP and confusion-matrix scripts for deck/report figures.
 docs/                 Project notes, findings, presentation materials, and implementation plans.
-demo/                 Zero-shot demo: predicted family + neighbours for sample test genes.
-viz/                  UMAP figures for the deck.
 ```
 
 ## Troubleshooting

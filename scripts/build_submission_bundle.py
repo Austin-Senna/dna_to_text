@@ -22,7 +22,7 @@ This folder contains the Bioinformatics-style final report PDF for the project
 
 ## Files
 
-- `main.pdf` - final report PDF.
+- `dna_to_text.pdf` - final report PDF.
 - `README.md` - this file.
 
 ## Project Repository
@@ -38,8 +38,8 @@ Useful repository paths:
 - `README.md` - setup, public data sources, and pipeline commands.
 - `analysis/figures/` - generated main and supplementary figures.
 - `analysis/tables/` - generated CSV and Markdown analysis tables.
-- `demo/cross_modal.py` - small sample run script.
-- `demo/output.md` - small sample generated output.
+- `analysis/demo/cross_modal.py` - small sample run script.
+- `analysis/demo/output.md` - small sample generated output.
 
 ## Quick Run Commands
 
@@ -67,7 +67,7 @@ def build_bundle(out_root: Path, name: str) -> tuple[Path, Path]:
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True)
 
-    shutil.copy2(REPO_ROOT / "dna_to_text_paper" / "main.pdf", out_dir / "main.pdf")
+    shutil.copy2(REPO_ROOT / "dna_to_text.pdf", out_dir / "dna_to_text.pdf")
     (out_dir / "README.md").write_text(README)
 
     archive_base = out_root / name

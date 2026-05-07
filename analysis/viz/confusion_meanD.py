@@ -11,7 +11,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA = REPO_ROOT / "data"
 SRC = DATA / "confusion_5way_nt_v2_meanD.json"
 OUT = Path(__file__).resolve().parent / "figures" / "confusion_5way_nt_v2_meanD.png"

@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression, Ridge
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA = REPO_ROOT / "data"
 OUT = Path(__file__).resolve().parent / "output.md"
 

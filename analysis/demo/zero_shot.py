@@ -12,7 +12,7 @@ Mechanism:
        characterised, novelty cohort).
     3. For each, print: predicted family + per-class probabilities; top-5
        nearest train+val gene neighbours by NT-v2_meanD embedding cosine.
-    4. Render a markdown table to demo/output.md for embedding in the deck.
+    4. Render a markdown table to analysis/demo/output.md for embedding in the deck.
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA = REPO_ROOT / "data"
 OUT = Path(__file__).resolve().parent / "output.md"
 

@@ -1,6 +1,6 @@
 # Writeup — direction document
 
-This is the **structure and content guide** for the project writeup, formatted as a *Bioinformatics* Application Note (≤2 pages main text + supplementary). It is not the final prose — fill each section against this scaffold using the numbers in `docs/findings/findings.md`, `data/full_table.md`, `data/kappa_summary.md`, and the figures in `viz/figures/` and `demo/`.
+This is the **structure and content guide** for the project writeup, formatted as a *Bioinformatics* Application Note (≤2 pages main text + supplementary). It is not the final prose — fill each section against this scaffold using the numbers in `docs/findings/findings.md`, `data/full_table.md`, `data/kappa_summary.md`, and the figures in `analysis/viz/figures/` and `analysis/demo/`.
 
 **Audience:** a stranger with a general understanding of the field but no knowledge of this project. Self-contained.
 
@@ -50,10 +50,10 @@ The detail is in the GitHub repo; this section gives the reader enough to evalua
 
 This is the longest section. Two figures + one table is plenty.
 
-- **Section 3.1 — Family classification.** Lead with the strong result. Reference **Table 2** (5-way classification, best variant per encoder + 4-mer + length + shuffled, columns: macro-F1, κ, Δκ vs 4-mer). Numbers in `data/full_table.md`. State: NT-v2 + meanD reaches macro-F1 0.828 / κ 0.821, Δκ +0.119 over k-mer; DNABERT-2 best is +0.020. Anti-baseline κ +0.048 — the headroom is real. **Figure 1**: UMAP of NT-v2 meanD embeddings coloured by family, showing five clean clusters (`viz/figures/umap_nt_v2_meanD.png`).
+- **Section 3.1 — Family classification.** Lead with the strong result. Reference **Table 2** (5-way classification, best variant per encoder + 4-mer + length + shuffled, columns: macro-F1, κ, Δκ vs 4-mer). Numbers in `data/full_table.md`. State: NT-v2 + meanD reaches macro-F1 0.828 / κ 0.821, Δκ +0.119 over k-mer; DNABERT-2 best is +0.020. Anti-baseline κ +0.048 — the headroom is real. **Figure 1**: UMAP of NT-v2 meanD embeddings coloured by family, showing five clean clusters (`analysis/viz/figures/umap_nt_v2_meanD.png`).
 - **Section 3.2 — Cross-modal alignment to text.** Honest result. Best DNABERT-2 R² 0.210 vs 4-mer 0.174 (ΔR² +0.036); NT-v2 0.193. Note the encoder ranking *flips* between tasks. Frame this as evidence that pretraining recipe shapes which downstream task each encoder wins — not as a contradiction. R² of 0.21 is modest and bounded by target noise; this is a partial, not decisive, recovery.
-- **Section 3.3 — Recipe-shape-readout.** Brief paragraph connecting the per-task encoder rankings back to the recipe table from Section 2. NT-v2's broader pretraining (850 species) and longer context favour global family signal; DNABERT-2's BPE may favour finer-grained motif units that align with text. **Figure 2** (optional, supplementary if space): two-panel UMAP showing DNABERT-2 before / after the chunk-boundary tokenisation fix (`viz/figures/umap_dnabert2_tokenisation_compare.png`) — concrete illustration that recipe details (here, whether CLS was pretrained as a sequence summary) gate what a linear probe can read out.
-- **Section 3.4 — Zero-shot demo.** One sentence. Four held-out / sparsely-annotated genes (e.g., ZNF839, ZNHIT2) classified correctly via the family-classifier head. Reference `demo/output.md` for full predictions.
+- **Section 3.3 — Recipe-shape-readout.** Brief paragraph connecting the per-task encoder rankings back to the recipe table from Section 2. NT-v2's broader pretraining (850 species) and longer context favour global family signal; DNABERT-2's BPE may favour finer-grained motif units that align with text. **Figure 2** (optional, supplementary if space): two-panel UMAP showing DNABERT-2 before / after the chunk-boundary tokenisation fix (`analysis/viz/figures/umap_dnabert2_tokenisation_compare.png`) — concrete illustration that recipe details (here, whether CLS was pretrained as a sequence summary) gate what a linear probe can read out.
+- **Section 3.4 — Zero-shot demo.** One sentence. Four held-out / sparsely-annotated genes (e.g., ZNF839, ZNHIT2) classified correctly via the family-classifier head. Reference `analysis/demo/output.md` for full predictions.
 
 ### 4 Discussion (~150 words)
 
@@ -85,14 +85,14 @@ Use the *Bioinformatics* numeric or author-year style. At minimum:
 - **Table 2.** Headline results — best variant per encoder vs baselines, three classification tasks + regression in one matrix; columns include macro-F1, κ, R², and Δ vs 4-mer. Condense from `data/full_table.md`.
 
 **Figures (in main text):**
-- **Figure 1.** UMAP of NT-v2 meanD embeddings, coloured by family. File: `viz/figures/umap_nt_v2_meanD.png`.
-- **Figure 2.** Two-panel before/after tokenisation UMAP for DNABERT-2 (or move to supplementary). File: `viz/figures/umap_dnabert2_tokenisation_compare.png`.
+- **Figure 1.** UMAP of NT-v2 meanD embeddings, coloured by family. File: `analysis/viz/figures/umap_nt_v2_meanD.png`.
+- **Figure 2.** Two-panel before/after tokenisation UMAP for DNABERT-2 (or move to supplementary). File: `analysis/viz/figures/umap_dnabert2_tokenisation_compare.png`.
 
 **Supplementary (in compressed folder):**
 - **Supp. Table S1.** Full results matrix — every (encoder × pooling × task) cell, both metrics. Use `data/full_table.md`.
 - **Supp. Table S2.** Cohen's κ summary per task. Use `data/kappa_summary.md`.
 - **Supp. Note S1.** Pooling sweep details and the chunk-boundary tokenisation finding. Source: `docs/findings/findings.md` Phase 4b.
-- **Supp. Note S2.** Zero-shot demo predictions on poorly-characterised genes. Source: `demo/output.md`.
+- **Supp. Note S2.** Zero-shot demo predictions on poorly-characterised genes. Source: `analysis/demo/output.md`.
 
 ---
 
@@ -105,8 +105,8 @@ The compressed folder uploaded to Courseworks must contain:
 3. **All source code / scripts.** Already in the repo. Includes:
    - `src/` — data loader, pooling, probes, baselines.
    - `scripts/` — runners for each phase, including `build_full_table.py`, `compute_kappa.py`, `train_logistic_probe.py`, `train_ridge_probe.py`.
-   - `viz/` — code that generates Figures 1–2.
-   - `demo/zero_shot.py` — code for the zero-shot demo.
+   - `analysis/viz/` — code that generates Figures 1–2.
+   - `analysis/demo/zero_shot.py` — code for the zero-shot demo.
 4. **Sample small input and output files.** Make sure the repo includes:
    - A small input sample (e.g., a 10-gene parquet slice or the first N rows of `data/dataset.parquet`).
    - The corresponding output (small `metrics.json` slice, a sample confusion matrix, the demo `output.md`).
