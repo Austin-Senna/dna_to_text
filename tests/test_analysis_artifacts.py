@@ -53,6 +53,15 @@ class AnalysisArtifactTests(unittest.TestCase):
             {
                 "model": "logistic_probe",
                 "timestamp": "2026-01-01T00:00:00+00:00",
+                "encoder": "kmer",
+                "task": "family5",
+                "test_macro_f1": 0.67,
+                "test_kappa": 0.70,
+                "test_accuracy": 0.82,
+            },
+            {
+                "model": "logistic_probe",
+                "timestamp": "2026-01-01T00:00:00+00:00",
                 "encoder": "nt_v2_meanG",
                 "task": "family5",
                 "test_macro_f1": 0.80,
@@ -83,9 +92,57 @@ class AnalysisArtifactTests(unittest.TestCase):
 
         self.assertEqual(rows.iloc[0]["encoder"], "nt_v2")
         self.assertEqual(rows.iloc[0]["feature_source"], "nt_v2_meanD")
+        self.assertAlmostEqual(rows.iloc[0]["delta_f1_vs_4mer"], 0.16)
+        self.assertAlmostEqual(rows.iloc[0]["delta_kappa_vs_4mer"], 0.12)
         self.assertEqual(rows.iloc[1]["encoder"], "hyena_dna")
         self.assertEqual(rows.iloc[1]["feature_source"], "hyena_dna_meanG")
         self.assertNotIn("gena_lm", rows["encoder"].tolist())
+
+    def test_latest_regression_runs_indexes_shuffled_y_anti_baselines(self):
+        from scripts.build_analysis_artifacts import latest_regression_runs, main_regression_table
+
+        metrics = [
+            {
+                "model": "kmer_baseline_4",
+                "timestamp": "2026-01-01T00:00:00+00:00",
+                "test_r2_macro": 0.17,
+            },
+            {
+                "model": "anti_baseline_shuffled_y",
+                "timestamp": "2026-01-02T00:00:00+00:00",
+                "dataset": "dataset.parquet",
+                "test_r2_macro": -0.02,
+                "test_mean_cosine": 0.90,
+                "alpha": 1000,
+            },
+            {
+                "model": "anti_baseline_shuffled_y",
+                "timestamp": "2026-01-02T00:00:01+00:00",
+                "dataset": "dataset_nt_v2.parquet",
+                "test_r2_macro": -0.01,
+                "test_mean_cosine": 0.91,
+                "alpha": 1000,
+            },
+            {
+                "model": "linear_probe",
+                "timestamp": "2026-01-03T00:00:00+00:00",
+                "dataset": "dataset_nt_v2.parquet",
+                "test_r2_macro": 0.19,
+                "test_mean_cosine": 0.93,
+                "alpha": 10,
+            },
+        ]
+
+        latest = latest_regression_runs(metrics)
+        self.assertIn("shuffled_y:dataset_nt_v2.parquet", latest)
+
+        table = main_regression_table(latest)
+        anti_rows = table[table["feature_source"] == "shuffled_y"]
+        self.assertEqual(len(anti_rows), 1)
+        anti = anti_rows.iloc[0]
+        self.assertEqual(anti["encoder"], "shuffled_y")
+        self.assertEqual(anti["pooling"], "-")
+        self.assertAlmostEqual(anti["delta_vs_4mer"], -0.18)
 
     def test_missing_cells_report_registered_unrun_family5_and_regression_cells(self):
         from scripts.build_analysis_artifacts import missing_cells_table

@@ -6,6 +6,7 @@ reframing" and the spec § "Pooling deferred" for the menu.
 
 Variants:
     meanmean  : mean across chunks of (mean tokens per chunk).        d
+    specialmean: mean across chunks of (mean all tokens per chunk).   d
     maxmean   : mean across chunks of (max  tokens per chunk).        d
     clsmean   : mean across chunks of (CLS  per chunk).               d
     meanD     : concat[first, last, mean] of (mean tokens).           3d
@@ -19,12 +20,14 @@ from __future__ import annotations
 
 import numpy as np
 
-POOLING_VARIANTS = ("meanmean", "maxmean", "clsmean", "meanD", "meanG")
+POOLING_VARIANTS = ("meanmean", "specialmean", "maxmean", "clsmean", "meanD", "meanG")
 
 
 def available_variants(per_chunk: dict[str, np.ndarray]) -> tuple[str, ...]:
     """Return pooling variants supported by the available per-chunk reductions."""
     variants = ["meanmean"]
+    if "special_mean" in per_chunk:
+        variants.append("specialmean")
     if "max" in per_chunk:
         variants.append("maxmean")
     if "cls" in per_chunk:
@@ -38,6 +41,10 @@ def aggregate(per_chunk: dict[str, np.ndarray], variant: str) -> np.ndarray:
     mean = per_chunk["mean"]   # (n_chunks, d)
     if variant == "meanmean":
         return mean.mean(axis=0).astype(np.float32)
+    if variant == "specialmean":
+        if "special_mean" not in per_chunk:
+            raise ValueError("specialmean requested but per-chunk reductions do not include 'special_mean'")
+        return per_chunk["special_mean"].mean(axis=0).astype(np.float32)
     if variant == "maxmean":
         return per_chunk["max"].mean(axis=0).astype(np.float32)
     if variant == "clsmean":
@@ -56,7 +63,7 @@ def aggregate(per_chunk: dict[str, np.ndarray], variant: str) -> np.ndarray:
 
 
 def output_dim(variant: str, per_chunk_d: int) -> int:
-    if variant in ("meanmean", "maxmean", "clsmean"):
+    if variant in ("meanmean", "specialmean", "maxmean", "clsmean"):
         return per_chunk_d
     if variant == "meanD":
         return 3 * per_chunk_d
