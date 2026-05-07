@@ -77,16 +77,34 @@ Headline:
 Code: `scripts/train_probe.py` (no changes — already accepts `--dataset`).
 Artefacts: 10 new `data/probe_{encoder}_{variant}.npz`, 10 new entries in `data/metrics.json` with `model == "linear_probe"`.
 
-## Phase 5 — Optional ceiling-breaker experiments   🔬 open, lower priority
+## Phase 5 — Encoder expansion   🔬 in progress
 
-The two remaining caveats in `findings.md`.
+Revised paper path: keep the headline task to 5-way family classification plus Ridge-to-GenePT regression. Move `tf-vs-gpcr` and `tf-vs-kinase` to legacy/appendix, and do not run new length baselines.
 
-- [ ] **Window sweep** — full transcript (promoter + UTR + CDS) instead of CDS-only. CDS is the most composition-homogenous part of a gene because of codon usage; promoters and UTRs may carry more function-discriminating signal.
-- [ ] **Optional third encoder** — HyenaDNA, Caduceus, or GENA-LM. Lowest priority now that both pretrained transformers have demonstrated they're doing real work; a third encoder would test whether the result generalises or is architecture-specific.
+- [x] **Model registry** — central encoder specs for DNABERT-2, NT-v2, GENA-LM base, and HyenaDNA.
+- [x] **GENA-LM + HyenaDNA plumbing** — multi-pool extraction and parquet materialisation use the registry.
+- [x] **Enformer comparator plumbing** — TSS-centered windows, internal trunk features, supervised output-track features, and matched TSS-window 4-mer dataset.
+- [x] **Focused table builder** — `scripts/build_family5_table.py` keeps the main table to family5 + Ridge R².
+- [x] **Run GENA-LM extraction** — cached 3,244 CDS embeddings and materialised all supported pooling datasets.
+- [x] **Run GENA-LM probes** — logistic family5 and Ridge-to-GenePT cells for `meanmean`, `meanD`, `meanG`, `maxmean`, and `clsmean`.
+- [x] **Regression table builder** — `scripts/build_regression_table.py` writes `data/regression_table.md`.
+- [x] **Run HyenaDNA extraction/probes** — cached 3,244 CDS embeddings and ran family5 + Ridge-to-GenePT cells for `meanmean`, `meanD`, `meanG`, `maxmean`, and `clsmean`.
+- [x] **Run Enformer extraction/probes** — TSS windows, Enformer trunk/track datasets, matched TSS 4-mer, family5, and Ridge cells are cached.
+- [ ] **Run TSS self-supervised ablation** — execute NT-v2 on TSS windows, materialise TSS pooling datasets, and run family5 + Ridge probes.
+
+HyenaDNA checkpoint:
+
+- Best 5-way cell: `hyena_dna_meanG`, macro-F1 0.7149, kappa 0.6944, accuracy 0.8090.
+- Best Ridge cell: `hyena_dna`/`meanmean`, R² 0.1822, slightly above the CDS 4-mer baseline (0.1743) but below DNABERT-2's best pooled cell (0.2104).
+- `clsmean` collapses on classification (macro-F1 0.1396, kappa 0) and regression (R² -0.0015), consistent with HyenaDNA not having a trained CLS-style summary token.
+
+Open caveat after encoder expansion:
+
+- [ ] **Window sweep for self-supervised encoders** — full transcript or promoter/UTR/CDS instead of CDS-only.
 
 ## Resolved / archived
 
-- **Mean-of-chunks pooling vs CLS / max-pool?** → Unresolved empirically; deferred to Phase 5. Cosine plateaued at the 4-mer baseline on both encoders, which was the trigger condition.
+- **Mean-of-chunks pooling vs CLS / max-pool?** → Addressed empirically in Phase 4b/5. `meanD`/`meanG` are the strongest variants; `maxmean` is consistently weak; `clsmean` is model-dependent and collapses for NT-v2/HyenaDNA.
 - **Five families enough resolution?** → Yes for the current corpus and probe. Sub-family classification is a Phase 4-or-later ask after we see the cluster figures.
 - **Version `dataset.parquet` if pooling changes?** → Handled implicitly by adding `dataset_nt_v2.parquet` as a sibling artefact rather than mutating in place. Future encoder/pooling variants follow the same convention.
 

@@ -22,6 +22,17 @@ import numpy as np
 POOLING_VARIANTS = ("meanmean", "maxmean", "clsmean", "meanD", "meanG")
 
 
+def available_variants(per_chunk: dict[str, np.ndarray]) -> tuple[str, ...]:
+    """Return pooling variants supported by the available per-chunk reductions."""
+    variants = ["meanmean"]
+    if "max" in per_chunk:
+        variants.append("maxmean")
+    if "cls" in per_chunk:
+        variants.append("clsmean")
+    variants.extend(["meanD", "meanG"])
+    return tuple(variants)
+
+
 def aggregate(per_chunk: dict[str, np.ndarray], variant: str) -> np.ndarray:
     """Reduce per-chunk arrays to a single fixed-length vector per gene."""
     mean = per_chunk["mean"]   # (n_chunks, d)
@@ -30,6 +41,8 @@ def aggregate(per_chunk: dict[str, np.ndarray], variant: str) -> np.ndarray:
     if variant == "maxmean":
         return per_chunk["max"].mean(axis=0).astype(np.float32)
     if variant == "clsmean":
+        if "cls" not in per_chunk:
+            raise ValueError("clsmean requested but per-chunk reductions do not include 'cls'")
         return per_chunk["cls"].mean(axis=0).astype(np.float32)
     if variant == "meanD":
         return np.concatenate(

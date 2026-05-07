@@ -2850,5 +2850,1582 @@
     "test_mean_cosine": 0.9320908784866333,
     "test_median_cosine": 0.9250916838645935,
     "test_r2_macro": 0.19019196927547455
+  },
+  {
+    "run_id": "logistic_gena_lm_meanmean_family5_2026-05-05T19:39:48+00:00",
+    "timestamp": "2026-05-05T19:39:48+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanmean",
+    "feature_source": "gena_lm_meanmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.31573440195914737
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.46699279969213653
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5131131080569082
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5217733523014263
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5001251085370007
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5065453307985464
+      }
+    ],
+    "test_macro_f1": 0.4940158341414686,
+    "test_kappa": 0.45679077920008493,
+    "test_balanced_accuracy": 0.48985661797244767,
+    "test_accuracy": 0.6550308008213552,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7865168539325843,
+      "immune": 0.21739130434782608,
+      "ion": 0.26666666666666666,
+      "kinase": 0.40476190476190477,
+      "tf": 0.7739463601532567
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanD_family5_2026-05-05T19:40:05+00:00",
+    "timestamp": "2026-05-05T19:40:05+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanD",
+    "feature_source": "gena_lm_meanD",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.34823933909626603
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5148150972614847
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5299454943953164
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5048009213686154
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.509377399431676
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5097560217560217
+      }
+    ],
+    "test_macro_f1": 0.4842794727141747,
+    "test_kappa": 0.4667799638613296,
+    "test_balanced_accuracy": 0.4781098535804329,
+    "test_accuracy": 0.6652977412731006,
+    "test_per_class_accuracy": {
+      "gpcr": 0.797752808988764,
+      "immune": 0.17391304347826086,
+      "ion": 0.23333333333333334,
+      "kinase": 0.38095238095238093,
+      "tf": 0.8045977011494253
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanG_family5_2026-05-05T19:40:27+00:00",
+    "timestamp": "2026-05-05T19:40:27+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanG",
+    "feature_source": "gena_lm_meanG",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3637516208361279
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5350453581325876
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5303044058744993
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5028034948303717
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5175292943000347
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.4933126483786263
+      }
+    ],
+    "test_macro_f1": 0.485293532983648,
+    "test_kappa": 0.4898755051631031,
+    "test_balanced_accuracy": 0.46424111111913274,
+    "test_accuracy": 0.6960985626283368,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7752808988764045,
+      "immune": 0.13043478260869565,
+      "ion": 0.13333333333333333,
+      "kinase": 0.40476190476190477,
+      "tf": 0.8773946360153256
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_maxmean_family5_2026-05-05T19:40:43+00:00",
+    "timestamp": "2026-05-05T19:40:43+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_maxmean",
+    "feature_source": "gena_lm_maxmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.35921341350994396
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.39012447247741366
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.36793038294478586
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.353664780839384
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.3758633949171034
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.37946049093590073
+      }
+    ],
+    "test_macro_f1": 0.35020457445596415,
+    "test_kappa": 0.23250511350300118,
+    "test_balanced_accuracy": 0.3410652164554427,
+    "test_accuracy": 0.5174537987679672,
+    "test_per_class_accuracy": {
+      "gpcr": 0.550561797752809,
+      "immune": 0.13043478260869565,
+      "ion": 0.1,
+      "kinase": 0.25,
+      "tf": 0.6743295019157088
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_clsmean_family5_2026-05-05T19:40:53+00:00",
+    "timestamp": "2026-05-05T19:40:53+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_clsmean",
+    "feature_source": "gena_lm_clsmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.30635660093932426
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.3978814460393408
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5186806154341141
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5177318128639126
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5169183237669834
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.49194346114115045
+      }
+    ],
+    "test_macro_f1": 0.4982302065432099,
+    "test_kappa": 0.4775740578439964,
+    "test_balanced_accuracy": 0.474239445285383,
+    "test_accuracy": 0.6858316221765913,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7752808988764045,
+      "immune": 0.17391304347826086,
+      "ion": 0.16666666666666666,
+      "kinase": 0.40476190476190477,
+      "tf": 0.8505747126436781
+    }
+  },
+  {
+    "run_id": "probe_2026-05-05T19:41:12+00:00",
+    "timestamp": "2026-05-05T19:41:12+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8929898142814636
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8969601392745972
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9100914597511292
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9215586185455322
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9252139925956726
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9205917716026306
+      }
+    ],
+    "test_mean_cosine": 0.9250584244728088,
+    "test_median_cosine": 0.9184562563896179,
+    "test_r2_macro": 0.11730758100748062
+  },
+  {
+    "run_id": "probe_2026-05-05T19:41:18+00:00",
+    "timestamp": "2026-05-05T19:41:18+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_meanmean.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8929898142814636
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8969601392745972
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9100914597511292
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9215586185455322
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9252139925956726
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9205917716026306
+      }
+    ],
+    "test_mean_cosine": 0.9250584244728088,
+    "test_median_cosine": 0.9184562563896179,
+    "test_r2_macro": 0.11730758100748062
+  },
+  {
+    "run_id": "probe_2026-05-05T19:41:25+00:00",
+    "timestamp": "2026-05-05T19:41:25+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_meanD.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8763028979301453
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8805712461471558
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8974218368530273
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9163368344306946
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9245070219039917
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9237679839134216
+      }
+    ],
+    "test_mean_cosine": 0.9244051575660706,
+    "test_median_cosine": 0.9172859191894531,
+    "test_r2_macro": 0.1084156334400177
+  },
+  {
+    "run_id": "probe_2026-05-05T19:41:38+00:00",
+    "timestamp": "2026-05-05T19:41:38+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_meanG.parquet",
+    "alpha": 1000.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8807597756385803
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8832316398620605
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8961687088012695
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9148539304733276
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.924024224281311
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9243822693824768
+      }
+    ],
+    "test_mean_cosine": 0.9244526624679565,
+    "test_median_cosine": 0.9184787273406982,
+    "test_r2_macro": 0.11182292550802231
+  },
+  {
+    "run_id": "logistic_gena_lm_family5_2026-05-05T19:42:19+00:00",
+    "timestamp": "2026-05-05T19:42:19+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm",
+    "feature_source": "gena_lm",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.31573440195914737
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.46699279969213653
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5131131080569082
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5217733523014263
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5001251085370007
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5065453307985464
+      }
+    ],
+    "test_macro_f1": 0.4940158341414686,
+    "test_kappa": 0.45679077920008493,
+    "test_balanced_accuracy": 0.48985661797244767,
+    "test_accuracy": 0.6550308008213552,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7865168539325843,
+      "immune": 0.21739130434782608,
+      "ion": 0.26666666666666666,
+      "kinase": 0.40476190476190477,
+      "tf": 0.7739463601532567
+    }
+  },
+  {
+    "run_id": "probe_2026-05-05T19:43:21+00:00",
+    "timestamp": "2026-05-05T19:43:21+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_maxmean.parquet",
+    "alpha": 1000.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8856511116027832
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.885673463344574
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8858948349952698
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8879709839820862
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9005939364433289
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9181482791900635
+      }
+    ],
+    "test_mean_cosine": 0.9178189039230347,
+    "test_median_cosine": 0.9135270118713379,
+    "test_r2_macro": 0.04002624750137329
+  },
+  {
+    "run_id": "probe_2026-05-05T19:43:27+00:00",
+    "timestamp": "2026-05-05T19:43:27+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_clsmean.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8931685090065002
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8992480039596558
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9134997725486755
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9233265519142151
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9247005581855774
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9183964729309082
+      }
+    ],
+    "test_mean_cosine": 0.9242216348648071,
+    "test_median_cosine": 0.9185050129890442,
+    "test_r2_macro": 0.1092628464102745
+  },
+  {
+    "run_id": "logistic_hyena_dna_family5_2026-05-05T20:15:43+00:00",
+    "timestamp": "2026-05-05T20:15:43+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna",
+    "feature_source": "hyena_dna",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3194349510138984
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.4757077627413978
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6389485366556767
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.711359658208408
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.7134459113665164
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6775506624282983
+      }
+    ],
+    "test_macro_f1": 0.7102865990889832,
+    "test_kappa": 0.6883252492589599,
+    "test_balanced_accuracy": 0.6777715021568937,
+    "test_accuracy": 0.8049281314168378,
+    "test_per_class_accuracy": {
+      "gpcr": 0.9101123595505618,
+      "immune": 0.5217391304347826,
+      "ion": 0.43333333333333335,
+      "kinase": 0.6309523809523809,
+      "tf": 0.89272030651341
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanmean_family5_2026-05-05T20:15:46+00:00",
+    "timestamp": "2026-05-05T20:15:46+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanmean",
+    "feature_source": "hyena_dna_meanmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3194349510138984
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.4757077627413978
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6389485366556767
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.711359658208408
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.7134459113665164
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6775506624282983
+      }
+    ],
+    "test_macro_f1": 0.7102865990889832,
+    "test_kappa": 0.6883252492589599,
+    "test_balanced_accuracy": 0.6777715021568937,
+    "test_accuracy": 0.8049281314168378,
+    "test_per_class_accuracy": {
+      "gpcr": 0.9101123595505618,
+      "immune": 0.5217391304347826,
+      "ion": 0.43333333333333335,
+      "kinase": 0.6309523809523809,
+      "tf": 0.89272030651341
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanD_family5_2026-05-05T20:15:54+00:00",
+    "timestamp": "2026-05-05T20:15:54+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanD",
+    "feature_source": "hyena_dna_meanD",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3445468465119334
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.6032143497451571
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6829165788043351
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.7120994513237016
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.6964219111509291
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6617771486813919
+      }
+    ],
+    "test_macro_f1": 0.6987634131378619,
+    "test_kappa": 0.6830458835014643,
+    "test_balanced_accuracy": 0.6615607979851701,
+    "test_accuracy": 0.8028747433264887,
+    "test_per_class_accuracy": {
+      "gpcr": 0.9101123595505618,
+      "immune": 0.4782608695652174,
+      "ion": 0.4,
+      "kinase": 0.6190476190476191,
+      "tf": 0.9003831417624522
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanG_family5_2026-05-05T20:16:09+00:00",
+    "timestamp": "2026-05-05T20:16:09+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanG",
+    "feature_source": "hyena_dna_meanG",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3838982972678805
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.6184707478946558
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6929453792019433
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.7066454202432315
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.6971129740782358
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6532693262575707
+      }
+    ],
+    "test_macro_f1": 0.7148833345239293,
+    "test_kappa": 0.6944009608377641,
+    "test_balanced_accuracy": 0.680784976693034,
+    "test_accuracy": 0.8090349075975359,
+    "test_per_class_accuracy": {
+      "gpcr": 0.9213483146067416,
+      "immune": 0.5217391304347826,
+      "ion": 0.43333333333333335,
+      "kinase": 0.6309523809523809,
+      "tf": 0.896551724137931
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_maxmean_family5_2026-05-05T20:16:12+00:00",
+    "timestamp": "2026-05-05T20:16:12+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_maxmean",
+    "feature_source": "hyena_dna_maxmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3397329892971085
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5379985756622021
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5871885891099196
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5666122632426619
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5608714232257888
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5584227587003154
+      }
+    ],
+    "test_macro_f1": 0.5613751042724386,
+    "test_kappa": 0.5314879506563686,
+    "test_balanced_accuracy": 0.5403917704069314,
+    "test_accuracy": 0.7104722792607803,
+    "test_per_class_accuracy": {
+      "gpcr": 0.8202247191011236,
+      "immune": 0.34782608695652173,
+      "ion": 0.26666666666666666,
+      "kinase": 0.4166666666666667,
+      "tf": 0.8505747126436781
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_clsmean_family5_2026-05-05T20:16:13+00:00",
+    "timestamp": "2026-05-05T20:16:13+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_clsmean",
+    "feature_source": "hyena_dna_clsmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.1399198931909212
+      }
+    ],
+    "test_macro_f1": 0.139572192513369,
+    "test_kappa": 0.0,
+    "test_balanced_accuracy": 0.2,
+    "test_accuracy": 0.5359342915811088,
+    "test_per_class_accuracy": {
+      "gpcr": 0.0,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.0,
+      "tf": 1.0
+    }
+  },
+  {
+    "run_id": "probe_2026-05-05T20:17:49+00:00",
+    "timestamp": "2026-05-05T20:17:49+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna.parquet",
+    "alpha": 1.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9266440272331238
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9294604063034058
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9306471347808838
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9295775890350342
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9265754818916321
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9212359189987183
+      }
+    ],
+    "test_mean_cosine": 0.931344747543335,
+    "test_median_cosine": 0.9236313104629517,
+    "test_r2_macro": 0.18219588696956635
+  },
+  {
+    "run_id": "probe_2026-05-05T20:17:50+00:00",
+    "timestamp": "2026-05-05T20:17:50+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_meanmean.parquet",
+    "alpha": 1.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9266440272331238
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9294604063034058
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9306471347808838
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9295775890350342
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9265754818916321
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9212359189987183
+      }
+    ],
+    "test_mean_cosine": 0.931344747543335,
+    "test_median_cosine": 0.9236313104629517,
+    "test_r2_macro": 0.18219588696956635
+  },
+  {
+    "run_id": "probe_2026-05-05T20:17:51+00:00",
+    "timestamp": "2026-05-05T20:17:51+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_meanD.parquet",
+    "alpha": 1.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9253028035163879
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9280083775520325
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9304458498954773
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.930389940738678
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.92822265625
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9242687821388245
+      }
+    ],
+    "test_mean_cosine": 0.9313692450523376,
+    "test_median_cosine": 0.9235037565231323,
+    "test_r2_macro": 0.18177364766597748
+  },
+  {
+    "run_id": "probe_2026-05-05T20:17:52+00:00",
+    "timestamp": "2026-05-05T20:17:52+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_meanG.parquet",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9252573847770691
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9275984168052673
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9302855730056763
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9305192232131958
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.928597629070282
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9249027967453003
+      }
+    ],
+    "test_mean_cosine": 0.9310213327407837,
+    "test_median_cosine": 0.9232905507087708,
+    "test_r2_macro": 0.17918439209461212
+  },
+  {
+    "run_id": "probe_2026-05-05T20:17:53+00:00",
+    "timestamp": "2026-05-05T20:17:53+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_maxmean.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9203891158103943
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9204390048980713
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9209039807319641
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9236776828765869
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9266670942306519
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9223793148994446
+      }
+    ],
+    "test_mean_cosine": 0.9265619516372681,
+    "test_median_cosine": 0.919337809085846,
+    "test_r2_macro": 0.1329001784324646
+  },
+  {
+    "run_id": "probe_2026-05-05T20:17:54+00:00",
+    "timestamp": "2026-05-05T20:17:54+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_clsmean.parquet",
+    "alpha": 0.01,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9120283722877502
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9120283126831055
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9120283126831055
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9120283722877502
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9120283126831055
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9120283126831055
+      }
+    ],
+    "test_mean_cosine": 0.9129231572151184,
+    "test_median_cosine": 0.9130721092224121,
+    "test_r2_macro": -0.0015016966499388218
+  },
+  {
+    "run_id": "logistic_enformer_tss_4mer_family5_2026-05-06T16:49:20+00:00",
+    "timestamp": "2026-05-06T16:49:20+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_tss_4mer",
+    "feature_source": "enformer_tss_4mer",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.1399198931909212
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.24166889983715034
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.2603443999574815
+      }
+    ],
+    "test_macro_f1": 0.2452272727272727,
+    "test_kappa": 0.20503678918901358,
+    "test_balanced_accuracy": 0.27987429506220673,
+    "test_accuracy": 0.5872689938398358,
+    "test_per_class_accuracy": {
+      "gpcr": 0.4606741573033708,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.0,
+      "tf": 0.9386973180076629
+    }
+  },
+  {
+    "run_id": "probe_2026-05-06T16:49:59+00:00",
+    "timestamp": "2026-05-06T16:49:59+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_tss_4mer.parquet",
+    "alpha": 0.01,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.917532742023468
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9148486852645874
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9132041335105896
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9122186899185181
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9120485782623291
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9120302796363831
+      }
+    ],
+    "test_mean_cosine": 0.9173449277877808,
+    "test_median_cosine": 0.9148357510566711,
+    "test_r2_macro": 0.04134269431233406
+  },
+  {
+    "run_id": "logistic_enformer_trunk_global_family5_2026-05-06T19:55:57+00:00",
+    "timestamp": "2026-05-06T19:55:57+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_trunk_global",
+    "feature_source": "enformer_trunk_global",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.4016104787954732
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5498531981317891
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.576927813498641
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5236365381538954
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5229312795768147
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5329727037747561
+      }
+    ],
+    "test_macro_f1": 0.5449862223262111,
+    "test_kappa": 0.43922017585314066,
+    "test_balanced_accuracy": 0.5366402807157149,
+    "test_accuracy": 0.6447638603696099,
+    "test_per_class_accuracy": {
+      "gpcr": 0.6966292134831461,
+      "immune": 0.5217391304347826,
+      "ion": 0.3333333333333333,
+      "kinase": 0.36904761904761907,
+      "tf": 0.7624521072796935
+    }
+  },
+  {
+    "run_id": "logistic_enformer_trunk_center_family5_2026-05-06T19:56:13+00:00",
+    "timestamp": "2026-05-06T19:56:13+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_trunk_center",
+    "feature_source": "enformer_trunk_center",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.4831859109691622
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5641563977369605
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5588526591942009
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5606367497005428
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5694971454705361
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5585704196621418
+      }
+    ],
+    "test_macro_f1": 0.5127195848894834,
+    "test_kappa": 0.4540757102395214,
+    "test_balanced_accuracy": 0.5051226125834889,
+    "test_accuracy": 0.6529774127310062,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7528089887640449,
+      "immune": 0.391304347826087,
+      "ion": 0.16666666666666666,
+      "kinase": 0.4523809523809524,
+      "tf": 0.7624521072796935
+    }
+  },
+  {
+    "run_id": "logistic_enformer_tracks_center_family5_2026-05-06T19:58:01+00:00",
+    "timestamp": "2026-05-06T19:58:01+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_tracks_center",
+    "feature_source": "enformer_tracks_center",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.5123676276615792
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5123634934211969
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.49692422473804765
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.49347951232685433
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.48904110458656075
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.47394350282485875
+      }
+    ],
+    "test_macro_f1": 0.48621720354702447,
+    "test_kappa": 0.42641085183128,
+    "test_balanced_accuracy": 0.47955396833418495,
+    "test_accuracy": 0.6386036960985626,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7528089887640449,
+      "immune": 0.30434782608695654,
+      "ion": 0.23333333333333334,
+      "kinase": 0.3333333333333333,
+      "tf": 0.7739463601532567
+    }
+  },
+  {
+    "run_id": "probe_2026-05-06T19:58:13+00:00",
+    "timestamp": "2026-05-06T19:58:13+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_trunk_global.parquet",
+    "alpha": 100.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.7620642781257629
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8446144461631775
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8985776901245117
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.922242283821106
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9281437993049622
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9268360137939453
+      }
+    ],
+    "test_mean_cosine": 0.9271116256713867,
+    "test_median_cosine": 0.9191821217536926,
+    "test_r2_macro": 0.13893455266952515
+  },
+  {
+    "run_id": "probe_2026-05-06T19:58:25+00:00",
+    "timestamp": "2026-05-06T19:58:25+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_trunk_center.parquet",
+    "alpha": 1000.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.699363648891449
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.7500174045562744
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8352223634719849
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8972731828689575
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9228438138961792
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9278952479362488
+      }
+    ],
+    "test_mean_cosine": 0.9274525046348572,
+    "test_median_cosine": 0.9200111031532288,
+    "test_r2_macro": 0.1424816995859146
+  },
+  {
+    "run_id": "probe_2026-05-06T19:58:37+00:00",
+    "timestamp": "2026-05-06T19:58:37+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_tracks_center.parquet",
+    "alpha": 1000.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8690288662910461
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8690169453620911
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8704545497894287
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8727037310600281
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.8982123732566833
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9165833592414856
+      }
+    ],
+    "test_mean_cosine": 0.917107105255127,
+    "test_median_cosine": 0.910784900188446,
+    "test_r2_macro": 0.01353320199996233
+  },
+  {
+    "run_id": "logistic_tss_nt_v2_meanmean_family5_2026-05-07T02:47:46+00:00",
+    "timestamp": "2026-05-07T02:47:46+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_nt_v2_meanmean",
+    "feature_source": "tss_nt_v2_meanmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.18909963985594236
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.2830446859678231
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.31000018707223925
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.42805940264548414
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.4937248810828688
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.4736636665184134
+      }
+    ],
+    "test_macro_f1": 0.44684646358329605,
+    "test_kappa": 0.37539850637976646,
+    "test_balanced_accuracy": 0.4202371099094647,
+    "test_accuracy": 0.6406570841889117,
+    "test_per_class_accuracy": {
+      "gpcr": 0.6629213483146067,
+      "immune": 0.2608695652173913,
+      "ion": 0.13333333333333333,
+      "kinase": 0.16666666666666666,
+      "tf": 0.8773946360153256
+    }
+  },
+  {
+    "run_id": "probe_2026-05-07T02:47:47+00:00",
+    "timestamp": "2026-05-07T02:47:47+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_tss_nt_v2_meanmean.parquet",
+    "alpha": 0.1,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.920932412147522
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9254785776138306
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9252461194992065
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9221298098564148
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9177474975585938
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9146791100502014
+      }
+    ],
+    "test_mean_cosine": 0.9251552224159241,
+    "test_median_cosine": 0.916850745677948,
+    "test_r2_macro": 0.11735475063323975
+  },
+  {
+    "run_id": "logistic_tss_nt_v2_meanD_family5_2026-05-07T02:57:19+00:00",
+    "timestamp": "2026-05-07T02:57:19+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_nt_v2_meanD",
+    "feature_source": "tss_nt_v2_meanD",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.22226240707253364
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.2795463632728727
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.35276618512573565
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.36349710373080385
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.35740682082145503
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.3675826078879664
+      }
+    ],
+    "test_macro_f1": 0.3480881884480752,
+    "test_kappa": 0.26294770248286536,
+    "test_balanced_accuracy": 0.34262921508748034,
+    "test_accuracy": 0.5338809034907598,
+    "test_per_class_accuracy": {
+      "gpcr": 0.5393258426966292,
+      "immune": 0.08695652173913043,
+      "ion": 0.1,
+      "kinase": 0.2857142857142857,
+      "tf": 0.7011494252873564
+    }
+  },
+  {
+    "run_id": "probe_2026-05-07T02:57:22+00:00",
+    "timestamp": "2026-05-07T02:57:22+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_tss_nt_v2_meanD.parquet",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8661047220230103
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.894186794757843
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9136069416999817
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9191357493400574
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9175038933753967
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9150285124778748
+      }
+    ],
+    "test_mean_cosine": 0.919010579586029,
+    "test_median_cosine": 0.9141708612442017,
+    "test_r2_macro": 0.0545431487262249
+  },
+  {
+    "run_id": "logistic_tss_nt_v2_meanG_family5_2026-05-07T03:14:58+00:00",
+    "timestamp": "2026-05-07T03:14:58+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_nt_v2_meanG",
+    "feature_source": "tss_nt_v2_meanG",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.2702428117522457
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.30311849111805034
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.3739018420889932
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.38367956059088765
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.396071000906889
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.38507911563604474
+      }
+    ],
+    "test_macro_f1": 0.4126683786991526,
+    "test_kappa": 0.28478846672056046,
+    "test_balanced_accuracy": 0.3993819542877037,
+    "test_accuracy": 0.5523613963039015,
+    "test_per_class_accuracy": {
+      "gpcr": 0.5842696629213483,
+      "immune": 0.30434782608695654,
+      "ion": 0.13333333333333333,
+      "kinase": 0.27380952380952384,
+      "tf": 0.7011494252873564
+    }
+  },
+  {
+    "run_id": "probe_2026-05-07T03:15:01+00:00",
+    "timestamp": "2026-05-07T03:15:01+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_tss_nt_v2_meanG.parquet",
+    "alpha": 10.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.814897894859314
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8728130459785461
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9092114567756653
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9205247759819031
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9190861582756042
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9159252643585205
+      }
+    ],
+    "test_mean_cosine": 0.919714629650116,
+    "test_median_cosine": 0.9146258234977722,
+    "test_r2_macro": 0.06049267575144768
   }
 ]

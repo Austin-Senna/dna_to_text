@@ -52,19 +52,16 @@ def embed_sequence_multi_pool(
 
     Returns: {"mean": (n_chunks, d), "max": (n_chunks, d), "cls": (n_chunks, d)}.
     """
-    # CLS/BOS at start is required (we use position 0 as the CLS pool).
-    # SEP/EOS at end is optional — NT-v2's tokeniser ships CLS only, no SEP.
+    # CLS/BOS at start is optional. BERT-family tokenizers expose a trained
+    # summary position, but some long-context DNA tokenizers do not. If absent,
+    # we still cache mean/max reductions and downstream code skips clsmean.
     cls_id = tokenizer.cls_token_id
     if cls_id is None:
         cls_id = tokenizer.bos_token_id
     sep_id = tokenizer.sep_token_id
     if sep_id is None:
         sep_id = tokenizer.eos_token_id
-    if cls_id is None:
-        raise RuntimeError(
-            f"tokenizer missing cls/bos token "
-            f"(cls={tokenizer.cls_token_id} bos={tokenizer.bos_token_id})"
-        )
+    has_cls = cls_id is not None
     has_sep = sep_id is not None
 
     enc = tokenizer(seq, add_special_tokens=False, return_tensors=None)
@@ -76,28 +73,35 @@ def embed_sequence_multi_pool(
     cls_per_chunk: list[np.ndarray] = []
 
     for chunk_content in chunks:
-        chunk_ids = [cls_id] + chunk_content + ([sep_id] if has_sep else [])
+        chunk_ids = ([cls_id] if has_cls else []) + chunk_content + ([sep_id] if has_sep else [])
         input_ids = torch.tensor([chunk_ids], dtype=torch.long, device=device)
         attention_mask = torch.ones_like(input_ids)
-        out = model(input_ids=input_ids, attention_mask=attention_mask)
+        try:
+            out = model(input_ids=input_ids, attention_mask=attention_mask)
+        except TypeError:
+            out = model(input_ids=input_ids)
         hidden = out[0] if isinstance(out, tuple) else out.last_hidden_state
         # hidden: (1, n_tokens, d). Position 0 is CLS; position -1 is SEP only
         # if we appended one. Slice content accordingly.
-        cls_vec = hidden[:, 0, :].squeeze(0)
+        cls_vec = hidden[:, 0, :].squeeze(0) if has_cls else None
+        content_start = 1 if has_cls else 0
         content_end = -1 if has_sep else hidden.shape[1]
-        content = hidden[:, 1:content_end, :]
+        content = hidden[:, content_start:content_end, :]
         mean_vec = content.mean(dim=1).squeeze(0)
         max_vec = content.max(dim=1).values.squeeze(0)
 
         mean_per_chunk.append(mean_vec.float().cpu().numpy())
         max_per_chunk.append(max_vec.float().cpu().numpy())
-        cls_per_chunk.append(cls_vec.float().cpu().numpy())
+        if cls_vec is not None:
+            cls_per_chunk.append(cls_vec.float().cpu().numpy())
 
-    return {
+    reductions = {
         "mean": np.stack(mean_per_chunk, axis=0),
         "max":  np.stack(max_per_chunk, axis=0),
-        "cls":  np.stack(cls_per_chunk, axis=0),
     }
+    if cls_per_chunk:
+        reductions["cls"] = np.stack(cls_per_chunk, axis=0)
+    return reductions
 
 
 def embed_all_multi_pool(
@@ -123,7 +127,7 @@ def embed_all_multi_pool(
         cache_file = cache_dir / f"{eid}.npz"
         if cache_file.exists():
             with np.load(cache_file) as data:
-                out[eid] = {k: data[k] for k in ("mean", "max", "cls")}
+                out[eid] = {k: data[k] for k in ("mean", "max", "cls") if k in data.files}
         else:
             pending.append((eid, seq))
 

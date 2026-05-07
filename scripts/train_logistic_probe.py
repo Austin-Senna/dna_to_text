@@ -20,6 +20,7 @@ import pandas as pd
 from sklearn.metrics import (
     accuracy_score,
     balanced_accuracy_score,
+    cohen_kappa_score,
     confusion_matrix,
     f1_score,
 )
@@ -27,7 +28,8 @@ from sklearn.metrics import (
 from binary_tasks import load_binary_split, BINARY_TASKS
 from kmer_baseline import featurize_cds
 from data_loader.sequence_fetcher import fetch_cds
-from length_baseline import cds_length_features
+from data_loader.model_registry import dataset_paths
+from data_loader.pooling_aggregator import POOLING_VARIANTS
 from linear_trainer import fit_logistic, sweep_C
 from splits import load_split
 
@@ -37,15 +39,18 @@ SEQUENCES_DIR = DATA / "sequences"
 
 DEFAULT_CS = [1e-2, 1e-1, 1.0, 10.0, 100.0, 1000.0]
 
-DATASET_PATHS = {
-    "dnabert2": DATA / "dataset.parquet",
-    "nt_v2":    DATA / "dataset_nt_v2.parquet",
-}
-# Phase 4b pooling variants (one parquet per encoder x variant).
-for _enc in ("dnabert2", "nt_v2"):
-    for _v in ("meanmean", "maxmean", "clsmean", "meanD", "meanG"):
-        DATASET_PATHS[f"{_enc}_{_v}"] = DATA / f"dataset_{_enc}_{_v}.parquet"
-del _enc, _v
+DATASET_PATHS = dataset_paths(include_variants=True)
+DATASET_PATHS.update({
+    "enformer_trunk_global": DATA / "dataset_enformer_trunk_global.parquet",
+    "enformer_trunk_center": DATA / "dataset_enformer_trunk_center.parquet",
+    "enformer_tracks_center": DATA / "dataset_enformer_tracks_center.parquet",
+    "enformer_tss_4mer": DATA / "dataset_enformer_tss_4mer.parquet",
+})
+for _encoder in ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"):
+    DATASET_PATHS[f"tss_{_encoder}"] = DATA / f"dataset_tss_{_encoder}.parquet"
+    for _variant in POOLING_VARIANTS:
+        DATASET_PATHS[f"tss_{_encoder}_{_variant}"] = DATA / f"dataset_tss_{_encoder}_{_variant}.parquet"
+del _encoder, _variant
 
 META_PARQUET = DATASET_PATHS["dnabert2"]
 
@@ -58,11 +63,6 @@ def _kmer_features_for_meta(meta: pd.DataFrame) -> np.ndarray:
             raise RuntimeError(f"missing cached CDS for {eid}")
         out[i] = featurize_cds(seq)
     return out
-
-
-def _length_features_for_meta(meta: pd.DataFrame) -> np.ndarray:
-    return cds_length_features(meta)
-
 
 def _load_split_for(
     dataset: str,
@@ -77,8 +77,6 @@ def _load_split_for(
             _, _, meta = load_split(name, dataset_path=META_PARQUET)
             if dataset == "kmer":
                 X = _kmer_features_for_meta(meta)
-            elif dataset == "length":
-                X = _length_features_for_meta(meta)
             else:
                 raise ValueError(f"unknown dataset: {dataset!r}")
         y = meta["family"].to_numpy()
@@ -92,8 +90,6 @@ def _load_split_for(
         _, y, meta = load_binary_split(task, name, dataset_path=META_PARQUET)
         if dataset == "kmer":
             X = _kmer_features_for_meta(meta)
-        elif dataset == "length":
-            X = _length_features_for_meta(meta)
         else:
             raise ValueError(f"unknown dataset: {dataset!r}")
     return X, y, meta
@@ -139,6 +135,7 @@ def _eval_test(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
             per_class[str(c)] = float((y_pred[mask] == c).mean())
     return {
         "test_macro_f1": macro_f1,
+        "test_kappa": float(cohen_kappa_score(y_true, y_pred)),
         "test_balanced_accuracy": bal_acc,
         "test_accuracy": acc,
         "test_per_class_accuracy": per_class,
@@ -169,7 +166,7 @@ def _append_metrics(path: Path, entry: dict) -> None:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", required=True,
-                    choices=sorted(set(DATASET_PATHS.keys()) | {"kmer", "length"}))
+                    choices=sorted(set(DATASET_PATHS.keys()) | {"kmer"}))
     ap.add_argument("--task", required=True,
                     choices=["family5", "tf_vs_gpcr", "tf_vs_kinase"])
     ap.add_argument("--shuffle-labels", action="store_true",
@@ -210,6 +207,7 @@ def main():
     y_pred = probe.predict(X_te)
     metrics = _eval_test(y_te, y_pred)
     print(f"  test_macro_f1          = {metrics['test_macro_f1']:.4f}")
+    print(f"  test_kappa             = {metrics['test_kappa']:.4f}")
     print(f"  test_balanced_accuracy = {metrics['test_balanced_accuracy']:.4f}")
     print(f"  test_accuracy          = {metrics['test_accuracy']:.4f}")
     print(f"  per-class:               {metrics['test_per_class_accuracy']}")

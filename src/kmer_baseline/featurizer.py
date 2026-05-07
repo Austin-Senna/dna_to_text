@@ -28,7 +28,7 @@ _LOOKUP[ord("T")] = 3
 KMER_DIM = 256
 
 
-def featurize_cds(sequence: str) -> np.ndarray:
+def featurize_sequence(sequence: str) -> np.ndarray:
     """Return a (256,) float32 L1-normalised 4-mer frequency vector."""
     if len(sequence) < 4:
         return np.zeros(KMER_DIM, dtype=np.float32)
@@ -46,6 +46,11 @@ def featurize_cds(sequence: str) -> np.ndarray:
     if total > 0:
         counts /= total
     return counts
+
+
+def featurize_cds(sequence: str) -> np.ndarray:
+    """Backward-compatible alias for CDS 4-mer features."""
+    return featurize_sequence(sequence)
 
 
 def load_kmer_features(
