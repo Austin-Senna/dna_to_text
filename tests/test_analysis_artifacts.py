@@ -167,6 +167,64 @@ class AnalysisArtifactTests(unittest.TestCase):
         self.assertEqual(parsed[("family5", "kmer")], 0.7024)
         self.assertEqual(parsed[("family5", "shuffled")], 0.0482)
 
+    def test_context_ablation_table_uses_expected_rows_and_enformer_per_metric(self):
+        from scripts.build_analysis_artifacts import (
+            context_ablation_table,
+            latest_logistic_runs,
+            latest_regression_runs,
+        )
+
+        metrics = []
+        for feature, f1 in [
+            ("kmer", 0.6722),
+            ("nt_v2_meanD", 0.8275),
+            ("enformer_tss_4mer", 0.2452),
+            ("tss_nt_v2_meanmean", 0.4468),
+            ("enformer_trunk_global", 0.5450),
+            ("enformer_trunk_center", 0.5127),
+        ]:
+            metrics.append(
+                {
+                    "model": "logistic_probe",
+                    "timestamp": "2026-01-01T00:00:00+00:00",
+                    "encoder": feature,
+                    "task": "family5",
+                    "shuffled_labels": False,
+                    "test_macro_f1": f1,
+                    "test_kappa": f1 - 0.1,
+                    "test_accuracy": f1 + 0.05,
+                }
+            )
+        for dataset, r2 in [
+            ("kmer", 0.1743),
+            ("dataset_nt_v2_meanD.parquet", 0.1882),
+            ("dataset_enformer_tss_4mer.parquet", 0.0413),
+            ("data/dataset_tss_nt_v2_meanmean.parquet", 0.1174),
+            ("dataset_enformer_trunk_global.parquet", 0.1389),
+            ("dataset_enformer_trunk_center.parquet", 0.1425),
+        ]:
+            row = {
+                "model": "linear_probe",
+                "timestamp": "2026-01-01T00:00:00+00:00",
+                "dataset": dataset,
+                "test_r2_macro": r2,
+            }
+            if dataset == "kmer":
+                row["model"] = "kmer_baseline_4"
+            metrics.append(row)
+
+        table = context_ablation_table(latest_logistic_runs(metrics), latest_regression_runs(metrics))
+
+        self.assertEqual(
+            table["label"].tolist(),
+            ["CDS 4-mer", "CDS NT-v2 meanD", "TSS 4-mer", "TSS NT-v2 meanmean", "Enformer trunk"],
+        )
+        enformer = table[table["label"] == "Enformer trunk"].iloc[0]
+        self.assertEqual(enformer["family5_feature_source"], "enformer_trunk_global")
+        self.assertEqual(enformer["regression_feature_source"], "enformer_trunk_center")
+        self.assertAlmostEqual(enformer["family5_macro_f1"], 0.5450)
+        self.assertAlmostEqual(enformer["ridge_r2_macro"], 0.1425)
+
 
 if __name__ == "__main__":
     unittest.main()
