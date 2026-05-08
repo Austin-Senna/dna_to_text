@@ -1,4 +1,4 @@
-# Bootstrap test-set confidence intervals
+# Stage 5: Bootstrap Test-Set Confidence Intervals
 
 `scripts/bootstrap_test_uncertainty.py` produces 95% percentile confidence
 intervals for every headline metric reported in the paper, plus per-class F1
@@ -18,6 +18,18 @@ does not rebuild encoder embeddings; it consumes the cached feature datasets,
 Sample input and output shapes are tracked in
 `samples/stage5_bootstrap_input.json` and
 `samples/stage5_bootstrap_output.json`.
+
+## Relevant Files
+
+| File | What it does |
+| --- | --- |
+| `scripts/bootstrap_test_uncertainty.py` | Refit headline probes, bootstrap held-out test metrics, and write confidence intervals. |
+| `data/bootstrap_metrics.json` | Cached 1,000-run bootstrap output used by the report. |
+| `data/metrics.json` | Source of recorded probe metrics and selected hyperparameters. |
+| `data/splits.json` | Frozen split membership used to identify train/validation/test genes. |
+| `data/sequences/` | CDS FASTA cache used to rebuild 4-mer cells during bootstrap. |
+| `samples/stage5_bootstrap_input.json` | Tiny summary of bootstrap inputs and settings. |
+| `samples/stage5_bootstrap_output.json` | Tiny excerpt of bootstrap confidence interval output. |
 
 ## What it does
 
@@ -46,7 +58,7 @@ does not reflect:
 - Train/val split-seed variability (the split is fixed).
 - Encoder-side variability (embeddings are taken as given).
 
-The Methods section states this scope explicitly.
+The report Methods section states this scope explicitly.
 
 ## Cells covered
 

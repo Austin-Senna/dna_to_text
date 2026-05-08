@@ -1,9 +1,10 @@
 """Anti-baseline: fit the linear probe on shuffled-y pairs, evaluate on real test.
 
-Pipeline-leak sanity gate from framework.md. If the scrambled fit still scores
-non-trivially on real test data (R^2 clearly above zero, or cosine close to the
-probe's), the real probe's numbers are suspect and something is joining Y to X
-wrong upstream.
+Pipeline-leak sanity gate from the original framework note archived at
+docs/archive/project-history/framework.md. If the scrambled fit still scores
+non-trivially on real test data (R^2 clearly above zero, or cosine close to
+the probe's), the real probe's numbers are suspect and something is joining Y
+to X wrong upstream.
 """
 from __future__ import annotations
 

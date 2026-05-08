@@ -45,7 +45,7 @@ Regenerate headline bootstrap confidence intervals from tracked cached metrics a
 uv run python scripts/bootstrap_test_uncertainty.py
 ```
 
-See `docs/bootstrap.md` for the 1000-run CI protocol and output schema.
+See `docs/stage5-bootstrap.md` for the 1000-run CI protocol and output schema.
 
 Regenerate report tables and figures from tracked cached metrics:
 

@@ -1,8 +1,8 @@
-"""Across-chunk pooling reductions for Phase 4b.
+"""Across-chunk pooling reductions for the encoder pooling sweep.
 
 Each function takes the per-chunk arrays produced by multi_pool and returns
-one fixed-length vector per gene. See findings.md § "Phase 4 — Classification
-reframing" and the spec § "Pooling deferred" for the menu.
+one fixed-length vector per gene. The probe-stage results are summarized in
+docs/stage3-train-probes.md.
 
 Variants:
     meanmean  : mean across chunks of (mean tokens per chunk).        d

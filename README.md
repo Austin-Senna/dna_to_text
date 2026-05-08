@@ -7,6 +7,7 @@ Project repository: https://github.com/Austin-Senna/dna_to_text
 Final report PDF: `dna_to_text.pdf`
 
 Submission-facing notes are in `submission.md`.
+Additional documentation is indexed in `docs/README.md`.
 
 ## Repository Layout
 
@@ -22,7 +23,7 @@ analysis/             Report-ready generated figures, tables, and visualizations
   tables/             CSV and Markdown tables used by the report.
 samples/              Small input/output examples for each pipeline stage.
 dna_to_text_paper/    LaTeX manuscript source submodule for the report.
-docs/                 Project history, notes, presentation materials, and plans.
+docs/                 Stage-level pipeline notes plus archived planning history.
 tests/                Unit tests for artifact builders and encoder helpers.
 ```
 
@@ -37,7 +38,7 @@ Small sample inputs and outputs for each stage live in `samples/`. They are revi
 Report-supporting cached reproduction:
 
 ```bash
-# Stage 5: regenerate 1000-run bootstrap confidence intervals (see docs/bootstrap.md).
+# Stage 5: regenerate 1000-run bootstrap confidence intervals (see docs/stage5-bootstrap.md).
 uv run python scripts/bootstrap_test_uncertainty.py
 
 # Stage 6: regenerate report tables and figures from tracked metrics/caches.
@@ -90,7 +91,7 @@ uv run python scripts/train_probe.py --dataset data/dataset_tss_nt_v2_meanmean.p
 uv run python scripts/train_logistic_probe.py --dataset enformer_trunk_global --task family5
 uv run python scripts/train_probe.py --dataset data/dataset_enformer_trunk_center.parquet --probe-out data/probe_enformer_trunk_center.npz
 
-# Stage 5: regenerate 1000-run bootstrap confidence intervals (see docs/bootstrap.md).
+# Stage 5: regenerate 1000-run bootstrap confidence intervals (see docs/stage5-bootstrap.md).
 uv run python scripts/bootstrap_test_uncertainty.py
 
 # Stage 6: regenerate final report analysis tables and figures.

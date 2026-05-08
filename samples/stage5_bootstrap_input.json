@@ -13,5 +13,5 @@
     "data/dataset_dnabert2_meanG.parquet",
     "data/dataset_nt_v2_meanmean.parquet"
   ],
-  "documentation": "docs/bootstrap.md"
+  "documentation": "docs/stage5-bootstrap.md"
 }
