@@ -1,0 +1,6 @@
+symbol,ensembl_id,family,split,cds_length_bp,summary_excerpt
+ADNP,ENSG00000101126,tf,train,3309,Gene Symbol ADNP Vasoactive intestinal peptide is a neuroprotective factor that has a stimulatory effect on the growth of some tumor cells and an inhibitory eff
+ACKR1,ENSG00000213088,gpcr,train,1011,Gene Symbol ACKR1 The protein encoded by this gene is a glycosylated membrane protein and a non-specific receptor for several chemokines. The encoded protein is
+AATK,ENSG00000181409,kinase,test,4125,Gene Symbol AATK The protein encoded by this gene contains a tyrosine kinase domain at the N-terminus and a proline-rich domain at the C-terminus. This gene is
+HCN1,ENSG00000164588,ion,test,2673,Gene Symbol HCN1 The membrane protein encoded by this gene is a hyperpolarization-activated cation channel that contributes to the native pacemaker currents in
+ACAN,ENSG00000157766,immune,train,7707,Gene Symbol ACAN This gene is a member of the aggrecan/versican proteoglycan family. The encoded protein is an integral part of the extracellular matrix in cart

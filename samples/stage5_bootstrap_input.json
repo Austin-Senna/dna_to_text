@@ -1,0 +1,17 @@
+{
+  "description": "Inputs consumed by scripts/bootstrap_test_uncertainty.py for the 1000-run test-set confidence intervals.",
+  "stage": "5",
+  "n_iters": 1000,
+  "seed": 42,
+  "metrics": "data/metrics.json",
+  "splits": "data/splits.json",
+  "sequence_cache": "data/sequences/",
+  "headline_feature_datasets": [
+    "data/dataset_nt_v2_meanD.parquet",
+    "data/dataset_dnabert2_meanD.parquet",
+    "data/dataset_hyena_dna_meanG.parquet",
+    "data/dataset_dnabert2_meanG.parquet",
+    "data/dataset_nt_v2_meanmean.parquet"
+  ],
+  "documentation": "docs/bootstrap.md"
+}

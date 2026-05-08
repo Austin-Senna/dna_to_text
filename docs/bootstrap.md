@@ -6,6 +6,19 @@ for the family-classification cells. Output is cached at
 `data/bootstrap_metrics.json` and rendered into the abstract, Methods §Probes,
 and Results §3.1–§3.2.
 
+## Pipeline placement
+
+This is Stage 5 of the repository pipeline. Run it after the Stage 3 probe and
+baseline metrics are available, and after the Stage 4 TSS context branch if
+you want the full report-supporting cache set present. The command
+does not rebuild encoder embeddings; it consumes the cached feature datasets,
+`data/metrics.json`, `data/splits.json`, and CDS sequence cache, then writes
+`data/bootstrap_metrics.json`.
+
+Sample input and output shapes are tracked in
+`samples/stage5_bootstrap_input.json` and
+`samples/stage5_bootstrap_output.json`.
+
 ## What it does
 
 For each headline cell (12 total: 6 classification + 6 regression):

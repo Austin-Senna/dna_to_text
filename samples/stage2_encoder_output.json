@@ -1,0 +1,136 @@
+{
+  "description": "Small example of pooled NT-v2 encoder features and GenePT targets loaded by probe scripts.",
+  "source_dataset": "data/dataset_nt_v2_meanD.parquet",
+  "rows": [
+    {
+      "symbol": "ADNP",
+      "ensembl_id": "ENSG00000101126",
+      "family": "tf",
+      "feature_source": "nt_v2_meanD",
+      "pooling": "meanD",
+      "x_dim": 1536,
+      "x_first8": [
+        0.108754,
+        0.097774,
+        0.106574,
+        -0.050471,
+        0.350807,
+        0.063777,
+        -0.415988,
+        0.223478
+      ],
+      "genept_target_dim": 1536,
+      "genept_target_first5": [
+        -0.0471,
+        -0.002733,
+        0.015072,
+        0.001021,
+        -0.034814
+      ]
+    },
+    {
+      "symbol": "ACKR1",
+      "ensembl_id": "ENSG00000213088",
+      "family": "gpcr",
+      "feature_source": "nt_v2_meanD",
+      "pooling": "meanD",
+      "x_dim": 1536,
+      "x_first8": [
+        -0.000414,
+        0.182409,
+        0.092797,
+        0.04255,
+        -0.208615,
+        -0.03411,
+        -0.337433,
+        0.327416
+      ],
+      "genept_target_dim": 1536,
+      "genept_target_first5": [
+        -0.025846,
+        0.002517,
+        -0.003013,
+        -0.0174,
+        -0.017749
+      ]
+    },
+    {
+      "symbol": "AATK",
+      "ensembl_id": "ENSG00000181409",
+      "family": "kinase",
+      "feature_source": "nt_v2_meanD",
+      "pooling": "meanD",
+      "x_dim": 1536,
+      "x_first8": [
+        -0.309824,
+        0.147919,
+        0.2354,
+        -0.111518,
+        -0.214777,
+        -0.107403,
+        -0.290232,
+        0.788282
+      ],
+      "genept_target_dim": 1536,
+      "genept_target_first5": [
+        -0.046381,
+        -0.01522,
+        -0.011078,
+        -0.035623,
+        -0.033895
+      ]
+    },
+    {
+      "symbol": "HCN1",
+      "ensembl_id": "ENSG00000164588",
+      "family": "ion",
+      "feature_source": "nt_v2_meanD",
+      "pooling": "meanD",
+      "x_dim": 1536,
+      "x_first8": [
+        -0.003535,
+        0.211993,
+        0.054409,
+        0.10129,
+        0.105349,
+        0.052331,
+        -0.273527,
+        0.278551
+      ],
+      "genept_target_dim": 1536,
+      "genept_target_first5": [
+        -0.010375,
+        0.011984,
+        -0.006914,
+        -0.008569,
+        -0.013474
+      ]
+    },
+    {
+      "symbol": "ACAN",
+      "ensembl_id": "ENSG00000157766",
+      "family": "immune",
+      "feature_source": "nt_v2_meanD",
+      "pooling": "meanD",
+      "x_dim": 1536,
+      "x_first8": [
+        -0.038818,
+        0.017855,
+        0.116404,
+        0.155753,
+        0.242206,
+        0.176156,
+        -0.184175,
+        0.280051
+      ],
+      "genept_target_dim": 1536,
+      "genept_target_first5": [
+        -0.03085,
+        -0.000855,
+        0.024236,
+        -0.022199,
+        -0.014919
+      ]
+    }
+  ]
+}

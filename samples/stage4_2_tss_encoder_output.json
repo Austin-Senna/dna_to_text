@@ -1,0 +1,52 @@
+{
+  "description": "Small excerpt of analysis/tables/context_ablation.csv after Stage 4.2 metrics are present.",
+  "stage": "4.2",
+  "output_table": "analysis/tables/context_ablation.csv",
+  "output_figure": "analysis/figures/context_ablation_cds_tss_enformer.png",
+  "rows": [
+    {
+      "label": "CDS NT-v2 meanD",
+      "context": "CDS",
+      "model_group": "self-supervised encoder",
+      "family5_feature_source": "nt_v2_meanD",
+      "regression_feature_source": "nt_v2_meanD",
+      "family5_macro_f1": 0.8275042891258189,
+      "family5_kappa": 0.8213690261827592,
+      "family5_accuracy": 0.8870636550308009,
+      "ridge_r2_macro": 0.18817661702632904
+    },
+    {
+      "label": "TSS 4-mer",
+      "context": "TSS window",
+      "model_group": "composition",
+      "family5_feature_source": "enformer_tss_4mer",
+      "regression_feature_source": "enformer_tss_4mer",
+      "family5_macro_f1": 0.2452272727272727,
+      "family5_kappa": 0.20503678918901358,
+      "family5_accuracy": 0.5872689938398358,
+      "ridge_r2_macro": 0.04134269431233406
+    },
+    {
+      "label": "TSS NT-v2 meanmean",
+      "context": "TSS window",
+      "model_group": "self-supervised encoder",
+      "family5_feature_source": "tss_nt_v2_meanmean",
+      "regression_feature_source": "tss_nt_v2_meanmean",
+      "family5_macro_f1": 0.44684646358329605,
+      "family5_kappa": 0.37539850637976646,
+      "family5_accuracy": 0.6406570841889117,
+      "ridge_r2_macro": 0.11735475063323975
+    },
+    {
+      "label": "Enformer trunk",
+      "context": "TSS window",
+      "model_group": "supervised comparator",
+      "family5_feature_source": "enformer_trunk_global",
+      "regression_feature_source": "enformer_trunk_center",
+      "family5_macro_f1": 0.5449862223262111,
+      "family5_kappa": 0.43922017585314066,
+      "family5_accuracy": 0.6447638603696099,
+      "ridge_r2_macro": 0.1424816995859146
+    }
+  ]
+}

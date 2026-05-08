@@ -1,0 +1,16 @@
+{
+  "description": "Inputs for Stage 4.1: derive TSS-centered genomic windows from the same genes used for CDS experiments.",
+  "stage": "4.1",
+  "template_dataset": "data/dataset_nt_v2_meanD.parquet",
+  "required_metadata_columns": [
+    "ensembl_id",
+    "gene_symbol",
+    "family",
+    "summary",
+    "genept_vec"
+  ],
+  "window_length_bp": 196608,
+  "window_cache": "data/enformer_windows/",
+  "source": "Ensembl REST gene coordinates via src/data_loader/enformer_windows.py",
+  "command": "uv run python scripts/run_enformer_features.py --skip-model"
+}

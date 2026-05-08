@@ -1,0 +1,32 @@
+{
+  "description": "Small example of Stage 4.1 outputs after TSS windows are fetched and converted into a matched TSS 4-mer feature table.",
+  "stage": "4.1",
+  "outputs": [
+    {
+      "path": "data/enformer_windows/",
+      "contents": "One cached FASTA window per gene that could be mapped to a TSS-centered genomic interval."
+    },
+    {
+      "path": "data/dataset_enformer_tss_4mer.parquet",
+      "contents": "The CDS metadata table with x replaced by 4-mer composition over the matched TSS window."
+    }
+  ],
+  "example_rows": [
+    {
+      "symbol": "ADNP",
+      "ensembl_id": "ENSG00000101126",
+      "family": "tf",
+      "window_length_bp": 196608,
+      "feature_source": "enformer_tss_4mer",
+      "x_dim": 256
+    },
+    {
+      "symbol": "AATK",
+      "ensembl_id": "ENSG00000181409",
+      "family": "kinase",
+      "window_length_bp": 196608,
+      "feature_source": "enformer_tss_4mer",
+      "x_dim": 256
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "description": "Small excerpt of analysis artifact generation output.",
+  "stage": "6",
+  "table_count": 18,
+  "figure_count": 9,
+  "example_tables": [
+    "analysis/tables/dataset_composition.csv",
+    "analysis/tables/main_family5.csv",
+    "analysis/tables/main_regression.csv",
+    "analysis/tables/context_ablation.csv"
+  ],
+  "example_figures": [
+    "analysis/figures/family5_macro_f1.png",
+    "analysis/figures/family5_kappa.png",
+    "analysis/figures/ridge_r2.png",
+    "analysis/figures/context_ablation_cds_tss_enformer.png"
+  ],
+  "missing_cells": [],
+  "skipped": []
+}

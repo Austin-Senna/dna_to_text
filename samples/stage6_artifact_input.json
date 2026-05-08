@@ -1,0 +1,8 @@
+{
+  "description": "Inputs consumed by scripts/build_analysis_artifacts.py for report table/figure generation.",
+  "stage": "6",
+  "metrics": "data/metrics.json",
+  "splits": "data/splits.json",
+  "data_dir": "data/",
+  "example_confusion": "data/confusion_5way_nt_v2_meanD.json"
+}

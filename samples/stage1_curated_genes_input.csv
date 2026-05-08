@@ -1,0 +1,6 @@
+symbol,ensembl_id,requested_family,source_note
+ADNP,ENSG00000101126,tf,example row after HGNC/GenePT family matching; CDS fetched from Ensembl REST
+ACKR1,ENSG00000213088,gpcr,example row after HGNC/GenePT family matching; CDS fetched from Ensembl REST
+AATK,ENSG00000181409,kinase,example row after HGNC/GenePT family matching; CDS fetched from Ensembl REST
+HCN1,ENSG00000164588,ion,example row after HGNC/GenePT family matching; CDS fetched from Ensembl REST
+ACAN,ENSG00000157766,immune,example row after HGNC/GenePT family matching; CDS fetched from Ensembl REST

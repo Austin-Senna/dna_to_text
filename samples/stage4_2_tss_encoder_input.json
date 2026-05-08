@@ -1,0 +1,43 @@
+{
+  "description": "Inputs for Stage 4.2: run TSS-window encoders/comparators and evaluate the context ablation.",
+  "stage": "4.2",
+  "comparison": "Canonical CDS embeddings are compared with 196608 bp TSS-centered window features, including TSS NT-v2 and Enformer.",
+  "required_inputs": [
+    {
+      "label": "CDS NT-v2 meanD",
+      "context": "canonical CDS",
+      "feature_dataset": "data/dataset_nt_v2_meanD.parquet",
+      "source_command": "uv run python scripts/run_nt_v2_encoder.py --device auto"
+    },
+    {
+      "label": "TSS 4-mer",
+      "context": "196608 bp TSS-centered window",
+      "feature_dataset": "data/dataset_enformer_tss_4mer.parquet",
+      "source_command": "uv run python scripts/run_enformer_features.py --skip-model"
+    },
+    {
+      "label": "TSS NT-v2 meanmean",
+      "context": "196608 bp TSS-centered window",
+      "feature_dataset": "data/dataset_tss_nt_v2_meanmean.parquet",
+      "source_commands": [
+        "uv run python scripts/run_tss_multi_pool_extract.py --encoder nt_v2 --device auto",
+        "uv run python scripts/build_tss_pooling_datasets.py --encoder nt_v2"
+      ]
+    },
+    {
+      "label": "Enformer trunk",
+      "context": "196608 bp TSS-centered window",
+      "family5_feature_dataset": "data/dataset_enformer_trunk_global.parquet",
+      "regression_feature_dataset": "data/dataset_enformer_trunk_center.parquet",
+      "source_command": "uv run python scripts/run_enformer_features.py --device auto"
+    }
+  ],
+  "metric_commands": [
+    "uv run python scripts/train_logistic_probe.py --dataset enformer_tss_4mer --task family5",
+    "uv run python scripts/train_probe.py --dataset data/dataset_enformer_tss_4mer.parquet --probe-out data/probe_enformer_tss_4mer.npz",
+    "uv run python scripts/train_logistic_probe.py --dataset tss_nt_v2_meanmean --task family5",
+    "uv run python scripts/train_probe.py --dataset data/dataset_tss_nt_v2_meanmean.parquet --probe-out data/probe_tss_nt_v2_meanmean.npz",
+    "uv run python scripts/train_logistic_probe.py --dataset enformer_trunk_global --task family5",
+    "uv run python scripts/train_probe.py --dataset data/dataset_enformer_trunk_center.parquet --probe-out data/probe_enformer_trunk_center.npz"
+  ]
+}

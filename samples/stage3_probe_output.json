@@ -1,0 +1,43 @@
+{
+  "description": "Small excerpt of probe-stage outputs used in the report.",
+  "classification_rows": [
+    {
+      "feature_source": "kmer",
+      "test_macro_f1": 0.672239,
+      "test_kappa": 0.7024,
+      "test_accuracy": 0.817248
+    },
+    {
+      "feature_source": "nt_v2_meanD",
+      "test_macro_f1": 0.827504,
+      "test_kappa": 0.821369,
+      "test_accuracy": 0.887064
+    },
+    {
+      "feature_source": "shuffled",
+      "test_macro_f1": 0.207796,
+      "test_kappa": 0.0482,
+      "test_accuracy": 0.435318
+    }
+  ],
+  "regression_rows": [
+    {
+      "feature_source": "shuffled_y",
+      "test_r2_macro": -0.000375,
+      "delta_vs_4mer": -0.174631,
+      "test_mean_cosine": 0.913044
+    },
+    {
+      "feature_source": "kmer",
+      "test_r2_macro": 0.174257,
+      "delta_vs_4mer": 0.0,
+      "test_mean_cosine": 0.930628
+    },
+    {
+      "feature_source": "dnabert2_meanG",
+      "test_r2_macro": 0.210356,
+      "delta_vs_4mer": 0.0361,
+      "test_mean_cosine": 0.934004
+    }
+  ]
+}
