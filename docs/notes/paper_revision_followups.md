@@ -8,18 +8,13 @@ Grouped by what unblocks them.
 
 ## A. Need new computation (high priority — would materially strengthen the paper)
 
-### 18. Bootstrap confidence intervals on every headline number
-**Source:** stats reader (raised at §3.1, §3.2, §3.4, Discussion); PI synthesis; PI noted at §3.4
-**Concern:** All Tables 2, 3, and the context-ablation numbers are point estimates. With test set n=487 and minority classes n=23 (immune) / n=30 (ion), the macro-F1 differences driving the encoder ranking — and the Δκ +0.119 headline — could be within sampling noise.
-**What's needed:** Stratified bootstrap (e.g., 1,000 resamples of the test split, refitting the probe each time or just resampling test predictions at the saved best-C/α). Report 95% CIs in the table cells.
-**Feasibility:** High. The probes are cheap (logistic + ridge on cached embeddings). `scripts/train_logistic_probe.py` and `scripts/train_probe.py` would need a `--bootstrap N` flag that resamples the test set after refit. ~30 minutes of dev + CPU runtime per encoder cell.
-**Output:** `data/family5_table.md` and `data/regression_table.md` get a `95% CI` column; abstract / Results §3.1 / §3.2 add `[CI lo, hi]` in parentheses to the headline numbers.
+### 18. Bootstrap confidence intervals on every headline number — DONE 2026-05-08
+**Source:** stats reader (§3.1, §3.2, §3.4, Discussion); PI synthesis; PI noted at §3.4
+**Resolution:** `scripts/bootstrap_test_uncertainty.py` refits each headline cell at the recorded best hyperparameter on train+val, predicts on test, then bootstrap-resamples 1,000 iterations (stratified by family for classification; i.i.d. by gene for regression). 95% percentile CIs now appear in the abstract (NT-v2 macro-F1 + DNABERT-2 R²), Methods §Probes (protocol), Results §3.1 (NT-v2 vs 4-mer comparison, both metrics non-overlapping), and Results §3.2 (DNABERT-2 vs 4-mer R², non-overlapping). All 12 headline cells dumped to `data/bootstrap_metrics.json`. Bootstrap quantifies test-composition sampling uncertainty only; not hyperparameter or split-seed variability — stated in Methods.
 
-### 19. Per-class F1 (or full confusion matrix) in main-text Table 2
+### 19. Per-class F1 in main-text Table 2 — DONE 2026-05-08
 **Source:** stats reader (§3.1); PI synthesis
-**Concern:** Macro-F1 0.828 averages over 5 classes — readers can't tell whether the score is driven by the TF majority (n=261 test) or whether minority classes (immune n=23, ion n=30) are also separated.
-**What's needed:** Add per-class F1 columns to Table 2, or include the 5×5 confusion matrix as Figure 2.5 / inline. Per-class F1 numbers exist in `data/confusion_5way_*.json` already.
-**Feasibility:** High — pure presentation work; data already cached. Decision: which to add (per-class column, normalised confusion matrix, or both)?
+**Resolution:** Added inline in Results §3.1 paragraph rather than as a separate table column (kept Table 2 visually intact). NT-v2 \texttt{meanD} per-class F1 is TF 0.93, GPCR 0.94, kinase 0.79, ion 0.68, immune 0.80 — versus the 4-mer baseline at 0.88, 0.91, 0.66, 0.39, 0.47. The text makes the headline biological observation: encoder gain is concentrated in the minority classes (immune +0.33, ion +0.29). Numbers come directly from `data/confusion_5way_nt_v2_meanD.json` (cm-derived) plus the bootstrap script's per-class output for the 4-mer cell.
 
 ### 20. Per-dimension or per-PC R² distribution for GenePT regression
 **Source:** PI (§3.2)
