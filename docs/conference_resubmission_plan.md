@@ -131,9 +131,10 @@ For this revision cycle that's a separate paper. Track in §"Out of scope" below
 | T-5 | Train probes (family5 + genept) for T-1..T-3 | — | not started | pick best pool per encoder from `data/metrics.json` |
 | T-6 | Extend `bootstrap_test_uncertainty.py` with 3 new TSS cells; rerun | — | not started | |
 | T-7 | Update `results.tex` / `methods.tex` / `discussion.tex` for multi-encoder TSS | — | not started | |
-| G-1 | Quantify GenePT pickle ceiling | — | not started | write to `docs/notes/gene_scope_analysis.md` |
-| G-2 | Count paralog drops under first-family-wins | — | not started | |
-| G-3 | Count CDS-fetch failures | — | not started | |
+| G-0 | Extract GenePT_emebdding_v2/ from Austin's data.zip | — | **done 2026-05-15** | unzipped to repo root; gitignored; pickle has 93,800 symbol keys, 1,536-d each |
+| G-1 | Quantify GenePT pickle ceiling within 5 family regexes | — | unblocked | pickle ready at `GenePT_emebdding_v2/GenePT_gene_embedding_ada_text.pickle`; write to `docs/notes/gene_scope_analysis.md` |
+| G-2 | Count paralog drops under first-family-wins | — | unblocked | re-run iteration in `src/data_loader/dataset_loader.py:176–183` without `seen_ensembl` |
+| G-3 | Count CDS-fetch failures | — | not started | grep `logs/` and `data/sequences/`; cheap CPU work |
 | G-4 | Decide on gene-expansion based on G-1..G-3 | — | not started | rule in §Step 2b above |
 | G-5 | Wire paralog-aware split (only if G-4 = run) | — | not started | MMseqs2 or CD-HIT at 50% |
 | P-1 | Rebuild `main.pdf`, bump submodule, commit + push | — | not started | after T-7 lands |
@@ -157,3 +158,16 @@ Update the **Status** column to `in progress` / `done <date>` as items move. Add
 - Two repositories: parent `/home/hayden/dna_to_text` (this branch, `revision/tss-and-gene-scope`) and submodule `dna_to_text_paper` (will work on `paper-draft` branch when paper edits start).
 - Detailed plan file (the one used to generate this doc) is at `~/.claude/plans/understand-the-project-existing-starry-yao.md` — same content, repo-external.
 - The paper as submitted is at parent `7e32954` → submodule `73a53bf`. The current submodule working tree at `a952cf1` is the post-bootstrap version with reader-feedback edits; this is the version the revision builds on.
+
+### Austin's data snapshot
+
+Hayden's Windows side has Austin's full `data/` snapshot at `/mnt/c/Users/hayde/Downloads/data.zip` (~2.4 GB). Scouted 2026-05-15. Contents:
+
+- `GenePT_emebdding_v2/` — the GenePT v2 pickles + NCBI summary JSONs. **Extracted** to repo root as of 2026-05-15 (gitignored). ada_text pickle has 93,800 keys × 1,536-d.
+- `data/sequences/` — same 3,244 ENSG `.fa` files we already have.
+- `data/dataset_<enc>_<pool>.parquet` — full CDS pooling sweep for all 4 encoders × 6 pools. Same as ours.
+- `data/dataset_tss_nt_v2_*.parquet` — NT-v2 TSS only. **No TSS data for DNABERT-2 / GENA-LM / HyenaDNA**, so Phase 1 still requires running those extractions ourselves.
+- `data/chunk_reductions_<encoder>/` — CDS chunk-level intermediates for all 4 encoders. Could rebuild CDS pooling variants without re-running encoders if ever needed. Does **not** include TSS.
+- `data/embeddings/` — per-gene `.npy` files (3200 B each = 800 floats). Local copy is empty; not currently needed.
+
+If anything in `data/` gets corrupted or lost locally, restore from this zip rather than re-running the pipeline.
