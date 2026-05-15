@@ -30,3 +30,6 @@ Genomics Project (1).pdf
 tss_windows_cache.tar.gz
 ntv2_tss_*outputs.tar.gz
 dist/
+
+# Local snapshot of Austin's data/ tree — large; restore source if caches are lost
+data.zip
