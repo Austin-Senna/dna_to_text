@@ -138,7 +138,7 @@ For this revision cycle that's a separate paper. Track in §"Out of scope" below
 | G-4 | Decide on gene-expansion based on G-1..G-3 | — | **done 2026-05-15 — SKIP** | <15 % lift triggers skip rule. Scope-(b) all-PC ceiling = 18,836 (5.81×) but is a separate paper. |
 | G-5 | Wire paralog-aware split | — | deferred | Independent of N; remains an open follow-up but out of revision scope. |
 | P-1 | Rebuild `main.pdf`, bump submodule, commit + push | — | **done 2026-05-16** | Submodule `revision/tss-multi-encoder` pushed to origin (`b9fc4ae`); parent pointer bumped in this commit; `dna_to_text.pdf` refreshed (8 pages, 910 KB). |
-| F-1 | Regenerate Figure 4 (`context_ablation_cds_tss_enformer_column.png`) to show 4-encoder TSS bars | — | not started | Caption already updated; the underlying PNG was rendered for the NT-v2-only ablation. Generator script is under `analysis/` (TBD which file). Tomorrow's task. |
+| F-1 | Regenerate Figure 4 (`context_ablation_cds_tss_enformer_column.png`) to show 4-encoder TSS bars | — | **done 2026-05-16** | Added 3 rows to `CONTEXT_ROWS` in `scripts/build_analysis_artifacts.py`; regenerated; copied to submodule. Submodule HEAD now `f30c026`. PDF rebuilt (8 pages, 926 KB) and refreshed at parent. |
 
 Update the **Status** column to `in progress` / `done <date>` as items move. Add a one-line **Notes** entry on completion so the next session sees what was actually run.
 
