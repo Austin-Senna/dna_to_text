@@ -58,6 +58,15 @@ def load_model(device: str | None = None):
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
     model = AutoModel.from_pretrained(MODEL_NAME, trust_remote_code=True)
     model = _select_backbone(model)
+    # GENA-LM's custom modeling registers `token_type_ids` as a non-persistent
+    # buffer; on some PyTorch builds it loads with uninitialised memory values
+    # (e.g. 299667744) which crash the token_type_embeddings lookup with
+    # `IndexError: index out of range in self` (type_vocab_size=2). Zero it
+    # explicitly so the embedding auto-generation path works again.
+    if hasattr(model.embeddings, "token_type_ids"):
+        model.embeddings.token_type_ids = torch.zeros_like(
+            model.embeddings.token_type_ids
+        )
     model.to(device).eval()
     return model, tokenizer, device
 
