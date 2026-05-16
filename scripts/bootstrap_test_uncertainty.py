@@ -97,10 +97,7 @@ HEADLINE_CLS_TSS = [
     ("tss_nt_v2_meanmean",         "tss_nt_v2_meanmean",        100.0,      False),
     ("tss_hyena_dna_meanmean",     "tss_hyena_dna_meanmean",    1000.0,     False),
     ("tss_dnabert2_maxmean",       "tss_dnabert2_maxmean",      100.0,      False),
-    # GENA-LM TSS row is filled in once its probe sweep finishes. Best pool
-    # and C come from data/metrics.json under model=logistic_probe, task=family5,
-    # encoder/feature_source starts with tss_gena_lm_. Format:
-    # ("tss_gena_lm_<best>",       "tss_gena_lm_<best>",        <C>,        False),
+    ("tss_gena_lm_clsmean",        "tss_gena_lm_clsmean",       1000.0,     False),
 ]
 
 HEADLINE_REG_TSS = [
@@ -109,10 +106,7 @@ HEADLINE_REG_TSS = [
     ("tss_nt_v2_meanmean",         "tss_nt_v2_meanmean",        0.1,            False),
     ("tss_hyena_dna_meanmean",     "tss_hyena_dna_meanmean",    0.1,            False),
     ("tss_dnabert2_meanmean",      "tss_dnabert2_meanmean",     0.1,            False),
-    # GENA-LM TSS regression row is filled in after its ridge sweep. Find the
-    # max-R² entry in data/metrics.json (model=linear_probe, dataset starts
-    # with dataset_tss_gena_lm_). Format:
-    # ("tss_gena_lm_<best>",       "tss_gena_lm_<best>",        <alpha>,        False),
+    ("tss_gena_lm_meanmean",       "tss_gena_lm_meanmean",      1.0,            False),
 ]
 
 
