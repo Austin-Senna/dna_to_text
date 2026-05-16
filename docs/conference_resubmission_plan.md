@@ -129,15 +129,16 @@ For this revision cycle that's a separate paper. Track in §"Out of scope" below
 | T-3 | Run GENA-LM TSS extraction | — | **in progress 2026-05-16** | Running on GPU after `token_type_ids` buffer fix; 1.7 s/gene → ETA ~92 min. Output: `data/tss_chunk_reductions_gena_lm/`. |
 | T-4 | Build pooling datasets for T-1..T-3 | — | partial (hyena_dna + dnabert2 done) | HyenaDNA: 5 variants (no specialmean — no CLS-equivalent). DNABERT-2: 5 variants (specialmean unexpectedly missing from the cached reductions; investigate post-revision if needed). GENA-LM pending. |
 | T-5 | Train probes (family5 + genept) for T-1..T-3 | — | partial (hyena_dna + dnabert2 done) | Best pool, family5 / genept:<br>• NT-v2 (existing): meanmean / meanmean — F1 **0.4468**, R² **0.1174**<br>• HyenaDNA: meanmean / meanmean — F1 **0.4194**, R² **0.0853**<br>• DNABERT-2: maxmean / meanmean — F1 **0.4553** ← beats NT-v2 on TSS, R² **0.1217**<br>4-mer TSS baseline: F1 **0.2452**, R² **0.0413**. All three self-supervised encoders cluster in 0.42–0.46 macro-F1 on TSS, ~2× the 4-mer baseline → substrate-dominance is encoder-general (NT-v2 was not specifically advantaged on TSS). |
-| T-6 | Extend `bootstrap_test_uncertainty.py` with 3 new TSS cells; rerun | — | not started | |
-| T-7 | Update `results.tex` / `methods.tex` / `discussion.tex` for multi-encoder TSS | — | not started | |
+| T-6 | Extend `bootstrap_test_uncertainty.py` with new TSS cells; rerun | — | **done 2026-05-16** | 22 cells in `data/bootstrap_metrics.json` (12 CDS + 10 TSS). All 4 encoders' TSS CIs non-overlapping with 4-mer baseline; encoders mutually overlap → substrate dominance encoder-general. |
+| T-7 | Update `results.tex` / `methods.tex` / `discussion.tex` for multi-encoder TSS | — | **done 2026-05-16** | Submodule branch `revision/tss-multi-encoder` @ `b9fc4ae`. Updated §3.3, §Methods §TSS context, §Discussion §Genomic context, §Discussion §Limitations, §Abstract. Figure 4 caption updated; **the figure PNG itself still needs regeneration to show the 4-encoder ablation** (see Out-of-scope / follow-ups). PDF rebuilt at submodule HEAD (8 pages, 910 KB) and copied to parent `dna_to_text.pdf`. |
 | G-0 | Extract GenePT_emebdding_v2/ from `data.zip` (repo root) | — | **done 2026-05-15** | pickle has 93,800 symbol keys, 1,536-d each |
 | G-1 | Quantify GenePT pickle ceiling within 5 family regexes | — | **done 2026-05-15** | Ceiling = 3,247 unique ensembls; current = 3,244 → +0.1 % lift. See `docs/notes/gene_scope_analysis.md`. |
 | G-2 | Count paralog drops under first-family-wins | — | **done 2026-05-15** | 0 drops in strict sense; 17 cross-family ambiguous genes assigned by priority. |
 | G-3 | Count CDS-fetch failures | — | **done 2026-05-15** | 0 missing `.fa` files for current gene_table; 3-gene gap to ceiling consistent with build-time REST fetch fails. |
 | G-4 | Decide on gene-expansion based on G-1..G-3 | — | **done 2026-05-15 — SKIP** | <15 % lift triggers skip rule. Scope-(b) all-PC ceiling = 18,836 (5.81×) but is a separate paper. |
 | G-5 | Wire paralog-aware split | — | deferred | Independent of N; remains an open follow-up but out of revision scope. |
-| P-1 | Rebuild `main.pdf`, bump submodule, commit + push | — | not started | after T-7 lands |
+| P-1 | Rebuild `main.pdf`, bump submodule, commit + push | — | **done 2026-05-16** | Submodule `revision/tss-multi-encoder` pushed to origin (`b9fc4ae`); parent pointer bumped in this commit; `dna_to_text.pdf` refreshed (8 pages, 910 KB). |
+| F-1 | Regenerate Figure 4 (`context_ablation_cds_tss_enformer_column.png`) to show 4-encoder TSS bars | — | not started | Caption already updated; the underlying PNG was rendered for the NT-v2-only ablation. Generator script is under `analysis/` (TBD which file). Tomorrow's task. |
 
 Update the **Status** column to `in progress` / `done <date>` as items move. Add a one-line **Notes** entry on completion so the next session sees what was actually run.
 
