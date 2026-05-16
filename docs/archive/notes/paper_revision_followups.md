@@ -16,11 +16,9 @@ Grouped by what unblocks them.
 **Source:** stats reader (§3.1); PI synthesis
 **Resolution:** Added inline in Results §3.1 paragraph rather than as a separate table column (kept Table 2 visually intact). NT-v2 \texttt{meanD} per-class F1 is TF 0.93, GPCR 0.94, kinase 0.79, ion 0.68, immune 0.80 — versus the 4-mer baseline at 0.88, 0.91, 0.66, 0.39, 0.47. The text makes the headline biological observation: encoder gain is concentrated in the minority classes (immune +0.33, ion +0.29). Numbers come directly from `data/confusion_5way_nt_v2_meanD.json` (cm-derived) plus the bootstrap script's per-class output for the 4-mer cell.
 
-### 20. Per-dimension or per-PC R² distribution for GenePT regression
+### 20. Per-dimension or per-PC R² distribution for GenePT regression — DONE 2026-05-16
 **Source:** PI (§3.2)
-**Concern:** Macro-R² averages over 1,536 GenePT dimensions. A handful of well-predicted dimensions (e.g., text-summary length proxies) could dominate the average without telling us anything about gene function.
-**What's needed:** Distribution of per-dimension R² across the 1,536 dims; ideally also per-PC R² after PCA on Y. If 90% of the explainable variance lives in 50 PCs, that changes the interpretation.
-**Feasibility:** Medium. Requires modifying `scripts/train_probe.py` to dump per-dim R² (small change). PCA analysis is one notebook cell. Plot would be a histogram or rank-ordered curve (good supplementary figure).
+**Resolution:** `scripts/per_dim_r2.py` loads the saved Ridge probe weights for five headline cells (4 CDS encoders + DNABERT-2 TSS), predicts on test, and dumps per-dim R² to `data/per_dim_r2.json` + a two-panel supplementary figure at `analysis/figures/per_dim_r2_distribution.png` (also copied into `dna_to_text_paper/paper/figures/`). DNABERT-2 \texttt{meanG} CDS (macro-R² 0.210) has 1,527 / 1,536 dims with R² > 0, median per-dim R² 0.190 (within 0.02 of the macro mean), and recovering 50 % of the summed R² requires the top 429 dimensions (28 % of the embedding space). The signal is broadly carried, not concentrated in a handful of well-predicted axes — directly addresses the PI's concern. New sentence + Supplementary Figure reference landed in `results.tex` §3.2 and `appendix.tex`. Per-PC R² after PCA on Y not done; would be a small extension if a future reviewer asks.
 
 ---
 
@@ -42,11 +40,11 @@ Grouped by what unblocks them.
 
 ## C. Need author / external verification (not code-resolvable here)
 
-### 21. Verify the Li 2026 SeqCLIP citation date
+### 21. Verify the Li 2026 SeqCLIP citation date — DONE 2026-05-16
 **Source:** PI (§Introduction)
-**Concern:** A 2026 reference cited in early 2026 is plausible but worth checking — could be a typo for 2025, or could be a preprint with a different bibliographic year.
-**What's needed:** Cross-check against the actual paper / preprint server. Update `bibliography.bib` if needed.
-**Feasibility:** 5-minute external lookup. Author's call.
+**Resolution:** Verified against arXiv (`2602.12286`, Yanan Li et al.). The paper is real — submitted 2026-01-21, v2 2026-05-08, under review at NeurIPS 2026 — but two things were off in our bib + intro:
+1. The current arXiv title is "Mind the Gap No More: Achieving Zero-Gap Multimodal Integration via One Tokenizer", not the placeholder "Alignment or Integration? Rethinking Multimodal Fusion in DNA-language Foundation Models" we had in the bib. Fixed in `bibliography.bib` (Li2026DNAFusion entry; also added a submission-timeline note).
+2. The intro called this paper "SeqCLIP and related DNA-language fusion methods", but the cited paper never uses the name SeqCLIP — its contribution is a *shared-tokenizer / zero-gap* approach. Rephrased the intro to "shared-tokenizer and other DNA-language fusion methods" (matches Li et al. 2026 actual contribution and keeps the Omni-DNA citation intact). Year (2026) is correct — not a typo for 2025.
 
 ---
 
