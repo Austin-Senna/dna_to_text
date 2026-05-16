@@ -124,11 +124,11 @@ For this revision cycle that's a separate paper. Track in §"Out of scope" below
 
 | ID | Item | Owner | Status | Notes |
 |---|---|---|---|---|
-| T-1 | Run HyenaDNA TSS extraction | — | **in progress 2026-05-15** | Smoke test 1.5 s/gene; full run kicked off in background, ETA ~80 min on RTX 5060 (8.5 GB VRAM). Output: `data/tss_chunk_reductions_hyena_dna/`. |
-| T-2 | Run DNABERT-2 TSS extraction | — | smoke-test passed | 3-gene smoke at 5 s/gene → full ETA ~4.5 h. Triton fallback to PyTorch attention is expected; not a blocker. Kick off after T-1 to avoid GPU contention. |
-| T-3 | Run GENA-LM TSS extraction | — | **BLOCKED** | Smoke test hit CUDA device-side assert in GENA-LM custom LayerNorm on Blackwell sm_120 (DNABERT-2 + HyenaDNA both work, so it's GENA-LM specific). Debug after T-1 finishes: `CUDA_LAUNCH_BLOCKING=1`, then try CPU / fp32 / pinned transformers. If unresolved, paper claims still defensible with HyenaDNA + DNABERT-2 + existing NT-v2 = 3-encoder TSS sweep. |
-| T-4 | Build pooling datasets for T-1..T-3 | — | not started | `build_tss_pooling_datasets.py` |
-| T-5 | Train probes (family5 + genept) for T-1..T-3 | — | not started | pick best pool per encoder from `data/metrics.json` |
+| T-1 | Run HyenaDNA TSS extraction | — | **done 2026-05-16** | 3,244 genes in 88 min on RTX 5060. Cache: `data/tss_chunk_reductions_hyena_dna/`. |
+| T-2 | Run DNABERT-2 TSS extraction | — | **in progress 2026-05-16** | Running on GPU, ~10 % done at 3.2 s/gene → ETA ~2h45m total. Triton fallback to PyTorch attention is expected; not a blocker. |
+| T-3 | Run GENA-LM TSS extraction | — | unblocked (queued) | Was blocked by `token_type_ids` uninitialised-buffer bug in GENA-LM's custom modeling code; fixed in `src/data_loader/gena_lm_encoder.py` (zero the buffer post-load). Verified working via 1-chunk CPU forward. Kick off after T-2 to avoid GPU contention. |
+| T-4 | Build pooling datasets for T-1..T-3 | — | partial (hyena_dna done) | HyenaDNA: 5 pool variants built (meanmean/maxmean/clsmean/meanD/meanG; specialmean skipped — HyenaDNA has no CLS-equivalent that gives `special_mean`). DNABERT-2/GENA-LM pending. |
+| T-5 | Train probes (family5 + genept) for T-1..T-3 | — | partial (hyena_dna done) | HyenaDNA TSS, best pool `meanmean`: family5 **macro-F1 = 0.419, kappa = 0.328 (C=1000)**; GenePT regression **R² = 0.085, mean cosine = 0.922 (α=0.1)**. Compare: NT-v2 TSS macro-F1 = 0.447. Encoder-general substrate effect is being supported. |
 | T-6 | Extend `bootstrap_test_uncertainty.py` with 3 new TSS cells; rerun | — | not started | |
 | T-7 | Update `results.tex` / `methods.tex` / `discussion.tex` for multi-encoder TSS | — | not started | |
 | G-0 | Extract GenePT_emebdding_v2/ from `data.zip` (repo root) | — | **done 2026-05-15** | pickle has 93,800 symbol keys, 1,536-d each |

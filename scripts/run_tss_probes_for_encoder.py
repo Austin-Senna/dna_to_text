@@ -101,19 +101,21 @@ def main() -> None:
 
     print(f"\n=== Best pool per task for {enc} ===")
     metrics = load_metrics()
+    # logistic_probe records use 'feature_source'/'encoder' fields; ridge uses 'dataset'
     cls_rows = [r for r in metrics
                 if r.get("model") == "logistic_probe"
-                and f"tss_{enc}_" in r.get("dataset", "")]
+                and f"tss_{enc}_" in (r.get("feature_source") or r.get("encoder") or "")]
     reg_rows = [r for r in metrics
                 if r.get("model") == "linear_probe"
                 and f"tss_{enc}_" in r.get("dataset", "")]
 
     if cls_rows:
         best_cls = max(cls_rows, key=lambda r: r.get("test_macro_f1", -1))
-        print(f"  family5 best: {best_cls.get('dataset','?'):40s} "
+        label = best_cls.get("feature_source") or best_cls.get("encoder", "?")
+        print(f"  family5 best: {label:40s} "
               f"F1={best_cls.get('test_macro_f1','?')}  "
               f"kappa={best_cls.get('test_kappa','?')}  "
-              f"C={best_cls.get('best_C', best_cls.get('C', '?'))}")
+              f"C={best_cls.get('C', '?')}")
     if reg_rows:
         best_reg = max(reg_rows, key=lambda r: r.get("test_r2_macro", -1))
         print(f"  genept  best: {best_reg.get('dataset','?'):40s} "
