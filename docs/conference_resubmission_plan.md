@@ -131,12 +131,12 @@ For this revision cycle that's a separate paper. Track in §"Out of scope" below
 | T-5 | Train probes (family5 + genept) for T-1..T-3 | — | not started | pick best pool per encoder from `data/metrics.json` |
 | T-6 | Extend `bootstrap_test_uncertainty.py` with 3 new TSS cells; rerun | — | not started | |
 | T-7 | Update `results.tex` / `methods.tex` / `discussion.tex` for multi-encoder TSS | — | not started | |
-| G-0 | Extract GenePT_emebdding_v2/ from `data.zip` (repo root) | — | **done 2026-05-15** | unzipped to repo root; gitignored; pickle has 93,800 symbol keys, 1,536-d each |
-| G-1 | Quantify GenePT pickle ceiling within 5 family regexes | — | unblocked | pickle ready at `GenePT_emebdding_v2/GenePT_gene_embedding_ada_text.pickle`; write to `docs/notes/gene_scope_analysis.md` |
-| G-2 | Count paralog drops under first-family-wins | — | unblocked | re-run iteration in `src/data_loader/dataset_loader.py:176–183` without `seen_ensembl` |
-| G-3 | Count CDS-fetch failures | — | not started | grep `logs/` and `data/sequences/`; cheap CPU work |
-| G-4 | Decide on gene-expansion based on G-1..G-3 | — | not started | rule in §Step 2b above |
-| G-5 | Wire paralog-aware split (only if G-4 = run) | — | not started | MMseqs2 or CD-HIT at 50% |
+| G-0 | Extract GenePT_emebdding_v2/ from `data.zip` (repo root) | — | **done 2026-05-15** | pickle has 93,800 symbol keys, 1,536-d each |
+| G-1 | Quantify GenePT pickle ceiling within 5 family regexes | — | **done 2026-05-15** | Ceiling = 3,247 unique ensembls; current = 3,244 → +0.1 % lift. See `docs/notes/gene_scope_analysis.md`. |
+| G-2 | Count paralog drops under first-family-wins | — | **done 2026-05-15** | 0 drops in strict sense; 17 cross-family ambiguous genes assigned by priority. |
+| G-3 | Count CDS-fetch failures | — | **done 2026-05-15** | 0 missing `.fa` files for current gene_table; 3-gene gap to ceiling consistent with build-time REST fetch fails. |
+| G-4 | Decide on gene-expansion based on G-1..G-3 | — | **done 2026-05-15 — SKIP** | <15 % lift triggers skip rule. Scope-(b) all-PC ceiling = 18,836 (5.81×) but is a separate paper. |
+| G-5 | Wire paralog-aware split | — | deferred | Independent of N; remains an open follow-up but out of revision scope. |
 | P-1 | Rebuild `main.pdf`, bump submodule, commit + push | — | not started | after T-7 lands |
 
 Update the **Status** column to `in progress` / `done <date>` as items move. Add a one-line **Notes** entry on completion so the next session sees what was actually run.
