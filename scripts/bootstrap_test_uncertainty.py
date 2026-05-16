@@ -46,7 +46,20 @@ for _enc in ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"):
         _p = DATA / f"dataset_{_enc}_{_v}.parquet"
         if _p.exists():
             DATASET_PATHS[f"{_enc}_{_v}"] = _p
-del _enc, _v, _p, _base
+    # TSS counterparts (only present for encoders that have run the TSS pipeline)
+    _tss_base = DATA / f"dataset_tss_{_enc}.parquet"
+    if _tss_base.exists():
+        DATASET_PATHS[f"tss_{_enc}"] = _tss_base
+    for _v in ("meanmean", "specialmean", "maxmean", "clsmean", "meanD", "meanG"):
+        _p = DATA / f"dataset_tss_{_enc}_{_v}.parquet"
+        if _p.exists():
+            DATASET_PATHS[f"tss_{_enc}_{_v}"] = _p
+# TSS 4-mer baseline lives under enformer_tss_4mer because the prep pipeline
+# computed it alongside the Enformer comparator.
+_tss_kmer = DATA / "dataset_enformer_tss_4mer.parquet"
+if _tss_kmer.exists():
+    DATASET_PATHS["enformer_tss_4mer"] = _tss_kmer
+del _enc, _v, _p, _base, _tss_base, _tss_kmer
 
 # Use any tracked encoder parquet for metadata-only loads (kmer baseline). All
 # encoder parquets share the same {ensembl_id, family, gene_symbol, summary,
@@ -74,6 +87,32 @@ HEADLINE_REG = [
     ("gena_lm_meanmean",    "gena_lm_meanmean",      100.0,   False),
     ("hyena_dna_specialmean","hyena_dna_specialmean", 1.0,    False),
     ("shuffled_y",          "nt_v2_meanmean",        1000.0,  True),
+]
+
+# TSS-context headline cells (added during the revision/tss-and-gene-scope work).
+# Hyperparameters are the recorded best from each encoder's TSS probe sweep.
+HEADLINE_CLS_TSS = [
+    # (cell_name,                  dataset_for_X_loading,       recorded_C, shuffled_labels)
+    ("tss_4mer",                   "enformer_tss_4mer",         1000.0,     False),
+    ("tss_nt_v2_meanmean",         "tss_nt_v2_meanmean",        100.0,      False),
+    ("tss_hyena_dna_meanmean",     "tss_hyena_dna_meanmean",    1000.0,     False),
+    ("tss_dnabert2_maxmean",       "tss_dnabert2_maxmean",      100.0,      False),
+    # GENA-LM TSS row is filled in once its probe sweep finishes. Best pool
+    # and C come from data/metrics.json under model=logistic_probe, task=family5,
+    # encoder/feature_source starts with tss_gena_lm_. Format:
+    # ("tss_gena_lm_<best>",       "tss_gena_lm_<best>",        <C>,        False),
+]
+
+HEADLINE_REG_TSS = [
+    # (cell_name,                  dataset_for_X_loading,       recorded_alpha, shuffled_y)
+    ("tss_4mer",                   "enformer_tss_4mer",         0.01,           False),
+    ("tss_nt_v2_meanmean",         "tss_nt_v2_meanmean",        0.1,            False),
+    ("tss_hyena_dna_meanmean",     "tss_hyena_dna_meanmean",    0.1,            False),
+    ("tss_dnabert2_meanmean",      "tss_dnabert2_meanmean",     0.1,            False),
+    # GENA-LM TSS regression row is filled in after its ridge sweep. Find the
+    # max-R² entry in data/metrics.json (model=linear_probe, dataset starts
+    # with dataset_tss_gena_lm_). Format:
+    # ("tss_gena_lm_<best>",       "tss_gena_lm_<best>",        <alpha>,        False),
 ]
 
 
@@ -190,7 +229,7 @@ def main():
                "n_iters": args.n_iters, "seed": args.seed}
 
     print("=== Classification bootstrap CIs (family5) ===")
-    for name, dataset, C, shuf in HEADLINE_CLS:
+    for name, dataset, C, shuf in HEADLINE_CLS + HEADLINE_CLS_TSS:
         t0 = time.time()
         res = bootstrap_classification(dataset, C, shuf,
                                         n_iters=args.n_iters, seed=args.seed)
@@ -198,20 +237,20 @@ def main():
         f1_lo, f1_hi = res["macro_f1_ci95"]
         k_lo, k_hi = res["kappa_ci95"]
         per = res["per_class_f1"]
-        print(f"  {name:<22s} F1={res['macro_f1_point']:.4f} [{f1_lo:.3f}-{f1_hi:.3f}]  "
+        print(f"  {name:<26s} F1={res['macro_f1_point']:.4f} [{f1_lo:.3f}-{f1_hi:.3f}]  "
               f"kappa={res['kappa_point']:.4f} [{k_lo:.3f}-{k_hi:.3f}]  "
               f"({time.time()-t0:.1f}s)")
         per_str = ", ".join(f"{k}={v:.2f}" for k, v in sorted(per.items()))
         print(f"    per-class F1: {per_str}")
 
     print("\n=== Regression bootstrap CIs (Ridge -> GenePT) ===")
-    for name, dataset, alpha, shuf in HEADLINE_REG:
+    for name, dataset, alpha, shuf in HEADLINE_REG + HEADLINE_REG_TSS:
         t0 = time.time()
         res = bootstrap_regression(dataset, alpha, shuf,
                                     n_iters=args.n_iters, seed=args.seed)
         results["regression"][name] = res
         r2_lo, r2_hi = res["r2_macro_ci95"]
-        print(f"  {name:<22s} R2={res['r2_macro_point']:.4f} [{r2_lo:.3f}-{r2_hi:.3f}]  "
+        print(f"  {name:<26s} R2={res['r2_macro_point']:.4f} [{r2_lo:.3f}-{r2_hi:.3f}]  "
               f"({time.time()-t0:.1f}s)")
 
     args.out.write_text(json.dumps(results, indent=2))
