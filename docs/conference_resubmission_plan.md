@@ -125,7 +125,7 @@ For this revision cycle that's a separate paper. Track in §"Out of scope" below
 | ID | Item | Owner | Status | Notes |
 |---|---|---|---|---|
 | T-1 | Run HyenaDNA TSS extraction | — | **done 2026-05-16** | 3,244 genes in 88 min on RTX 5060. Cache: `data/tss_chunk_reductions_hyena_dna/`. |
-| T-2 | Run DNABERT-2 TSS extraction | — | **in progress 2026-05-16** | Running on GPU, ~10 % done at 3.2 s/gene → ETA ~2h45m total. Triton fallback to PyTorch attention is expected; not a blocker. |
+| T-2 | Run DNABERT-2 TSS extraction | — | **partial 2026-05-16 (1,231 / 3,244)** | Crashed at gene 1,231 with `CUDA error: unknown error` inside MosaicBERT's `unpad_input_only` (`bert_layers.py:189`). Cache is intact (per-gene .npz); resumable. Attempt to resume immediately failed with `cudaGetDeviceCount: invalid argument` — CUDA context stuck. **Next step needs WSL restart** (`wsl --shutdown` from Windows PowerShell, then reopen terminal). After restart: `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True uv run python scripts/run_tss_multi_pool_extract.py --encoder dnabert2 --device cuda` will skip cached and finish the remaining ~2,013 genes (~108 min). |
 | T-3 | Run GENA-LM TSS extraction | — | unblocked (queued) | Was blocked by `token_type_ids` uninitialised-buffer bug in GENA-LM's custom modeling code; fixed in `src/data_loader/gena_lm_encoder.py` (zero the buffer post-load). Verified working via 1-chunk CPU forward. Kick off after T-2 to avoid GPU contention. |
 | T-4 | Build pooling datasets for T-1..T-3 | — | partial (hyena_dna done) | HyenaDNA: 5 pool variants built (meanmean/maxmean/clsmean/meanD/meanG; specialmean skipped — HyenaDNA has no CLS-equivalent that gives `special_mean`). DNABERT-2/GENA-LM pending. |
 | T-5 | Train probes (family5 + genept) for T-1..T-3 | — | partial (hyena_dna done) | HyenaDNA TSS, best pool `meanmean`: family5 **macro-F1 = 0.419, kappa = 0.328 (C=1000)**; GenePT regression **R² = 0.085, mean cosine = 0.922 (α=0.1)**. Compare: NT-v2 TSS macro-F1 = 0.447. Encoder-general substrate effect is being supported. |
@@ -151,6 +151,11 @@ Update the **Status** column to `in progress` / `done <date>` as items move. Add
 - **Additional organisms / per-layer probes / noncoding-regulatory targets** — `discussion.tex` future-work items; not in revision scope.
 
 ---
+
+## Known operational notes
+
+- **WSL2 CUDA recovery.** If a CUDA process crashes hard (e.g., "CUDA error: unknown error"), subsequent CUDA inits in *new* Python processes can fail with `cudaGetDeviceCount(): invalid argument` and `nvidia-smi` returns `Failed to initialize NVML`. The fix is `wsl --shutdown` from a Windows PowerShell window (closes all WSL distros) and then reopen the terminal — that re-attaches the GPU. No data is lost; per-gene caches under `data/tss_chunk_reductions_*/` are intact and the resumable extraction scripts will pick up where they left off.
+- **8.5 GB VRAM budget.** Don't run two large encoders (DNABERT-2 + GENA-LM) in parallel. Sequence them: extraction (GPU) for one encoder, probes (CPU) concurrent with the next extraction.
 
 ## Pointers for the next session
 
