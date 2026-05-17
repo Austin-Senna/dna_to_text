@@ -37,14 +37,6 @@ ENFORMER_SOURCES = (
 )
 CONTEXT_ABLATION_SPECS = (
     {
-        "label": "CDS 4-mer",
-        "context": "CDS",
-        "model_group": "composition",
-        "family5_feature_source": "kmer",
-        "regression_dataset": "kmer",
-        "regression_feature_source": "kmer",
-    },
-    {
         "label": "CDS NT-v2 meanD",
         "context": "CDS",
         "model_group": "self-supervised encoder",
@@ -53,12 +45,12 @@ CONTEXT_ABLATION_SPECS = (
         "regression_feature_source": "nt_v2_meanD",
     },
     {
-        "label": "TSS 4-mer",
-        "context": "TSS window",
+        "label": "CDS 4-mer",
+        "context": "CDS",
         "model_group": "composition",
-        "family5_feature_source": "enformer_tss_4mer",
-        "regression_dataset": "dataset_enformer_tss_4mer.parquet",
-        "regression_feature_source": "enformer_tss_4mer",
+        "family5_feature_source": "kmer",
+        "regression_dataset": "kmer",
+        "regression_feature_source": "kmer",
     },
     {
         "label": "TSS NT-v2 meanmean",
@@ -69,28 +61,12 @@ CONTEXT_ABLATION_SPECS = (
         "regression_feature_source": "tss_nt_v2_meanmean",
     },
     {
-        "label": "TSS DNABERT-2 maxmean",
+        "label": "TSS 4-mer",
         "context": "TSS window",
-        "model_group": "self-supervised encoder",
-        "family5_feature_source": "tss_dnabert2_maxmean",
-        "regression_dataset": "dataset_tss_dnabert2_meanmean.parquet",
-        "regression_feature_source": "tss_dnabert2_meanmean",
-    },
-    {
-        "label": "TSS HyenaDNA meanmean",
-        "context": "TSS window",
-        "model_group": "self-supervised encoder",
-        "family5_feature_source": "tss_hyena_dna_meanmean",
-        "regression_dataset": "dataset_tss_hyena_dna_meanmean.parquet",
-        "regression_feature_source": "tss_hyena_dna_meanmean",
-    },
-    {
-        "label": "TSS GENA-LM clsmean",
-        "context": "TSS window",
-        "model_group": "self-supervised encoder",
-        "family5_feature_source": "tss_gena_lm_clsmean",
-        "regression_dataset": "dataset_tss_gena_lm_meanmean.parquet",
-        "regression_feature_source": "tss_gena_lm_meanmean",
+        "model_group": "composition",
+        "family5_feature_source": "enformer_tss_4mer",
+        "regression_dataset": "dataset_enformer_tss_4mer.parquet",
+        "regression_feature_source": "enformer_tss_4mer",
     },
     {
         "label": "Enformer trunk",
