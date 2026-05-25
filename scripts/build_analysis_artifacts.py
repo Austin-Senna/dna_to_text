@@ -653,11 +653,11 @@ def plot_tradeoff(combined: pd.DataFrame, out: Path, overwrite: bool) -> Path | 
     for _, row in df.iterrows():
         label = row["encoder"]
         colour = "#808080" if label == "kmer" else "#3b7f5c"
-        ax.scatter(row["ridge_r2_macro"], row["family5_macro_f1"], s=55, color=colour)
-        ax.text(row["ridge_r2_macro"] + 0.002, row["family5_macro_f1"], str(label), fontsize=8, va="center")
-    ax.set_xlabel("Ridge macro R2")
-    ax.set_ylabel("Family5 macro-F1")
-    ax.set_title("Family classification vs cross-modal regression")
+        ax.scatter(row["ridge_r2_macro"], row["family5_macro_f1"], s=70, color=colour)
+        ax.text(row["ridge_r2_macro"] + 0.002, row["family5_macro_f1"], str(label), fontsize=13, va="center")
+    ax.set_xlabel("Ridge macro R2", fontsize=15)
+    ax.set_ylabel("Family5 macro-F1", fontsize=15)
+    ax.tick_params(axis="both", labelsize=13)
     fig.tight_layout()
     return _savefig(fig, out, overwrite)
 
@@ -712,21 +712,28 @@ def plot_pooling_heatmap(pooling: pd.DataFrame, out: Path, overwrite: bool) -> P
     if not rows or not cols:
         return None
     values = pivot.loc[rows, cols].to_numpy(dtype=float)
+    vmin = float(np.nanmin(values))
+    vmax = float(np.nanmax(values))
     fig, ax = plt.subplots(figsize=(8.2, 4.8))
-    im = ax.imshow(values, cmap="YlGnBu", vmin=np.nanmin(values), vmax=np.nanmax(values))
+    im = ax.imshow(values, cmap="YlGnBu", vmin=vmin, vmax=vmax)
     ax.set_xticks(range(len(cols)))
     ax.set_yticks(range(len(rows)))
     ax.set_xticklabels(cols, rotation=35, ha="right")
     ax.set_yticklabels(rows)
-    ax.set_title("Family5 macro-F1 by encoder and pooling")
+    ax.tick_params(axis="both", labelsize=13)
+    span = max(vmax - vmin, 1e-9)
     for i in range(len(rows)):
         for j in range(len(cols)):
             value = values[i, j]
             if np.isnan(value):
                 continue
-            ax.text(j, i, f"{value:.3f}", ha="center", va="center", fontsize=8)
+            # YlGnBu is dark at the top of the range; flip text to white on dark cells.
+            shade = (value - vmin) / span
+            colour = "white" if shade > 0.55 else "black"
+            ax.text(j, i, f"{value:.3f}", ha="center", va="center", fontsize=12, color=colour)
     cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_label("macro-F1")
+    cbar.set_label("macro-F1", fontsize=14)
+    cbar.ax.tick_params(labelsize=12)
     fig.tight_layout()
     return _savefig(fig, out, overwrite)
 
@@ -754,16 +761,17 @@ def plot_confusion_best_family5(family5: pd.DataFrame, out: Path, overwrite: boo
     ax.set_yticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=30, ha="right")
     ax.set_yticklabels(labels)
-    ax.set_xlabel("Predicted family")
-    ax.set_ylabel("True family")
-    ax.set_title(f"Best family5 confusion matrix: {feature}")
+    ax.tick_params(axis="both", labelsize=13)
+    ax.set_xlabel("Predicted family", fontsize=15)
+    ax.set_ylabel("True family", fontsize=15)
     for i in range(len(labels)):
         for j in range(len(labels)):
             frac = normalised[i, j]
             colour = "white" if frac > 0.55 else "black"
-            ax.text(j, i, f"{matrix[i, j]}\n{frac:.2f}", ha="center", va="center", fontsize=8, color=colour)
+            ax.text(j, i, f"{matrix[i, j]}\n{frac:.2f}", ha="center", va="center", fontsize=12, color=colour)
     cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_label("Row-normalised fraction")
+    cbar.set_label("Row-normalised fraction", fontsize=14)
+    cbar.ax.tick_params(labelsize=12)
     fig.tight_layout()
     return _savefig(fig, out, overwrite)
 
@@ -785,7 +793,7 @@ def _umap_coords(X: np.ndarray) -> np.ndarray:
     return umap.UMAP(n_components=2, n_neighbors=15, min_dist=0.1, random_state=42).fit_transform(X)
 
 
-def _plot_umap(df: pd.DataFrame, title: str, out: Path, overwrite: bool) -> Path:
+def _plot_umap(df: pd.DataFrame, out: Path, overwrite: bool) -> Path:
     X = np.stack(df["x"].values).astype(np.float32)
     coords = _umap_coords(X)
     families = df["family"].to_numpy()
@@ -804,10 +812,9 @@ def _plot_umap(df: pd.DataFrame, title: str, out: Path, overwrite: bool) -> Path
         ax.scatter(coords[mask, 0], coords[mask, 1], s=6, alpha=0.65, c=palette[family], label=f"{family} (n={int(mask.sum())})")
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.set_xlabel("UMAP-1")
-    ax.set_ylabel("UMAP-2")
-    ax.set_title(title)
-    ax.legend(loc="upper right", fontsize=8, markerscale=2.0, framealpha=0.85)
+    ax.set_xlabel("UMAP-1", fontsize=15)
+    ax.set_ylabel("UMAP-2", fontsize=15)
+    ax.legend(loc="lower right", fontsize=12, markerscale=2.5, framealpha=0.85)
     fig.tight_layout()
     return _savefig(fig, out, overwrite)
 
@@ -823,7 +830,7 @@ def plot_umap_best_family5(family5: pd.DataFrame, out: Path, overwrite: bool) ->
     if dataset_path is None or not dataset_path.exists():
         return None
     df = pd.read_parquet(dataset_path)
-    return _plot_umap(df, f"UMAP of best family5 feature: {feature}", out, overwrite)
+    return _plot_umap(df, out, overwrite)
 
 
 def plot_umap_dnabert2_compare(out: Path, overwrite: bool) -> Path | None:

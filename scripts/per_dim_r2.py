@@ -131,8 +131,7 @@ def main() -> None:
     ax.grid(axis="both", color="#dddddd", linewidth=0.5)
     ax.set_axisbelow(True)
 
-    fig.suptitle("GenePT regression: per-dimension R² across 1,536 dims")
-    fig.tight_layout(rect=[0, 0.0, 1, 0.95])
+    fig.tight_layout()
     fig.savefig(OUT_PNG, dpi=140, bbox_inches="tight")
     print(f"wrote {OUT_PNG}")
 
