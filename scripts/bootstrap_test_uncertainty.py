@@ -212,11 +212,158 @@ def bootstrap_regression(dataset: str, alpha: float, shuffled: bool,
     }
 
 
+# ---------------------------------------------------------------------------
+# Paired difference tests (issue #10): resample the SAME test genes once per
+# iteration and apply to BOTH cells' fixed predictions, so the bootstrap CI is
+# on the metric *difference* rather than on two independent cells. Reports the
+# difference CI plus the fraction of resamples favouring side A (a one-sided
+# paired bootstrap p-value analogue).
+# ---------------------------------------------------------------------------
+
+# Paired classification comparisons: (label, dsA, C_A, dsB, C_B). Hyperparameters
+# are the current recorded bests; they are refreshed by the homology-split
+# re-run before the final numbers are reported.
+PAIRED_CLS = [
+    ("nt_v2_meanD - kmer",           "nt_v2_meanD",    1.0,  "kmer",                  1000.0),
+    ("nt_v2 CDS - TSS",              "nt_v2_meanD",    1.0,  "tss_nt_v2_meanmean",    100.0),
+    ("dnabert2 CDS - TSS",           "dnabert2_meanD", 10.0, "tss_dnabert2_maxmean",  100.0),
+    ("gena_lm CDS - TSS",            "gena_lm_clsmean", 1.0, "tss_gena_lm_clsmean",   1000.0),
+    ("hyena_dna CDS - TSS",          "hyena_dna_meanG", 10.0,"tss_hyena_dna_meanmean",1000.0),
+]
+
+# Paired regression comparisons: (label, dsA, alpha_A, dsB, alpha_B).
+PAIRED_REG = [
+    ("nt_v2_meanmean - kmer",        "nt_v2_meanmean",      10.0, "kmer",                   0.01),
+    ("nt_v2 CDS - TSS",              "nt_v2_meanmean",      10.0, "tss_nt_v2_meanmean",     0.1),
+    ("dnabert2 CDS - TSS",           "dnabert2_meanG",      10.0, "tss_dnabert2_meanmean",  0.1),
+    ("gena_lm CDS - TSS",            "gena_lm_meanmean",   100.0, "tss_gena_lm_meanmean",   1.0),
+    ("hyena_dna CDS - TSS",          "hyena_dna_specialmean",1.0, "tss_hyena_dna_meanmean", 0.1),
+]
+
+
+def _load_eval(dataset: str, name: str):
+    """Like _load but also returns the row-aligned ensembl_id array."""
+    if dataset in DATASET_PATHS:
+        X, Y_genept, meta = load_split(name, dataset_path=DATASET_PATHS[dataset])
+    elif dataset == "kmer":
+        _, Y_genept, meta = load_split(name, dataset_path=META_PARQUET)
+        X = _kmer_features(meta)
+    else:
+        raise ValueError(f"unknown dataset: {dataset}")
+    ids = meta["ensembl_id"].to_numpy()
+    y_family = meta["family"].to_numpy()
+    return X, y_family, Y_genept, ids
+
+
+def _common_alignment(ids_a: np.ndarray, ids_b: np.ndarray):
+    """Return index arrays (pos_a, pos_b) selecting the shared genes, in the
+    order they appear in ids_a. Used to pair CDS- and TSS-arm test sets that
+    may not cover identical gene sets."""
+    pos_b = {g: i for i, g in enumerate(ids_b.tolist())}
+    keep_a, keep_b = [], []
+    for i, g in enumerate(ids_a.tolist()):
+        j = pos_b.get(g)
+        if j is not None:
+            keep_a.append(i)
+            keep_b.append(j)
+    return np.array(keep_a, dtype=int), np.array(keep_b, dtype=int)
+
+
+def paired_bootstrap_classification(ds_a, C_a, ds_b, C_b,
+                                    n_iters: int = 1000, seed: int = 42) -> dict:
+    Xa_tr, ya_tr, _, _ = _load_eval(ds_a, "train")
+    Xa_val, ya_val, _, _ = _load_eval(ds_a, "val")
+    Xa_te, ya_te, _, ids_a = _load_eval(ds_a, "test")
+    Xb_tr, yb_tr, _, _ = _load_eval(ds_b, "train")
+    Xb_val, yb_val, _, _ = _load_eval(ds_b, "val")
+    Xb_te, yb_te, _, ids_b = _load_eval(ds_b, "test")
+
+    probe_a = fit_logistic(np.vstack([Xa_tr, Xa_val]),
+                           np.concatenate([ya_tr, ya_val]), C_a)
+    probe_b = fit_logistic(np.vstack([Xb_tr, Xb_val]),
+                           np.concatenate([yb_tr, yb_val]), C_b)
+    pred_a_full = probe_a.predict(Xa_te)
+    pred_b_full = probe_b.predict(Xb_te)
+
+    pa, pb = _common_alignment(ids_a, ids_b)
+    y = ya_te[pa]
+    assert np.array_equal(y, yb_te[pb]), "paired test labels misaligned"
+    pred_a, pred_b = pred_a_full[pa], pred_b_full[pb]
+
+    classes = sorted(np.unique(y).tolist())
+    rng = np.random.default_rng(seed)
+    d_f1, d_kappa = [], []
+    for _ in range(n_iters):
+        idx = np.concatenate([rng.choice(np.where(y == c)[0],
+                                          size=int((y == c).sum()), replace=True)
+                              for c in classes])
+        d_f1.append(f1_score(y[idx], pred_a[idx], average="macro")
+                    - f1_score(y[idx], pred_b[idx], average="macro"))
+        d_kappa.append(cohen_kappa_score(y[idx], pred_a[idx])
+                       - cohen_kappa_score(y[idx], pred_b[idx]))
+    d_f1 = np.asarray(d_f1)
+    d_kappa = np.asarray(d_kappa)
+    return {
+        "n_common": int(len(y)),
+        "delta_macro_f1_point": float(
+            f1_score(y, pred_a, average="macro") - f1_score(y, pred_b, average="macro")),
+        "delta_macro_f1_ci95": [float(np.percentile(d_f1, 2.5)),
+                                float(np.percentile(d_f1, 97.5))],
+        "delta_kappa_point": float(
+            cohen_kappa_score(y, pred_a) - cohen_kappa_score(y, pred_b)),
+        "delta_kappa_ci95": [float(np.percentile(d_kappa, 2.5)),
+                             float(np.percentile(d_kappa, 97.5))],
+        "frac_A_gt_B_f1": float(np.mean(d_f1 > 0)),
+        "n_iters": n_iters,
+    }
+
+
+def paired_bootstrap_regression(ds_a, alpha_a, ds_b, alpha_b,
+                                n_iters: int = 1000, seed: int = 42) -> dict:
+    Xa_tr, _, Ya_tr, _ = _load_eval(ds_a, "train")
+    Xa_val, _, Ya_val, _ = _load_eval(ds_a, "val")
+    Xa_te, _, Ya_te, ids_a = _load_eval(ds_a, "test")
+    Xb_tr, _, Yb_tr, _ = _load_eval(ds_b, "train")
+    Xb_val, _, Yb_val, _ = _load_eval(ds_b, "val")
+    Xb_te, _, Yb_te, ids_b = _load_eval(ds_b, "test")
+
+    pa, pb = _common_alignment(ids_a, ids_b)
+    probe_a = Ridge(alpha=alpha_a).fit(np.vstack([Xa_tr, Xa_val]), np.vstack([Ya_tr, Ya_val]))
+    probe_b = Ridge(alpha=alpha_b).fit(np.vstack([Xb_tr, Xb_val]), np.vstack([Yb_tr, Yb_val]))
+    pred_a = probe_a.predict(Xa_te)[pa]
+    pred_b = probe_b.predict(Xb_te)[pb]
+    Y = Ya_te[pa]
+    assert np.allclose(Y, Yb_te[pb]), "paired regression targets misaligned"
+
+    def _r2_macro(y_true, y_pred):
+        ss_res = np.sum((y_true - y_pred) ** 2, axis=0)
+        ss_tot = np.sum((y_true - y_true.mean(axis=0)) ** 2, axis=0)
+        return float(np.mean(1.0 - ss_res / np.where(ss_tot == 0, 1e-12, ss_tot)))
+
+    rng = np.random.default_rng(seed)
+    n = len(Y)
+    d_r2 = []
+    for _ in range(n_iters):
+        idx = rng.choice(n, size=n, replace=True)
+        d_r2.append(_r2_macro(Y[idx], pred_a[idx]) - _r2_macro(Y[idx], pred_b[idx]))
+    d_r2 = np.asarray(d_r2)
+    return {
+        "n_common": int(n),
+        "delta_r2_macro_point": float(_r2_macro(Y, pred_a) - _r2_macro(Y, pred_b)),
+        "delta_r2_macro_ci95": [float(np.percentile(d_r2, 2.5)),
+                                float(np.percentile(d_r2, 97.5))],
+        "frac_A_gt_B": float(np.mean(d_r2 > 0)),
+        "n_iters": n_iters,
+    }
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n-iters", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--out", type=Path, default=OUT)
+    ap.add_argument("--paired", action="store_true",
+                    help="also compute paired difference CIs (issue #10)")
     args = ap.parse_args()
 
     results = {"classification": {}, "regression": {},
@@ -246,6 +393,28 @@ def main():
         r2_lo, r2_hi = res["r2_macro_ci95"]
         print(f"  {name:<26s} R2={res['r2_macro_point']:.4f} [{r2_lo:.3f}-{r2_hi:.3f}]  "
               f"({time.time()-t0:.1f}s)")
+
+    if args.paired:
+        results["paired"] = {"classification": {}, "regression": {}}
+        print("\n=== Paired classification difference CIs (A - B) ===")
+        for label, da, ca, db, cb in PAIRED_CLS:
+            t0 = time.time()
+            res = paired_bootstrap_classification(da, ca, db, cb,
+                                                  n_iters=args.n_iters, seed=args.seed)
+            results["paired"]["classification"][label] = res
+            lo, hi = res["delta_macro_f1_ci95"]
+            print(f"  {label:<24s} dF1={res['delta_macro_f1_point']:+.4f} [{lo:+.3f},{hi:+.3f}]  "
+                  f"P(A>B)={res['frac_A_gt_B_f1']:.3f}  n={res['n_common']}  ({time.time()-t0:.1f}s)")
+
+        print("\n=== Paired regression difference CIs (A - B) ===")
+        for label, da, aa, db, ab in PAIRED_REG:
+            t0 = time.time()
+            res = paired_bootstrap_regression(da, aa, db, ab,
+                                              n_iters=args.n_iters, seed=args.seed)
+            results["paired"]["regression"][label] = res
+            lo, hi = res["delta_r2_macro_ci95"]
+            print(f"  {label:<24s} dR2={res['delta_r2_macro_point']:+.4f} [{lo:+.3f},{hi:+.3f}]  "
+                  f"P(A>B)={res['frac_A_gt_B']:.3f}  n={res['n_common']}  ({time.time()-t0:.1f}s)")
 
     args.out.write_text(json.dumps(results, indent=2))
     print(f"\nwrote {args.out}")

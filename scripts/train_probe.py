@@ -36,6 +36,12 @@ def _append_metrics(path: Path, entry: dict) -> None:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--alphas", type=float, nargs="+", default=DEFAULT_ALPHAS)
+    ap.add_argument(
+        "--select-by",
+        choices=["r2", "cosine"],
+        default="r2",
+        help="validation metric for alpha selection (default: macro-R^2)",
+    )
     ap.add_argument("--dataset", default=str(DATA / "dataset.parquet"))
     ap.add_argument("--probe-out", default=str(DATA / "probe.npz"))
     ap.add_argument("--metrics-out", default=str(DATA / "metrics.json"))
@@ -48,12 +54,17 @@ def main():
     X_te, Y_te, _ = load_split("test", dataset_path=dataset_path)
     print(f"  train={X_tr.shape} val={X_val.shape} test={X_te.shape}")
 
-    print("\n=== alpha sweep (mean cosine on val) ===")
-    best_alpha, sweep = sweep_alpha(X_tr, Y_tr, X_val, Y_val, args.alphas)
+    print(f"\n=== alpha sweep (select by val {args.select_by}) ===")
+    best_alpha, sweep = sweep_alpha(
+        X_tr, Y_tr, X_val, Y_val, args.alphas, select_by=args.select_by
+    )
     for r in sweep:
         mark = " *" if r["alpha"] == best_alpha else ""
-        print(f"  alpha={r['alpha']:>8.3g}  mean_cosine={r['mean_cosine']:.4f}{mark}")
-    print(f"  best alpha = {best_alpha}")
+        print(
+            f"  alpha={r['alpha']:>8.3g}  "
+            f"val_r2={r['r2']:.4f}  mean_cosine={r['mean_cosine']:.4f}{mark}"
+        )
+    print(f"  best alpha = {best_alpha}  (selected by val {args.select_by})")
 
     print("\n=== refit on train+val ===")
     X_fit = np.vstack([X_tr, X_val])
@@ -84,6 +95,7 @@ def main():
         "model": "linear_probe",
         "dataset": dataset_path.name,
         "alpha": best_alpha,
+        "select_by": args.select_by,
         "alpha_sweep": sweep,
         "test_mean_cosine": test_mean_cos,
         "test_median_cosine": test_median_cos,

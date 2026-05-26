@@ -12,6 +12,7 @@ from typing import Sequence
 
 import numpy as np
 from sklearn.linear_model import Ridge
+from sklearn.metrics import r2_score
 
 
 @dataclass
@@ -55,12 +56,26 @@ def sweep_alpha(
     X_val: np.ndarray,
     Y_val: np.ndarray,
     alphas: Sequence[float],
+    select_by: str = "r2",
 ) -> tuple[float, list[dict]]:
-    """Fit at each alpha on train, score mean cosine on val. Return (best_alpha, results)."""
+    """Fit at each alpha on train, score on val. Return (best_alpha, results).
+
+    Selection metric is validation macro-R^2 by default (``select_by="r2"``),
+    matching the manuscript's argument that R^2 — not the compressed cosine
+    similarity — is the interpreted regression metric. Mean cosine is still
+    recorded per alpha as a secondary diagnostic. Pass ``select_by="cosine"``
+    to recover the legacy cosine-selected behaviour (used for the
+    α-selection sensitivity analysis).
+    """
+    if select_by not in ("r2", "cosine"):
+        raise ValueError(f"select_by must be 'r2' or 'cosine', got {select_by!r}")
     results: list[dict] = []
     for a in alphas:
         probe = fit(X_tr, Y_tr, a)
-        cos = _mean_cosine(probe.predict(X_val), Y_val)
-        results.append({"alpha": float(a), "mean_cosine": cos})
-    best = max(results, key=lambda r: r["mean_cosine"])
+        Y_hat = probe.predict(X_val)
+        cos = _mean_cosine(Y_hat, Y_val)
+        r2 = float(r2_score(Y_val, Y_hat, multioutput="uniform_average"))
+        results.append({"alpha": float(a), "mean_cosine": cos, "r2": r2})
+    key = "r2" if select_by == "r2" else "mean_cosine"
+    best = max(results, key=lambda r: r[key])
     return best["alpha"], results
