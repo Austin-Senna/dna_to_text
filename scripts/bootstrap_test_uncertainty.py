@@ -27,9 +27,21 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import cohen_kappa_score, f1_score, r2_score
 
 from linear_trainer import fit_logistic
-from kmer_baseline import featurize_cds
+from kmer_baseline import featurize_kmer
+from composition_baseline import featurize_aa_kmer, featurize_codon, featurize_gc
 from data_loader.sequence_fetcher import fetch_cds
 from splits import load_split
+
+# On-the-fly compositional feature sources (mirror train_logistic_probe).
+SYNTHETIC_FEATURIZERS = {
+    "kmer": lambda s: featurize_kmer(s, 4),
+    "kmer6": lambda s: featurize_kmer(s, 6),
+    "codon": featurize_codon,
+    "aa1": lambda s: featurize_aa_kmer(s, 1),
+    "aa2": lambda s: featurize_aa_kmer(s, 2),
+    "aa3": lambda s: featurize_aa_kmer(s, 3),
+    "gc": featurize_gc,
+}
 
 REPO = Path(__file__).resolve().parents[1]
 DATA = REPO / "data"
@@ -110,23 +122,24 @@ HEADLINE_REG_TSS = [
 ]
 
 
-def _kmer_features(meta: pd.DataFrame) -> np.ndarray:
-    out = np.zeros((len(meta), 256), dtype=np.float32)
-    for i, eid in enumerate(meta["ensembl_id"].tolist()):
+def _synth_features(dataset: str, meta: pd.DataFrame) -> np.ndarray:
+    fn = SYNTHETIC_FEATURIZERS[dataset]
+    rows = []
+    for eid in meta["ensembl_id"].tolist():
         seq = fetch_cds(eid, SEQUENCES_DIR)
         if not seq:
             raise RuntimeError(f"missing CDS for {eid}")
-        out[i] = featurize_cds(seq)
-    return out
+        rows.append(fn(seq))
+    return np.stack(rows).astype(np.float32)
 
 
 def _load(dataset: str, name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Returns (X, y_family, Y_genept) for the given dataset/split."""
     if dataset in DATASET_PATHS:
         X, Y_genept, meta = load_split(name, dataset_path=DATASET_PATHS[dataset])
-    elif dataset == "kmer":
+    elif dataset in SYNTHETIC_FEATURIZERS:
         _, Y_genept, meta = load_split(name, dataset_path=META_PARQUET)
-        X = _kmer_features(meta)
+        X = _synth_features(dataset, meta)
     else:
         raise ValueError(f"unknown dataset: {dataset}")
     y_family = meta["family"].to_numpy()
@@ -224,20 +237,17 @@ def bootstrap_regression(dataset: str, alpha: float, shuffled: bool,
 # are the current recorded bests; they are refreshed by the homology-split
 # re-run before the final numbers are reported.
 PAIRED_CLS = [
-    ("nt_v2_meanD - kmer",           "nt_v2_meanD",    1.0,  "kmer",                  1000.0),
-    ("nt_v2 CDS - TSS",              "nt_v2_meanD",    1.0,  "tss_nt_v2_meanmean",    100.0),
-    ("dnabert2 CDS - TSS",           "dnabert2_meanD", 10.0, "tss_dnabert2_maxmean",  100.0),
-    ("gena_lm CDS - TSS",            "gena_lm_clsmean", 1.0, "tss_gena_lm_clsmean",   1000.0),
-    ("hyena_dna CDS - TSS",          "hyena_dna_meanG", 10.0,"tss_hyena_dna_meanmean",1000.0),
+    ("nt_v2_meanD - aa2",  "nt_v2_meanD", 10.0,   "aa2",  1000.0),  # headline: DNA-LM vs AA composition
+    ("nt_v2_meanD - kmer", "nt_v2_meanD", 10.0,   "kmer", 1000.0),
+    ("aa2 - kmer",         "aa2",         1000.0, "kmer", 1000.0),
 ]
 
 # Paired regression comparisons: (label, dsA, alpha_A, dsB, alpha_B).
 PAIRED_REG = [
-    ("nt_v2_meanmean - kmer",        "nt_v2_meanmean",      10.0, "kmer",                   0.01),
-    ("nt_v2 CDS - TSS",              "nt_v2_meanmean",      10.0, "tss_nt_v2_meanmean",     0.1),
-    ("dnabert2 CDS - TSS",           "dnabert2_meanG",      10.0, "tss_dnabert2_meanmean",  0.1),
-    ("gena_lm CDS - TSS",            "gena_lm_meanmean",   100.0, "tss_gena_lm_meanmean",   1.0),
-    ("hyena_dna CDS - TSS",          "hyena_dna_specialmean",1.0, "tss_hyena_dna_meanmean", 0.1),
+    ("dnabert2_meanD - aa3", "dnabert2_meanD", 10.0, "aa3",  0.01),  # headline reg: best DNA-LM vs AA-3mer
+    ("nt_v2_meanmean - aa3", "nt_v2_meanmean", 10.0, "aa3",  0.01),
+    ("dnabert2_meanD - kmer","dnabert2_meanD", 10.0, "kmer", 0.01),
+    ("aa3 - kmer",           "aa3",            0.01, "kmer", 0.01),
 ]
 
 
@@ -245,9 +255,9 @@ def _load_eval(dataset: str, name: str):
     """Like _load but also returns the row-aligned ensembl_id array."""
     if dataset in DATASET_PATHS:
         X, Y_genept, meta = load_split(name, dataset_path=DATASET_PATHS[dataset])
-    elif dataset == "kmer":
+    elif dataset in SYNTHETIC_FEATURIZERS:
         _, Y_genept, meta = load_split(name, dataset_path=META_PARQUET)
-        X = _kmer_features(meta)
+        X = _synth_features(dataset, meta)
     else:
         raise ValueError(f"unknown dataset: {dataset}")
     ids = meta["ensembl_id"].to_numpy()

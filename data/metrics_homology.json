@@ -1,0 +1,5574 @@
+[
+  {
+    "run_id": "logistic_kmer_family5_2026-05-26T10:23:18+00:00",
+    "timestamp": "2026-05-26T10:23:18+00:00",
+    "model": "logistic_probe",
+    "encoder": "kmer",
+    "feature_source": "kmer",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.2499275932450769
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.3845558029742544
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.48256710337513375
+      }
+    ],
+    "test_macro_f1": 0.6327505898053448,
+    "test_kappa": 0.5837979778486901,
+    "test_balanced_accuracy": 0.5974355973431156,
+    "test_accuracy": 0.7453798767967146,
+    "test_per_class_accuracy": {
+      "gpcr": 0.6966292134831461,
+      "immune": 0.4782608695652174,
+      "ion": 0.4,
+      "kinase": 0.5119047619047619,
+      "tf": 0.9003831417624522
+    }
+  },
+  {
+    "run_id": "logistic_kmer6_family5_2026-05-26T10:24:25+00:00",
+    "timestamp": "2026-05-26T10:24:25+00:00",
+    "model": "logistic_probe",
+    "encoder": "kmer6",
+    "feature_source": "kmer6",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.14478889340132062
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.2689672990329962
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.4693310851184834
+      }
+    ],
+    "test_macro_f1": 0.5460322009166575,
+    "test_kappa": 0.5453676894240517,
+    "test_balanced_accuracy": 0.49979568268300306,
+    "test_accuracy": 0.7371663244353183,
+    "test_per_class_accuracy": {
+      "gpcr": 0.651685393258427,
+      "immune": 0.13043478260869565,
+      "ion": 0.26666666666666666,
+      "kinase": 0.5,
+      "tf": 0.9501915708812261
+    }
+  },
+  {
+    "run_id": "logistic_codon_family5_2026-05-26T10:24:26+00:00",
+    "timestamp": "2026-05-26T10:24:26+00:00",
+    "model": "logistic_probe",
+    "encoder": "codon",
+    "feature_source": "codon",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.2537406355830739
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.39894450576326684
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5722512419178536
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5488719317085918
+      }
+    ],
+    "test_macro_f1": 0.6453150491596036,
+    "test_kappa": 0.6241999159438063,
+    "test_balanced_accuracy": 0.6134874590527101,
+    "test_accuracy": 0.7700205338809035,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7640449438202247,
+      "immune": 0.43478260869565216,
+      "ion": 0.43333333333333335,
+      "kinase": 0.5119047619047619,
+      "tf": 0.9233716475095786
+    }
+  },
+  {
+    "run_id": "logistic_aa1_family5_2026-05-26T10:24:27+00:00",
+    "timestamp": "2026-05-26T10:24:27+00:00",
+    "model": "logistic_probe",
+    "encoder": "aa1",
+    "feature_source": "aa1",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.14478889340132062
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.3024734715456365
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.39974325364091834
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5773953616085328
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5880629320428343
+      }
+    ],
+    "test_macro_f1": 0.6805367084165731,
+    "test_kappa": 0.6687654886326904,
+    "test_balanced_accuracy": 0.6699852374508305,
+    "test_accuracy": 0.7926078028747433,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7191011235955056,
+      "immune": 0.5217391304347826,
+      "ion": 0.5666666666666667,
+      "kinase": 0.6190476190476191,
+      "tf": 0.9233716475095786
+    }
+  },
+  {
+    "run_id": "logistic_aa2_family5_2026-05-26T10:24:57+00:00",
+    "timestamp": "2026-05-26T10:24:57+00:00",
+    "model": "logistic_probe",
+    "encoder": "aa2",
+    "feature_source": "aa2",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.14937146261543044
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.32762264144220227
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5515083620487505
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6662395409499845
+      }
+    ],
+    "test_macro_f1": 0.7352412393424661,
+    "test_kappa": 0.710370709632435,
+    "test_balanced_accuracy": 0.6972707118885715,
+    "test_accuracy": 0.8213552361396304,
+    "test_per_class_accuracy": {
+      "gpcr": 0.8202247191011236,
+      "immune": 0.5217391304347826,
+      "ion": 0.5666666666666667,
+      "kinase": 0.6428571428571429,
+      "tf": 0.9348659003831418
+    }
+  },
+  {
+    "run_id": "logistic_aa3_family5_2026-05-26T10:25:33+00:00",
+    "timestamp": "2026-05-26T10:25:33+00:00",
+    "model": "logistic_probe",
+    "encoder": "aa3",
+    "feature_source": "aa3",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.17090418353576248
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.3532149719999687
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5680345228849543
+      }
+    ],
+    "test_macro_f1": 0.6552734215470064,
+    "test_kappa": 0.6552767052767052,
+    "test_balanced_accuracy": 0.5928584691068056,
+    "test_accuracy": 0.7967145790554415,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7752808988764045,
+      "immune": 0.21739130434782608,
+      "ion": 0.36666666666666664,
+      "kinase": 0.6547619047619048,
+      "tf": 0.9501915708812261
+    }
+  },
+  {
+    "run_id": "logistic_gc_family5_2026-05-26T10:25:34+00:00",
+    "timestamp": "2026-05-26T10:25:34+00:00",
+    "model": "logistic_probe",
+    "encoder": "gc",
+    "feature_source": "gc",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.14117494824016563
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.1440159574468085
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.1699334183645206
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.1952386575067983
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.1952386575067983
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.1952386575067983
+      }
+    ],
+    "test_macro_f1": 0.1643612506302293,
+    "test_kappa": 0.004532897719011553,
+    "test_balanced_accuracy": 0.202153096806332,
+    "test_accuracy": 0.5092402464065708,
+    "test_per_class_accuracy": {
+      "gpcr": 0.06741573033707865,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.023809523809523808,
+      "tf": 0.9195402298850575
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_meanmean_family5_2026-05-26T10:27:27+00:00",
+    "timestamp": "2026-05-26T10:27:27+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_meanmean",
+    "feature_source": "dnabert2_meanmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.17533875338753385
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.28935422965711194
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5032467047874398
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5453092813438369
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5511769570407444
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5454357911130387
+      }
+    ],
+    "test_macro_f1": 0.61685341137554,
+    "test_kappa": 0.5952980913574952,
+    "test_balanced_accuracy": 0.6057997111663538,
+    "test_accuracy": 0.7453798767967146,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7191011235955056,
+      "immune": 0.4782608695652174,
+      "ion": 0.36666666666666664,
+      "kinase": 0.5952380952380952,
+      "tf": 0.8697318007662835
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_specialmean_family5_2026-05-26T10:29:14+00:00",
+    "timestamp": "2026-05-26T10:29:14+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_specialmean",
+    "feature_source": "dnabert2_specialmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.17533875338753385
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.2917689739428869
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5052771616402316
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5423544576352862
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5559451508717549
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5578325345010032
+      }
+    ],
+    "test_macro_f1": 0.6069586255090484,
+    "test_kappa": 0.5723049088099734,
+    "test_balanced_accuracy": 0.6053646531469418,
+    "test_accuracy": 0.7268993839835729,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7415730337078652,
+      "immune": 0.5652173913043478,
+      "ion": 0.3333333333333333,
+      "kinase": 0.5476190476190477,
+      "tf": 0.8390804597701149
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_maxmean_family5_2026-05-26T10:33:23+00:00",
+    "timestamp": "2026-05-26T10:33:23+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_maxmean",
+    "feature_source": "dnabert2_maxmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.17074567338508653
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.3286518818672864
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.41129945910256654
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.3995370169410818
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.4115602580967833
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.43784312556124994
+      }
+    ],
+    "test_macro_f1": 0.4880107276953335,
+    "test_kappa": 0.40216525407127834,
+    "test_balanced_accuracy": 0.49042374478892176,
+    "test_accuracy": 0.6139630390143738,
+    "test_per_class_accuracy": {
+      "gpcr": 0.48314606741573035,
+      "immune": 0.391304347826087,
+      "ion": 0.36666666666666664,
+      "kinase": 0.4523809523809524,
+      "tf": 0.7586206896551724
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_clsmean_family5_2026-05-26T10:34:58+00:00",
+    "timestamp": "2026-05-26T10:34:58+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_clsmean",
+    "feature_source": "dnabert2_clsmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.2853339142394615
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.4093640803645441
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.4695930771811418
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.4901445055524564
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.49364764574110465
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.4619936333642758
+      }
+    ],
+    "test_macro_f1": 0.6128428146002856,
+    "test_kappa": 0.5533055810343611,
+    "test_balanced_accuracy": 0.6251075131241228,
+    "test_accuracy": 0.7063655030800822,
+    "test_per_class_accuracy": {
+      "gpcr": 0.6741573033707865,
+      "immune": 0.6521739130434783,
+      "ion": 0.36666666666666664,
+      "kinase": 0.6547619047619048,
+      "tf": 0.7777777777777778
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_meanD_family5_2026-05-26T10:39:18+00:00",
+    "timestamp": "2026-05-26T10:39:18+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_meanD",
+    "feature_source": "dnabert2_meanD",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.2274712957009987
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.4183468242131558
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.528640983395066
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5644709829905505
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5543494909790813
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5570253788827246
+      }
+    ],
+    "test_macro_f1": 0.6509746385553241,
+    "test_kappa": 0.6204208885424786,
+    "test_balanced_accuracy": 0.631817122471402,
+    "test_accuracy": 0.7618069815195072,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7528089887640449,
+      "immune": 0.5217391304347826,
+      "ion": 0.4,
+      "kinase": 0.6071428571428571,
+      "tf": 0.8773946360153256
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_meanG_family5_2026-05-26T10:44:10+00:00",
+    "timestamp": "2026-05-26T10:44:10+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_meanG",
+    "feature_source": "dnabert2_meanG",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.23524289479455004
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.4163263202251418
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5303568037930059
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5479223830556436
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5322349352281293
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5205643163223443
+      }
+    ],
+    "test_macro_f1": 0.6535812829430205,
+    "test_kappa": 0.6149963512527366,
+    "test_balanced_accuracy": 0.6295699314601662,
+    "test_accuracy": 0.7597535934291582,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7415730337078652,
+      "immune": 0.5217391304347826,
+      "ion": 0.4,
+      "kinase": 0.6071428571428571,
+      "tf": 0.8773946360153256
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_meanmean_family5_2026-05-26T10:47:33+00:00",
+    "timestamp": "2026-05-26T10:47:33+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_meanmean",
+    "feature_source": "nt_v2_meanmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3598712036686364
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.49807478107109704
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.594411931924571
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.6159660307343946
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.6059872960244453
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6064216833834893
+      }
+    ],
+    "test_macro_f1": 0.7103507867793583,
+    "test_kappa": 0.6820852373402966,
+    "test_balanced_accuracy": 0.710152935838127,
+    "test_accuracy": 0.7987679671457906,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7640449438202247,
+      "immune": 0.6086956521739131,
+      "ion": 0.6666666666666666,
+      "kinase": 0.6071428571428571,
+      "tf": 0.9042145593869731
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_specialmean_family5_2026-05-26T10:50:28+00:00",
+    "timestamp": "2026-05-26T10:50:28+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_specialmean",
+    "feature_source": "nt_v2_specialmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3605682731540855
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.49619085450628686
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5890699920751692
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.6188624814861228
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.6130934936325607
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5993622257684841
+      }
+    ],
+    "test_macro_f1": 0.7095167678901505,
+    "test_kappa": 0.6813337962715666,
+    "test_balanced_accuracy": 0.7085382669820788,
+    "test_accuracy": 0.7987679671457906,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7640449438202247,
+      "immune": 0.6086956521739131,
+      "ion": 0.6666666666666666,
+      "kinase": 0.5952380952380952,
+      "tf": 0.9080459770114943
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_maxmean_family5_2026-05-26T10:55:39+00:00",
+    "timestamp": "2026-05-26T10:55:39+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_maxmean",
+    "feature_source": "nt_v2_maxmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.33951841039219677
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.4668098065527941
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.454990254804098
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.45409610668010636
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.44508744350717844
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.44757524534717774
+      }
+    ],
+    "test_macro_f1": 0.5191425729271633,
+    "test_kappa": 0.5201868416949008,
+    "test_balanced_accuracy": 0.49438889971814526,
+    "test_accuracy": 0.7145790554414785,
+    "test_per_class_accuracy": {
+      "gpcr": 0.6292134831460674,
+      "immune": 0.08695652173913043,
+      "ion": 0.4,
+      "kinase": 0.42857142857142855,
+      "tf": 0.9272030651340997
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_clsmean_family5_2026-05-26T11:00:52+00:00",
+    "timestamp": "2026-05-26T11:00:52+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_clsmean",
+    "feature_source": "nt_v2_clsmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.28642583773761326
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.3747981166614707
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.4528551522084049
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.42973355592958573
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.4207338912739894
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.4274866033902625
+      }
+    ],
+    "test_macro_f1": 0.5291607848373743,
+    "test_kappa": 0.4944489009026013,
+    "test_balanced_accuracy": 0.5198341653143466,
+    "test_accuracy": 0.6837782340862423,
+    "test_per_class_accuracy": {
+      "gpcr": 0.550561797752809,
+      "immune": 0.2608695652173913,
+      "ion": 0.43333333333333335,
+      "kinase": 0.5,
+      "tf": 0.8544061302681992
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_meanD_family5_2026-05-26T11:04:23+00:00",
+    "timestamp": "2026-05-26T11:04:23+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_meanD",
+    "feature_source": "nt_v2_meanD",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.4213726242832789
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5667917410965739
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6031520601281835
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.6075231835506116
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.6017416405723699
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5882522532236635
+      }
+    ],
+    "test_macro_f1": 0.7220264797168923,
+    "test_kappa": 0.6912022853633955,
+    "test_balanced_accuracy": 0.7177101096321823,
+    "test_accuracy": 0.8049281314168378,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7640449438202247,
+      "immune": 0.6521739130434783,
+      "ion": 0.6333333333333333,
+      "kinase": 0.6309523809523809,
+      "tf": 0.9080459770114943
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_meanG_family5_2026-05-26T11:12:49+00:00",
+    "timestamp": "2026-05-26T11:12:49+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_meanG",
+    "feature_source": "nt_v2_meanG",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.44697602720925883
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5732351013451591
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6039757556526023
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.6040837909892964
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.6019564138584412
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5937301833651797
+      }
+    ],
+    "test_macro_f1": 0.7271920760084425,
+    "test_kappa": 0.7038544297876321,
+    "test_balanced_accuracy": 0.7223899125878473,
+    "test_accuracy": 0.813141683778234,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7640449438202247,
+      "immune": 0.6521739130434783,
+      "ion": 0.6333333333333333,
+      "kinase": 0.6428571428571429,
+      "tf": 0.9195402298850575
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanmean_family5_2026-05-26T11:17:05+00:00",
+    "timestamp": "2026-05-26T11:17:05+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanmean",
+    "feature_source": "gena_lm_meanmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.1985096302645049
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.32809428762395354
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.32503962906601014
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.33416844665463447
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.3260583110923482
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.3394434740799207
+      }
+    ],
+    "test_macro_f1": 0.3783431845696922,
+    "test_kappa": 0.2684104653711751,
+    "test_balanced_accuracy": 0.3755937413850592,
+    "test_accuracy": 0.5215605749486653,
+    "test_per_class_accuracy": {
+      "gpcr": 0.5056179775280899,
+      "immune": 0.043478260869565216,
+      "ion": 0.3,
+      "kinase": 0.39285714285714285,
+      "tf": 0.6360153256704981
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_specialmean_family5_2026-05-26T11:21:38+00:00",
+    "timestamp": "2026-05-26T11:21:38+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_specialmean",
+    "feature_source": "gena_lm_specialmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.21962297134179218
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.2804684022262892
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.36238053607507237
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.35849905737787297
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.34631288762978374
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.3400839278455253
+      }
+    ],
+    "test_macro_f1": 0.40500882947388755,
+    "test_kappa": 0.31058020477815695,
+    "test_balanced_accuracy": 0.3873340483316394,
+    "test_accuracy": 0.5852156057494866,
+    "test_per_class_accuracy": {
+      "gpcr": 0.3707865168539326,
+      "immune": 0.08695652173913043,
+      "ion": 0.3333333333333333,
+      "kinase": 0.3333333333333333,
+      "tf": 0.8122605363984674
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_maxmean_family5_2026-05-26T11:32:56+00:00",
+    "timestamp": "2026-05-26T11:32:56+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_maxmean",
+    "feature_source": "gena_lm_maxmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.25164324316329345
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.2764699013855639
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.26000632861513484
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.2506921025990427
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.2671127109204713
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.2661357132208635
+      }
+    ],
+    "test_macro_f1": 0.29429453996707516,
+    "test_kappa": 0.1534044021158295,
+    "test_balanced_accuracy": 0.29081491357050204,
+    "test_accuracy": 0.4722792607802875,
+    "test_per_class_accuracy": {
+      "gpcr": 0.23595505617977527,
+      "immune": 0.13043478260869565,
+      "ion": 0.1,
+      "kinase": 0.30952380952380953,
+      "tf": 0.6781609195402298
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_clsmean_family5_2026-05-26T11:42:49+00:00",
+    "timestamp": "2026-05-26T11:42:49+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_clsmean",
+    "feature_source": "gena_lm_clsmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.19008310995238617
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.2798335420711132
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.34125823278210227
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.34844191407688335
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.3405850708456108
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.346305741617208
+      }
+    ],
+    "test_macro_f1": 0.3769759838184755,
+    "test_kappa": 0.278733203037824,
+    "test_balanced_accuracy": 0.3659160548136846,
+    "test_accuracy": 0.5503080082135524,
+    "test_per_class_accuracy": {
+      "gpcr": 0.449438202247191,
+      "immune": 0.08695652173913043,
+      "ion": 0.2,
+      "kinase": 0.36904761904761907,
+      "tf": 0.7241379310344828
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanD_family5_2026-05-26T11:52:42+00:00",
+    "timestamp": "2026-05-26T11:52:42+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanD",
+    "feature_source": "gena_lm_meanD",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.268568857978694
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.3153245362401989
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.3332489175176922
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.3322890304212094
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.35039992792585506
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.33711973842116916
+      }
+    ],
+    "test_macro_f1": 0.41468789862710925,
+    "test_kappa": 0.3148350789432547,
+    "test_balanced_accuracy": 0.40840350825122484,
+    "test_accuracy": 0.5564681724845996,
+    "test_per_class_accuracy": {
+      "gpcr": 0.5168539325842697,
+      "immune": 0.21739130434782608,
+      "ion": 0.23333333333333334,
+      "kinase": 0.38095238095238093,
+      "tf": 0.6934865900383141
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanG_family5_2026-05-26T12:01:07+00:00",
+    "timestamp": "2026-05-26T12:01:07+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanG",
+    "feature_source": "gena_lm_meanG",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.29402864726440436
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.3115442508710801
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.3359410349055833
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.333271780236276
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.33478889671294976
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.3439724559557932
+      }
+    ],
+    "test_macro_f1": 0.3906415790428753,
+    "test_kappa": 0.2819284087468239,
+    "test_balanced_accuracy": 0.38196156603346265,
+    "test_accuracy": 0.5400410677618069,
+    "test_per_class_accuracy": {
+      "gpcr": 0.47191011235955055,
+      "immune": 0.17391304347826086,
+      "ion": 0.23333333333333334,
+      "kinase": 0.3333333333333333,
+      "tf": 0.6973180076628352
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanmean_family5_2026-05-26T12:09:20+00:00",
+    "timestamp": "2026-05-26T12:09:20+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanmean",
+    "feature_source": "hyena_dna_meanmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.25366810138689627
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.3449433684103485
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.4340628067822401
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5271188586448639
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5431653712141518
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5351885133344576
+      }
+    ],
+    "test_macro_f1": 0.6392085892585451,
+    "test_kappa": 0.5929630628201672,
+    "test_balanced_accuracy": 0.6289897453627387,
+    "test_accuracy": 0.7453798767967146,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7415730337078652,
+      "immune": 0.5217391304347826,
+      "ion": 0.5,
+      "kinase": 0.5119047619047619,
+      "tf": 0.8697318007662835
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_specialmean_family5_2026-05-26T12:16:50+00:00",
+    "timestamp": "2026-05-26T12:16:50+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_specialmean",
+    "feature_source": "hyena_dna_specialmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.25366810138689627
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.3449433684103485
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.43602787662131537
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5154428560482868
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5412176159556203
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5149345430941318
+      }
+    ],
+    "test_macro_f1": 0.6329536882837777,
+    "test_kappa": 0.5926720358303992,
+    "test_balanced_accuracy": 0.623356884960409,
+    "test_accuracy": 0.7453798767967146,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7191011235955056,
+      "immune": 0.5217391304347826,
+      "ion": 0.4666666666666667,
+      "kinase": 0.5357142857142857,
+      "tf": 0.8735632183908046
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_maxmean_family5_2026-05-26T12:27:28+00:00",
+    "timestamp": "2026-05-26T12:27:28+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_maxmean",
+    "feature_source": "hyena_dna_maxmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.26422839141255483
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.37539525016797254
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.41488536155202826
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.3900183237928868
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.36230929972662224
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.3757476047603715
+      }
+    ],
+    "test_macro_f1": 0.4733903921137964,
+    "test_kappa": 0.3959398558414531,
+    "test_balanced_accuracy": 0.4557068175382614,
+    "test_accuracy": 0.6303901437371663,
+    "test_per_class_accuracy": {
+      "gpcr": 0.48314606741573035,
+      "immune": 0.21739130434782608,
+      "ion": 0.3333333333333333,
+      "kinase": 0.42857142857142855,
+      "tf": 0.8160919540229885
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_clsmean_family5_2026-05-26T12:27:32+00:00",
+    "timestamp": "2026-05-26T12:27:32+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_clsmean",
+    "feature_source": "hyena_dna_clsmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.14010695187165775
+      }
+    ],
+    "test_macro_f1": 0.139572192513369,
+    "test_kappa": 0.0,
+    "test_balanced_accuracy": 0.2,
+    "test_accuracy": 0.5359342915811088,
+    "test_per_class_accuracy": {
+      "gpcr": 0.0,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.0,
+      "tf": 1.0
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanD_family5_2026-05-26T12:37:11+00:00",
+    "timestamp": "2026-05-26T12:37:11+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanD",
+    "feature_source": "hyena_dna_meanD",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.2781409945378449
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.368248903841747
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.4538751658021777
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5253413256701704
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5329055902323474
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5246777248289345
+      }
+    ],
+    "test_macro_f1": 0.6406845451084923,
+    "test_kappa": 0.5820162939618466,
+    "test_balanced_accuracy": 0.6292877103449345,
+    "test_accuracy": 0.7371663244353183,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7303370786516854,
+      "immune": 0.5217391304347826,
+      "ion": 0.5,
+      "kinase": 0.5476190476190477,
+      "tf": 0.8467432950191571
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanG_family5_2026-05-26T12:47:08+00:00",
+    "timestamp": "2026-05-26T12:47:08+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanG",
+    "feature_source": "hyena_dna_meanG",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3028608291047874
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.3879246988603445
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.4777644924969007
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5284570375308955
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5431303764611565
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5056103188620752
+      }
+    ],
+    "test_macro_f1": 0.6352118419831044,
+    "test_kappa": 0.578374786915612,
+    "test_balanced_accuracy": 0.625292089107934,
+    "test_accuracy": 0.7351129363449692,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7303370786516854,
+      "immune": 0.5217391304347826,
+      "ion": 0.5,
+      "kinase": 0.5238095238095238,
+      "tf": 0.8505747126436781
+    }
+  },
+  {
+    "run_id": "logistic_kmer_tf_vs_gpcr_2026-05-26T12:47:08+00:00",
+    "timestamp": "2026-05-26T12:47:08+00:00",
+    "model": "logistic_probe",
+    "encoder": "kmer",
+    "feature_source": "kmer",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3801755036460265
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9435010214504597
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9263184860226072
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9434143222506394
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9490940465918896
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.949146049481245
+      }
+    ],
+    "test_macro_f1": 0.9606729160748666,
+    "test_kappa": 0.9213483146067416,
+    "test_balanced_accuracy": 0.9606741573033708,
+    "test_accuracy": 0.9606741573033708,
+    "test_per_class_accuracy": {
+      "0": 0.9662921348314607,
+      "1": 0.9550561797752809
+    }
+  },
+  {
+    "run_id": "logistic_kmer6_tf_vs_gpcr_2026-05-26T12:47:09+00:00",
+    "timestamp": "2026-05-26T12:47:09+00:00",
+    "model": "logistic_probe",
+    "encoder": "kmer6",
+    "feature_source": "kmer6",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3320754716981132
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5859649122807017
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9548008171603677
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9491265608533197
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9547892720306513
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9604469273743017
+      }
+    ],
+    "test_macro_f1": 0.9606629834254143,
+    "test_kappa": 0.9213483146067416,
+    "test_balanced_accuracy": 0.9606741573033708,
+    "test_accuracy": 0.9606741573033708,
+    "test_per_class_accuracy": {
+      "0": 0.9775280898876404,
+      "1": 0.9438202247191011
+    }
+  },
+  {
+    "run_id": "logistic_codon_tf_vs_gpcr_2026-05-26T12:47:10+00:00",
+    "timestamp": "2026-05-26T12:47:10+00:00",
+    "model": "logistic_probe",
+    "encoder": "codon",
+    "feature_source": "codon",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9433563748079877
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9604469273743017
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9604469273743017
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9604469273743017
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9604469273743017
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9717514124293786
+      }
+    ],
+    "test_macro_f1": 0.971909225767762,
+    "test_kappa": 0.9438202247191011,
+    "test_balanced_accuracy": 0.9719101123595506,
+    "test_accuracy": 0.9719101123595506,
+    "test_per_class_accuracy": {
+      "0": 0.9662921348314607,
+      "1": 0.9775280898876404
+    }
+  },
+  {
+    "run_id": "logistic_aa1_tf_vs_gpcr_2026-05-26T12:47:10+00:00",
+    "timestamp": "2026-05-26T12:47:10+00:00",
+    "model": "logistic_probe",
+    "encoder": "aa1",
+    "feature_source": "aa1",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9434577050856121
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9377816125011984
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9491265608533197
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9774004085801838
+      }
+    ],
+    "test_macro_f1": 0.971909225767762,
+    "test_kappa": 0.9438202247191011,
+    "test_balanced_accuracy": 0.9719101123595506,
+    "test_accuracy": 0.9719101123595506,
+    "test_per_class_accuracy": {
+      "0": 0.9662921348314607,
+      "1": 0.9775280898876404
+    }
+  },
+  {
+    "run_id": "logistic_aa2_tf_vs_gpcr_2026-05-26T12:47:10+00:00",
+    "timestamp": "2026-05-26T12:47:10+00:00",
+    "model": "logistic_probe",
+    "encoder": "aa2",
+    "feature_source": "aa2",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.7152295211036181
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9547892720306513
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9547892720306513
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9547892720306513
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9491525423728814
+      }
+    ],
+    "test_macro_f1": 0.9775252525252525,
+    "test_kappa": 0.9550561797752809,
+    "test_balanced_accuracy": 0.9775280898876404,
+    "test_accuracy": 0.9775280898876404,
+    "test_per_class_accuracy": {
+      "0": 0.9887640449438202,
+      "1": 0.9662921348314607
+    }
+  },
+  {
+    "run_id": "logistic_aa3_tf_vs_gpcr_2026-05-26T12:47:12+00:00",
+    "timestamp": "2026-05-26T12:47:12+00:00",
+    "model": "logistic_probe",
+    "encoder": "aa3",
+    "feature_source": "aa3",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3320754716981132
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7425672247590056
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9548008171603677
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9491265608533197
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9491265608533197
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9548008171603677
+      }
+    ],
+    "test_macro_f1": 0.971909225767762,
+    "test_kappa": 0.9438202247191011,
+    "test_balanced_accuracy": 0.9719101123595506,
+    "test_accuracy": 0.9719101123595506,
+    "test_per_class_accuracy": {
+      "0": 0.9775280898876404,
+      "1": 0.9662921348314607
+    }
+  },
+  {
+    "run_id": "logistic_gc_tf_vs_gpcr_2026-05-26T12:47:12+00:00",
+    "timestamp": "2026-05-26T12:47:12+00:00",
+    "model": "logistic_probe",
+    "encoder": "gc",
+    "feature_source": "gc",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.7614249037227214
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7672919672919672
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.7852490421455939
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.7569380129658608
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.751213902376693
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.751213902376693
+      }
+    ],
+    "test_macro_f1": 0.7297912713472485,
+    "test_kappa": 0.4606741573033708,
+    "test_balanced_accuracy": 0.7303370786516854,
+    "test_accuracy": 0.7303370786516854,
+    "test_per_class_accuracy": {
+      "0": 0.6853932584269663,
+      "1": 0.7752808988764045
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_meanmean_tf_vs_gpcr_2026-05-26T12:47:18+00:00",
+    "timestamp": "2026-05-26T12:47:18+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_meanmean",
+    "feature_source": "dnabert2_meanmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8742572978558512
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9145560454413799
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9491265608533197
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9547892720306513
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.96045197740113
+      }
+    ],
+    "test_macro_f1": 0.9887640449438202,
+    "test_kappa": 0.9775280898876404,
+    "test_balanced_accuracy": 0.9887640449438202,
+    "test_accuracy": 0.9887640449438202,
+    "test_per_class_accuracy": {
+      "0": 0.9887640449438202,
+      "1": 0.9887640449438202
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_specialmean_tf_vs_gpcr_2026-05-26T12:47:23+00:00",
+    "timestamp": "2026-05-26T12:47:23+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_specialmean",
+    "feature_source": "dnabert2_specialmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8742572978558512
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9145560454413799
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9491265608533197
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9547892720306513
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9604469273743017
+      }
+    ],
+    "test_macro_f1": 0.9887640449438202,
+    "test_kappa": 0.9775280898876404,
+    "test_balanced_accuracy": 0.9887640449438202,
+    "test_accuracy": 0.9887640449438202,
+    "test_per_class_accuracy": {
+      "0": 0.9887640449438202,
+      "1": 0.9887640449438202
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_maxmean_tf_vs_gpcr_2026-05-26T12:47:36+00:00",
+    "timestamp": "2026-05-26T12:47:36+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_maxmean",
+    "feature_source": "dnabert2_maxmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8748070987654321
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9204749679075739
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9377816125011984
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9435010214504597
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9322012257405515
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9435010214504597
+      }
+    ],
+    "test_macro_f1": 0.9438131313131313,
+    "test_kappa": 0.8876404494382022,
+    "test_balanced_accuracy": 0.9438202247191011,
+    "test_accuracy": 0.9438202247191011,
+    "test_per_class_accuracy": {
+      "0": 0.9550561797752809,
+      "1": 0.9325842696629213
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_clsmean_tf_vs_gpcr_2026-05-26T12:47:40+00:00",
+    "timestamp": "2026-05-26T12:47:40+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_clsmean",
+    "feature_source": "dnabert2_clsmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9318356867779205
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9434865900383141
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9717369782518442
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9717369782518442
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9604064806825807
+      }
+    ],
+    "test_macro_f1": 0.971909225767762,
+    "test_kappa": 0.9438202247191011,
+    "test_balanced_accuracy": 0.9719101123595506,
+    "test_accuracy": 0.9719101123595506,
+    "test_per_class_accuracy": {
+      "0": 0.9662921348314607,
+      "1": 0.9775280898876404
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_meanD_tf_vs_gpcr_2026-05-26T12:47:44+00:00",
+    "timestamp": "2026-05-26T12:47:44+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_meanD",
+    "feature_source": "dnabert2_meanD",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8856884525962283
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9319405280697257
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9548008171603677
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9548008171603677
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.96045197740113
+      }
+    ],
+    "test_macro_f1": 0.971902131018153,
+    "test_kappa": 0.9438202247191011,
+    "test_balanced_accuracy": 0.9719101123595506,
+    "test_accuracy": 0.9719101123595506,
+    "test_per_class_accuracy": {
+      "0": 0.9887640449438202,
+      "1": 0.9550561797752809
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_meanG_tf_vs_gpcr_2026-05-26T12:47:50+00:00",
+    "timestamp": "2026-05-26T12:47:50+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_meanG",
+    "feature_source": "dnabert2_meanG",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9029511369134011
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9263184860226072
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.96045197740113
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9660919540229885
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9660919540229885
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9661006128702758
+      }
+    ],
+    "test_macro_f1": 0.9606431030670584,
+    "test_kappa": 0.9213483146067416,
+    "test_balanced_accuracy": 0.9606741573033708,
+    "test_accuracy": 0.9606741573033708,
+    "test_per_class_accuracy": {
+      "0": 0.9887640449438202,
+      "1": 0.9325842696629213
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_meanmean_tf_vs_gpcr_2026-05-26T12:47:51+00:00",
+    "timestamp": "2026-05-26T12:47:51+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_meanmean",
+    "feature_source": "nt_v2_meanmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9491265608533197
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9717478052673583
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9717478052673583
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9604469273743017
+      }
+    ],
+    "test_macro_f1": 0.9831455354606571,
+    "test_kappa": 0.9662921348314607,
+    "test_balanced_accuracy": 0.9831460674157303,
+    "test_accuracy": 0.9831460674157303,
+    "test_per_class_accuracy": {
+      "0": 0.9775280898876404,
+      "1": 0.9887640449438202
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_specialmean_tf_vs_gpcr_2026-05-26T12:47:53+00:00",
+    "timestamp": "2026-05-26T12:47:53+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_specialmean",
+    "feature_source": "nt_v2_specialmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9491265608533197
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9717478052673583
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9661006128702758
+      }
+    ],
+    "test_macro_f1": 0.9887626262626263,
+    "test_kappa": 0.9775280898876404,
+    "test_balanced_accuracy": 0.9887640449438202,
+    "test_accuracy": 0.9887640449438202,
+    "test_per_class_accuracy": {
+      "0": 0.9775280898876404,
+      "1": 1.0
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_maxmean_tf_vs_gpcr_2026-05-26T12:47:55+00:00",
+    "timestamp": "2026-05-26T12:47:55+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_maxmean",
+    "feature_source": "nt_v2_maxmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.915243415802075
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.949146049481245
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9378213521540575
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9378213521540575
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9378213521540575
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9321492461027345
+      }
+    ],
+    "test_macro_f1": 0.971909225767762,
+    "test_kappa": 0.9438202247191011,
+    "test_balanced_accuracy": 0.9719101123595506,
+    "test_accuracy": 0.9719101123595506,
+    "test_per_class_accuracy": {
+      "0": 0.9662921348314607,
+      "1": 0.9775280898876404
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_clsmean_tf_vs_gpcr_2026-05-26T12:47:58+00:00",
+    "timestamp": "2026-05-26T12:47:58+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_clsmean",
+    "feature_source": "nt_v2_clsmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8699900999584838
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9095785440613027
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9378451715881884
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9435010214504597
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9491265608533197
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9321492461027345
+      }
+    ],
+    "test_macro_f1": 0.9382002966890761,
+    "test_kappa": 0.8764044943820225,
+    "test_balanced_accuracy": 0.9382022471910112,
+    "test_accuracy": 0.9382022471910112,
+    "test_per_class_accuracy": {
+      "0": 0.9438202247191011,
+      "1": 0.9325842696629213
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_meanD_tf_vs_gpcr_2026-05-26T12:48:05+00:00",
+    "timestamp": "2026-05-26T12:48:05+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_meanD",
+    "feature_source": "nt_v2_meanD",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9604469273743017
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9717514124293786
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9717514124293786
+      }
+    ],
+    "test_macro_f1": 0.9887640449438202,
+    "test_kappa": 0.9775280898876404,
+    "test_balanced_accuracy": 0.9887640449438202,
+    "test_accuracy": 0.9887640449438202,
+    "test_per_class_accuracy": {
+      "0": 0.9887640449438202,
+      "1": 0.9887640449438202
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_meanG_tf_vs_gpcr_2026-05-26T12:48:15+00:00",
+    "timestamp": "2026-05-26T12:48:15+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_meanG",
+    "feature_source": "nt_v2_meanG",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9661006128702758
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9604469273743017
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9661006128702758
+      }
+    ],
+    "test_macro_f1": 0.9662921348314607,
+    "test_kappa": 0.9325842696629214,
+    "test_balanced_accuracy": 0.9662921348314607,
+    "test_accuracy": 0.9662921348314607,
+    "test_per_class_accuracy": {
+      "0": 0.9662921348314607,
+      "1": 0.9662921348314607
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanmean_tf_vs_gpcr_2026-05-26T12:48:26+00:00",
+    "timestamp": "2026-05-26T12:48:26+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanmean",
+    "feature_source": "gena_lm_meanmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8247692651614346
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8641943734015345
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8869731800766283
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8926553672316384
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8870020429009193
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.903954802259887
+      }
+    ],
+    "test_macro_f1": 0.8369499984206703,
+    "test_kappa": 0.6741573033707865,
+    "test_balanced_accuracy": 0.8370786516853932,
+    "test_accuracy": 0.8370786516853933,
+    "test_per_class_accuracy": {
+      "0": 0.8089887640449438,
+      "1": 0.8651685393258427
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_specialmean_tf_vs_gpcr_2026-05-26T12:48:41+00:00",
+    "timestamp": "2026-05-26T12:48:41+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_specialmean",
+    "feature_source": "gena_lm_specialmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8472821397756687
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8586848912592214
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9039057260562706
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8926553672316384
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8870020429009193
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8870020429009193
+      }
+    ],
+    "test_macro_f1": 0.881988950276243,
+    "test_kappa": 0.7640449438202247,
+    "test_balanced_accuracy": 0.8820224719101124,
+    "test_accuracy": 0.8820224719101124,
+    "test_per_class_accuracy": {
+      "0": 0.898876404494382,
+      "1": 0.8651685393258427
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_maxmean_tf_vs_gpcr_2026-05-26T12:49:09+00:00",
+    "timestamp": "2026-05-26T12:49:09+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_maxmean",
+    "feature_source": "gena_lm_maxmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8134640564621722
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7964477383082034
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.7853038815117467
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.7740040858018387
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.7682432216651232
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.7683320031923384
+      }
+    ],
+    "test_macro_f1": 0.7976506252368322,
+    "test_kappa": 0.5955056179775281,
+    "test_balanced_accuracy": 0.797752808988764,
+    "test_accuracy": 0.797752808988764,
+    "test_per_class_accuracy": {
+      "0": 0.7752808988764045,
+      "1": 0.8202247191011236
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_clsmean_tf_vs_gpcr_2026-05-26T12:49:34+00:00",
+    "timestamp": "2026-05-26T12:49:34+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_clsmean",
+    "feature_source": "gena_lm_clsmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8360744738606969
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8585945738663598
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.881340782122905
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.869907007957051
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8473796825599591
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8416815742397138
+      }
+    ],
+    "test_macro_f1": 0.9100669445497032,
+    "test_kappa": 0.8202247191011236,
+    "test_balanced_accuracy": 0.9101123595505618,
+    "test_accuracy": 0.9101123595505618,
+    "test_per_class_accuracy": {
+      "0": 0.8876404494382022,
+      "1": 0.9325842696629213
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanD_tf_vs_gpcr_2026-05-26T12:49:49+00:00",
+    "timestamp": "2026-05-26T12:49:49+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanD",
+    "feature_source": "gena_lm_meanD",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8302429667519182
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8982758620689655
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8983018386108274
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8870020429009193
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8870020429009193
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8926416600159617
+      }
+    ],
+    "test_macro_f1": 0.8932550579174952,
+    "test_kappa": 0.7865168539325843,
+    "test_balanced_accuracy": 0.8932584269662921,
+    "test_accuracy": 0.8932584269662921,
+    "test_per_class_accuracy": {
+      "0": 0.8876404494382022,
+      "1": 0.898876404494382
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanG_tf_vs_gpcr_2026-05-26T12:50:03+00:00",
+    "timestamp": "2026-05-26T12:50:03+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanG",
+    "feature_source": "gena_lm_meanG",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8358228050535743
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8926416600159617
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8983018386108274
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8983018386108274
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8983018386108274
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.903954802259887
+      }
+    ],
+    "test_macro_f1": 0.8820187482245999,
+    "test_kappa": 0.7640449438202247,
+    "test_balanced_accuracy": 0.8820224719101124,
+    "test_accuracy": 0.8820224719101124,
+    "test_per_class_accuracy": {
+      "0": 0.8876404494382022,
+      "1": 0.8764044943820225
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanmean_tf_vs_gpcr_2026-05-26T12:50:03+00:00",
+    "timestamp": "2026-05-26T12:50:03+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanmean",
+    "feature_source": "hyena_dna_meanmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9091142490372273
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9378213521540575
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9491525423728814
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9547661640684897
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9547892720306513
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9547892720306513
+      }
+    ],
+    "test_macro_f1": 0.971902131018153,
+    "test_kappa": 0.9438202247191011,
+    "test_balanced_accuracy": 0.9719101123595506,
+    "test_accuracy": 0.9719101123595506,
+    "test_per_class_accuracy": {
+      "0": 0.9550561797752809,
+      "1": 0.9887640449438202
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_specialmean_tf_vs_gpcr_2026-05-26T12:50:04+00:00",
+    "timestamp": "2026-05-26T12:50:04+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_specialmean",
+    "feature_source": "hyena_dna_specialmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9091142490372273
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9434577050856121
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9491525423728814
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9547661640684897
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9547892720306513
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9547892720306513
+      }
+    ],
+    "test_macro_f1": 0.971902131018153,
+    "test_kappa": 0.9438202247191011,
+    "test_balanced_accuracy": 0.9719101123595506,
+    "test_accuracy": 0.9719101123595506,
+    "test_per_class_accuracy": {
+      "0": 0.9550561797752809,
+      "1": 0.9887640449438202
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_maxmean_tf_vs_gpcr_2026-05-26T12:50:04+00:00",
+    "timestamp": "2026-05-26T12:50:04+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_maxmean",
+    "feature_source": "hyena_dna_maxmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8867127496159755
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.9150807612346075
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9152542372881356
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9095323281369793
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9152109347555328
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9152109347555328
+      }
+    ],
+    "test_macro_f1": 0.9494366063819715,
+    "test_kappa": 0.898876404494382,
+    "test_balanced_accuracy": 0.949438202247191,
+    "test_accuracy": 0.949438202247191,
+    "test_per_class_accuracy": {
+      "0": 0.9438202247191011,
+      "1": 0.9550561797752809
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_clsmean_tf_vs_gpcr_2026-05-26T12:50:04+00:00",
+    "timestamp": "2026-05-26T12:50:04+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_clsmean",
+    "feature_source": "hyena_dna_clsmean",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3320754716981132
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.3320754716981132
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.3320754716981132
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.3320754716981132
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.3320754716981132
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.3320754716981132
+      }
+    ],
+    "test_macro_f1": 0.3333333333333333,
+    "test_kappa": 0.0,
+    "test_balanced_accuracy": 0.5,
+    "test_accuracy": 0.5,
+    "test_per_class_accuracy": {
+      "0": 0.0,
+      "1": 1.0
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanD_tf_vs_gpcr_2026-05-26T12:50:21+00:00",
+    "timestamp": "2026-05-26T12:50:21+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanD",
+    "feature_source": "hyena_dna_meanD",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9148629148629148
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.949146049481245
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9548008171603677
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9604064806825807
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9604317695525819
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.9547661640684897
+      }
+    ],
+    "test_macro_f1": 0.9775167361374257,
+    "test_kappa": 0.9550561797752809,
+    "test_balanced_accuracy": 0.9775280898876404,
+    "test_accuracy": 0.9775280898876404,
+    "test_per_class_accuracy": {
+      "0": 0.9550561797752809,
+      "1": 1.0
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanG_tf_vs_gpcr_2026-05-26T12:50:41+00:00",
+    "timestamp": "2026-05-26T12:50:41+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanG",
+    "feature_source": "hyena_dna_meanG",
+    "task": "tf_vs_gpcr",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.9263184860226072
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.949146049481245
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.9604317695525819
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.9604064806825807
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.9547661640684897
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.949146049481245
+      }
+    ],
+    "test_macro_f1": 0.9550505050505051,
+    "test_kappa": 0.9101123595505618,
+    "test_balanced_accuracy": 0.9550561797752809,
+    "test_accuracy": 0.9550561797752809,
+    "test_per_class_accuracy": {
+      "0": 0.9438202247191011,
+      "1": 0.9662921348314607
+    }
+  },
+  {
+    "run_id": "logistic_kmer_tf_vs_kinase_2026-05-26T12:50:41+00:00",
+    "timestamp": "2026-05-26T12:50:41+00:00",
+    "model": "logistic_probe",
+    "encoder": "kmer",
+    "feature_source": "kmer",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.332
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5282485875706214
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5180375180375181
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.735759493670886
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8013696161470536
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8438578826237054
+      }
+    ],
+    "test_macro_f1": 0.8392344497607656,
+    "test_kappa": 0.6785714285714286,
+    "test_balanced_accuracy": 0.8392857142857142,
+    "test_accuracy": 0.8392857142857143,
+    "test_per_class_accuracy": {
+      "0": 0.8214285714285714,
+      "1": 0.8571428571428571
+    }
+  },
+  {
+    "run_id": "logistic_kmer6_tf_vs_kinase_2026-05-26T12:50:42+00:00",
+    "timestamp": "2026-05-26T12:50:42+00:00",
+    "model": "logistic_probe",
+    "encoder": "kmer6",
+    "feature_source": "kmer6",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.332
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.332
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.7158252977878616
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.7201253278927426
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.7809676479160594
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8251182609323655
+      }
+    ],
+    "test_macro_f1": 0.7846153846153847,
+    "test_kappa": 0.5714285714285714,
+    "test_balanced_accuracy": 0.7857142857142857,
+    "test_accuracy": 0.7857142857142857,
+    "test_per_class_accuracy": {
+      "0": 0.7142857142857143,
+      "1": 0.8571428571428571
+    }
+  },
+  {
+    "run_id": "logistic_codon_tf_vs_kinase_2026-05-26T12:50:42+00:00",
+    "timestamp": "2026-05-26T12:50:42+00:00",
+    "model": "logistic_probe",
+    "encoder": "codon",
+    "feature_source": "codon",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3949552854849805
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7452048823016565
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.7838032220943614
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8440373563218391
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8861622358554874
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8862275449101796
+      }
+    ],
+    "test_macro_f1": 0.8808848553601816,
+    "test_kappa": 0.7619047619047619,
+    "test_balanced_accuracy": 0.8809523809523809,
+    "test_accuracy": 0.8809523809523809,
+    "test_per_class_accuracy": {
+      "0": 0.8571428571428571,
+      "1": 0.9047619047619048
+    }
+  },
+  {
+    "run_id": "logistic_aa1_tf_vs_kinase_2026-05-26T12:50:43+00:00",
+    "timestamp": "2026-05-26T12:50:43+00:00",
+    "model": "logistic_probe",
+    "encoder": "aa1",
+    "feature_source": "aa1",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.6878504672897197
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8320402298850574
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8261228592970237
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8262476231478492
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8502779272010041
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8742334588488434
+      }
+    ],
+    "test_macro_f1": 0.8689733408961997,
+    "test_kappa": 0.7380952380952381,
+    "test_balanced_accuracy": 0.8690476190476191,
+    "test_accuracy": 0.8690476190476191,
+    "test_per_class_accuracy": {
+      "0": 0.8452380952380952,
+      "1": 0.8928571428571429
+    }
+  },
+  {
+    "run_id": "logistic_aa2_tf_vs_kinase_2026-05-26T12:50:43+00:00",
+    "timestamp": "2026-05-26T12:50:43+00:00",
+    "model": "logistic_probe",
+    "encoder": "aa2",
+    "feature_source": "aa2",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.332
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7395488607402336
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8354679802955665
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8430451127819549
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8436329588014981
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8859658580413298
+      }
+    ],
+    "test_macro_f1": 0.9285309132161089,
+    "test_kappa": 0.8571428571428572,
+    "test_balanced_accuracy": 0.9285714285714286,
+    "test_accuracy": 0.9285714285714286,
+    "test_per_class_accuracy": {
+      "0": 0.9047619047619048,
+      "1": 0.9523809523809523
+    }
+  },
+  {
+    "run_id": "logistic_aa3_tf_vs_kinase_2026-05-26T12:50:45+00:00",
+    "timestamp": "2026-05-26T12:50:45+00:00",
+    "model": "logistic_probe",
+    "encoder": "aa3",
+    "feature_source": "aa3",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.332
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5982466870540265
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6954564854692895
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.7537152580828135
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8349137773221542
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8671920185078079
+      }
+    ],
+    "test_macro_f1": 0.9046402724563645,
+    "test_kappa": 0.8095238095238095,
+    "test_balanced_accuracy": 0.9047619047619048,
+    "test_accuracy": 0.9047619047619048,
+    "test_per_class_accuracy": {
+      "0": 0.8690476190476191,
+      "1": 0.9404761904761905
+    }
+  },
+  {
+    "run_id": "logistic_gc_tf_vs_kinase_2026-05-26T12:50:45+00:00",
+    "timestamp": "2026-05-26T12:50:45+00:00",
+    "model": "logistic_probe",
+    "encoder": "gc",
+    "feature_source": "gc",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.5146916370681305
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5085414872236578
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5201149425287357
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.4955408515535098
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.4955408515535098
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.4955408515535098
+      }
+    ],
+    "test_macro_f1": 0.6181818181818182,
+    "test_kappa": 0.23809523809523814,
+    "test_balanced_accuracy": 0.6190476190476191,
+    "test_accuracy": 0.6190476190476191,
+    "test_per_class_accuracy": {
+      "0": 0.5714285714285714,
+      "1": 0.6666666666666666
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_meanmean_tf_vs_kinase_2026-05-26T12:50:56+00:00",
+    "timestamp": "2026-05-26T12:50:56+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_meanmean",
+    "feature_source": "dnabert2_meanmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.6465037850249344
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7108225108225108
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8080459770114943
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8619586702605571
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8615606415570373
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8562410329985652
+      }
+    ],
+    "test_macro_f1": 0.8869007547036105,
+    "test_kappa": 0.7738095238095238,
+    "test_balanced_accuracy": 0.8869047619047619,
+    "test_accuracy": 0.8869047619047619,
+    "test_per_class_accuracy": {
+      "0": 0.8928571428571429,
+      "1": 0.8809523809523809
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_specialmean_tf_vs_kinase_2026-05-26T12:51:07+00:00",
+    "timestamp": "2026-05-26T12:51:07+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_specialmean",
+    "feature_source": "dnabert2_specialmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.6462499551215308
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7165709746145235
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8019407008086253
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8619586702605571
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8497606966785418
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8441716910709158
+      }
+    ],
+    "test_macro_f1": 0.8809523809523809,
+    "test_kappa": 0.7619047619047619,
+    "test_balanced_accuracy": 0.8809523809523809,
+    "test_accuracy": 0.8809523809523809,
+    "test_per_class_accuracy": {
+      "0": 0.8809523809523809,
+      "1": 0.8809523809523809
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_maxmean_tf_vs_kinase_2026-05-26T12:51:31+00:00",
+    "timestamp": "2026-05-26T12:51:31+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_maxmean",
+    "feature_source": "dnabert2_maxmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.6765423242467719
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7706043956043955
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.784051724137931
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.7484939759036144
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.7484939759036144
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.7245410212277682
+      }
+    ],
+    "test_macro_f1": 0.791067050421064,
+    "test_kappa": 0.5833333333333333,
+    "test_balanced_accuracy": 0.7916666666666667,
+    "test_accuracy": 0.7916666666666666,
+    "test_per_class_accuracy": {
+      "0": 0.7380952380952381,
+      "1": 0.8452380952380952
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_clsmean_tf_vs_kinase_2026-05-26T12:51:51+00:00",
+    "timestamp": "2026-05-26T12:51:51+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_clsmean",
+    "feature_source": "dnabert2_clsmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.7120689655172414
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8009966417506229
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8318469505178366
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8261228592970237
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8502994011976048
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8323293172690763
+      }
+    ],
+    "test_macro_f1": 0.8273748361265634,
+    "test_kappa": 0.6547619047619048,
+    "test_balanced_accuracy": 0.8273809523809523,
+    "test_accuracy": 0.8273809523809523,
+    "test_per_class_accuracy": {
+      "0": 0.8333333333333334,
+      "1": 0.8214285714285714
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_meanD_tf_vs_kinase_2026-05-26T12:51:58+00:00",
+    "timestamp": "2026-05-26T12:51:58+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_meanD",
+    "feature_source": "dnabert2_meanD",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.6643697961527419
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7947513013302487
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8554112554112554
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8919016110471807
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8800287356321839
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8620974401321222
+      }
+    ],
+    "test_macro_f1": 0.8869007547036105,
+    "test_kappa": 0.7738095238095238,
+    "test_balanced_accuracy": 0.8869047619047619,
+    "test_accuracy": 0.8869047619047619,
+    "test_per_class_accuracy": {
+      "0": 0.8809523809523809,
+      "1": 0.8928571428571429
+    }
+  },
+  {
+    "run_id": "logistic_dnabert2_meanG_tf_vs_kinase_2026-05-26T12:52:08+00:00",
+    "timestamp": "2026-05-26T12:52:08+00:00",
+    "model": "logistic_probe",
+    "encoder": "dnabert2_meanG",
+    "feature_source": "dnabert2_meanG",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.6699011680143756
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8134078212290503
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8551185656448814
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8917458945548833
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8798906789413119
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8619586702605571
+      }
+    ],
+    "test_macro_f1": 0.8749955709882011,
+    "test_kappa": 0.75,
+    "test_balanced_accuracy": 0.875,
+    "test_accuracy": 0.875,
+    "test_per_class_accuracy": {
+      "0": 0.8690476190476191,
+      "1": 0.8809523809523809
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_meanmean_tf_vs_kinase_2026-05-26T12:52:13+00:00",
+    "timestamp": "2026-05-26T12:52:13+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_meanmean",
+    "feature_source": "nt_v2_meanmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.7896649753499587
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8499550763701706
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8801320700545507
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8802352266207687
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8802352266207687
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8562822719449226
+      }
+    ],
+    "test_macro_f1": 0.8808003405704555,
+    "test_kappa": 0.7619047619047619,
+    "test_balanced_accuracy": 0.8809523809523809,
+    "test_accuracy": 0.8809523809523809,
+    "test_per_class_accuracy": {
+      "0": 0.9166666666666666,
+      "1": 0.8452380952380952
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_specialmean_tf_vs_kinase_2026-05-26T12:52:18+00:00",
+    "timestamp": "2026-05-26T12:52:18+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_specialmean",
+    "feature_source": "nt_v2_specialmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.7896649753499587
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8499550763701706
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8741793133139597
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8862275449101796
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8802352266207687
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8802352266207687
+      }
+    ],
+    "test_macro_f1": 0.8808003405704555,
+    "test_kappa": 0.7619047619047619,
+    "test_balanced_accuracy": 0.8809523809523809,
+    "test_accuracy": 0.8809523809523809,
+    "test_per_class_accuracy": {
+      "0": 0.9166666666666666,
+      "1": 0.8452380952380952
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_maxmean_tf_vs_kinase_2026-05-26T12:52:20+00:00",
+    "timestamp": "2026-05-26T12:52:20+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_maxmean",
+    "feature_source": "nt_v2_maxmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.795520023048113
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8382305456893768
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8263473053892215
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.7659299191374663
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.7720545977011495
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.789937106918239
+      }
+    ],
+    "test_macro_f1": 0.8333333333333334,
+    "test_kappa": 0.6666666666666667,
+    "test_balanced_accuracy": 0.8333333333333334,
+    "test_accuracy": 0.8333333333333334,
+    "test_per_class_accuracy": {
+      "0": 0.8333333333333334,
+      "1": 0.8333333333333334
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_clsmean_tf_vs_kinase_2026-05-26T12:52:28+00:00",
+    "timestamp": "2026-05-26T12:52:28+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_clsmean",
+    "feature_source": "nt_v2_clsmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.700588066551922
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7245410212277682
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.7184013202741004
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.6945669714900484
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.6766351118760757
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6766351118760757
+      }
+    ],
+    "test_macro_f1": 0.7619047619047619,
+    "test_kappa": 0.5238095238095238,
+    "test_balanced_accuracy": 0.7619047619047619,
+    "test_accuracy": 0.7619047619047619,
+    "test_per_class_accuracy": {
+      "0": 0.7619047619047619,
+      "1": 0.7619047619047619
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_meanD_tf_vs_kinase_2026-05-26T12:52:57+00:00",
+    "timestamp": "2026-05-26T12:52:57+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_meanD",
+    "feature_source": "nt_v2_meanD",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8320402298850574
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8620974401321222
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8742334588488434
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8682587492828457
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8802008608321377
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8862275449101796
+      }
+    ],
+    "test_macro_f1": 0.8505497633704586,
+    "test_kappa": 0.7023809523809523,
+    "test_balanced_accuracy": 0.8511904761904762,
+    "test_accuracy": 0.8511904761904762,
+    "test_per_class_accuracy": {
+      "0": 0.9166666666666666,
+      "1": 0.7857142857142857
+    }
+  },
+  {
+    "run_id": "logistic_nt_v2_meanG_tf_vs_kinase_2026-05-26T12:53:33+00:00",
+    "timestamp": "2026-05-26T12:53:33+00:00",
+    "model": "logistic_probe",
+    "encoder": "nt_v2_meanG",
+    "feature_source": "nt_v2_meanG",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.8318469505178366
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.8800287356321839
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8802352266207687
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8742334588488434
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8862112246727631
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8862275449101796
+      }
+    ],
+    "test_macro_f1": 0.8566349025743137,
+    "test_kappa": 0.7142857142857143,
+    "test_balanced_accuracy": 0.8571428571428572,
+    "test_accuracy": 0.8571428571428571,
+    "test_per_class_accuracy": {
+      "0": 0.9166666666666666,
+      "1": 0.7976190476190477
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanmean_tf_vs_kinase_2026-05-26T12:53:58+00:00",
+    "timestamp": "2026-05-26T12:53:58+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanmean",
+    "feature_source": "gena_lm_meanmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.632834744999099
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.6574543884270754
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6760775862068966
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.6702330090115967
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.6824525526495174
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6645624103299856
+      }
+    ],
+    "test_macro_f1": 0.6654814393400654,
+    "test_kappa": 0.33333333333333337,
+    "test_balanced_accuracy": 0.6666666666666666,
+    "test_accuracy": 0.6666666666666666,
+    "test_per_class_accuracy": {
+      "0": 0.7261904761904762,
+      "1": 0.6071428571428571
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_specialmean_tf_vs_kinase_2026-05-26T12:54:23+00:00",
+    "timestamp": "2026-05-26T12:54:23+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_specialmean",
+    "feature_source": "gena_lm_specialmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.7000718390804598
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.734920634920635
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.741588398287092
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.6877157652474108
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.7062075898466951
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.7123169681309216
+      }
+    ],
+    "test_macro_f1": 0.7544822669755837,
+    "test_kappa": 0.5119047619047619,
+    "test_balanced_accuracy": 0.7559523809523809,
+    "test_accuracy": 0.7559523809523809,
+    "test_per_class_accuracy": {
+      "0": 0.6785714285714286,
+      "1": 0.8333333333333334
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_maxmean_tf_vs_kinase_2026-05-26T12:55:02+00:00",
+    "timestamp": "2026-05-26T12:55:02+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_maxmean",
+    "feature_source": "gena_lm_maxmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.5959628787058101
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5541847041847041
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5743007934513338
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.568103448275862
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5477196403423248
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5508337816030123
+      }
+    ],
+    "test_macro_f1": 0.6057459820793628,
+    "test_kappa": 0.2142857142857143,
+    "test_balanced_accuracy": 0.6071428571428572,
+    "test_accuracy": 0.6071428571428571,
+    "test_per_class_accuracy": {
+      "0": 0.6666666666666666,
+      "1": 0.5476190476190477
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_clsmean_tf_vs_kinase_2026-05-26T12:55:47+00:00",
+    "timestamp": "2026-05-26T12:55:47+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_clsmean",
+    "feature_source": "gena_lm_clsmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.5903318903318904
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.6465037850249344
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6819047619047619
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.6825892056661287
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.6886115892139988
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6702330090115967
+      }
+    ],
+    "test_macro_f1": 0.6415872564357843,
+    "test_kappa": 0.2857142857142857,
+    "test_balanced_accuracy": 0.6428571428571428,
+    "test_accuracy": 0.6428571428571429,
+    "test_per_class_accuracy": {
+      "0": 0.7023809523809523,
+      "1": 0.5833333333333334
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanD_tf_vs_kinase_2026-05-26T12:56:02+00:00",
+    "timestamp": "2026-05-26T12:56:02+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanD",
+    "feature_source": "gena_lm_meanD",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.625722961249277
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.6935118212242254
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6819047619047619
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.6643697961527419
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.640396210163652
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6645624103299856
+      }
+    ],
+    "test_macro_f1": 0.73805811481219,
+    "test_kappa": 0.47619047619047616,
+    "test_balanced_accuracy": 0.7380952380952381,
+    "test_accuracy": 0.7380952380952381,
+    "test_per_class_accuracy": {
+      "0": 0.75,
+      "1": 0.7261904761904762
+    }
+  },
+  {
+    "run_id": "logistic_gena_lm_meanG_tf_vs_kinase_2026-05-26T12:56:16+00:00",
+    "timestamp": "2026-05-26T12:56:16+00:00",
+    "model": "logistic_probe",
+    "encoder": "gena_lm_meanG",
+    "feature_source": "gena_lm_meanG",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.6442061170692955
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.680987565327086
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.6819047619047619
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.6704696301079898
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.640396210163652
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6699011680143756
+      }
+    ],
+    "test_macro_f1": 0.6955548448992644,
+    "test_kappa": 0.3928571428571429,
+    "test_balanced_accuracy": 0.6964285714285714,
+    "test_accuracy": 0.6964285714285714,
+    "test_per_class_accuracy": {
+      "0": 0.75,
+      "1": 0.6428571428571429
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanmean_tf_vs_kinase_2026-05-26T12:56:16+00:00",
+    "timestamp": "2026-05-26T12:56:16+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanmean",
+    "feature_source": "hyena_dna_meanmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.6156501726121979
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7477704257767549
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.795520023048113
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8309716599190283
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.795520023048113
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.7902988555232662
+      }
+    ],
+    "test_macro_f1": 0.86875,
+    "test_kappa": 0.7380952380952381,
+    "test_balanced_accuracy": 0.8690476190476191,
+    "test_accuracy": 0.8690476190476191,
+    "test_per_class_accuracy": {
+      "0": 0.8214285714285714,
+      "1": 0.9166666666666666
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_specialmean_tf_vs_kinase_2026-05-26T12:56:17+00:00",
+    "timestamp": "2026-05-26T12:56:17+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_specialmean",
+    "feature_source": "hyena_dna_specialmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 10.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.6156501726121979
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7477704257767549
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.795520023048113
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8309716599190283
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.795520023048113
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.7962245190927362
+      }
+    ],
+    "test_macro_f1": 0.86875,
+    "test_kappa": 0.7380952380952381,
+    "test_balanced_accuracy": 0.8690476190476191,
+    "test_accuracy": 0.8690476190476191,
+    "test_per_class_accuracy": {
+      "0": 0.8214285714285714,
+      "1": 0.9166666666666666
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_maxmean_tf_vs_kinase_2026-05-26T12:56:17+00:00",
+    "timestamp": "2026-05-26T12:56:17+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_maxmean",
+    "feature_source": "hyena_dna_maxmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.7240660919540229
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7722509331036462
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.7602641401091014
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.7360632183908046
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.7005021520803443
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.6945669714900484
+      }
+    ],
+    "test_macro_f1": 0.7968994453136111,
+    "test_kappa": 0.5952380952380952,
+    "test_balanced_accuracy": 0.7976190476190477,
+    "test_accuracy": 0.7976190476190477,
+    "test_per_class_accuracy": {
+      "0": 0.7380952380952381,
+      "1": 0.8571428571428571
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_clsmean_tf_vs_kinase_2026-05-26T12:56:17+00:00",
+    "timestamp": "2026-05-26T12:56:17+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_clsmean",
+    "feature_source": "hyena_dna_clsmean",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.332
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.332
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.332
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.332
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.332
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.332
+      }
+    ],
+    "test_macro_f1": 0.3333333333333333,
+    "test_kappa": 0.0,
+    "test_balanced_accuracy": 0.5,
+    "test_accuracy": 0.5,
+    "test_per_class_accuracy": {
+      "0": 0.0,
+      "1": 1.0
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanD_tf_vs_kinase_2026-05-26T12:58:09+00:00",
+    "timestamp": "2026-05-26T12:58:09+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanD",
+    "feature_source": "hyena_dna_meanD",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.6765423242467719
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7714635551714204
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8013696161470536
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8198360184119677
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.8198360184119677
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8263473053892215
+      }
+    ],
+    "test_macro_f1": 0.8392800198419728,
+    "test_kappa": 0.6785714285714286,
+    "test_balanced_accuracy": 0.8392857142857143,
+    "test_accuracy": 0.8392857142857143,
+    "test_per_class_accuracy": {
+      "0": 0.8333333333333334,
+      "1": 0.8452380952380952
+    }
+  },
+  {
+    "run_id": "logistic_hyena_dna_meanG_tf_vs_kinase_2026-05-26T12:59:53+00:00",
+    "timestamp": "2026-05-26T12:59:53+00:00",
+    "model": "logistic_probe",
+    "encoder": "hyena_dna_meanG",
+    "feature_source": "hyena_dna_meanG",
+    "task": "tf_vs_kinase",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.7120689655172414
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.7714635551714204
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8068247541931752
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.807825086306099
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.825947888589398
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.8263473053892215
+      }
+    ],
+    "test_macro_f1": 0.8452161587526577,
+    "test_kappa": 0.6904761904761905,
+    "test_balanced_accuracy": 0.8452380952380952,
+    "test_accuracy": 0.8452380952380952,
+    "test_per_class_accuracy": {
+      "0": 0.8333333333333334,
+      "1": 0.8571428571428571
+    }
+  },
+  {
+    "run_id": "logistic_shuffled_family5_2026-05-26T13:09:56+00:00",
+    "timestamp": "2026-05-26T13:09:56+00:00",
+    "model": "logistic_probe",
+    "encoder": "shuffled",
+    "feature_source": "nt_v2_meanD",
+    "task": "family5",
+    "shuffled_labels": true,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.14010695187165775
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.1402945113788487
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.16129229181097784
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.18498527549536922
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.20898993923779585
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.20535319150755008
+      }
+    ],
+    "test_macro_f1": 0.2243815185581842,
+    "test_kappa": 0.03487379923481326,
+    "test_balanced_accuracy": 0.22225807641925427,
+    "test_accuracy": 0.4086242299794661,
+    "test_per_class_accuracy": {
+      "gpcr": 0.19101123595505617,
+      "immune": 0.0,
+      "ion": 0.13333333333333333,
+      "kinase": 0.15476190476190477,
+      "tf": 0.632183908045977
+    }
+  },
+  {
+    "run_id": "kmer_baseline_4_2026-05-26T13:09:58+00:00",
+    "timestamp": "2026-05-26T13:09:58+00:00",
+    "model": "kmer_baseline_4",
+    "feature_source": "kmer",
+    "feature_dim": 256,
+    "select_by": "r2",
+    "alpha": 0.01,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.914971649646759,
+        "r2": 0.022207019850611687
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9143269062042236,
+        "r2": 0.01603526435792446
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.91230309009552,
+        "r2": -0.002970980480313301
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9099318981170654,
+        "r2": -0.027126697823405266
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9093256592750549,
+        "r2": -0.03340650349855423
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9092547297477722,
+        "r2": -0.03414301574230194
+      }
+    ],
+    "test_mean_cosine": 0.9170240759849548,
+    "test_median_cosine": 0.9162594676017761,
+    "test_r2_macro": 0.044808391481637955
+  },
+  {
+    "run_id": "kmer_baseline_6_2026-05-26T13:10:00+00:00",
+    "timestamp": "2026-05-26T13:10:00+00:00",
+    "model": "kmer_baseline_6",
+    "feature_source": "kmer6",
+    "feature_dim": 4096,
+    "select_by": "r2",
+    "alpha": 0.01,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9162639379501343,
+        "r2": 0.037338510155677795
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9134306907653809,
+        "r2": 0.008654446341097355
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9102726578712463,
+        "r2": -0.023710669949650764
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9093703031539917,
+        "r2": -0.03295960649847984
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9092593193054199,
+        "r2": -0.03409689664840698
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9092479944229126,
+        "r2": -0.034213367849588394
+      }
+    ],
+    "test_mean_cosine": 0.9180424213409424,
+    "test_median_cosine": 0.9176609516143799,
+    "test_r2_macro": 0.056991096585989
+  },
+  {
+    "run_id": "codon_baseline_2026-05-26T13:10:01+00:00",
+    "timestamp": "2026-05-26T13:10:01+00:00",
+    "model": "codon_baseline",
+    "feature_source": "codon",
+    "feature_dim": 64,
+    "select_by": "r2",
+    "alpha": 0.1,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9136227965354919,
+        "r2": 0.004910158459097147
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9146304130554199,
+        "r2": 0.016908451914787292
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9142537713050842,
+        "r2": 0.015166365541517735
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9116411805152893,
+        "r2": -0.00996654387563467
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9096238613128662,
+        "r2": -0.030392339453101158
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9092867970466614,
+        "r2": -0.03381893411278725
+      }
+    ],
+    "test_mean_cosine": 0.9170325398445129,
+    "test_median_cosine": 0.916419267654419,
+    "test_r2_macro": 0.04412605240941048
+  },
+  {
+    "run_id": "aa_baseline_1_2026-05-26T13:10:03+00:00",
+    "timestamp": "2026-05-26T13:10:03+00:00",
+    "model": "aa_baseline_1",
+    "feature_source": "aa1",
+    "feature_dim": 20,
+    "select_by": "r2",
+    "alpha": 1.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9132028222084045,
+        "r2": 0.0003610172716435045
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9132715463638306,
+        "r2": 0.0012714340118691325
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9134311079978943,
+        "r2": 0.004623740445822477
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9127956032752991,
+        "r2": 0.0014348956756293774
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9099979996681213,
+        "r2": -0.02658528834581375
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9093297123908997,
+        "r2": -0.0333808958530426
+      }
+    ],
+    "test_mean_cosine": 0.9157251119613647,
+    "test_median_cosine": 0.9146372079849243,
+    "test_r2_macro": 0.030807361006736755
+  },
+  {
+    "run_id": "aa_baseline_2_2026-05-26T13:10:05+00:00",
+    "timestamp": "2026-05-26T13:10:05+00:00",
+    "model": "aa_baseline_2",
+    "feature_source": "aa2",
+    "feature_dim": 400,
+    "select_by": "r2",
+    "alpha": 0.1,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9154102206230164,
+        "r2": 0.024393627420067787
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9162653088569641,
+        "r2": 0.036350905895233154
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9141477942466736,
+        "r2": 0.015450376085937023
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9105363488197327,
+        "r2": -0.02113245613873005
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9093981981277466,
+        "r2": -0.03268818184733391
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9092621207237244,
+        "r2": -0.034069813787937164
+      }
+    ],
+    "test_mean_cosine": 0.9184327125549316,
+    "test_median_cosine": 0.9182310104370117,
+    "test_r2_macro": 0.060415297746658325
+  },
+  {
+    "run_id": "aa_baseline_3_2026-05-26T13:10:09+00:00",
+    "timestamp": "2026-05-26T13:10:09+00:00",
+    "model": "aa_baseline_3",
+    "feature_source": "aa3",
+    "feature_dim": 8000,
+    "select_by": "r2",
+    "alpha": 0.01,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9195849895477295,
+        "r2": 0.07295328378677368
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9159408807754517,
+        "r2": 0.0351332388818264
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9115797877311707,
+        "r2": -0.01052579004317522
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.909615159034729,
+        "r2": -0.030529698356986046
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9092862010002136,
+        "r2": -0.03383069112896919
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9092506170272827,
+        "r2": -0.034186478704214096
+      }
+    ],
+    "test_mean_cosine": 0.9211597442626953,
+    "test_median_cosine": 0.9207870960235596,
+    "test_r2_macro": 0.09036610275506973
+  },
+  {
+    "run_id": "gc_baseline_2026-05-26T13:10:10+00:00",
+    "timestamp": "2026-05-26T13:10:10+00:00",
+    "model": "gc_baseline",
+    "feature_source": "gc",
+    "feature_dim": 3,
+    "select_by": "r2",
+    "alpha": 1000.0,
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9063353538513184,
+        "r2": -0.06691793352365494
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9063431620597839,
+        "r2": -0.06683395057916641
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9064598679542542,
+        "r2": -0.06553784757852554
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9070656299591064,
+        "r2": -0.05881334841251373
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9075964689254761,
+        "r2": -0.05273609235882759
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9090293645858765,
+        "r2": -0.03640182688832283
+      }
+    ],
+    "test_mean_cosine": 0.9101918339729309,
+    "test_median_cosine": 0.9106135964393616,
+    "test_r2_macro": -0.022586986422538757
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:11+00:00",
+    "timestamp": "2026-05-26T13:10:11+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_meanmean.parquet",
+    "alpha": 10.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8974567651748657,
+        "r2": -0.19166415929794312
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9105015993118286,
+        "r2": -0.032727692276239395
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9173098206520081,
+        "r2": 0.04709198698401451
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9181790947914124,
+        "r2": 0.058009009808301926
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9158725142478943,
+        "r2": 0.034547287970781326
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9123865365982056,
+        "r2": -0.0010951701551675797
+      }
+    ],
+    "test_mean_cosine": 0.9195572137832642,
+    "test_median_cosine": 0.9189971685409546,
+    "test_r2_macro": 0.07327970862388611
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:13+00:00",
+    "timestamp": "2026-05-26T13:10:13+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_specialmean.parquet",
+    "alpha": 10.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8975422978401184,
+        "r2": -0.19074022769927979
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9105432033538818,
+        "r2": -0.03223035857081413
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9173148274421692,
+        "r2": 0.04715423285961151
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9181874990463257,
+        "r2": 0.058093372732400894
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9158994555473328,
+        "r2": 0.034821584820747375
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9124025702476501,
+        "r2": -0.0009318215888924897
+      }
+    ],
+    "test_mean_cosine": 0.9195615649223328,
+    "test_median_cosine": 0.9190288782119751,
+    "test_r2_macro": 0.07331138849258423
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:14+00:00",
+    "timestamp": "2026-05-26T13:10:14+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_maxmean.parquet",
+    "alpha": 100.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8871463537216187,
+        "r2": -0.307599276304245
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8885452747344971,
+        "r2": -0.29009997844696045
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8976454734802246,
+        "r2": -0.17853498458862305
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.913195013999939,
+        "r2": 0.0033693660516291857
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9153409600257874,
+        "r2": 0.029139680787920952
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9121537804603577,
+        "r2": -0.0033993509132415056
+      }
+    ],
+    "test_mean_cosine": 0.9166538119316101,
+    "test_median_cosine": 0.9154199361801147,
+    "test_r2_macro": 0.04367411509156227
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:16+00:00",
+    "timestamp": "2026-05-26T13:10:16+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_clsmean.parquet",
+    "alpha": 100.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8852881193161011,
+        "r2": -0.34223923087120056
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8915395140647888,
+        "r2": -0.26158806681632996
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9053357243537903,
+        "r2": -0.09129050374031067
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9145828485488892,
+        "r2": 0.017163658514618874
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9168668389320374,
+        "r2": 0.044256288558244705
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9149526357650757,
+        "r2": 0.02540704794228077
+      }
+    ],
+    "test_mean_cosine": 0.9184851050376892,
+    "test_median_cosine": 0.9174287915229797,
+    "test_r2_macro": 0.061719801276922226
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:18+00:00",
+    "timestamp": "2026-05-26T13:10:18+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_meanD.parquet",
+    "alpha": 10.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8744309544563293,
+        "r2": -0.4967224597930908
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9001486301422119,
+        "r2": -0.15678028762340546
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9144004583358765,
+        "r2": 0.013251430355012417
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9182936549186707,
+        "r2": 0.058591026812791824
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9172556400299072,
+        "r2": 0.04866904020309448
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9140512943267822,
+        "r2": 0.015975257381796837
+      }
+    ],
+    "test_mean_cosine": 0.9199280142784119,
+    "test_median_cosine": 0.9188334941864014,
+    "test_r2_macro": 0.07661586254835129
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:21+00:00",
+    "timestamp": "2026-05-26T13:10:21+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_dnabert2_meanG.parquet",
+    "alpha": 10.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8756670355796814,
+        "r2": -0.47608211636543274
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8980976343154907,
+        "r2": -0.1819872111082077
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9134007692337036,
+        "r2": 0.0016126497648656368
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9181820750236511,
+        "r2": 0.05716925486922264
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9175906181335449,
+        "r2": 0.05205954238772392
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9145211577415466,
+        "r2": 0.020765112712979317
+      }
+    ],
+    "test_mean_cosine": 0.9198459386825562,
+    "test_median_cosine": 0.9186933636665344,
+    "test_r2_macro": 0.07555471360683441
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:22+00:00",
+    "timestamp": "2026-05-26T13:10:22+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_meanmean.parquet",
+    "alpha": 10.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9004133343696594,
+        "r2": -0.1522073596715927
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9051096439361572,
+        "r2": -0.09549832344055176
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9123714566230774,
+        "r2": -0.009762299247086048
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9154077768325806,
+        "r2": 0.02577967382967472
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9152393937110901,
+        "r2": 0.02480023168027401
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.913833737373352,
+        "r2": 0.011920805089175701
+      }
+    ],
+    "test_mean_cosine": 0.9177554845809937,
+    "test_median_cosine": 0.917438268661499,
+    "test_r2_macro": 0.051228463649749756
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:23+00:00",
+    "timestamp": "2026-05-26T13:10:23+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_specialmean.parquet",
+    "alpha": 10.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9004004597663879,
+        "r2": -0.15236110985279083
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9051265120506287,
+        "r2": -0.09529422968626022
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9123968482017517,
+        "r2": -0.009462677873671055
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9154109358787537,
+        "r2": 0.02582455426454544
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9152331948280334,
+        "r2": 0.024738555774092674
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9138335585594177,
+        "r2": 0.011924147605895996
+      }
+    ],
+    "test_mean_cosine": 0.9177452921867371,
+    "test_median_cosine": 0.917405903339386,
+    "test_r2_macro": 0.051118284463882446
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:28+00:00",
+    "timestamp": "2026-05-26T13:10:28+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_maxmean.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8977218270301819,
+        "r2": -0.17943380773067474
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8977852463722229,
+        "r2": -0.17866617441177368
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8983960747718811,
+        "r2": -0.17128519713878632
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9028191566467285,
+        "r2": -0.1183352842926979
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9122070670127869,
+        "r2": -0.008589993230998516
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9134731292724609,
+        "r2": 0.008351982571184635
+      }
+    ],
+    "test_mean_cosine": 0.915176272392273,
+    "test_median_cosine": 0.9147745370864868,
+    "test_r2_macro": 0.02657391130924225
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:30+00:00",
+    "timestamp": "2026-05-26T13:10:30+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_clsmean.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8966783881187439,
+        "r2": -0.19296884536743164
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8970547318458557,
+        "r2": -0.18830259144306183
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8998219966888428,
+        "r2": -0.15422126650810242
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9068657159805298,
+        "r2": -0.06917944550514221
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9111957550048828,
+        "r2": -0.01726343482732773
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9120909571647644,
+        "r2": -0.005271565169095993
+      }
+    ],
+    "test_mean_cosine": 0.9133366346359253,
+    "test_median_cosine": 0.9133856892585754,
+    "test_r2_macro": 0.008551512844860554
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:32+00:00",
+    "timestamp": "2026-05-26T13:10:32+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_meanD.parquet",
+    "alpha": 100.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8952436447143555,
+        "r2": -0.22325082123279572
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8988279104232788,
+        "r2": -0.17517130076885223
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9079620838165283,
+        "r2": -0.06183763965964317
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9143052697181702,
+        "r2": 0.012834698893129826
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9153416156768799,
+        "r2": 0.025438936427235603
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9147089123725891,
+        "r2": 0.02000637724995613
+      }
+    ],
+    "test_mean_cosine": 0.9177341461181641,
+    "test_median_cosine": 0.9170914888381958,
+    "test_r2_macro": 0.05133930966258049
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:34+00:00",
+    "timestamp": "2026-05-26T13:10:34+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_nt_v2_meanG.parquet",
+    "alpha": 100.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8956669569015503,
+        "r2": -0.21621447801589966
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8982895612716675,
+        "r2": -0.1819753497838974
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9067673087120056,
+        "r2": -0.07637304067611694
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9138959646224976,
+        "r2": 0.00801085401326418
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9153719544410706,
+        "r2": 0.025670351460576057
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.914834201335907,
+        "r2": 0.021056385710835457
+      }
+    ],
+    "test_mean_cosine": 0.9178203344345093,
+    "test_median_cosine": 0.9173529744148254,
+    "test_r2_macro": 0.052169859409332275
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:35+00:00",
+    "timestamp": "2026-05-26T13:10:35+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_meanmean.parquet",
+    "alpha": 100.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8847925066947937,
+        "r2": -0.3395349085330963
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8878393173217773,
+        "r2": -0.30005887150764465
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8982537388801575,
+        "r2": -0.1695266216993332
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.907987117767334,
+        "r2": -0.053602803498506546
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9116230010986328,
+        "r2": -0.01101334486156702
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9113588929176331,
+        "r2": -0.012185458093881607
+      }
+    ],
+    "test_mean_cosine": 0.9125061631202698,
+    "test_median_cosine": 0.9120488166809082,
+    "test_r2_macro": -0.0006444168393500149
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:37+00:00",
+    "timestamp": "2026-05-26T13:10:37+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_specialmean.parquet",
+    "alpha": 100.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8848280906677246,
+        "r2": -0.3393804728984833
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8880555033683777,
+        "r2": -0.2975890338420868
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8985758423805237,
+        "r2": -0.16587160527706146
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9079262018203735,
+        "r2": -0.05443227291107178
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9113860726356506,
+        "r2": -0.013489365577697754
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9109688997268677,
+        "r2": -0.0164268147200346
+      }
+    ],
+    "test_mean_cosine": 0.9122438430786133,
+    "test_median_cosine": 0.9123721122741699,
+    "test_r2_macro": -0.0029248197097331285
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:39+00:00",
+    "timestamp": "2026-05-26T13:10:39+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_maxmean.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8764335513114929,
+        "r2": -0.42973098158836365
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8764530420303345,
+        "r2": -0.4294823408126831
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8766467571258545,
+        "r2": -0.42701172828674316
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8784669041633606,
+        "r2": -0.4038824141025543
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.8897340297698975,
+        "r2": -0.2642335891723633
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9071571230888367,
+        "r2": -0.05952884256839752
+      }
+    ],
+    "test_mean_cosine": 0.9070584774017334,
+    "test_median_cosine": 0.9075881242752075,
+    "test_r2_macro": -0.059365201741456985
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:40+00:00",
+    "timestamp": "2026-05-26T13:10:40+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_clsmean.parquet",
+    "alpha": 100.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8837695121765137,
+        "r2": -0.351968377828598
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.888800323009491,
+        "r2": -0.2872120141983032
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9007226228713989,
+        "r2": -0.13958433270454407
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.909247875213623,
+        "r2": -0.038979098200798035
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9118427038192749,
+        "r2": -0.008171741850674152
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9110310673713684,
+        "r2": -0.015443208627402782
+      }
+    ],
+    "test_mean_cosine": 0.9125464558601379,
+    "test_median_cosine": 0.9122856855392456,
+    "test_r2_macro": 0.00030209298711270094
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:43+00:00",
+    "timestamp": "2026-05-26T13:10:43+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_meanD.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8659076690673828,
+        "r2": -0.6001560688018799
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.869499146938324,
+        "r2": -0.5462443232536316
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8848838806152344,
+        "r2": -0.3341468870639801
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9027878642082214,
+        "r2": -0.1138148084282875
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9105220437049866,
+        "r2": -0.02406405657529831
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9117474555969238,
+        "r2": -0.008662608452141285
+      }
+    ],
+    "test_mean_cosine": 0.912606418132782,
+    "test_median_cosine": 0.9122421145439148,
+    "test_r2_macro": 0.0015528540825471282
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:45+00:00",
+    "timestamp": "2026-05-26T13:10:45+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_meanG.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8707942366600037,
+        "r2": -0.5215376615524292
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8728585243225098,
+        "r2": -0.49300265312194824
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8841636776924133,
+        "r2": -0.34265294671058655
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9014127850532532,
+        "r2": -0.13013148307800293
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9100267291069031,
+        "r2": -0.029834052547812462
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.911797285079956,
+        "r2": -0.008366694673895836
+      }
+    ],
+    "test_mean_cosine": 0.9126887917518616,
+    "test_median_cosine": 0.9124273657798767,
+    "test_r2_macro": 0.0021615761797875166
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:46+00:00",
+    "timestamp": "2026-05-26T13:10:46+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_meanmean.parquet",
+    "alpha": 1.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9083228707313538,
+        "r2": -0.060010794550180435
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9121814370155334,
+        "r2": -0.011937475763261318
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9145411252975464,
+        "r2": 0.017224974930286407
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9142908453941345,
+        "r2": 0.015795135870575905
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9125016927719116,
+        "r2": -0.0026935578789561987
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9114043712615967,
+        "r2": -0.012327343225479126
+      }
+    ],
+    "test_mean_cosine": 0.9164035320281982,
+    "test_median_cosine": 0.9154800176620483,
+    "test_r2_macro": 0.03848687931895256
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:47+00:00",
+    "timestamp": "2026-05-26T13:10:47+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_specialmean.parquet",
+    "alpha": 1.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9082990884780884,
+        "r2": -0.0602853000164032
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9121705293655396,
+        "r2": -0.012047305703163147
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9145359992980957,
+        "r2": 0.017171865329146385
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9142858982086182,
+        "r2": 0.015740973874926567
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.912497341632843,
+        "r2": -0.002743089571595192
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9114013314247131,
+        "r2": -0.012360078282654285
+      }
+    ],
+    "test_mean_cosine": 0.9164094924926758,
+    "test_median_cosine": 0.915412962436676,
+    "test_r2_macro": 0.03854846954345703
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:47+00:00",
+    "timestamp": "2026-05-26T13:10:47+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_maxmean.parquet",
+    "alpha": 100.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9049135446548462,
+        "r2": -0.09036573022603989
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9049663543701172,
+        "r2": -0.08974986523389816
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9054597020149231,
+        "r2": -0.08400779217481613
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9084460139274597,
+        "r2": -0.04942026734352112
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9123309254646301,
+        "r2": -0.004391066264361143
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9109843969345093,
+        "r2": -0.017194276675581932
+      }
+    ],
+    "test_mean_cosine": 0.9135092496871948,
+    "test_median_cosine": 0.9129178524017334,
+    "test_r2_macro": 0.009355132468044758
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:48+00:00",
+    "timestamp": "2026-05-26T13:10:48+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_clsmean.parquet",
+    "alpha": 1.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9092466235160828,
+        "r2": -0.03422657027840614
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9092466235160828,
+        "r2": -0.03422633185982704
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9092466235160828,
+        "r2": -0.03422631695866585
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9092466235160828,
+        "r2": -0.03422631695866585
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9092466235160828,
+        "r2": -0.03422631695866585
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9092466235160828,
+        "r2": -0.03422631695866585
+      }
+    ],
+    "test_mean_cosine": 0.9100427031517029,
+    "test_median_cosine": 0.910566508769989,
+    "test_r2_macro": -0.024096354842185974
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:50+00:00",
+    "timestamp": "2026-05-26T13:10:50+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_meanD.parquet",
+    "alpha": 10.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9043828845024109,
+        "r2": -0.11898601800203323
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9087284803390503,
+        "r2": -0.05628378316760063
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9133362770080566,
+        "r2": 0.002328102709725499
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9145650863647461,
+        "r2": 0.018104473128914833
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9133999943733215,
+        "r2": 0.006536939647048712
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9118742346763611,
+        "r2": -0.00839875265955925
+      }
+    ],
+    "test_mean_cosine": 0.9164888858795166,
+    "test_median_cosine": 0.9158120155334473,
+    "test_r2_macro": 0.03990955650806427
+  },
+  {
+    "run_id": "probe_2026-05-26T13:10:51+00:00",
+    "timestamp": "2026-05-26T13:10:51+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_hyena_dna_meanG.parquet",
+    "alpha": 10.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9042709469795227,
+        "r2": -0.11909317970275879
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9080862998962402,
+        "r2": -0.06442323327064514
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9129425287246704,
+        "r2": -0.0025133839808404446
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9145511388778687,
+        "r2": 0.017747530713677406
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.913642168045044,
+        "r2": 0.009052787907421589
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9119946360588074,
+        "r2": -0.007400333881378174
+      }
+    ],
+    "test_mean_cosine": 0.9165223240852356,
+    "test_median_cosine": 0.915946900844574,
+    "test_r2_macro": 0.04015718027949333
+  }
+]
