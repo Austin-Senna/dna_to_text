@@ -33,3 +33,9 @@ dist/
 
 # Local snapshot of Austin's data/ tree — large; restore source if caches are lost
 data.zip
+
+# Journal-hardening tooling/artifacts — provisioned locally, not committed
+tools/
+data/annotation/
+data/sequences_protein/
+data/tss_masked_windows/
