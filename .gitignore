@@ -39,3 +39,4 @@ tools/
 data/annotation/
 data/sequences_protein/
 data/tss_masked_windows/
+data/cluster_work/
