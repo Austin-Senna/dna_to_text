@@ -71,7 +71,12 @@ for _enc in ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"):
 _tss_kmer = DATA / "dataset_enformer_tss_4mer.parquet"
 if _tss_kmer.exists():
     DATASET_PATHS["enformer_tss_4mer"] = _tss_kmer
-del _enc, _v, _p, _base, _tss_base, _tss_kmer
+# ESM-2 protein-LM comparator (#9).
+for _esm in ("esm2_150m", "esm2_650m"):
+    _ep = DATA / f"dataset_{_esm}.parquet"
+    if _ep.exists():
+        DATASET_PATHS[_esm] = _ep
+del _enc, _v, _p, _base, _tss_base, _tss_kmer, _esm, _ep
 
 # Use any tracked encoder parquet for metadata-only loads (kmer baseline). All
 # encoder parquets share the same {ensembl_id, family, gene_symbol, summary,
@@ -240,6 +245,10 @@ PAIRED_CLS = [
     ("nt_v2_meanD - aa2",  "nt_v2_meanD", 10.0,   "aa2",  1000.0),  # headline: DNA-LM vs AA composition
     ("nt_v2_meanD - kmer", "nt_v2_meanD", 10.0,   "kmer", 1000.0),
     ("aa2 - kmer",         "aa2",         1000.0, "kmer", 1000.0),
+    # ESM-2 protein-LM comparator (#9): vs AA composition, vs best DNA-LM, and scaling.
+    ("esm2_650m - aa2",        "esm2_650m", 100.0, "aa2",         1000.0),
+    ("esm2_650m - nt_v2_meanG","esm2_650m", 100.0, "nt_v2_meanG", 10.0),
+    ("esm2_650m - esm2_150m",  "esm2_650m", 100.0, "esm2_150m",   1000.0),
 ]
 
 # Paired regression comparisons: (label, dsA, alpha_A, dsB, alpha_B).
@@ -248,6 +257,10 @@ PAIRED_REG = [
     ("nt_v2_meanmean - aa3", "nt_v2_meanmean", 10.0, "aa3",  0.01),
     ("dnabert2_meanD - kmer","dnabert2_meanD", 10.0, "kmer", 0.01),
     ("aa3 - kmer",           "aa3",            0.01, "kmer", 0.01),
+    # ESM-2 protein-LM comparator (#9): vs AA-3mer, vs best DNA-LM, and scaling.
+    ("esm2_650m - aa3",            "esm2_650m", 10.0, "aa3",            0.01),
+    ("esm2_650m - dnabert2_meanD", "esm2_650m", 10.0, "dnabert2_meanD", 10.0),
+    ("esm2_650m - esm2_150m",      "esm2_650m", 10.0, "esm2_150m",      10.0),
 ]
 
 

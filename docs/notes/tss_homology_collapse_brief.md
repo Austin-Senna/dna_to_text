@@ -77,8 +77,19 @@ opposite of what we found for DNA-LMs on CDS. **Fairness note for the text:** ES
 protein sequences for exactly this kind of task, so its edge is expected; the comparison's point is that
 DNA-LMs on genomic windows are the wrong substrate/model here, not that ESM-2 is a novel result.
 
-_(Paired-bootstrap difference CIs for ESM-2 vs AA-composition / DNA-LM and 150M vs 650M are the natural
-next addition for MINA #10 rigor — not yet run.)_
+**Paired-bootstrap difference CIs (MINA #10) — ESM-2 650M − comparator, n=487 test, all frac(A>B)=1.000:**
+
+| comparison | Δ (650M − B) | 95% CI |
+|---|---|---|
+| cls macro-F1 vs AA-2mer | **+0.225** | [+0.171, +0.285] |
+| cls macro-F1 vs best DNA-LM (NT-v2) | **+0.233** | [+0.177, +0.289] |
+| cls macro-F1 vs ESM-2 150M (scaling) | +0.039 | [+0.015, +0.070] |
+| reg R² vs AA-3mer | **+0.091** | [+0.080, +0.102] |
+| reg R² vs best DNA-LM (DNABERT-2) | **+0.105** | [+0.091, +0.118] |
+| reg R² vs ESM-2 150M | +0.019 | [+0.015, +0.023] |
+
+Every CI excludes zero: ESM-2's advantage over both AA-composition and the DNA-LMs is significant on
+both tasks, and the 650M>150M scaling gap is significant too.
 
 ## Decisions for you (Austin)
 1. Approve **retiring or heavily qualifying the TSS substrate claim**? (The primary-split TSS arm is at
