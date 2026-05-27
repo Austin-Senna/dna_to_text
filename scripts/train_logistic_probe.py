@@ -53,6 +53,10 @@ for _encoder in ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"):
         DATASET_PATHS[f"tss_{_encoder}_{_variant}"] = DATA / f"dataset_tss_{_encoder}_{_variant}.parquet"
 del _encoder, _variant
 
+# ESM-2 protein-LM comparator (#9): real parquet-backed feature sources.
+DATASET_PATHS["esm2_150m"] = DATA / "dataset_esm2_150m.parquet"
+DATASET_PATHS["esm2_650m"] = DATA / "dataset_esm2_650m.parquet"
+
 # Any encoder parquet supplies the shared {ensembl_id, family, gene_symbol,
 # genept_vec} metadata used to build synthetic (on-the-fly) features. Prefer
 # the canonical base if present, else fall back to a pooling variant that is

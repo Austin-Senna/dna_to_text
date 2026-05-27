@@ -22,11 +22,23 @@ Homology 40% split: NT-v2 beats 4-mer (ΔF1 +0.089 [+0.025,+0.161]) but is **tie
 ## #4a GTF overlap — DONE (code uncommitted)
 Built `src/tss_overlap/{gtf,overlap}.py` + `scripts/tss_overlap.py` (numpy boolean-mask, no new dep). Ran over all 3,244 genes (0 skipped); partition buckets sum to 1.0 (asserted). **HEADLINE: the 196,608 bp window is overwhelmingly non-coding context — mean target-CDS = 0.0080 (0.8%), target-intron 0.17, neighbour-intron 0.39, intergenic 0.33.** Reinforces the AA-composition finding (DNA-LMs see ~1% coding). Outputs: `analysis/tss_overlap/{tables,figures}/` (per_gene_overlap.csv, overlap_by_family.{csv,md}, partition_by_family.png, intergenic_intron_distribution.png) — artifacts not committed. GTF cache `data/annotation/gtf_features.parquet` (gitignored). Re-run: `uv run scripts/tss_overlap.py`. **TODO: commit `src/tss_overlap/` + `scripts/tss_overlap.py`.**
 
-## Pending (2 tasks) — exact next steps
-- **#4b masked-TSS** (GPU, RTX 5060 8GB): GTF-driven mask CDS/exon→N in TSS windows, re-encode via `src/data_loader/multi_pool.py`+`model_registry.py` → `dataset_tss_*_masked*.parquet`, re-probe, masked-vs-unmasked deltas. **This also re-runs the TSS arm on the homology split** (TSS not yet re-run — extend `rerun_on_split.py` with `--tss`).
-- **#9 ESM-2 comparator** (GPU): install present (`fair-esm`); run small ESM-2 on translated proteins (reuse `protein.translate_cds`), cache embeddings, probe family + GenePT-regression. Now extra-interesting: does a real protein LM beat the AA-composition baseline?
-- **#10 manuscript** (`dna_to_text_paper` submodule): regenerate tables/figures via `scripts/build_analysis_artifacts.py` (also register baselines kmer6/codon/aa1-3/gc as display rows — deferred from #2). Reframe title/abstract/claims per the homology+AA finding. **Hold for Austin.** Also: α-selection sensitivity table, pre-specified pooling rule, TSS overlap, masked-TSS, ESM.
-- Also pending: split-seed sensitivity (run `make_splits.py --seed N` for a few seeds + `rerun_on_split.py`).
+## Stage-0 gate (2026-05-27): TSS arm COLLAPSES on homology split
+Ran `rerun_on_split.py --only-tss` (new flag). TSS family5 macro-F1 best **0.326** (chance floor 0.224); TSS GenePT R² best **0.010** (most ≈0/neg). Random split TSS was 0.455/0.122 → that signal was paralog leakage. So the "TSS substrate carries signal" claim does NOT survive homology splitting.
+
+## #4b masked-TSS — SKIPPED (decision recorded)
+Three blind independent agents (numbers only) unanimously: don't run masking — homology TSS already at floor (nothing to ablate); masking on the random split is a "trap"; MINA #4's "quantify OR mask" is satisfied by #4a's quantify branch + near-floor homology perf. Minimal hedge if a reviewer insists: one fast encoder, homology split only. Masking infra (`src/tss_overlap/mask.py`, `--mask` on extract) NOT built.
+
+## #9 ESM-2 comparator — DONE (code uncommitted)
+`scripts/run_esm2.py` (CDS→`translate_cds`→ESM-2, mean-over-residues, chunk-and-mean >1022aa, fp16) + `scripts/build_esm2_datasets.py`; registered `esm2_150m`/`esm2_650m` in `train_logistic_probe.DATASET_PATHS`; added `--esm2`/`--only-esm2` to `rerun_on_split.py`. Embeddings `data/esm2_{150m,650m}_embeddings/` (3244 each), datasets `dataset_esm2_{150m,650m}.parquet`. **RESULT (homology): ESM-2 650M cls 0.960 / reg R² 0.181; 150M 0.920/0.162 — beats best DNA-LM (0.727/0.077) AND AA-composition (0.735/0.090).** Re-run probes: `uv run scripts/rerun_on_split.py --only-esm2`.
+
+## Reframe brief for Austin
+`docs/notes/tss_homology_collapse_brief.md` — 3-part story (CDS=composition, TSS=leakage/noise, ESM-2 wins) + skip-masking rationale + decisions for Austin. **Hold manuscript (#10) for his steer.**
+
+## Pending
+- **Paired-bootstrap CIs** (ESM-2 vs AA-composition / DNA-LM, 150M vs 650M) for MINA #10 rigor — extend `scripts/bootstrap_test_uncertainty.py` PAIRED lists.
+- **#10 manuscript** (`dna_to_text_paper` submodule): regenerate tables/figures, register kmer6/codon/aa1-3/gc display rows, reframe title/abstract/claims per the 3-part finding. **Hold for Austin.** Also: α-selection sensitivity table, pre-specified pooling rule.
+- Split-seed sensitivity (run `make_splits.py --seed N` + `rerun_on_split.py`).
+- **Commit:** ESM-2 scripts + `rerun_on_split.py`/`train_logistic_probe.py` changes + this brief.
 
 ## Environment / gotchas
 - Run everything via `uv run`. GPU: RTX 5060, 8 GB.

@@ -72,18 +72,32 @@ def main():
                     help="also run the two binary classification tasks")
     ap.add_argument("--tss", action="store_true",
                     help="also run TSS-arm cells (parquets must be present)")
+    ap.add_argument("--only-tss", action="store_true",
+                    help="run ONLY the TSS-arm cells (skip CDS baselines/encoders + shuffled); implies --tss")
+    ap.add_argument("--esm2", action="store_true",
+                    help="also run the ESM-2 comparator cells (esm2_150m, esm2_650m)")
+    ap.add_argument("--only-esm2", action="store_true",
+                    help="run ONLY the ESM-2 comparator cells; implies --esm2")
     args = ap.parse_args()
+    if args.only_tss:
+        args.tss = True
+    if args.only_esm2:
+        args.esm2 = True
+    only_mode = args.only_tss or args.only_esm2
     out = args.metrics_out
 
     tasks = list(CLS_TASKS)
     if args.binary:
         tasks += ["tf_vs_gpcr", "tf_vs_kinase"]
 
-    cls_cells = list(CLS_BASELINES)
-    cls_cells += [f"{e}_{p}" for e in ENCODERS for p in POOLINGS]
+    cls_cells = [] if only_mode else list(CLS_BASELINES)
+    if not only_mode:
+        cls_cells += [f"{e}_{p}" for e in ENCODERS for p in POOLINGS]
     if args.tss:
         cls_cells += [f"tss_{e}_{p}" for e in ENCODERS for p in POOLINGS]
         cls_cells += ["enformer_tss_4mer"]
+    if args.esm2:
+        cls_cells += ["esm2_150m", "esm2_650m"]
 
     ok = fail = skip = 0
     print("=== CLASSIFICATION ===", flush=True)
@@ -100,7 +114,7 @@ def main():
             ok += r
             fail += (not r)
     # anti-baseline (shuffled labels) on the headline encoder cell
-    if _exists_cls("nt_v2_meanD"):
+    if not only_mode and _exists_cls("nt_v2_meanD"):
         r = _run("cls shuffled [family5]",
                  lambda: _call(tlp, [
                      "train_logistic_probe.py", "--dataset", "nt_v2_meanD",
@@ -109,15 +123,18 @@ def main():
 
     print("\n=== REGRESSION ===", flush=True)
     # baselines via train_baseline (--feature)
-    for feat in REG_BASELINES:
-        r = _run(f"reg baseline {feat}",
-                 lambda feat=feat: _call(tb, [
-                     "train_baseline.py", "--feature", feat, "--metrics-out", out]))
-        ok += r; fail += (not r)
+    if not only_mode:
+        for feat in REG_BASELINES:
+            r = _run(f"reg baseline {feat}",
+                     lambda feat=feat: _call(tb, [
+                         "train_baseline.py", "--feature", feat, "--metrics-out", out]))
+            ok += r; fail += (not r)
     # encoder cells via train_probe (--dataset PATH)
-    reg_parquets = [f"dataset_{e}_{p}.parquet" for e in ENCODERS for p in POOLINGS]
+    reg_parquets = [] if only_mode else [f"dataset_{e}_{p}.parquet" for e in ENCODERS for p in POOLINGS]
     if args.tss:
         reg_parquets += [f"dataset_tss_{e}_{p}.parquet" for e in ENCODERS for p in POOLINGS]
+    if args.esm2:
+        reg_parquets += ["dataset_esm2_150m.parquet", "dataset_esm2_650m.parquet"]
     for fn in reg_parquets:
         path = DATA / fn
         if not path.exists():
