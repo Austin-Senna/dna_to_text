@@ -34,11 +34,14 @@ Three blind independent agents (numbers only) unanimously: don't run masking —
 ## Reframe brief for Austin
 `docs/notes/tss_homology_collapse_brief.md` — 3-part story (CDS=composition, TSS=leakage/noise, ESM-2 wins) + skip-masking rationale + decisions for Austin. **Hold manuscript (#10) for his steer.**
 
+## DONE this session (committed)
+- ESM-2 paired-bootstrap CIs (`03063a9`): all 6 ESM-2 vs AA/DNA/scaling CIs exclude 0.
+- Split-seed sensitivity (`cd6f3ad`): `scripts/seed_sensitivity.py`, seeds 42/1/7/123, all 3 conclusions stable (see brief). Per-seed metrics `data/seed_sensitivity/`.
+- **GOTCHA:** `train_logistic_probe.py` writes `data/confusion_5way_{source}.json` to a FIXED path — off-split probing clobbers the canonical homology matrices; restore with `git checkout -- data/confusion_5way_*.json` (done this session).
+
 ## Pending
-- **Paired-bootstrap CIs** (ESM-2 vs AA-composition / DNA-LM, 150M vs 650M) for MINA #10 rigor — extend `scripts/bootstrap_test_uncertainty.py` PAIRED lists.
-- **#10 manuscript** (`dna_to_text_paper` submodule): regenerate tables/figures, register kmer6/codon/aa1-3/gc display rows, reframe title/abstract/claims per the 3-part finding. **Hold for Austin.** Also: α-selection sensitivity table, pre-specified pooling rule.
-- Split-seed sensitivity (run `make_splits.py --seed N` + `rerun_on_split.py`).
-- **Commit:** ESM-2 scripts + `rerun_on_split.py`/`train_logistic_probe.py` changes + this brief.
+- **Send Austin the brief** `docs/notes/tss_homology_collapse_brief.md` (now includes ESM-2 table, paired CIs, seed sensitivity) — gates the manuscript reframe.
+- **#10 manuscript** (`dna_to_text_paper` submodule): regenerate tables/figures, register kmer6/codon/aa1-3/gc display rows, reframe title/abstract/claims per the 3-part finding (CDS=composition, TSS=leakage, ESM-2 wins). **Hold for Austin.** Also: α-selection sensitivity table, pre-specified pooling rule.
 
 ## Environment / gotchas
 - Run everything via `uv run`. GPU: RTX 5060, 8 GB.
