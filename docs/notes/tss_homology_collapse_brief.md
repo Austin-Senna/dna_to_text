@@ -91,6 +91,22 @@ DNA-LMs on genomic windows are the wrong substrate/model here, not that ESM-2 is
 Every CI excludes zero: ESM-2's advantage over both AA-composition and the DNA-LMs is significant on
 both tasks, and the 650M>150M scaling gap is significant too.
 
+## Split-seed sensitivity (MINA #10)
+Re-clustered once and re-assigned whole clusters to train/val/test at **4 seeds (42, 1, 7, 123)**, then
+re-probed the headline cells. All three conclusions are **stable across seeds** (ranges over the 4 seeds):
+
+| cell | family5 macro-F1 | GenePT R² |
+|---|---|---|
+| ESM-2 650M | 0.917 – 0.960 | 0.181 – 0.193 |
+| ESM-2 150M | 0.920 – 0.950 | 0.160 – 0.170 |
+| best DNA-LM | 0.656 – 0.727 | 0.068 – 0.084 |
+| AA-composition (2mer cls / 3mer reg) | 0.699 – 0.735 | 0.083 – 0.096 |
+| TSS (DNABERT-2) | 0.307 – 0.355 | −0.003 – 0.019 |
+
+Every seed: AA-composition ties/beats the best DNA-LM; the TSS arm sits at the ~0.224 chance floor (cls)
+and ~0 (reg); ESM-2 dominates. The conclusions are not an artifact of one cluster→split assignment.
+(Driver: `scripts/seed_sensitivity.py`; per-seed metrics in `data/seed_sensitivity/`.)
+
 ## Decisions for you (Austin)
 1. Approve **retiring or heavily qualifying the TSS substrate claim**? (The primary-split TSS arm is at
    chance.)
