@@ -426,6 +426,81 @@
         ],
         "frac_A_gt_B_f1": 1.0,
         "n_iters": 1000
+      },
+      "dnabert2 CDS - TSS": {
+        "n_common": 487,
+        "delta_macro_f1_point": 0.36763641893795423,
+        "delta_macro_f1_ci95": [
+          0.29056912435060245,
+          0.4380304364222532
+        ],
+        "delta_kappa_point": 0.49552998838625495,
+        "delta_kappa_ci95": [
+          0.41375179087478386,
+          0.5735547674741248
+        ],
+        "frac_A_gt_B_f1": 1.0,
+        "n_iters": 1000
+      },
+      "nt_v2 CDS - TSS": {
+        "n_common": 487,
+        "delta_macro_f1_point": 0.4215524076413049,
+        "delta_macro_f1_ci95": [
+          0.3568976362082376,
+          0.48758100691320344
+        ],
+        "delta_kappa_point": 0.5724836746109123,
+        "delta_kappa_ci95": [
+          0.4952730119285391,
+          0.6480889353201453
+        ],
+        "frac_A_gt_B_f1": 1.0,
+        "n_iters": 1000
+      },
+      "gena_lm CDS - TSS": {
+        "n_common": 487,
+        "delta_macro_f1_point": 0.14426306803389755,
+        "delta_macro_f1_ci95": [
+          0.07714728697879508,
+          0.20959374451118706
+        ],
+        "delta_kappa_point": 0.21268699633131793,
+        "delta_kappa_ci95": [
+          0.12052377883737513,
+          0.2954437040059469
+        ],
+        "frac_A_gt_B_f1": 1.0,
+        "n_iters": 1000
+      },
+      "hyena_dna CDS - TSS": {
+        "n_common": 487,
+        "delta_macro_f1_point": 0.35279873341425333,
+        "delta_macro_f1_ci95": [
+          0.2786172678856085,
+          0.4258209195668601
+        ],
+        "delta_kappa_point": 0.46048089938178094,
+        "delta_kappa_ci95": [
+          0.38086972358138504,
+          0.5392917058056088
+        ],
+        "frac_A_gt_B_f1": 1.0,
+        "n_iters": 1000
+      },
+      "kmer CDS - TSS 4mer": {
+        "n_common": 487,
+        "delta_macro_f1_point": 0.45217260251286684,
+        "delta_macro_f1_ci95": [
+          0.3868976125369685,
+          0.5164287242638467
+        ],
+        "delta_kappa_point": 0.5509622574319745,
+        "delta_kappa_ci95": [
+          0.4684120927328751,
+          0.6289552242773943
+        ],
+        "frac_A_gt_B_f1": 1.0,
+        "n_iters": 1000
       }
     },
     "regression": {
@@ -495,6 +570,56 @@
         "delta_r2_macro_ci95": [
           0.014877717196941375,
           0.02306172624230385
+        ],
+        "frac_A_gt_B": 1.0,
+        "n_iters": 1000
+      },
+      "dnabert2 CDS - TSS": {
+        "n_common": 487,
+        "delta_r2_macro_point": 0.06533349212259054,
+        "delta_r2_macro_ci95": [
+          0.0547326139989309,
+          0.07629025678470498
+        ],
+        "frac_A_gt_B": 1.0,
+        "n_iters": 1000
+      },
+      "nt_v2 CDS - TSS": {
+        "n_common": 487,
+        "delta_r2_macro_point": 0.05389715381897986,
+        "delta_r2_macro_ci95": [
+          0.04075215638440568,
+          0.06627091073896736
+        ],
+        "frac_A_gt_B": 1.0,
+        "n_iters": 1000
+      },
+      "gena_lm CDS - TSS": {
+        "n_common": 487,
+        "delta_r2_macro_point": 0.021131449087988585,
+        "delta_r2_macro_ci95": [
+          0.01025894318590872,
+          0.03256091296207159
+        ],
+        "frac_A_gt_B": 1.0,
+        "n_iters": 1000
+      },
+      "hyena_dna CDS - TSS": {
+        "n_common": 487,
+        "delta_r2_macro_point": 0.05652202479541302,
+        "delta_r2_macro_ci95": [
+          0.04380170656368137,
+          0.06938436729833483
+        ],
+        "frac_A_gt_B": 1.0,
+        "n_iters": 1000
+      },
+      "kmer CDS - TSS 4mer": {
+        "n_common": 487,
+        "delta_r2_macro_point": 0.06606796756386757,
+        "delta_r2_macro_ci95": [
+          0.055598585354164246,
+          0.07696761353872716
         ],
         "frac_A_gt_B": 1.0,
         "n_iters": 1000

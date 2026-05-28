@@ -249,6 +249,14 @@ PAIRED_CLS = [
     ("esm2_650m - aa2",        "esm2_650m", 100.0, "aa2",         1000.0),
     ("esm2_650m - nt_v2_meanG","esm2_650m", 100.0, "nt_v2_meanG", 10.0),
     ("esm2_650m - esm2_150m",  "esm2_650m", 100.0, "esm2_150m",   1000.0),
+    # CDS arm vs TSS arm within each DNA-LM encoder (#10): each encoder's best CDS
+    # pooling vs its best TSS pooling. Shows the CDS substrate carries the family
+    # signal the TSS window does not. Hyperparameters from HEADLINE_CLS{,_TSS}.
+    ("dnabert2 CDS - TSS",  "dnabert2_meanD",  10.0, "tss_dnabert2_maxmean",    100.0),
+    ("nt_v2 CDS - TSS",     "nt_v2_meanD",      1.0, "tss_nt_v2_meanmean",      100.0),
+    ("gena_lm CDS - TSS",   "gena_lm_clsmean",  1.0, "tss_gena_lm_clsmean",    1000.0),
+    ("hyena_dna CDS - TSS", "hyena_dna_meanG", 10.0, "tss_hyena_dna_meanmean", 1000.0),
+    ("kmer CDS - TSS 4mer", "kmer",          1000.0, "enformer_tss_4mer",      1000.0),
 ]
 
 # Paired regression comparisons: (label, dsA, alpha_A, dsB, alpha_B).
@@ -261,7 +269,19 @@ PAIRED_REG = [
     ("esm2_650m - aa3",            "esm2_650m", 10.0, "aa3",            0.01),
     ("esm2_650m - dnabert2_meanD", "esm2_650m", 10.0, "dnabert2_meanD", 10.0),
     ("esm2_650m - esm2_150m",      "esm2_650m", 10.0, "esm2_150m",      10.0),
+    # CDS arm vs TSS arm within each DNA-LM encoder (#10). Hyperparameters from
+    # HEADLINE_REG{,_TSS}.
+    ("dnabert2 CDS - TSS",  "dnabert2_meanG",       10.0, "tss_dnabert2_meanmean", 0.1),
+    ("nt_v2 CDS - TSS",     "nt_v2_meanmean",       10.0, "tss_nt_v2_meanmean",    0.1),
+    ("gena_lm CDS - TSS",   "gena_lm_meanmean",    100.0, "tss_gena_lm_meanmean",  1.0),
+    ("hyena_dna CDS - TSS", "hyena_dna_specialmean", 1.0, "tss_hyena_dna_meanmean",0.1),
+    ("kmer CDS - TSS 4mer", "kmer",                 0.01, "enformer_tss_4mer",     0.01),
 ]
+
+
+def _resolvable(dataset: str) -> bool:
+    """True if a dataset name can be loaded (parquet present or synthetic featurizer)."""
+    return dataset in DATASET_PATHS or dataset in SYNTHETIC_FEATURIZERS
 
 
 def _load_eval(dataset: str, name: str):
@@ -421,6 +441,9 @@ def main():
         results["paired"] = {"classification": {}, "regression": {}}
         print("\n=== Paired classification difference CIs (A - B) ===")
         for label, da, ca, db, cb in PAIRED_CLS:
+            if not (_resolvable(da) and _resolvable(db)):
+                print(f"  skip {label}: dataset parquet absent")
+                continue
             t0 = time.time()
             res = paired_bootstrap_classification(da, ca, db, cb,
                                                   n_iters=args.n_iters, seed=args.seed)
@@ -431,6 +454,9 @@ def main():
 
         print("\n=== Paired regression difference CIs (A - B) ===")
         for label, da, aa, db, ab in PAIRED_REG:
+            if not (_resolvable(da) and _resolvable(db)):
+                print(f"  skip {label}: dataset parquet absent")
+                continue
             t0 = time.time()
             res = paired_bootstrap_regression(da, aa, db, ab,
                                               n_iters=args.n_iters, seed=args.seed)
