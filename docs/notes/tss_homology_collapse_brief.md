@@ -107,6 +107,25 @@ Every seed: AA-composition ties/beats the best DNA-LM; the TSS arm sits at the ~
 and ~0 (reg); ESM-2 dominates. The conclusions are not an artifact of one cluster→split assignment.
 (Driver: `scripts/seed_sensitivity.py`; per-seed metrics in `data/seed_sensitivity/`.)
 
+## Supplementary robustness (added 2026-05-28; closes MINA #1/#3/#10)
+Three remaining reviewer asks are now answered with committed analysis — none change the story:
+
+- **CDS-vs-TSS within each encoder (MINA #10 paired test).** For every DNA-LM the CDS arm
+  beats the TSS arm with P(CDS>TSS)=1.000 and a 95% CI excluding zero — cls ΔF1 +0.14 to +0.45,
+  reg ΔR² +0.02 to +0.07 (dnabert2 ΔF1 +0.37 / ΔR² +0.065; nt_v2 +0.42 / +0.054; hyena
+  +0.35 / +0.057; gena_lm +0.14 / +0.021). A 4-mer-on-CDS vs 4-mer-on-TSS-window control gives
+  the same gap (+0.45 / +0.066). (`data/bootstrap_metrics.json`, commit `dfb9e86`.)
+- **α-selection sensitivity (MINA #3).** Selecting Ridge α by validation cosine vs macro-R²
+  changes nothing: 50/53 regression cells pick the same α, and the leader ordering
+  (ESM-2 650M > 150M > AA-3mer > DNA-LMs) is identical under both rules; the only 3 cells whose
+  α differs are noise-floor TSS cells. (`analysis/alpha_sensitivity/`, commit `c5bfea2`.)
+- **Stricter 70%-identity split (MINA #1).** Re-probing the headline cells on a 70%-id
+  supplementary split keeps the ordering (ESM-2 dominates; AA-composition ties/beats the best
+  DNA-LM: aa2 0.825 > nt_v2 0.783 cls, aa3 0.215 > dnabert2 0.186 reg). Every cell is higher than
+  at 40% — looser threshold, more paralog leakage — and the TSS arm rises from 0.326 (40%, at
+  floor) to 0.505 (70%), tracking the leakage gradient. (`docs/notes/homology70_supplementary.md`,
+  commit `13145d3`.)
+
 ## Decisions for you (Austin)
 1. Approve **retiring or heavily qualifying the TSS substrate claim**? (The primary-split TSS arm is at
    chance.)

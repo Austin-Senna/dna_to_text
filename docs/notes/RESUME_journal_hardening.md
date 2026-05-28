@@ -1,6 +1,6 @@
 # RESUME — journal-hardening phase (handoff)
 
-Last updated: 2026-05-28. Branch: **`revision/journal-hardening`** — working tree clean, **not pushed** (latest commit `0f4ffe3`). Analysis is substantively COMPLETE; what remains is 3 small CPU items + manuscript text + the Austin-gated reframe (see **Pending**).
+Last updated: 2026-05-28. Branch: **`revision/journal-hardening`** — working tree clean, **not pushed** (latest commit `13145d3`). Analysis is COMPLETE — the 3 CPU quick wins (α-sensitivity #3 `c5bfea2`, CDS-vs-TSS paired #10 `dfb9e86`, 70% split #1 `13145d3`) are done & committed; what remains is manuscript text (#10 items 4–5) + the Austin-gated reframe (see **Pending**).
 
 ## Read these first
 - `docs/notes/tss_homology_collapse_brief.md` — **THE decision brief for Austin** (current, complete): 3-part finding + paired CIs + seed sensitivity + decisions. Start here.
@@ -43,10 +43,10 @@ Three blind independent agents (numbers only) unanimously: don't run masking —
 
 ## Pending (mapped to MINA.md issues)
 
-**Doable now — CPU, no Austin (highest-value quick wins first):**
-1. **α-selection sensitivity table (MINA #3)** — show cls/reg conclusions don't flip when Ridge α is picked by cosine vs R². `train_baseline.py` already records both per-α (`alpha_sweep`); build a small table from existing runs or a focused re-run. NOT built.
-2. **CDS-vs-TSS within-encoder paired test (MINA #10)** — `bootstrap_metrics.json` has DNA-LM-vs-composition and ESM-vs-X pairs but NOT "CDS vs TSS within each encoder". Add pairs (e.g. `dnabert2_meanD` vs `tss_dnabert2_meanmean`) to `bootstrap_test_uncertainty.py` `PAIRED_*` and run `--paired`. Quick.
-3. **Supplementary 70%-identity split (MINA #1)** — `splits_homology70.json` EXISTS but was never probed. Re-probe the matrix on it (swap into `splits.json` like `seed_sensitivity.py` does, or add `--splits` plumbing). ⚠️ will clobber `data/confusion_5way_*.json` — restore after via `git checkout`.
+**DONE 2026-05-28 — CPU quick wins (committed):**
+1. ✅ **α-selection sensitivity table (MINA #3)** — `c5bfea2`. `scripts/alpha_sensitivity.py` → `analysis/alpha_sensitivity/alpha_selection_table.{md,csv}`. 50/53 reg cells pick the same α (cosine vs R²); the 3 that differ are noise-floor TSS cells; the leader ordering (ESM-2 650M > 150M > aa3 > DNA-LMs) is unchanged.
+2. ✅ **CDS-vs-TSS within-encoder paired test (MINA #10)** — `dfb9e86`. Added 5 CDS-vs-TSS pairs (4 DNA-LMs + 4-mer control) to `bootstrap_test_uncertainty.py` `PAIRED_*` (+ resolvability guard). Every pair P(CDS>TSS)=1.000, CI excludes 0 (cls ΔF1 +0.14..+0.45; reg ΔR² +0.02..+0.07). Existing pairs reproduced byte-identically.
+3. ✅ **Supplementary 70%-identity split (MINA #1)** — `13145d3`. `scripts/probe_homology70.py` → `data/metrics_homology70.json` + `docs/notes/homology70_supplementary.md`. Conclusions stable; every cell higher than 40% (more leakage); TSS rises 0.326→0.505 with the looser threshold (leakage gradient).
 
 **Writeup (fold into manuscript text):**
 4. **Pre-specified pooling-selection rule (MINA #10)** — already enforced in code (val-only `sweep_C`/`sweep_alpha`); just state it explicitly.
@@ -57,11 +57,11 @@ Three blind independent agents (numbers only) unanimously: don't run masking —
 7. **#10 manuscript** (`dna_to_text_paper` submodule): regenerate tables/figures, register `kmer6/codon/aa1-3/gc` + `esm2_{150m,650m}` display rows, reframe title/abstract/claims per the 3-part finding (CDS=composition, TSS=leakage, ESM-2 wins). **Hold for Austin's steer.**
 
 ## MINA.md issue status (one-line each)
-- #1 homology split: DONE (primary 40%); 70% supplementary split file exists but UNPROBED (pending item 3).
+- #1 homology split: DONE (primary 40%); 70% supplementary split PROBED (`13145d3`, conclusions stable).
 - #2 stronger baselines: DONE (composition + ESM-2 protein LM); manuscript display rows pending (item 7).
-- #3 Ridge α by R²: DONE; sensitivity table pending (item 1).
+- #3 Ridge α by R²: DONE; α-selection sensitivity table DONE (`c5bfea2`).
 - #4 TSS coding leakage: DONE (#4a quantify; #4b mask SKIPPED by consensus; homology collapse answers it).
-- #10 paired CIs + seed sensitivity: DONE; CDS-vs-TSS pair (item 2) + pooling-rule/best-cell text (items 4–5) pending.
+- #10 paired CIs + seed sensitivity: DONE; CDS-vs-TSS paired test DONE (`dfb9e86`); pooling-rule/best-cell text (items 4–5) still pending (writeup).
 
 ## Environment / gotchas
 - Run everything via `uv run`. GPU: RTX 5060, 8 GB.
