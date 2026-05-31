@@ -575,7 +575,9 @@ def build_leakage():
         for name, rv, hv in rows:
             out.append(f"\\quad {name} & {f(rv,3)} & {f(hv,3)} & {sgn(hv-rv,3)} \\\\")
 
-    section(r"Coding sequence (CDS)", _kmer_f1(RAND, "kmer"), _kmer_f1(M, "kmer"), False)
+    # random CDS 4-mer from the comparator re-run (RANDC, 0.662) to match the
+    # split-comparison table; RAND's legacy 4-mer (0.672) differs by protocol.
+    section(r"Coding sequence (CDS)", _kmer_f1(RANDC, "kmer"), _kmer_f1(M, "kmer"), False)
     out.append(r"\midrule")
     section(r"TSS-centred window (196{,}608\,bp)",
             _kmer_f1(RAND, "enformer_tss_4mer", "tss_kmer"),
