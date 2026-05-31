@@ -144,6 +144,12 @@ SPECS = {
     "leakage": dict(setup=r"\setlength{\tabcolsep}{3pt}",
                     width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
                     header=r"Source & Random F1 & Homology F1 & $\Delta$"),
+    "split_comparison": dict(setup=r"\setlength{\tabcolsep}{3pt}",
+                             width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
+                             header=r"Source & F1 (rand) & F1 (hom) & $R^2$ (rand) & $R^2$ (hom)"),
+    "split_comparison_full": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.5}\selectfont",
+                                  width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
+                                  header=r"Source & F1 (rand) & F1 (hom) & $R^2$ (rand) & $R^2$ (hom)"),
     "s_pooling_full": dict(setup=r"\setlength{\tabcolsep}{1pt}\fontsize{5}{6}\selectfont",
                            width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llrrrr@{}",
                            header=r"Encoder & Pooling & Macro-F1 & $\kappa$ & $\Delta\kappa$ & Accuracy"),
@@ -181,7 +187,8 @@ M = load("metrics_homology.json")
 M70 = load("metrics_homology70.json")
 SEED = load("seed_sensitivity/summary.json")
 BOOT = load("bootstrap_metrics.json")
-RAND = load("metrics.json")  # random-stratified split (leakage reference)
+RAND = load("metrics.json")  # random-stratified split: DNA encoders + 4-mer + TSS
+RANDC = load("metrics_random_comparators.json")  # composition + ESM-2 on random split
 
 # classification index: feature_source -> record (non-shuffled), plus shuffled
 CLS = {}
@@ -572,11 +579,85 @@ def build_leakage():
     return "\n".join(out)
 
 
+# ===================================================================
+# Random vs homology split comparison (CDS), classification + regression.
+# DNA encoders/4-mer come from metrics.json; composition + ESM from
+# metrics_random_comparators.json; homology from metrics_homology.json.
+# ===================================================================
+def _cls_f1(metrics, src):
+    if src in ENCODERS:
+        cells = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
+                 and not r["feature_source"].startswith("tss_")
+                 and (r["feature_source"] == src or r["feature_source"].startswith(src + "_"))]
+        return max(cells, key=lambda r: r["test_macro_f1"])["test_macro_f1"] if cells else None
+    cells = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
+             and r.get("feature_source") == src]
+    return cells[0]["test_macro_f1"] if cells else None
+
+
+def _reg_r2(metrics, src):
+    recs = [r for r in metrics if r.get("task") is None]
+    if src in ENCODERS:
+        cells = [r for r in recs if r.get("model") == "linear_probe"
+                 and not str(r.get("dataset", "")).startswith("dataset_tss_")
+                 and (str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "") == src
+                      or str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "").startswith(src + "_"))]
+        return max(cells, key=lambda r: r["test_r2_macro"])["test_r2_macro"] if cells else None
+    for r in recs:
+        try:
+            if reg_raw(r) == src:
+                return r["test_r2_macro"]
+        except Exception:
+            continue
+    return None
+
+
+def _rand_cls(src):
+    v = _cls_f1(RANDC, src)
+    return v if v is not None else _cls_f1(RAND, src)
+
+
+def _rand_reg(src):
+    v = _reg_r2(RANDC, src)
+    return v if v is not None else _reg_r2(RAND, src)
+
+
+CMP_DISPLAY = {"kmer": "CDS 4-mer", "kmer6": "CDS 6-mer", "codon": "Codon", "gc": "GC + length",
+               "aa1": "AA 1-mer", "aa2": "AA 2-mer", "aa3": "AA 3-mer",
+               "dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "gena_lm": "GENA-LM", "hyena_dna": "HyenaDNA",
+               "esm2_150m": "ESM-2 150M", "esm2_650m": "ESM-2 650M"}
+CMP_HEADLINE = ["kmer", "aa2", "aa3", "codon", "nt_v2", "dnabert2", "esm2_650m"]
+CMP_FULL = ["kmer", "kmer6", "codon", "gc", "aa1", "aa2", "aa3",
+            "dnabert2", "nt_v2", "gena_lm", "hyena_dna", "esm2_150m", "esm2_650m"]
+
+
+def _split_comparison(srcs):
+    out = []
+    for src in srcs:
+        rf, hf, rr, hr = _rand_cls(src), _cls_f1(M, src), _rand_reg(src), _reg_r2(M, src)
+
+        def pair(rv, hv):
+            return (f(rv, 3) + " & " + f(hv, 3)) if (rv is not None and hv is not None) else "--- & ---"
+
+        out.append(f"{CMP_DISPLAY[src]} & {pair(rf, hf)} & {pair(rr, hr)} \\\\")
+    return "\n".join(out)
+
+
+def build_split_comparison():
+    return _split_comparison(CMP_HEADLINE)
+
+
+def build_split_comparison_full():
+    return _split_comparison(CMP_FULL)
+
+
 def main():
     write("family5_main", build_family5_main())
     write("ridge_main", build_ridge_main())
     write("cds_tss", build_cds_tss())
     write("leakage", build_leakage())
+    write("split_comparison", build_split_comparison())
+    write("split_comparison_full", build_split_comparison_full())
     write("protein_comparison", build_protein_comparison())
     write("s_pooling_full", build_pooling_full())
     write("s_regression_full", build_regression_full())
