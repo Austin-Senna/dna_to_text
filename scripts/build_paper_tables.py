@@ -141,6 +141,9 @@ SPECS = {
     "protein_comparison": dict(setup=r"\setlength{\tabcolsep}{3pt}",
                                width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
                                header=r"Source & Macro-F1 & $\kappa$ & GenePT $R^2$"),
+    "leakage": dict(setup=r"\setlength{\tabcolsep}{3pt}",
+                    width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
+                    header=r"Source & Random F1 & Homology F1 & $\Delta$"),
     "s_pooling_full": dict(setup=r"\setlength{\tabcolsep}{1pt}\fontsize{5}{6}\selectfont",
                            width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llrrrr@{}",
                            header=r"Encoder & Pooling & Macro-F1 & $\kappa$ & $\Delta\kappa$ & Accuracy"),
@@ -178,6 +181,7 @@ M = load("metrics_homology.json")
 M70 = load("metrics_homology70.json")
 SEED = load("seed_sensitivity/summary.json")
 BOOT = load("bootstrap_metrics.json")
+RAND = load("metrics.json")  # random-stratified split (leakage reference)
 
 # classification index: feature_source -> record (non-shuffled), plus shuffled
 CLS = {}
@@ -520,10 +524,59 @@ def build_protein_comparison():
     return "\n".join(out)
 
 
+# ===================================================================
+# Table (sec 3.x): homology leakage -- random vs homology split (main text)
+# Best-pool macro-F1 per encoder, CDS and TSS, both splits + delta.
+# (kappa is incomplete in the random metrics; macro-F1 is on both splits.)
+# ===================================================================
+def _best_f1_family5(metrics, enc, tss=False):
+    cells = []
+    for r in metrics:
+        if r.get("task") != "family5" or r.get("shuffled_labels"):
+            continue
+        fs = r["feature_source"]
+        is_tss = fs.startswith("tss_")
+        if tss != is_tss:
+            continue
+        core = fs[4:] if is_tss else fs
+        if core == enc or core.startswith(enc + "_"):
+            cells.append(r)
+    return max(cells, key=lambda r: r["test_macro_f1"])["test_macro_f1"] if cells else None
+
+
+def _kmer_f1(metrics, *names):
+    for fs in names:
+        c = [r for r in metrics if r.get("task") == "family5" and r["feature_source"] == fs]
+        if c:
+            return c[0]["test_macro_f1"]
+    return None
+
+
+def build_leakage():
+    out = []
+
+    def section(label, baseline_rand, baseline_hom, tss):
+        out.append(r"\multicolumn{4}{@{}l}{\textbf{" + label + r"}}\\")
+        rows = [("4-mer", baseline_rand, baseline_hom)]
+        for enc in ENCODERS:
+            rows.append((ENC_DISPLAY[enc], _best_f1_family5(RAND, enc, tss),
+                         _best_f1_family5(M, enc, tss)))
+        for name, rv, hv in rows:
+            out.append(f"\\quad {name} & {f(rv,3)} & {f(hv,3)} & {sgn(hv-rv,3)} \\\\")
+
+    section(r"Coding sequence (CDS)", _kmer_f1(RAND, "kmer"), _kmer_f1(M, "kmer"), False)
+    out.append(r"\midrule")
+    section(r"TSS-centred window (196{,}608\,bp)",
+            _kmer_f1(RAND, "enformer_tss_4mer", "tss_kmer"),
+            _kmer_f1(M, "enformer_tss_4mer", "tss_kmer"), True)
+    return "\n".join(out)
+
+
 def main():
     write("family5_main", build_family5_main())
     write("ridge_main", build_ridge_main())
     write("cds_tss", build_cds_tss())
+    write("leakage", build_leakage())
     write("protein_comparison", build_protein_comparison())
     write("s_pooling_full", build_pooling_full())
     write("s_regression_full", build_regression_full())
