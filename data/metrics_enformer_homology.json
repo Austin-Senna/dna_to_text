@@ -1,0 +1,34 @@
+[
+  {
+    "model": "logistic_probe",
+    "feature_source": "enformer_trunk_global",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "test_macro_f1": 0.35651050321952066,
+    "test_kappa": 0.16144932677101342
+  },
+  {
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_trunk_global.parquet",
+    "select_by": "r2",
+    "alpha": 1000,
+    "test_r2_macro": 0.01750619150698185
+  },
+  {
+    "model": "logistic_probe",
+    "feature_source": "enformer_trunk_center",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1,
+    "test_macro_f1": 0.40101314727123877,
+    "test_kappa": 0.2460640653711793
+  },
+  {
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_trunk_center.parquet",
+    "select_by": "r2",
+    "alpha": 1000,
+    "test_r2_macro": 0.012576625682413578
+  }
+]

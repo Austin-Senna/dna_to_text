@@ -189,6 +189,7 @@ SEED = load("seed_sensitivity/summary.json")
 BOOT = load("bootstrap_metrics.json")
 RAND = load("metrics.json")  # random-stratified split: DNA encoders + 4-mer + TSS
 RANDC = load("metrics_random_comparators.json")  # composition + ESM-2 on random split
+ENFH = load("metrics_enformer_homology.json")  # Enformer re-probed on the homology split
 
 # classification index: feature_source -> record (non-shuffled), plus shuffled
 CLS = {}
@@ -346,6 +347,9 @@ def build_cds_tss():
         if enc == "nt_v2":
             name = bold(name)
         out.append(f"\\quad {name} & {kt} & {dkt} & {f(r2,3)} & --- \\\\")
+    enf_k = max(r["test_kappa"] for r in ENFH if r.get("task") == "family5")
+    enf_r2 = max(r["test_r2_macro"] for r in ENFH if r.get("task") is None)
+    out.append(f"\\quad Enformer$^\\dagger$ & {f(enf_k,3)} & {sgn(enf_k-tss_base_k,3)} & {f(enf_r2,3)} & --- \\\\")
     return "\n".join(out)
 
 
