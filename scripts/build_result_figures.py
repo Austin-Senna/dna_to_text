@@ -101,11 +101,24 @@ def _no_title(ax):
     ax.grid(axis="y", color="#dddddd", linewidth=0.6)
 
 
+def _declutter(ys, gap):
+    """Return label y-positions >= the given vertical gap apart, order preserved."""
+    order = sorted(range(len(ys)), key=lambda i: ys[i])
+    s = [ys[i] for i in order]
+    for k in range(1, len(s)):
+        if s[k] - s[k - 1] < gap:
+            s[k] = s[k - 1] + gap
+    out = [0.0] * len(ys)
+    for k, i in enumerate(order):
+        out[i] = s[k]
+    return out
+
+
 # ---------- Figure A: comparator landscape ----------
 def fig_comparator_landscape():
     # representative cells, grouped: composition | DNA encoders | ESM-2 (comparator)
     cells = [
-        ("CDS 4-mer", "kmer", C_COMP), ("AA 2-mer", "aa2", C_COMP), ("AA 3-mer", "aa3", C_COMP),
+        ("CDS 4-mer", "kmer", C_COMP), ("Codon", "codon", C_COMP), ("AA comp.", "aa_best", C_COMP),
         ("DNABERT-2", "dnabert2", C_DNA), ("NT-v2", "nt_v2", C_DNA),
         ("GENA-LM", "gena_lm", C_DNA), ("HyenaDNA", "hyena_dna", C_DNA),
         ("ESM-2 150M", "esm2_150m", C_ESM), ("ESM-2 650M", "esm2_650m", C_ESM),
@@ -115,7 +128,13 @@ def fig_comparator_landscape():
     x = np.arange(len(cells))
     fig, (axF, axR) = plt.subplots(1, 2, figsize=(11, 4.2))
 
-    f1 = [f1_of(M, c[1]) for c in cells]
+    def f1v(src):
+        return max(f1_of(M, s) for s in ("aa1", "aa2", "aa3")) if src == "aa_best" else f1_of(M, src)
+
+    def r2v(src):
+        return max(r2_of(M, s) for s in ("aa1", "aa2", "aa3")) if src == "aa_best" else r2_of(M, src)
+
+    f1 = [f1v(c[1]) for c in cells]
     axF.bar(x, f1, color=colors, edgecolor="white",
             hatch=["" if c[2] != C_ESM else "//" for c in cells])
     axF.axhline(FLOOR, color="#555", ls="--", lw=0.9)
@@ -123,7 +142,7 @@ def fig_comparator_landscape():
     axF.set_ylabel("5-way family macro-F1")
     axF.set_ylim(0, 1.0)
 
-    r2 = [r2_of(M, c[1]) for c in cells]
+    r2 = [r2v(c[1]) for c in cells]
     axR.bar(x, r2, color=colors, edgecolor="white",
             hatch=["" if c[2] != C_ESM else "//" for c in cells])
     axR.axhline(0, color="#555", lw=0.8)
@@ -189,18 +208,19 @@ def fig_split_slope():
         ("AA 2-mer", "aa2", C_COMP), ("NT-v2", "nt_v2", C_DNA),
         ("DNABERT-2", "dnabert2", C_DNA), ("CDS 4-mer", "kmer", C_COMP),
     ]
-    fig, ax = plt.subplots(figsize=(6.0, 4.4))
-    for label, src, col in rows:
-        rv, hv = _rand_f1(src), f1_of(M, src)
+    data = [(label, _rand_f1(src), f1_of(M, src), col) for label, src, col in rows]
+    rys = _declutter([d[1] for d in data], 0.014)
+    hys = _declutter([d[2] for d in data], 0.014)
+    fig, ax = plt.subplots(figsize=(6.4, 4.4))
+    for (label, rv, hv, col), ry, hy in zip(data, rys, hys):
         ax.plot([0, 1], [rv, hv], "-o", color=col, lw=2, ms=6)
-        ax.text(1.02, hv, f" {label} {hv:.3f}", va="center", fontsize=8, color=col)
-        ax.text(-0.02, rv, f"{rv:.3f} ", va="center", ha="right", fontsize=8, color=col)
-    ax.axhline(FLOOR, color="#999", ls=":", lw=0.8)
+        ax.text(1.03, hy, f"{label} {hv:.3f}", va="center", fontsize=8, color=col)
+        ax.text(-0.03, ry, f"{rv:.3f}", va="center", ha="right", fontsize=8, color=col)
     _no_title(ax)
     ax.grid(axis="y", color="#eeeeee")
     ax.set_xticks([0, 1])
     ax.set_xticklabels(["random split", "homology split"], fontsize=9)
-    ax.set_xlim(-0.35, 1.6)
+    ax.set_xlim(-0.42, 1.7)
     ax.set_ylabel("5-way family macro-F1")
     ax.set_ylim(0.55, 1.0)
     fig.tight_layout()
