@@ -616,7 +616,7 @@ def plot_family5_bar(family5: pd.DataFrame, metric: str, out: Path, overwrite: b
     ax.set_xticklabels(labels, rotation=35, ha="right")
     ax.set_ylim(0, max(1.0, float(values.max()) * 1.12))
     ax.set_ylabel(metric.replace("_", " "))
-    ax.set_title(f"Family5 {metric.replace('_', ' ')}")
+    # [no-title convention] ax.set_title(f"Family5 {metric.replace('_', ' ')}")
     for i, value in enumerate(values):
         ax.text(i, value + 0.015, f"{value:.3f}", ha="center", va="bottom", fontsize=8)
     fig.tight_layout()
@@ -638,7 +638,7 @@ def plot_ridge_r2(regression: pd.DataFrame, out: Path, overwrite: bool) -> Path 
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=35, ha="right")
     ax.set_ylabel("Ridge macro R2")
-    ax.set_title("Ridge-to-GenePT regression")
+    # [no-title convention] ax.set_title("Ridge-to-GenePT regression")
     for i, value in enumerate(values):
         ax.text(i, value + 0.006, f"{value:.3f}", ha="center", va="bottom", fontsize=8)
     fig.tight_layout()
@@ -657,7 +657,7 @@ def plot_tradeoff(combined: pd.DataFrame, out: Path, overwrite: bool) -> Path | 
         ax.text(row["ridge_r2_macro"] + 0.002, row["family5_macro_f1"], str(label), fontsize=8, va="center")
     ax.set_xlabel("Ridge macro R2")
     ax.set_ylabel("Family5 macro-F1")
-    ax.set_title("Family classification vs cross-modal regression")
+    # [no-title convention] ax.set_title("Family classification vs cross-modal regression")
     fig.tight_layout()
     return _savefig(fig, out, overwrite)
 
@@ -684,7 +684,7 @@ def plot_context_ablation(context: pd.DataFrame, out: Path, overwrite: bool) -> 
         ax.barh(y, values, color=bar_colours)
         ax.set_xlim(0, xmax)
         ax.set_xlabel(title)
-        ax.set_title(title)
+        # [no-title convention] ax.set_title(title)
         for i, value in enumerate(values):
             ax.text(value + xmax * 0.015, i, f"{value:.3f}", va="center", ha="left", fontsize=8)
         ax.grid(axis="x", color="#dddddd", linewidth=0.6)
@@ -697,7 +697,7 @@ def plot_context_ablation(context: pd.DataFrame, out: Path, overwrite: bool) -> 
         for label, color in colours.items()
     ]
     fig.legend(handles=handles, loc="lower center", ncol=3, frameon=False)
-    fig.suptitle("Coding sequence vs TSS context")
+    # [no-title convention] fig.suptitle("Coding sequence vs TSS context")
     fig.tight_layout(rect=[0, 0.08, 1, 0.95])
     return _savefig(fig, out, overwrite)
 
@@ -718,7 +718,7 @@ def plot_pooling_heatmap(pooling: pd.DataFrame, out: Path, overwrite: bool) -> P
     ax.set_yticks(range(len(rows)))
     ax.set_xticklabels(cols, rotation=35, ha="right")
     ax.set_yticklabels(rows)
-    ax.set_title("Family5 macro-F1 by encoder and pooling")
+    # [no-title convention] ax.set_title("Family5 macro-F1 by encoder and pooling")
     for i in range(len(rows)):
         for j in range(len(cols)):
             value = values[i, j]
@@ -756,7 +756,7 @@ def plot_confusion_best_family5(family5: pd.DataFrame, out: Path, overwrite: boo
     ax.set_yticklabels(labels)
     ax.set_xlabel("Predicted family")
     ax.set_ylabel("True family")
-    ax.set_title(f"Best family5 confusion matrix: {feature}")
+    # [no-title convention] ax.set_title(f"Best family5 confusion matrix: {feature}")
     for i in range(len(labels)):
         for j in range(len(labels)):
             frac = normalised[i, j]
@@ -806,7 +806,7 @@ def _plot_umap(df: pd.DataFrame, title: str, out: Path, overwrite: bool) -> Path
     ax.set_yticks([])
     ax.set_xlabel("UMAP-1")
     ax.set_ylabel("UMAP-2")
-    ax.set_title(title)
+    # [no-title convention] ax.set_title(title)
     ax.legend(loc="upper right", fontsize=8, markerscale=2.0, framealpha=0.85)
     fig.tight_layout()
     return _savefig(fig, out, overwrite)
@@ -857,9 +857,9 @@ def plot_umap_dnabert2_compare(out: Path, overwrite: bool) -> Path | None:
         ax.set_yticks([])
         ax.set_xlabel("UMAP-1")
         ax.set_ylabel("UMAP-2")
-        ax.set_title(title)
+        # [no-title convention] ax.set_title(title)
     axes[1].legend(loc="upper right", fontsize=8, markerscale=2.0, framealpha=0.85)
-    fig.suptitle("DNABERT-2 boundary-token effect")
+    # [no-title convention] fig.suptitle("DNABERT-2 boundary-token effect")
     fig.tight_layout()
     return _savefig(fig, out, overwrite)
 
@@ -897,8 +897,9 @@ def build_analysis_artifacts(
     *,
     skip_umap: bool = False,
     overwrite: bool = False,
+    metrics_path: Path = DATA / "metrics.json",
 ) -> dict[str, list[Path] | Path]:
-    metrics = json.loads((DATA / "metrics.json").read_text())
+    metrics = json.loads(Path(metrics_path).read_text())
     latest_logistic = latest_logistic_runs(metrics)
     latest_regression = latest_regression_runs(metrics)
 
@@ -984,12 +985,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bundle", choices=["paper"], default="paper")
     parser.add_argument("--skip-umap", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--metrics", type=Path, default=DATA / "metrics.json")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    result = build_analysis_artifacts(args.out, skip_umap=args.skip_umap, overwrite=args.overwrite)
+    result = build_analysis_artifacts(args.out, skip_umap=args.skip_umap, overwrite=args.overwrite, metrics_path=args.metrics)
     print(f"wrote {len(result['tables'])} table files")
     print(f"wrote {len(result['figures'])} figure files")
     print(f"wrote manifest -> {result['manifest']}")
