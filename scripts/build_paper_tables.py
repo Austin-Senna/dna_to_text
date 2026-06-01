@@ -39,7 +39,7 @@ COMPOSITION = [
     ("aa2", "AA 2-mer"),
     ("aa3", "AA 3-mer"),
 ]
-ESM = [("esm2_150m", "ESM-2 150M"), ("esm2_650m", "ESM-2 650M")]
+ESM = [("esm2_650m", "ESM-2 650M")]
 # Subset shown in the main best-cell tables; CDS 6-mer stays in the appendix
 # full matrices only. (GC+length is dropped from the study entirely.)
 MAIN_COMPOSITION = [c for c in COMPOSITION if c[0] != "kmer6"]
@@ -466,7 +466,6 @@ def build_seed_sensitivity():
     # (display, cls_source, reg_source)
     cells = [
         ("ESM-2 650M", "esm2_650m", "esm2_650m"),
-        ("ESM-2 150M", "esm2_150m", "esm2_150m"),
         ("Best DNA-LM", "nt_v2_meanG", "dnabert2_meanD"),
         ("AA-composition", "aa2", "aa3"),
         ("TSS (DNABERT-2)", "tss_dnabert2_meanmean", "tss_dnabert2_meanmean"),
@@ -496,7 +495,6 @@ def build_homology70():
     # (display, cls_source, reg_source)
     cells = [
         ("ESM-2 650M", "esm2_650m", "esm2_650m"),
-        ("ESM-2 150M", "esm2_150m", "esm2_150m"),
         ("Best DNA-LM", "nt_v2_meanG", "dnabert2_meanD"),
         ("AA-composition", "aa2", "aa3"),
         ("CDS 4-mer", "kmer", None),
@@ -658,7 +656,7 @@ CMP_DISPLAY = {"kmer": "CDS 4-mer", "kmer6": "CDS 6-mer", "codon": "Codon", "gc"
                "esm2_150m": "ESM-2 150M", "esm2_650m": "ESM-2 650M"}
 CMP_HEADLINE = ["kmer", "aa2", "aa3", "codon", "nt_v2", "dnabert2", "esm2_650m"]
 CMP_FULL = ["kmer", "kmer6", "codon", "gc", "aa1", "aa2", "aa3",
-            "dnabert2", "nt_v2", "gena_lm", "hyena_dna", "esm2_150m", "esm2_650m"]
+            "dnabert2", "nt_v2", "gena_lm", "hyena_dna", "esm2_650m"]
 
 
 def _split_comparison(srcs):
