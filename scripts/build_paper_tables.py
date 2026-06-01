@@ -845,8 +845,6 @@ def main():
     write("split_comparison", build_split_comparison())
     write("s_pooling_full", build_pooling_full())
     write("s_regression_full", build_regression_full())
-    write("s_pooling_full_random", build_pooling_full_random())
-    write("s_regression_full_random", build_regression_full_random())
     write("s_seed_sensitivity", build_seed_sensitivity())
     write("s_cds_tss_paired", build_cds_tss_paired())
     print("\nAll fragments written to", OUT)
