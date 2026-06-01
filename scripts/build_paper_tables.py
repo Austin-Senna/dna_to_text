@@ -144,7 +144,7 @@ SPECS = {
     "leakage": dict(setup=r"\setlength{\tabcolsep}{3pt}",
                     width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
                     header=r"Source & Random F1 & Homology F1 & $\Delta$"),
-    "split_comparison": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{8}{9.5}\selectfont",
+    "split_comparison": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7.5}{9}\selectfont",
                              width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrrrr@{}",
                              header=r"Source & F1 (rand) & F1 (hom) & $\Delta$F1 & $R^2$ (rand) & $R^2$ (hom) & $\Delta R^2$"),
     "split_comparison_full": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.5}\selectfont",
@@ -706,10 +706,12 @@ def _split_comparison(srcs):
     return "\n".join(out)
 
 
-SPLIT_GROUPS = [
-    ("Composition (CDS)", ["kmer", "codon", "aa2", "aa3"]),
-    ("DNA encoders (CDS)", ["nt_v2", "dnabert2"]),
-    ("Protein LM (CDS)", ["esm2_650m"]),
+# CDS section: composition / all four DNA encoders / protein-LM reference,
+# separated by rules (no per-class labels) under one "Coding sequence" header.
+SPLIT_CDS = [
+    ["kmer", "codon", "aa2", "aa3"],
+    ["nt_v2", "dnabert2", "gena_lm", "hyena_dna"],
+    ["esm2_650m"],
 ]
 
 
@@ -730,12 +732,11 @@ def build_split_comparison():
     def trip(rv, hv):
         return (f"{f(rv,3)} & {f(hv,3)} & {sgn(hv-rv,3)}"
                 if rv is not None and hv is not None else "--- & --- & ---")
-    out = []
-    for gi, (label, srcs) in enumerate(SPLIT_GROUPS):
-        if gi:
+    out = [r"\multicolumn{7}{@{}l}{\textbf{Coding sequence (CDS)}}\\"]
+    for bi, block in enumerate(SPLIT_CDS):
+        if bi:
             out.append(r"\midrule")
-        out.append(r"\multicolumn{7}{@{}l}{\textbf{" + label + r"}}\\")
-        for src in srcs:
+        for src in block:
             f1 = trip(_rand_cls(src), _cls_f1(M, src))
             r2 = trip(_rand_reg(src), _reg_r2(M, src))
             out.append(f"\\quad {CMP_DISPLAY[src]} & {f1} & {r2} \\\\")
