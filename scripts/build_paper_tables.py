@@ -744,9 +744,11 @@ def build_split_comparison():
     out.append(r"\multicolumn{7}{@{}l}{\textbf{TSS window (196{,}608\,bp)}}\\")
     out.append(f"\\quad TSS 4-mer & {trip(_kmer_f1(RAND, 'enformer_tss_4mer', 'tss_kmer'), _kmer_f1(M, 'enformer_tss_4mer', 'tss_kmer'))}"
                f" & {trip(_reg_r2(RAND, 'enformer_tss_4mer'), _reg_r2(M, 'enformer_tss_4mer'))} \\\\")
+    out.append(r"\midrule")
     for enc in ENCODERS:
         out.append(f"\\quad {ENC_DISPLAY[enc]} & {trip(_best_f1_family5(RAND, enc, True), _best_f1_family5(M, enc, True))}"
                    f" & {trip(_reg_r2_tss(RAND, enc), _reg_r2_tss(M, enc))} \\\\")
+    out.append(r"\midrule")
     out.append(f"\\quad Enformer & {trip(_enf_split(RAND, 'f1'), _enf_split(ENFH, 'f1'))}"
                f" & {trip(_enf_split(RAND, 'r2'), _enf_split(ENFH, 'r2'))} \\\\")
     return "\n".join(out)

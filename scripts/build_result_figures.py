@@ -199,7 +199,7 @@ def fig_substrate_collapse():
     cds_r2 = [_cell_reg(M, "kmer")] + [_best_reg_enc_ctx(M, e, False) for e in ENCODERS] + [np.nan]
     tss_r2 = [_cell_reg(M, "enformer_tss_4mer")] + [_best_reg_enc_ctx(M, e, True) for e in ENCODERS] + [enf_tss_r2]
 
-    fig, (axT, axB) = plt.subplots(2, 1, figsize=(6.8, 7.4), sharex=True)
+    fig, (axT, axB) = plt.subplots(2, 1, figsize=(7.0, 6.0), sharex=True)
 
     # (top) macro-F1
     axT.bar(x - w / 2, cds_f1, w, color=cols, edgecolor="white")
@@ -246,7 +246,7 @@ def fig_split_bars():
     f1_hom = [f1_of(M, s) for _, s, _ in cells]
     r2_rand = [_rand_r2(s) for _, s, _ in cells]
     r2_hom = [r2_of(M, s) for _, s, _ in cells]
-    fig, (axT, axB) = plt.subplots(2, 1, figsize=(6.8, 7.4), sharex=True)
+    fig, (axT, axB) = plt.subplots(2, 1, figsize=(7.0, 6.0), sharex=True)
 
     # (top) 5-way family macro-F1
     axT.bar(x - w / 2, f1_rand, w, color=cols, alpha=0.5, edgecolor="white")
