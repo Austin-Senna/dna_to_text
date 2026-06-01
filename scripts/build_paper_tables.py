@@ -273,9 +273,12 @@ def build_family5_main():
         pool, r = cls_best_pool(enc)
         rows.append((ENC_DISPLAY[enc], tt(pool), r["test_macro_f1"], r["test_kappa"],
                      r["test_kappa"] - base_k, r["test_accuracy"], False))
-    # ESM-2 lives in its own protein-comparison table, not here.
-    # bold per-column max among non-controls
-    return render_main_rows(rows, dp=3, cols=("f1", "kappa", "dkappa", "acc"))
+    # bold per-column max among non-controls; ESM-2 added below as upper bound
+    body = render_main_rows(rows, dp=3, cols=("f1", "kappa", "dkappa", "acc"))
+    esm = CLS["esm2_650m"]
+    esm_row = (f"ESM-2 650M & --- & {f(esm['test_macro_f1'], 3)} & {f(esm['test_kappa'], 3)} "
+               f"& {sgn(esm['test_kappa'] - base_k, 3)} & {f(esm['test_accuracy'], 3)} \\\\")
+    return body + "\n" + r"\midrule" + "\n" + esm_row
 
 
 def render_main_rows(rows, dp, cols):
@@ -315,7 +318,7 @@ def build_ridge_main():
         pool, r = reg_best_pool(enc)
         rows.append((ENC_DISPLAY[enc], tt(pool), r["test_r2_macro"],
                      r["test_r2_macro"] - base_r2, r["test_mean_cosine"]))
-    # ESM-2 lives in its own protein-comparison table, not here.
+    # bold per-column max among non-controls; ESM-2 added below as upper bound
     best_r2 = max(r[2] for r in rows)
     best_cos = max(r[4] for r in rows)
     out = []
@@ -323,7 +326,10 @@ def build_ridge_main():
         r2t = bold(f(r2, 3)) if r2 == best_r2 else f(r2, 3)
         cost = bold(f(cos, 3)) if cos == best_cos else f(cos, 3)
         out.append(f"{disp} & {pool} & {r2t} & {sgn(delta,3)} & {cost} \\\\")
-    return "\n".join(out)
+    esm = REG["esm2_650m"]
+    esm_row = (f"ESM-2 650M & --- & {f(esm['test_r2_macro'], 3)} "
+               f"& {sgn(esm['test_r2_macro'] - base_r2, 3)} & {f(esm['test_mean_cosine'], 3)} \\\\")
+    return "\n".join(out) + "\n" + r"\midrule" + "\n" + esm_row
 
 
 # ===================================================================
