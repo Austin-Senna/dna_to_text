@@ -106,14 +106,23 @@ def _no_title(ax):
 CELLS = [("CDS 4-mer", "kmer", C_COMP), ("Codon", "codon", C_COMP), ("AA comp.", "aa_best", C_COMP),
          ("DNABERT-2", "dnabert2", C_DNA), ("NT-v2", "nt_v2", C_DNA),
          ("GENA-LM", "gena_lm", C_DNA), ("HyenaDNA", "hyena_dna", C_DNA),
-         ("ESM-2 150M", "esm2_150m", C_ESM), ("ESM-2 650M", "esm2_650m", C_ESM)]
+         ("ESM-2 650M", "esm2_650m", C_ESM)]
 
 
 def _aa_best(fn):
     return max(fn(M, s) for s in ("aa1", "aa2", "aa3"))
 
 
-def _comparator_panel(value_fn, ylabel, ylim, floor, fname):
+def _label_bars(ax, xs, vals, fmt="{:.2f}", fontsize=7, dy=0.01, rot=0):
+    top = ax.get_ylim()[1]
+    for xp, v in zip(xs, vals):
+        if v is None or (isinstance(v, float) and np.isnan(v)):
+            continue
+        ax.text(xp, min(v + dy, top - dy), fmt.format(v),
+                ha="center", va="bottom", fontsize=fontsize, color="#222", rotation=rot)
+
+
+def _comparator_panel(value_fn, ylabel, ylim, floor, fname, fmt="{:.2f}"):
     labels = [c[0] for c in CELLS]
     colors = [c[2] for c in CELLS]
     vals = [_aa_best(value_fn) if c[1] == "aa_best" else value_fn(M, c[1]) for c in CELLS]
@@ -121,6 +130,8 @@ def _comparator_panel(value_fn, ylabel, ylim, floor, fname):
     fig, ax = plt.subplots(figsize=(6.2, 4.2))
     ax.bar(x, vals, color=colors, edgecolor="white",
            hatch=["//" if c[2] == C_ESM else "" for c in CELLS])
+    ax.set_ylim(*ylim)
+    _label_bars(ax, x, vals, fmt=fmt, fontsize=7, dy=ylim[1] * 0.012)
     if floor is not None:
         ax.axhline(floor, color="#555", ls="--", lw=0.9)
         ax.text(0.1, floor + 0.008, f"chance {floor:.3f}", fontsize=7.5, color="#555")
@@ -133,7 +144,7 @@ def _comparator_panel(value_fn, ylabel, ylim, floor, fname):
     ax.set_ylim(*ylim)
     ax.legend(handles=[Patch(facecolor=C_COMP, label="composition"),
                        Patch(facecolor=C_DNA, label="DNA encoder"),
-                       Patch(facecolor=C_ESM, hatch="//", label="ESM-2 (comparator)")],
+                       Patch(facecolor=C_ESM, hatch="//", label="ESM-2 650M (upper bound)")],
               fontsize=8, loc="upper left", frameon=False)
     fig.tight_layout()
     fig.savefig(OUT / fname, dpi=180, bbox_inches="tight")
@@ -146,7 +157,7 @@ def fig_comparator_f1():
 
 
 def fig_comparator_r2():
-    _comparator_panel(r2_of, "Ridge-to-GenePT $R^2$", (0, 0.20), None, "comparator_r2.png")
+    _comparator_panel(r2_of, "Ridge-to-GenePT $R^2$", (0, 0.20), None, "comparator_r2.png", fmt="{:.3f}")
 
 
 def fig_substrate_collapse():
@@ -167,6 +178,8 @@ def fig_substrate_collapse():
     ax.set_xticklabels(cats, fontsize=8.5)
     ax.set_ylabel("5-way family $\\kappa$ (best pool)")
     ax.set_ylim(0, 0.8)
+    _label_bars(ax, x - w / 2, cds, fmt="{:.2f}", fontsize=6, dy=0.008)
+    _label_bars(ax, x + w / 2, tss, fmt="{:.2f}", fontsize=6, dy=0.008)
     ax.legend(handles=[Patch(facecolor="#777", label="CDS"),
                        Patch(facecolor="#777", alpha=0.45, hatch="//", label="TSS window"),
                        Patch(facecolor=C_ESM, label="supervised comparator (TSS)")],
@@ -195,6 +208,8 @@ def fig_split_bars():
     ax.set_xticklabels([c[0] for c in cells], fontsize=9)
     ax.set_ylabel("5-way family macro-F1")
     ax.set_ylim(0, 1.0)
+    _label_bars(ax, x - w / 2, rand, fmt="{:.2f}", fontsize=6.5, dy=0.01)
+    _label_bars(ax, x + w / 2, hom, fmt="{:.2f}", fontsize=6.5, dy=0.01)
     ax.legend(handles=[Patch(facecolor="#777", alpha=0.5, label="random split"),
                        Patch(facecolor="#777", label="homology split")],
               fontsize=8, frameon=False, loc="upper left")

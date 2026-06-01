@@ -156,6 +156,12 @@ SPECS = {
     "s_regression_full": dict(setup=r"\setlength{\tabcolsep}{1pt}\fontsize{5}{6}\selectfont",
                               width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llrrrr@{}",
                               header=r"Feature source & Pooling & $R^2$ macro & $\Delta$ & Mean cosine & $\alpha$"),
+    "s_pooling_full_random": dict(setup=r"\setlength{\tabcolsep}{1pt}\fontsize{5}{6}\selectfont",
+                                  width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llrrr@{}",
+                                  header=r"Encoder & Pooling & Macro-F1 & $\Delta$F1 & Accuracy"),
+    "s_regression_full_random": dict(setup=r"\setlength{\tabcolsep}{1pt}\fontsize{5}{6}\selectfont",
+                                     width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llrrrr@{}",
+                                     header=r"Feature source & Pooling & $R^2$ macro & $\Delta$ & Mean cosine & $\alpha$"),
     "s_seed_sensitivity": dict(setup="", width=r"0.9\columnwidth",
                                cols=r"@{\extracolsep{\fill}}lrr@{}",
                                header=r"Cell & Macro-F1 (4 seeds) & GenePT $R^2$ (4 seeds)"),
@@ -208,6 +214,26 @@ for r in M:
     if r.get("task") is not None:
         continue
     REG[reg_raw(r)] = r
+
+# random-split indices for the appendix mirror tables. DNA-encoder cells come
+# from metrics.json; composition + ESM from metrics_random_comparators.json
+# (iterated last so the comparator re-run wins on shared keys, e.g. the 4-mer).
+# Note: cached random DNA-LM runs lack test_kappa, so the random classification
+# mirror reports macro-F1 (+ delta over the random 4-mer) and accuracy only.
+CLS_RAND = {}
+for r in list(RAND) + list(RANDC):
+    if r.get("task") == "family5" and not r.get("shuffled_labels"):
+        CLS_RAND[r["feature_source"]] = r
+REG_RAND = {}
+for r in list(RAND) + list(RANDC):
+    if r.get("task") is not None:
+        continue
+    if r.get("model") == "linear_probe" and not r.get("dataset"):
+        continue  # stray summary row with no dataset
+    try:
+        REG_RAND[reg_raw(r)] = r
+    except (KeyError, ValueError):
+        continue  # anti-baselines / rows we don't tabulate here
 
 
 def cls_best_pool(enc, ctx="CDS"):
@@ -520,8 +546,6 @@ def build_protein_comparison():
          REG[aa_reg]["test_r2_macro"]),
         ("Best DNA encoder", cls_best_pool(dna_cls)[1]["test_macro_f1"],
          cls_best_pool(dna_cls)[1]["test_kappa"], reg_best_pool(dna_reg)[1]["test_r2_macro"]),
-        ("ESM-2 150M", CLS["esm2_150m"]["test_macro_f1"], CLS["esm2_150m"]["test_kappa"],
-         REG["esm2_150m"]["test_r2_macro"]),
         ("ESM-2 650M", CLS["esm2_650m"]["test_macro_f1"], CLS["esm2_650m"]["test_kappa"],
          REG["esm2_650m"]["test_r2_macro"]),
     ]
@@ -657,6 +681,86 @@ def build_split_comparison_full():
     return _split_comparison(CMP_FULL)
 
 
+# ===================================================================
+# Random-split mirrors of the homology appendix matrices (A1/A2).
+# Same layout, computed on the random-stratified split. Classification
+# reports macro-F1 (random DNA-LM runs have no cached kappa); regression
+# mirrors the homology grid exactly.
+# ===================================================================
+def build_pooling_full_random():
+    out = []
+    base_f1 = CLS_RAND["kmer"]["test_macro_f1"]
+    out.append(r"\multicolumn{5}{@{}l}{\textbf{Coding sequence (CDS)}}\\")
+
+    def row(disp, pool, r):
+        return (f"{disp} & {pool} & {f(r['test_macro_f1'])} "
+                f"& {sgn(r['test_macro_f1'] - base_f1)} & {f(r['test_accuracy'])} \\\\")
+
+    for rid, disp in COMPOSITION:
+        if rid in CLS_RAND:
+            out.append(row(disp, "baseline" if rid == "kmer" else "---", CLS_RAND[rid]))
+    for enc in ENCODERS:
+        for pool in POOLS:
+            fsrc = f"{enc}_{pool}"
+            if fsrc in CLS_RAND:
+                out.append(row(ENC_DISPLAY[enc], tt(pool), CLS_RAND[fsrc]))
+    out.append(r"\midrule")
+    out.append(r"\multicolumn{5}{@{}l}{\textbf{Protein language model (translated CDS)}}\\")
+    for rid, disp in ESM:
+        if rid in CLS_RAND:
+            out.append(row(disp, "---", CLS_RAND[rid]))
+    out.append(r"\midrule")
+    out.append(r"\multicolumn{5}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
+    tbf = CLS_RAND[TSS_4MER]["test_macro_f1"]
+
+    def trow(disp, pool, r):
+        return (f"{disp} & {pool} & {f(r['test_macro_f1'])} "
+                f"& {sgn(r['test_macro_f1'] - tbf)} & {f(r['test_accuracy'])} \\\\")
+
+    out.append(trow("TSS 4-mer", "baseline", CLS_RAND[TSS_4MER]))
+    for enc in ENCODERS:
+        for pool in POOLS:
+            fsrc = f"tss_{enc}_{pool}"
+            if fsrc in CLS_RAND:
+                out.append(trow(ENC_DISPLAY[enc], tt(pool), CLS_RAND[fsrc]))
+    return "\n".join(out)
+
+
+def build_regression_full_random():
+    out = []
+    base_r2 = REG_RAND["kmer"]["test_r2_macro"]
+    out.append(r"\multicolumn{6}{@{}l}{\textbf{Coding sequence (CDS)}}\\")
+
+    def row(disp, pool, r, delta=True):
+        d = sgn(r["test_r2_macro"] - base_r2) if delta else "---"
+        cos = r.get("test_mean_cosine")
+        cos = f(cos) if cos is not None else "---"
+        return (f"{disp} & {pool} & {f(r['test_r2_macro'])} & {d} "
+                f"& {cos} & {alpha_str(r.get('alpha'))} \\\\")
+
+    for rid, disp in COMPOSITION:
+        if rid in REG_RAND:
+            out.append(row(disp, "baseline" if rid == "kmer" else "---", REG_RAND[rid]))
+    for enc in ENCODERS:
+        for pool in POOLS:
+            s = f"{enc}_{pool}"
+            if s in REG_RAND:
+                out.append(row(ENC_DISPLAY[enc], tt(pool), REG_RAND[s]))
+    out.append(r"\midrule")
+    out.append(r"\multicolumn{6}{@{}l}{\textbf{Protein language model (translated CDS)}}\\")
+    for rid, disp in ESM:
+        if rid in REG_RAND:
+            out.append(row(disp, "---", REG_RAND[rid]))
+    out.append(r"\midrule")
+    out.append(r"\multicolumn{6}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
+    for enc in ENCODERS:
+        for pool in POOLS:
+            s = f"tss_{enc}_{pool}"
+            if s in REG_RAND:
+                out.append(row(ENC_DISPLAY[enc], tt(pool), REG_RAND[s], delta=False))
+    return "\n".join(out)
+
+
 def main():
     write("family5_main", build_family5_main())
     write("ridge_main", build_ridge_main())
@@ -667,6 +771,8 @@ def main():
     write("protein_comparison", build_protein_comparison())
     write("s_pooling_full", build_pooling_full())
     write("s_regression_full", build_regression_full())
+    write("s_pooling_full_random", build_pooling_full_random())
+    write("s_regression_full_random", build_regression_full_random())
     write("s_seed_sensitivity", build_seed_sensitivity())
     write("s_cds_tss_paired", build_cds_tss_paired())
     print("\nAll fragments written to", OUT)
