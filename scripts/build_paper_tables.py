@@ -850,20 +850,65 @@ def write_raw(key, body):
     print(f"wrote {key}.tex (full longtable)")
 
 
-def _longtable(caption, label, header, body):
-    """A complete full-width, page-breaking longtable (\\input at top level, not
-    inside another table -- longtable cannot be \\input mid-body)."""
+def _cell_order():
+    """Canonical (kind, ...) stream shared by both readouts: context sub-headers
+    plus one entry per encoder-pooling / baseline cell, in display order. The same
+    key indexes the homology (CLS/REG) and random (CLS_RAND/REG_RAND) tables."""
+    yield ("ctx", "Coding sequence (CDS)")
+    for rid, disp in COMPOSITION:
+        yield ("row", disp, "---", rid)
+    for enc in ENCODERS:
+        for pool in POOLS:
+            yield ("row", ENC_DISPLAY[enc], tt(pool), f"{enc}_{pool}")
+    yield ("ctx", "Protein language model (translated CDS)")
+    for rid, disp in ESM:
+        yield ("row", disp, "---", rid)
+    yield ("ctx", r"TSS-centred window (196{,}608\,bp)")
+    yield ("row", "TSS 4-mer", "---", TSS_4MER)
+    for enc in ENCODERS:
+        for pool in POOLS:
+            yield ("row", ENC_DISPLAY[enc], tt(pool), f"tss_{enc}_{pool}")
+
+
+def _side_by_side(homidx, randidx, mcells):
+    """Body rows for a side-by-side matrix: Enc|Pool|<hom metrics> | Enc|Pool|<rand metrics>."""
+    out, first = [], True
+    for item in _cell_order():
+        if item[0] == "ctx":
+            if not first:
+                out.append(r"\midrule")
+            out.append(r"\multicolumn{10}{l}{\textit{" + item[1] + r"}}\\")
+            first = False
+            continue
+        _, disp, pool, key = item
+        h, r = homidx.get(key), randidx.get(key)
+        if h is None and r is None:
+            continue
+        out.append(f"{disp} & {pool} & {mcells(h)} & {disp} & {pool} & {mcells(r)} \\\\")
+    return "\n".join(out)
+
+
+def _side_longtable(caption, label, names, body):
+    """Complete full-width page-breaking longtable with two side-by-side 5-column
+    blocks (homology | random). Generated whole so the \\input sits at top level."""
+    hdr = (r"\multicolumn{5}{c}{\textbf{Homology-aware split}} & "
+           r"\multicolumn{5}{c}{\textbf{Random-stratified split}} \\" + "\n"
+           + names + " & " + names + r" \\")
     return "\n".join([
-        r"{\footnotesize",
-        r"\setlength{\tabcolsep}{14pt}\setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}\setlength{\LTcapwidth}{\textwidth}",
-        r"\begin{longtable}{@{}llrrr@{}}",
+        r"{\scriptsize",
+        r"\setlength{\tabcolsep}{4pt}\setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}\setlength{\LTcapwidth}{\textwidth}",
+        r"\begin{longtable}{@{}llrrr@{\hspace{1.6em}}llrrr@{}}",
         r"\caption{" + caption + r"\label{" + label + r"}}\\",
-        r"\toprule " + header + r" \\\midrule",
+        r"\toprule",
+        hdr,
+        r"\midrule",
         r"\endfirsthead",
-        r"\multicolumn{5}{l}{\emph{\tablename~\thetable\ -- continued}}\\",
-        r"\toprule " + header + r" \\\midrule",
+        r"\multicolumn{10}{l}{\emph{\tablename~\thetable\ -- continued}}\\",
+        r"\toprule",
+        hdr,
+        r"\midrule",
         r"\endhead",
-        r"\midrule \multicolumn{5}{r}{\emph{continued on next page}}\\",
+        r"\midrule \multicolumn{10}{r}{\emph{continued on next page}}\\",
         r"\endfoot",
         r"\bottomrule",
         r"\endlastfoot",
@@ -905,17 +950,19 @@ def _pool_section(idx):
 
 
 def build_pooling_combined():
-    body = ([r"\multicolumn{5}{l}{\textbf{Homology-aware split}}\\", r"\midrule"]
-            + _pool_section(CLS)
-            + [r"\midrule", r"\multicolumn{5}{l}{\textbf{Random-stratified split}}\\", r"\midrule"]
-            + _pool_section(CLS_RAND))
-    return _longtable(
+    def mc(rec):
+        if rec is None:
+            return "--- & --- & ---"
+        k = rec.get("test_kappa")
+        kt = f(k) if k is not None else "---"
+        return f"{f(rec['test_macro_f1'])} & {kt} & {f(rec['test_accuracy'])}"
+    return _side_longtable(
         r"Encoder-pooling cells for 5-way family classification, CDS and TSS: "
-        r"homology-aware split (top) versus random-stratified split (bottom). "
+        r"homology-aware split (left) versus random-stratified split (right). "
         r"Random DNA-LM runs have no cached $\kappa$ (shown ``---'').",
         "tab:s-pooling-full",
         r"Encoder & Pooling & Macro-F1 & $\kappa$ & Accuracy",
-        "\n".join(body))
+        _side_by_side(CLS, CLS_RAND, mc))
 
 
 def _reg_section(idx):
@@ -953,16 +1000,20 @@ def _reg_section(idx):
 
 
 def build_regression_combined():
-    body = ([r"\multicolumn{5}{l}{\textbf{Homology-aware split}}\\", r"\midrule"]
-            + _reg_section(REG)
-            + [r"\midrule", r"\multicolumn{5}{l}{\textbf{Random-stratified split}}\\", r"\midrule"]
-            + _reg_section(REG_RAND))
-    return _longtable(
-        r"Ridge-to-GenePT cells, CDS and TSS: homology-aware split (top) "
-        r"versus random-stratified split (bottom).",
+    def mc(rec):
+        if rec is None:
+            return "--- & --- & ---"
+        cos = rec.get("test_mean_cosine")
+        cos = f(cos) if cos is not None else "---"
+        a = rec.get("alpha")
+        at = alpha_str(a) if a is not None else "---"
+        return f"{f(rec['test_r2_macro'])} & {cos} & {at}"
+    return _side_longtable(
+        r"Ridge-to-GenePT cells, CDS and TSS: homology-aware split (left) "
+        r"versus random-stratified split (right).",
         "tab:s-regression-full",
         r"Feature source & Pooling & $R^2$ macro & Mean cosine & $\alpha$",
-        "\n".join(body))
+        _side_by_side(REG, REG_RAND, mc))
 
 
 def main():
