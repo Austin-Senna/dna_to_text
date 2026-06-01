@@ -4,6 +4,8 @@ the LaTeX caption is the title, per repo convention).
 
   comparator_f1.png / comparator_r2.png  -- composition, DNA encoders, ESM-2
         (comparator) on macro-F1 (sec 3.1) and GenePT R^2 (sec 3.2).
+  pooling_heatmap_family5_column.png  -- encoder x pooling macro-F1 heatmap
+        (sec 3.3), adaptive label colours for legibility.
   substrate_collapse.png  -- CDS vs TSS macro-F1 for 4-mer + DNA encoders, plus
         the supervised Enformer TSS comparator (sec 3.4).
   split_bars.png  -- random vs homology grouped bars per comparator (sec 3.5).
@@ -33,6 +35,7 @@ ENFH = json.loads((DATA / "metrics_enformer_homology.json").read_text())
 
 ENCODERS = ["dnabert2", "nt_v2", "gena_lm", "hyena_dna"]
 ENC_DISP = {"dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "gena_lm": "GENA-LM", "hyena_dna": "HyenaDNA"}
+POOLS = ["meanmean", "specialmean", "meanD", "meanG", "maxmean", "clsmean"]
 FLOOR = 0.224
 
 C_COMP = "#9e9e9e"   # composition (grey)
@@ -280,10 +283,51 @@ def fig_split_bars():
     print("split_bars R2  random:", [round(v, 3) for v in r2_rand], "homology:", [round(v, 3) for v in r2_hom])
 
 
+def fig_pooling_heatmap():
+    """Encoder x pooling macro-F1 heatmap (sec 3.3), homology split.
+
+    Per-cell labels use an adaptive text colour (white on dark cells, black on
+    light) keyed to colormap luminance, so the dark NT-v2 row stays legible;
+    pool names are monospaced to match their \\texttt rendering in the paper.
+    """
+    vals = np.full((len(ENCODERS), len(POOLS)), np.nan)
+    for i, enc in enumerate(ENCODERS):
+        for j, pool in enumerate(POOLS):
+            v = _cell_cls(M, f"{enc}_{pool}")
+            if v is not None:
+                vals[i, j] = v
+    vmin, vmax = float(np.nanmin(vals)), float(np.nanmax(vals))
+    norm = plt.Normalize(vmin=vmin, vmax=vmax)
+    cmap = plt.get_cmap("YlGnBu")
+    fig, ax = plt.subplots(figsize=(8.2, 4.8))
+    im = ax.imshow(vals, cmap=cmap, vmin=vmin, vmax=vmax)
+    ax.set_xticks(range(len(POOLS)))
+    ax.set_yticks(range(len(ENCODERS)))
+    ax.set_xticklabels(POOLS, rotation=35, ha="right", fontfamily="monospace")
+    ax.set_yticklabels([ENC_DISP[e] for e in ENCODERS])
+    for i in range(len(ENCODERS)):
+        for j in range(len(POOLS)):
+            v = vals[i, j]
+            if np.isnan(v):
+                continue
+            r, g, b, _ = cmap(norm(v))
+            lum = 0.299 * r + 0.587 * g + 0.114 * b
+            ax.text(j, i, f"{v:.3f}", ha="center", va="center", fontsize=8,
+                    color="white" if lum < 0.5 else "black")
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("macro-F1")
+    fig.tight_layout()
+    fig.savefig(OUT / "pooling_heatmap_family5_column.png", dpi=180, bbox_inches="tight")
+    plt.close(fig)
+    print("pooling_heatmap_family5_column.png  best/enc:",
+          [round(float(np.nanmax(vals[i])), 3) for i in range(len(ENCODERS))])
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     fig_comparator_f1()
     fig_comparator_r2()
+    fig_pooling_heatmap()
     fig_substrate_collapse()
     fig_split_bars()
     print("wrote figures to", OUT)
