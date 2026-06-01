@@ -131,7 +131,7 @@ def alpha_str(a):
 SPECS = {
     "family5_main": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7.5}{8.8}\selectfont",
                          width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llrrrr@{}",
-                         header=r"Source & Pool & F1 & $\kappa$ & $\Delta\kappa$ & Acc."),
+                         header=r"Source & Pool & F1 & $\Delta$F1 & $\kappa$ & Acc."),
     "ridge_main": dict(setup=r"\setlength{\tabcolsep}{2.5pt}",
                        width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llrrr@{}",
                        header=r"Source & Pool & $R^2$ & $\Delta$ & Cos."),
@@ -260,43 +260,43 @@ def reg_best_pool(enc, ctx="CDS"):
 # Columns: Source & Pool & F1 & kappa & Dkappa & Acc.
 # ===================================================================
 def build_family5_main():
-    base_k = CLS[CDS_4MER]["test_kappa"]
-    rows = []  # (display, pool_tex, f1, kappa, dkappa, acc, is_control)
+    base_f1 = CLS[CDS_4MER]["test_macro_f1"]
+    rows = []  # (display, pool_tex, f1, df1, kappa, acc, is_control)
     rows.append(("Shuffled labels", "---", CLS_SHUF["test_macro_f1"],
-                 CLS_SHUF["test_kappa"], CLS_SHUF["test_kappa"] - base_k,
+                 CLS_SHUF["test_macro_f1"] - base_f1, CLS_SHUF["test_kappa"],
                  CLS_SHUF["test_accuracy"], True))
     for rid, disp in MAIN_COMPOSITION:
         r = CLS[rid]
-        rows.append((disp, "---", r["test_macro_f1"], r["test_kappa"],
-                     r["test_kappa"] - base_k, r["test_accuracy"], False))
+        rows.append((disp, "---", r["test_macro_f1"], r["test_macro_f1"] - base_f1,
+                     r["test_kappa"], r["test_accuracy"], False))
     for enc in ENCODERS:
         pool, r = cls_best_pool(enc)
-        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_macro_f1"], r["test_kappa"],
-                     r["test_kappa"] - base_k, r["test_accuracy"], False))
+        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_macro_f1"], r["test_macro_f1"] - base_f1,
+                     r["test_kappa"], r["test_accuracy"], False))
     # bold per-column max among non-controls; ESM-2 added below as upper bound
-    body = render_main_rows(rows, dp=3, cols=("f1", "kappa", "dkappa", "acc"),
+    body = render_main_rows(rows, dp=3, cols=("f1", "df1", "kappa", "acc"),
                             rule_after=1 + len(MAIN_COMPOSITION))
     esm = CLS["esm2_650m"]
-    esm_row = (f"ESM-2 650M & --- & {f(esm['test_macro_f1'], 3)} & {f(esm['test_kappa'], 3)} "
-               f"& {sgn(esm['test_kappa'] - base_k, 3)} & {f(esm['test_accuracy'], 3)} \\\\")
+    esm_row = (f"ESM-2 650M & --- & {f(esm['test_macro_f1'], 3)} & {sgn(esm['test_macro_f1'] - base_f1, 3)} "
+               f"& {f(esm['test_kappa'], 3)} & {f(esm['test_accuracy'], 3)} \\\\")
     return body + "\n" + r"\midrule" + "\n" + esm_row
 
 
 def render_main_rows(rows, dp, cols, rule_after=None):
-    # rows: (display, pool, f1, kappa, dkappa, acc, is_control)
+    # rows: (display, pool, f1, df1, kappa, acc, is_control)
     # rule_after: insert a \midrule after this many leading (baseline) rows.
     vals = {c: [] for c in cols}
-    for (disp, pool, v_f1, v_k, v_dk, v_acc, ctrl) in rows:
-        m = dict(f1=v_f1, kappa=v_k, dkappa=v_dk, acc=v_acc)
+    for (disp, pool, v_f1, v_df1, v_k, v_acc, ctrl) in rows:
+        m = dict(f1=v_f1, df1=v_df1, kappa=v_k, acc=v_acc)
         for c in cols:
             vals[c].append((m[c], ctrl))
     best = {c: max((v for v, ctrl in vals[c] if not ctrl)) for c in cols}
     out = []
-    for i, (disp, pool, v_f1, v_k, v_dk, v_acc, ctrl) in enumerate(rows):
-        m = dict(f1=v_f1, kappa=v_k, dkappa=v_dk, acc=v_acc)
+    for i, (disp, pool, v_f1, v_df1, v_k, v_acc, ctrl) in enumerate(rows):
+        m = dict(f1=v_f1, df1=v_df1, kappa=v_k, acc=v_acc)
         cells = []
-        for c in ("f1", "kappa", "dkappa", "acc"):
-            txt = sgn(m[c], dp) if c == "dkappa" else f(m[c], dp)
+        for c in ("f1", "df1", "kappa", "acc"):
+            txt = sgn(m[c], dp) if c == "df1" else f(m[c], dp)
             if (not ctrl) and m[c] == best[c]:
                 txt = bold(txt)
             cells.append(txt)
@@ -380,27 +380,27 @@ def build_cds_tss():
     tb_f1 = CLS[TSS_4MER]["test_macro_f1"]
     tb_k = CLS[TSS_4MER]["test_kappa"]
     tb_r2 = REG[TSS_4MER]["test_r2_macro"]
-    out.append(f"\\quad 4-mer & {f(tb_f1,3)} & {sgn(0,3)} & {f(tb_k,3)} & {f(tb_r2,3)} & --- \\\\")
+    out.append(f"\\quad 4-mer & {f(tb_f1,3)} & {sgn(0,3)} & {f(tb_k,3)} & {f(tb_r2,3)} & {sgn(0,3)} \\\\")
     tss_rows = []
     for enc in ENCODERS:
         _, kc = cls_best_pool(enc, "TSS")
         _, rc = reg_best_pool(enc, "TSS")
         f1 = kc["test_macro_f1"]; k = kc["test_kappa"]; r2 = rc["test_r2_macro"]
-        tss_rows.append((enc, f1, f1 - tb_f1, k, r2))
+        tss_rows.append((enc, f1, f1 - tb_f1, k, r2, r2 - tb_r2))
     bf = max(r[1] for r in tss_rows)
-    for enc, f1, df1, k, r2 in tss_rows:
+    for enc, f1, df1, k, r2, dr2 in tss_rows:
         name = ENC_DISPLAY[enc]
         f1t = bold(f(f1, 3)) if f1 == bf else f(f1, 3)
         df1t = bold(sgn(df1, 3)) if f1 == bf else sgn(df1, 3)
         if enc == "nt_v2":
             name = bold(name)
-        out.append(f"\\quad {name} & {f1t} & {df1t} & {f(k,3)} & {f(r2,3)} & --- \\\\")
+        out.append(f"\\quad {name} & {f1t} & {df1t} & {f(k,3)} & {f(r2,3)} & {sgn(dr2,3)} \\\\")
     enf_cls = max((r for r in ENFH if r.get("task") == "family5"),
                   key=lambda r: r["test_macro_f1"])
     enf_var = enf_cls["feature_source"]  # e.g. enformer_trunk_center
     enf_reg = next(r for r in ENFH if r.get("task") is None and enf_var in (r.get("dataset") or ""))
     enf_f1 = enf_cls["test_macro_f1"]; enf_k = enf_cls["test_kappa"]; enf_r2 = enf_reg["test_r2_macro"]
-    out.append(f"\\quad Enformer$^\\dagger$ & {f(enf_f1,3)} & {sgn(enf_f1-tb_f1,3)} & {f(enf_k,3)} & {f(enf_r2,3)} & --- \\\\")
+    out.append(f"\\quad Enformer$^\\dagger$ & {f(enf_f1,3)} & {sgn(enf_f1-tb_f1,3)} & {f(enf_k,3)} & {f(enf_r2,3)} & {sgn(enf_r2-tb_r2,3)} \\\\")
     return "\n".join(out)
 
 

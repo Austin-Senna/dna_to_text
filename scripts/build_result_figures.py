@@ -70,6 +70,21 @@ def _best_reg_enc(metrics, enc):
     return max(cells, key=lambda r: r["test_r2_macro"])["test_r2_macro"] if cells else None
 
 
+def _best_reg_enc_ctx(metrics, enc, tss=False):
+    """Best-pool Ridge R^2 for an encoder within a sequence context (CDS or TSS)."""
+    cells = []
+    for r in metrics:
+        if r.get("task") is not None or r.get("model") != "linear_probe":
+            continue
+        ds = str(r.get("dataset", ""))
+        if ds.startswith("dataset_tss_") != tss:
+            continue
+        core = ds.replace("dataset_tss_", "").replace("dataset_", "").replace(".parquet", "")
+        if core == enc or core.startswith(enc + "_"):
+            cells.append(r)
+    return max(cells, key=lambda r: r["test_r2_macro"])["test_r2_macro"] if cells else None
+
+
 def _cell_reg(metrics, src):
     base = {"kmer_baseline_4": "kmer", "kmer_baseline_6": "kmer6", "codon_baseline": "codon",
             "gc_baseline": "gc", "aa_baseline_1": "aa1", "aa_baseline_2": "aa2", "aa_baseline_3": "aa3"}
@@ -167,33 +182,59 @@ def fig_comparator_r2():
 
 def fig_substrate_collapse():
     cats = ["CDS 4-mer"] + [ENC_DISP[e] for e in ENCODERS] + ["Enformer"]
-    kmer_cds = next(r["test_macro_f1"] for r in M if r.get("task") == "family5" and r["feature_source"] == "kmer")
-    kmer_tss = next(r["test_macro_f1"] for r in M if r.get("task") == "family5" and r["feature_source"] == "enformer_tss_4mer")
-    enf_tss = max(r["test_macro_f1"] for r in ENFH if r.get("task") == "family5")
-    cds = [kmer_cds] + [_best_cls(M, e, False, "test_macro_f1") for e in ENCODERS] + [np.nan]
-    tss = [kmer_tss] + [_best_cls(M, e, True, "test_macro_f1") for e in ENCODERS] + [enf_tss]
     cols = [C_COMP] + [C_DNA] * 4 + [C_ESM]
     x = np.arange(len(cats))
     w = 0.38
-    fig, ax = plt.subplots(figsize=(7.4, 4.1))
-    ax.bar(x - w / 2, cds, w, color=cols, edgecolor="white")
-    ax.bar(x + w / 2, tss, w, color=cols, alpha=0.45, hatch="//", edgecolor="white")
-    _no_title(ax)
-    ax.set_xticks(x)
-    ax.set_xticklabels(cats, fontsize=8.5)
-    ax.set_ylabel("5-way family macro-F1 (best pool)")
-    ax.set_ylim(0, 0.8)
-    ax.axhline(FLOOR, color="#555", ls="--", lw=0.9)
-    _label_bars(ax, x - w / 2, cds, fmt="{:.2f}", fontsize=6, dy=0.008)
-    _label_bars(ax, x + w / 2, tss, fmt="{:.2f}", fontsize=6, dy=0.008)
-    ax.legend(handles=[Patch(facecolor="#777", label="CDS"),
-                       Patch(facecolor="#777", alpha=0.45, hatch="//", label="TSS window"),
-                       Patch(facecolor=C_ESM, label="supervised comparator (TSS)")],
-              fontsize=8, frameon=False)
+
+    # classification (macro-F1), CDS vs TSS
+    kmer_cds_f1 = next(r["test_macro_f1"] for r in M if r.get("task") == "family5" and r["feature_source"] == "kmer")
+    kmer_tss_f1 = next(r["test_macro_f1"] for r in M if r.get("task") == "family5" and r["feature_source"] == "enformer_tss_4mer")
+    enf_cls = max((r for r in ENFH if r.get("task") == "family5"), key=lambda r: r["test_macro_f1"])
+    enf_var = enf_cls["feature_source"]  # best-F1 Enformer variant (trunk_center)
+    cds_f1 = [kmer_cds_f1] + [_best_cls(M, e, False, "test_macro_f1") for e in ENCODERS] + [np.nan]
+    tss_f1 = [kmer_tss_f1] + [_best_cls(M, e, True, "test_macro_f1") for e in ENCODERS] + [enf_cls["test_macro_f1"]]
+
+    # regression (Ridge-to-GenePT R^2), CDS vs TSS -- same Enformer variant
+    enf_tss_r2 = next(r["test_r2_macro"] for r in ENFH if r.get("task") is None and enf_var in str(r.get("dataset", "")))
+    cds_r2 = [_cell_reg(M, "kmer")] + [_best_reg_enc_ctx(M, e, False) for e in ENCODERS] + [np.nan]
+    tss_r2 = [_cell_reg(M, "enformer_tss_4mer")] + [_best_reg_enc_ctx(M, e, True) for e in ENCODERS] + [enf_tss_r2]
+
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(10.0, 4.2))
+
+    # (left) macro-F1
+    axL.bar(x - w / 2, cds_f1, w, color=cols, edgecolor="white")
+    axL.bar(x + w / 2, tss_f1, w, color=cols, alpha=0.45, hatch="//", edgecolor="white")
+    axL.axhline(FLOOR, color="#555", ls="--", lw=0.9)
+    axL.text(0.0, FLOOR + 0.012, f"chance {FLOOR:.3f}", fontsize=7.5, color="#555")
+    _no_title(axL)
+    axL.set_xticks(x)
+    axL.set_xticklabels(cats, fontsize=8, rotation=18, ha="right")
+    axL.set_ylabel("5-way family macro-F1 (best pool)")
+    axL.set_ylim(0, 0.8)
+    _label_bars(axL, x - w / 2, cds_f1, fmt="{:.2f}", fontsize=6, dy=0.008)
+    _label_bars(axL, x + w / 2, tss_f1, fmt="{:.2f}", fontsize=6, dy=0.008)
+    axL.legend(handles=[Patch(facecolor="#777", label="CDS"),
+                        Patch(facecolor="#777", alpha=0.45, hatch="//", label="TSS window"),
+                        Patch(facecolor=C_ESM, label="supervised comparator (TSS)")],
+               fontsize=8, frameon=False)
+
+    # (right) Ridge-to-GenePT R^2
+    axR.bar(x - w / 2, cds_r2, w, color=cols, edgecolor="white")
+    axR.bar(x + w / 2, tss_r2, w, color=cols, alpha=0.45, hatch="//", edgecolor="white")
+    axR.axhline(0, color="#555", lw=0.8)
+    _no_title(axR)
+    axR.set_xticks(x)
+    axR.set_xticklabels(cats, fontsize=8, rotation=18, ha="right")
+    axR.set_ylabel("Ridge-to-GenePT $R^2$ (best pool)")
+    axR.set_ylim(-0.05, 0.12)
+    _label_bars(axR, x - w / 2, cds_r2, fmt="{:.3f}", fontsize=6, dy=0.003)
+    _label_bars(axR, x + w / 2, tss_r2, fmt="{:.3f}", fontsize=6, dy=0.003)
+
     fig.tight_layout()
     fig.savefig(OUT / "substrate_collapse.png", dpi=180, bbox_inches="tight")
     plt.close(fig)
-    print("substrate_collapse.png CDS:", [round(v, 3) for v in cds[:-1]], "TSS:", [round(v, 3) for v in tss])
+    print("substrate F1 CDS:", [round(v, 3) for v in cds_f1], "TSS:", [round(v, 3) for v in tss_f1])
+    print("substrate R2 CDS:", [round(v, 3) for v in cds_r2], "TSS:", [round(v, 3) for v in tss_r2])
 
 
 def fig_split_bars():
