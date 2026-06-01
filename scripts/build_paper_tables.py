@@ -767,7 +767,7 @@ def build_split_comparison_full():
 def build_pooling_full_random():
     out = []
     base_f1 = CLS_RAND["kmer"]["test_macro_f1"]
-    out.append(r"\multicolumn{5}{@{}l}{\textbf{Coding sequence (CDS)}}\\")
+    out.append(r"\multicolumn{5}{l}{\textbf{Coding sequence (CDS)}}\\")
 
     def row(disp, pool, r):
         return (f"{disp} & {pool} & {f(r['test_macro_f1'])} "
@@ -782,12 +782,12 @@ def build_pooling_full_random():
             if fsrc in CLS_RAND:
                 out.append(row(ENC_DISPLAY[enc], tt(pool), CLS_RAND[fsrc]))
     out.append(r"\midrule")
-    out.append(r"\multicolumn{5}{@{}l}{\textbf{Protein language model (translated CDS)}}\\")
+    out.append(r"\multicolumn{5}{l}{\textbf{Protein language model (translated CDS)}}\\")
     for rid, disp in ESM:
         if rid in CLS_RAND:
             out.append(row(disp, "---", CLS_RAND[rid]))
     out.append(r"\midrule")
-    out.append(r"\multicolumn{5}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
+    out.append(r"\multicolumn{5}{l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
     tbf = CLS_RAND[TSS_4MER]["test_macro_f1"]
 
     def trow(disp, pool, r):
@@ -838,15 +838,140 @@ def build_regression_full_random():
     return "\n".join(out)
 
 
+# ===================================================================
+# Combined full-width matrices (appendix longtables): the homology-aware
+# split section stacked above its random-stratified mirror -- one big table
+# per readout. Random DNA-LM runs have no cached kappa, shown as '---'.
+# write_raw emits just the rows (+ section headers) for \input into a longtable.
+# ===================================================================
+def write_raw(key, body):
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / f"{key}.tex").write_text(body.rstrip() + "\n")
+    print(f"wrote {key}.tex (full longtable)")
+
+
+def _longtable(caption, label, header, body):
+    """A complete full-width, page-breaking longtable (\\input at top level, not
+    inside another table -- longtable cannot be \\input mid-body)."""
+    return "\n".join([
+        r"{\footnotesize",
+        r"\setlength{\tabcolsep}{14pt}\setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}\setlength{\LTcapwidth}{\textwidth}",
+        r"\begin{longtable}{@{}llrrr@{}}",
+        r"\caption{" + caption + r"\label{" + label + r"}}\\",
+        r"\toprule " + header + r" \\\midrule",
+        r"\endfirsthead",
+        r"\multicolumn{5}{l}{\emph{\tablename~\thetable\ -- continued}}\\",
+        r"\toprule " + header + r" \\\midrule",
+        r"\endhead",
+        r"\midrule \multicolumn{5}{r}{\emph{continued on next page}}\\",
+        r"\endfoot",
+        r"\bottomrule",
+        r"\endlastfoot",
+        body,
+        r"\end{longtable}}",
+    ])
+
+
+def _pool_section(idx):
+    def crow(disp, pool, r):
+        k = r.get("test_kappa")
+        kt = f(k) if k is not None else "---"
+        return f"{disp} & {pool} & {f(r['test_macro_f1'])} & {kt} & {f(r['test_accuracy'])} \\\\"
+    o = [r"\multicolumn{5}{l}{\textit{Coding sequence (CDS)}}\\"]
+    for rid, disp in COMPOSITION:
+        if rid in idx:
+            o.append(crow(disp, "---", idx[rid]))
+    for enc in ENCODERS:
+        for pool in POOLS:
+            fsrc = f"{enc}_{pool}"
+            if fsrc in idx:
+                o.append(crow(ENC_DISPLAY[enc], tt(pool), idx[fsrc]))
+    if any(rid in idx for rid, _ in ESM):
+        o.append(r"\midrule")
+        o.append(r"\multicolumn{5}{l}{\textit{Protein language model (translated CDS)}}\\")
+        for rid, disp in ESM:
+            if rid in idx:
+                o.append(crow(disp, "---", idx[rid]))
+    o.append(r"\midrule")
+    o.append(r"\multicolumn{5}{l}{\textit{TSS-centred window (196{,}608\,bp)}}\\")
+    if TSS_4MER in idx:
+        o.append(crow("TSS 4-mer", "---", idx[TSS_4MER]))
+    for enc in ENCODERS:
+        for pool in POOLS:
+            fsrc = f"tss_{enc}_{pool}"
+            if fsrc in idx:
+                o.append(crow(ENC_DISPLAY[enc], tt(pool), idx[fsrc]))
+    return o
+
+
+def build_pooling_combined():
+    body = ([r"\multicolumn{5}{l}{\textbf{Homology-aware split}}\\", r"\midrule"]
+            + _pool_section(CLS)
+            + [r"\midrule", r"\multicolumn{5}{l}{\textbf{Random-stratified split}}\\", r"\midrule"]
+            + _pool_section(CLS_RAND))
+    return _longtable(
+        r"Encoder-pooling cells for 5-way family classification, CDS and TSS: "
+        r"homology-aware split (top) versus random-stratified split (bottom). "
+        r"Random DNA-LM runs have no cached $\kappa$ (shown ``---'').",
+        "tab:s-pooling-full",
+        r"Encoder & Pooling & Macro-F1 & $\kappa$ & Accuracy",
+        "\n".join(body))
+
+
+def _reg_section(idx):
+    def rrow(disp, pool, r):
+        cos = r.get("test_mean_cosine")
+        cos = f(cos) if cos is not None else "---"
+        a = r.get("alpha")
+        at = alpha_str(a) if a is not None else "---"
+        return f"{disp} & {pool} & {f(r['test_r2_macro'])} & {cos} & {at} \\\\"
+    o = [r"\multicolumn{5}{l}{\textit{Coding sequence (CDS)}}\\"]
+    for rid, disp in COMPOSITION:
+        if rid in idx:
+            o.append(rrow(disp, "---", idx[rid]))
+    for enc in ENCODERS:
+        for pool in POOLS:
+            s = f"{enc}_{pool}"
+            if s in idx:
+                o.append(rrow(ENC_DISPLAY[enc], tt(pool), idx[s]))
+    if any(rid in idx for rid, _ in ESM):
+        o.append(r"\midrule")
+        o.append(r"\multicolumn{5}{l}{\textit{Protein language model (translated CDS)}}\\")
+        for rid, disp in ESM:
+            if rid in idx:
+                o.append(rrow(disp, "---", idx[rid]))
+    o.append(r"\midrule")
+    o.append(r"\multicolumn{5}{l}{\textit{TSS-centred window (196{,}608\,bp)}}\\")
+    if TSS_4MER in idx:
+        o.append(rrow("TSS 4-mer", "---", idx[TSS_4MER]))
+    for enc in ENCODERS:
+        for pool in POOLS:
+            s = f"tss_{enc}_{pool}"
+            if s in idx:
+                o.append(rrow(ENC_DISPLAY[enc], tt(pool), idx[s]))
+    return o
+
+
+def build_regression_combined():
+    body = ([r"\multicolumn{5}{l}{\textbf{Homology-aware split}}\\", r"\midrule"]
+            + _reg_section(REG)
+            + [r"\midrule", r"\multicolumn{5}{l}{\textbf{Random-stratified split}}\\", r"\midrule"]
+            + _reg_section(REG_RAND))
+    return _longtable(
+        r"Ridge-to-GenePT cells, CDS and TSS: homology-aware split (top) "
+        r"versus random-stratified split (bottom).",
+        "tab:s-regression-full",
+        r"Feature source & Pooling & $R^2$ macro & Mean cosine & $\alpha$",
+        "\n".join(body))
+
+
 def main():
     write("family5_main", build_family5_main())
     write("ridge_main", build_ridge_main())
     write("cds_tss", build_cds_tss())
     write("split_comparison", build_split_comparison())
-    write("s_pooling_full", build_pooling_full())
-    write("s_pooling_full_random", build_pooling_full_random())
-    write("s_regression_full", build_regression_full())
-    write("s_regression_full_random", build_regression_full_random())
+    write_raw("pooling_combined", build_pooling_combined())
+    write_raw("regression_combined", build_regression_combined())
     write("s_seed_sensitivity", build_seed_sensitivity())
     write("s_cds_tss_paired", build_cds_tss_paired())
     print("\nAll fragments written to", OUT)
