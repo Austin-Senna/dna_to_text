@@ -145,7 +145,7 @@ SPECS = {
                     width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
                     header=r"Source & Random F1 & Homology F1 & $\Delta$"),
     "split_comparison": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7.5}{9}\selectfont",
-                             width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrrrr@{}",
+                             width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr|rrr@{}",
                              header=r"Source & F1 (rand) & F1 (hom) & $\Delta$F1 & $R^2$ (rand) & $R^2$ (hom) & $\Delta R^2$"),
     "split_comparison_full": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.5}\selectfont",
                                   width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
@@ -857,14 +857,16 @@ def _cell_order():
     yield ("ctx", "Coding sequence (CDS)")
     for rid, disp in COMPOSITION:
         yield ("row", disp, "---", rid)
+    yield ("rule",)
     for enc in ENCODERS:
         for pool in POOLS:
             yield ("row", ENC_DISPLAY[enc], tt(pool), f"{enc}_{pool}")
-    yield ("ctx", "Protein language model (translated CDS)")
+    yield ("rule",)  # ESM-2 set off by a rule, like Table 6 (no sub-header)
     for rid, disp in ESM:
         yield ("row", disp, "---", rid)
     yield ("ctx", r"TSS-centred window (196{,}608\,bp)")
     yield ("row", "TSS 4-mer", "---", TSS_4MER)
+    yield ("rule",)
     for enc in ENCODERS:
         for pool in POOLS:
             yield ("row", ENC_DISPLAY[enc], tt(pool), f"tss_{enc}_{pool}")
@@ -874,17 +876,20 @@ def _side_by_side(homidx, randidx, mcells):
     """Body rows for a side-by-side matrix: Enc|Pool|<hom metrics> | Enc|Pool|<rand metrics>."""
     out, first = [], True
     for item in _cell_order():
-        if item[0] == "ctx":
+        kind = item[0]
+        if kind == "ctx":
             if not first:
                 out.append(r"\midrule")
-            out.append(r"\multicolumn{10}{l}{\textit{" + item[1] + r"}}\\")
+            out.append(r"\multicolumn{10}{l}{\textbf{" + item[1] + r"}}\\")
             first = False
-            continue
-        _, disp, pool, key = item
-        h, r = homidx.get(key), randidx.get(key)
-        if h is None and r is None:
-            continue
-        out.append(f"{disp} & {pool} & {mcells(h)} & {disp} & {pool} & {mcells(r)} \\\\")
+        elif kind == "rule":
+            out.append(r"\midrule")
+        else:
+            _, disp, pool, key = item
+            h, r = homidx.get(key), randidx.get(key)
+            if h is None and r is None:
+                continue
+            out.append(f"{disp} & {pool} & {mcells(h)} & {disp} & {pool} & {mcells(r)} \\\\")
     return "\n".join(out)
 
 
@@ -961,7 +966,7 @@ def build_pooling_combined():
         r"homology-aware split (left) versus random-stratified split (right). "
         r"Random DNA-LM runs have no cached $\kappa$ (shown ``---'').",
         "tab:s-pooling-full",
-        r"Encoder & Pooling & Macro-F1 & $\kappa$ & Accuracy",
+        r"Source & Pooling & Macro-F1 & $\kappa$ & Accuracy",
         _side_by_side(CLS, CLS_RAND, mc))
 
 
@@ -1012,7 +1017,7 @@ def build_regression_combined():
         r"Ridge-to-GenePT cells, CDS and TSS: homology-aware split (left) "
         r"versus random-stratified split (right).",
         "tab:s-regression-full",
-        r"Feature source & Pooling & $R^2$ macro & Mean cosine & $\alpha$",
+        r"Source & Pooling & $R^2$ macro & Mean cosine & $\alpha$",
         _side_by_side(REG, REG_RAND, mc))
 
 
