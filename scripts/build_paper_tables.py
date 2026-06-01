@@ -897,7 +897,7 @@ def _side_longtable(caption, label, names, body):
     return "\n".join([
         r"{\scriptsize",
         r"\setlength{\tabcolsep}{4pt}\setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}\setlength{\LTcapwidth}{\textwidth}",
-        r"\begin{longtable}{@{}llrrr@{\hspace{1.6em}}llrrr@{}}",
+        r"\begin{longtable}{@{}llrrr@{\hspace{0.9em}\vrule width 1.1pt\hspace{0.9em}}llrrr@{}}",
         r"\caption{" + caption + r"\label{" + label + r"}}\\",
         r"\toprule",
         hdr,
