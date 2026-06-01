@@ -199,36 +199,34 @@ def fig_substrate_collapse():
     cds_r2 = [_cell_reg(M, "kmer")] + [_best_reg_enc_ctx(M, e, False) for e in ENCODERS] + [np.nan]
     tss_r2 = [_cell_reg(M, "enformer_tss_4mer")] + [_best_reg_enc_ctx(M, e, True) for e in ENCODERS] + [enf_tss_r2]
 
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(10.0, 4.2))
+    fig, (axT, axB) = plt.subplots(2, 1, figsize=(6.8, 7.4), sharex=True)
 
-    # (left) macro-F1
-    axL.bar(x - w / 2, cds_f1, w, color=cols, edgecolor="white")
-    axL.bar(x + w / 2, tss_f1, w, color=cols, alpha=0.45, hatch="//", edgecolor="white")
-    axL.axhline(FLOOR, color="#555", ls="--", lw=0.9)
-    axL.text(0.0, FLOOR + 0.012, f"chance {FLOOR:.3f}", fontsize=7.5, color="#555")
-    _no_title(axL)
-    axL.set_xticks(x)
-    axL.set_xticklabels(cats, fontsize=8, rotation=18, ha="right")
-    axL.set_ylabel("5-way family macro-F1 (best pool)")
-    axL.set_ylim(0, 0.8)
-    _label_bars(axL, x - w / 2, cds_f1, fmt="{:.2f}", fontsize=6, dy=0.008)
-    _label_bars(axL, x + w / 2, tss_f1, fmt="{:.2f}", fontsize=6, dy=0.008)
-    axL.legend(handles=[Patch(facecolor="#777", label="CDS"),
+    # (top) macro-F1
+    axT.bar(x - w / 2, cds_f1, w, color=cols, edgecolor="white")
+    axT.bar(x + w / 2, tss_f1, w, color=cols, alpha=0.45, hatch="//", edgecolor="white")
+    axT.axhline(FLOOR, color="#555", ls="--", lw=0.9)
+    axT.text(0.0, FLOOR + 0.012, f"chance {FLOOR:.3f}", fontsize=8, color="#555")
+    _no_title(axT)
+    axT.set_ylabel("5-way family macro-F1 (best pool)")
+    axT.set_ylim(0, 0.8)
+    _label_bars(axT, x - w / 2, cds_f1, fmt="{:.2f}", fontsize=7.5, dy=0.008)
+    _label_bars(axT, x + w / 2, tss_f1, fmt="{:.2f}", fontsize=7.5, dy=0.008)
+    axT.legend(handles=[Patch(facecolor="#777", label="CDS"),
                         Patch(facecolor="#777", alpha=0.45, hatch="//", label="TSS window"),
                         Patch(facecolor=C_ESM, label="supervised comparator (TSS)")],
-               fontsize=8, frameon=False)
+               fontsize=8.5, frameon=False)
 
-    # (right) Ridge-to-GenePT R^2
-    axR.bar(x - w / 2, cds_r2, w, color=cols, edgecolor="white")
-    axR.bar(x + w / 2, tss_r2, w, color=cols, alpha=0.45, hatch="//", edgecolor="white")
-    axR.axhline(0, color="#555", lw=0.8)
-    _no_title(axR)
-    axR.set_xticks(x)
-    axR.set_xticklabels(cats, fontsize=8, rotation=18, ha="right")
-    axR.set_ylabel("Ridge-to-GenePT $R^2$ (best pool)")
-    axR.set_ylim(-0.05, 0.12)
-    _label_bars(axR, x - w / 2, cds_r2, fmt="{:.3f}", fontsize=6, dy=0.003)
-    _label_bars(axR, x + w / 2, tss_r2, fmt="{:.3f}", fontsize=6, dy=0.003)
+    # (bottom) Ridge-to-GenePT R^2
+    axB.bar(x - w / 2, cds_r2, w, color=cols, edgecolor="white")
+    axB.bar(x + w / 2, tss_r2, w, color=cols, alpha=0.45, hatch="//", edgecolor="white")
+    axB.axhline(0, color="#555", lw=0.8)
+    _no_title(axB)
+    axB.set_ylabel("Ridge-to-GenePT $R^2$ (best pool)")
+    axB.set_ylim(-0.05, 0.12)
+    _label_bars(axB, x - w / 2, cds_r2, fmt="{:.3f}", fontsize=7.5, dy=0.003)
+    _label_bars(axB, x + w / 2, tss_r2, fmt="{:.3f}", fontsize=7.5, dy=0.003)
+    axB.set_xticks(x)
+    axB.set_xticklabels(cats, fontsize=9)
 
     fig.tight_layout()
     fig.savefig(OUT / "substrate_collapse.png", dpi=180, bbox_inches="tight")
@@ -248,34 +246,32 @@ def fig_split_bars():
     f1_hom = [f1_of(M, s) for _, s, _ in cells]
     r2_rand = [_rand_r2(s) for _, s, _ in cells]
     r2_hom = [r2_of(M, s) for _, s, _ in cells]
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(9.6, 4.0))
+    fig, (axT, axB) = plt.subplots(2, 1, figsize=(6.8, 7.4), sharex=True)
 
-    # (left) 5-way family macro-F1
-    axL.bar(x - w / 2, f1_rand, w, color=cols, alpha=0.5, edgecolor="white")
-    axL.bar(x + w / 2, f1_hom, w, color=cols, edgecolor="white")
-    axL.axhline(FLOOR, color="#555", ls="--", lw=0.9)
-    axL.text(0.0, FLOOR + 0.012, f"chance {FLOOR:.3f}", fontsize=7.5, color="#555")
-    _no_title(axL)
-    axL.set_xticks(x)
-    axL.set_xticklabels(labels, fontsize=8, rotation=18, ha="right")
-    axL.set_ylabel("5-way family macro-F1")
-    axL.set_ylim(0, 1.0)
-    _label_bars(axL, x - w / 2, f1_rand, fmt="{:.2f}", fontsize=6.5, dy=0.01)
-    _label_bars(axL, x + w / 2, f1_hom, fmt="{:.2f}", fontsize=6.5, dy=0.01)
-    axL.legend(handles=[Patch(facecolor="#777", alpha=0.5, label="random split"),
+    # (top) 5-way family macro-F1
+    axT.bar(x - w / 2, f1_rand, w, color=cols, alpha=0.5, edgecolor="white")
+    axT.bar(x + w / 2, f1_hom, w, color=cols, edgecolor="white")
+    axT.axhline(FLOOR, color="#555", ls="--", lw=0.9)
+    axT.text(0.0, FLOOR + 0.012, f"chance {FLOOR:.3f}", fontsize=8, color="#555")
+    _no_title(axT)
+    axT.set_ylabel("5-way family macro-F1")
+    axT.set_ylim(0, 1.0)
+    _label_bars(axT, x - w / 2, f1_rand, fmt="{:.2f}", fontsize=7.5, dy=0.01)
+    _label_bars(axT, x + w / 2, f1_hom, fmt="{:.2f}", fontsize=7.5, dy=0.01)
+    axT.legend(handles=[Patch(facecolor="#777", alpha=0.5, label="random split"),
                         Patch(facecolor="#777", label="homology split")],
-               fontsize=8, frameon=False, loc="upper right")
+               fontsize=8.5, frameon=False, loc="upper right")
 
-    # (right) Ridge-to-GenePT R^2
-    axR.bar(x - w / 2, r2_rand, w, color=cols, alpha=0.5, edgecolor="white")
-    axR.bar(x + w / 2, r2_hom, w, color=cols, edgecolor="white")
-    _no_title(axR)
-    axR.set_xticks(x)
-    axR.set_xticklabels(labels, fontsize=8, rotation=18, ha="right")
-    axR.set_ylabel("Ridge-to-GenePT $R^2$")
-    axR.set_ylim(0, 0.4)
-    _label_bars(axR, x - w / 2, r2_rand, fmt="{:.3f}", fontsize=6.5, dy=0.004)
-    _label_bars(axR, x + w / 2, r2_hom, fmt="{:.3f}", fontsize=6.5, dy=0.004)
+    # (bottom) Ridge-to-GenePT R^2
+    axB.bar(x - w / 2, r2_rand, w, color=cols, alpha=0.5, edgecolor="white")
+    axB.bar(x + w / 2, r2_hom, w, color=cols, edgecolor="white")
+    _no_title(axB)
+    axB.set_ylabel("Ridge-to-GenePT $R^2$")
+    axB.set_ylim(0, 0.4)
+    _label_bars(axB, x - w / 2, r2_rand, fmt="{:.3f}", fontsize=7.5, dy=0.004)
+    _label_bars(axB, x + w / 2, r2_hom, fmt="{:.3f}", fontsize=7.5, dy=0.004)
+    axB.set_xticks(x)
+    axB.set_xticklabels(labels, fontsize=9)
 
     fig.tight_layout()
     fig.savefig(OUT / "split_bars.png", dpi=180, bbox_inches="tight")
