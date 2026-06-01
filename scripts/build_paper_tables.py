@@ -144,9 +144,9 @@ SPECS = {
     "leakage": dict(setup=r"\setlength{\tabcolsep}{3pt}",
                     width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
                     header=r"Source & Random F1 & Homology F1 & $\Delta$"),
-    "split_comparison": dict(setup=r"\setlength{\tabcolsep}{3pt}",
-                             width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
-                             header=r"Source & F1 (rand) & F1 (hom) & $R^2$ (rand) & $R^2$ (hom)"),
+    "split_comparison": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{8}{9.5}\selectfont",
+                             width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrrrr@{}",
+                             header=r"Source & F1 (rand) & F1 (hom) & $\Delta$F1 & $R^2$ (rand) & $R^2$ (hom) & $\Delta R^2$"),
     "split_comparison_full": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.5}\selectfont",
                                   width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
                                   header=r"Source & F1 (rand) & F1 (hom) & $R^2$ (rand) & $R^2$ (hom)"),
@@ -666,6 +666,15 @@ def _reg_r2(metrics, src):
     return None
 
 
+def _reg_r2_tss(metrics, enc):
+    """Best-pool Ridge R^2 for an encoder on the TSS window."""
+    cells = [r for r in metrics if r.get("task") is None and r.get("model") == "linear_probe"
+             and str(r.get("dataset", "")).startswith("dataset_tss_")
+             and (str(r.get("dataset", "")).replace("dataset_tss_", "").replace(".parquet", "") == enc
+                  or str(r.get("dataset", "")).replace("dataset_tss_", "").replace(".parquet", "").startswith(enc + "_"))]
+    return max(cells, key=lambda r: r["test_r2_macro"])["test_r2_macro"] if cells else None
+
+
 def _rand_cls(src):
     v = _cls_f1(RANDC, src)
     return v if v is not None else _cls_f1(RAND, src)
@@ -697,8 +706,49 @@ def _split_comparison(srcs):
     return "\n".join(out)
 
 
+SPLIT_GROUPS = [
+    ("Composition (CDS)", ["kmer", "codon", "aa2", "aa3"]),
+    ("DNA encoders (CDS)", ["nt_v2", "dnabert2"]),
+    ("Protein LM (CDS)", ["esm2_650m"]),
+]
+
+
+def _enf_split(metrics, kind):
+    """Enformer \\texttt{trunk\\_center} cell (same variant as Table~3); kind in {'f1','r2'}."""
+    var = "enformer_trunk_center"
+    if kind == "f1":
+        c = [r for r in metrics if r.get("task") == "family5" and r.get("feature_source") == var]
+        return c[0]["test_macro_f1"] if c else None
+    c = [r for r in metrics if r.get("task") is None and var in str(r.get("dataset", ""))]
+    return c[0]["test_r2_macro"] if c else None
+
+
 def build_split_comparison():
-    return _split_comparison(CMP_HEADLINE)
+    # Grouped rows with explicit leakage deltas (hom - rand). CDS classes from the
+    # user spec, plus a TSS-window section so the homology-driven TSS collapse
+    # (cited in the abstract/discussion) is shown rather than only asserted.
+    def trip(rv, hv):
+        return (f"{f(rv,3)} & {f(hv,3)} & {sgn(hv-rv,3)}"
+                if rv is not None and hv is not None else "--- & --- & ---")
+    out = []
+    for gi, (label, srcs) in enumerate(SPLIT_GROUPS):
+        if gi:
+            out.append(r"\midrule")
+        out.append(r"\multicolumn{7}{@{}l}{\textbf{" + label + r"}}\\")
+        for src in srcs:
+            f1 = trip(_rand_cls(src), _cls_f1(M, src))
+            r2 = trip(_rand_reg(src), _reg_r2(M, src))
+            out.append(f"\\quad {CMP_DISPLAY[src]} & {f1} & {r2} \\\\")
+    out.append(r"\midrule")
+    out.append(r"\multicolumn{7}{@{}l}{\textbf{TSS window (196{,}608\,bp)}}\\")
+    out.append(f"\\quad TSS 4-mer & {trip(_kmer_f1(RAND, 'enformer_tss_4mer', 'tss_kmer'), _kmer_f1(M, 'enformer_tss_4mer', 'tss_kmer'))}"
+               f" & {trip(_reg_r2(RAND, 'enformer_tss_4mer'), _reg_r2(M, 'enformer_tss_4mer'))} \\\\")
+    for enc in ENCODERS:
+        out.append(f"\\quad {ENC_DISPLAY[enc]} & {trip(_best_f1_family5(RAND, enc, True), _best_f1_family5(M, enc, True))}"
+                   f" & {trip(_reg_r2_tss(RAND, enc), _reg_r2_tss(M, enc))} \\\\")
+    out.append(f"\\quad Enformer & {trip(_enf_split(RAND, 'f1'), _enf_split(ENFH, 'f1'))}"
+               f" & {trip(_enf_split(RAND, 'r2'), _enf_split(ENFH, 'r2'))} \\\\")
+    return "\n".join(out)
 
 
 def build_split_comparison_full():
