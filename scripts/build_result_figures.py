@@ -95,6 +95,11 @@ def _rand_f1(src):
     return v if v is not None else f1_of(RAND, src)
 
 
+def _rand_r2(src):
+    v = _cell_reg(RANDC, src)
+    return v if v is not None else r2_of(RAND, src)
+
+
 def _no_title(ax):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -194,30 +199,48 @@ def fig_substrate_collapse():
 def fig_split_bars():
     cells = [("CDS 4-mer", "kmer", C_COMP), ("AA 2-mer", "aa2", C_COMP), ("NT-v2", "nt_v2", C_DNA),
              ("DNABERT-2", "dnabert2", C_DNA), ("ESM-2 650M", "esm2_650m", C_ESM)]
-    rand = [_rand_f1(s) for _, s, _ in cells]
-    hom = [f1_of(M, s) for _, s, _ in cells]
     cols = [c for *_, c in cells]
+    labels = [c[0] for c in cells]
     x = np.arange(len(cells))
     w = 0.38
-    fig, ax = plt.subplots(figsize=(6.8, 4.2))
-    ax.bar(x - w / 2, rand, w, color=cols, alpha=0.5, edgecolor="white")
-    ax.bar(x + w / 2, hom, w, color=cols, edgecolor="white")
-    ax.axhline(FLOOR, color="#555", ls="--", lw=0.9)
-    ax.text(0.0, FLOOR + 0.008, f"chance {FLOOR:.3f}", fontsize=7.5, color="#555")
-    _no_title(ax)
-    ax.set_xticks(x)
-    ax.set_xticklabels([c[0] for c in cells], fontsize=9)
-    ax.set_ylabel("5-way family macro-F1")
-    ax.set_ylim(0, 1.0)
-    _label_bars(ax, x - w / 2, rand, fmt="{:.2f}", fontsize=6.5, dy=0.01)
-    _label_bars(ax, x + w / 2, hom, fmt="{:.2f}", fontsize=6.5, dy=0.01)
-    ax.legend(handles=[Patch(facecolor="#777", alpha=0.5, label="random split"),
-                       Patch(facecolor="#777", label="homology split")],
-              fontsize=8, frameon=False, loc="upper left")
+    f1_rand = [_rand_f1(s) for _, s, _ in cells]
+    f1_hom = [f1_of(M, s) for _, s, _ in cells]
+    r2_rand = [_rand_r2(s) for _, s, _ in cells]
+    r2_hom = [r2_of(M, s) for _, s, _ in cells]
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(9.6, 4.0))
+
+    # (left) 5-way family macro-F1
+    axL.bar(x - w / 2, f1_rand, w, color=cols, alpha=0.5, edgecolor="white")
+    axL.bar(x + w / 2, f1_hom, w, color=cols, edgecolor="white")
+    axL.axhline(FLOOR, color="#555", ls="--", lw=0.9)
+    axL.text(0.0, FLOOR + 0.012, f"chance {FLOOR:.3f}", fontsize=7.5, color="#555")
+    _no_title(axL)
+    axL.set_xticks(x)
+    axL.set_xticklabels(labels, fontsize=8, rotation=18, ha="right")
+    axL.set_ylabel("5-way family macro-F1")
+    axL.set_ylim(0, 1.0)
+    _label_bars(axL, x - w / 2, f1_rand, fmt="{:.2f}", fontsize=6.5, dy=0.01)
+    _label_bars(axL, x + w / 2, f1_hom, fmt="{:.2f}", fontsize=6.5, dy=0.01)
+    axL.legend(handles=[Patch(facecolor="#777", alpha=0.5, label="random split"),
+                        Patch(facecolor="#777", label="homology split")],
+               fontsize=8, frameon=False, loc="upper right")
+
+    # (right) Ridge-to-GenePT R^2
+    axR.bar(x - w / 2, r2_rand, w, color=cols, alpha=0.5, edgecolor="white")
+    axR.bar(x + w / 2, r2_hom, w, color=cols, edgecolor="white")
+    _no_title(axR)
+    axR.set_xticks(x)
+    axR.set_xticklabels(labels, fontsize=8, rotation=18, ha="right")
+    axR.set_ylabel("Ridge-to-GenePT $R^2$")
+    axR.set_ylim(0, 0.4)
+    _label_bars(axR, x - w / 2, r2_rand, fmt="{:.3f}", fontsize=6.5, dy=0.004)
+    _label_bars(axR, x + w / 2, r2_hom, fmt="{:.3f}", fontsize=6.5, dy=0.004)
+
     fig.tight_layout()
     fig.savefig(OUT / "split_bars.png", dpi=180, bbox_inches="tight")
     plt.close(fig)
-    print("split_bars.png  random:", [round(v, 3) for v in rand], "homology:", [round(v, 3) for v in hom])
+    print("split_bars F1  random:", [round(v, 3) for v in f1_rand], "homology:", [round(v, 3) for v in f1_hom])
+    print("split_bars R2  random:", [round(v, 3) for v in r2_rand], "homology:", [round(v, 3) for v in r2_hom])
 
 
 def main():
