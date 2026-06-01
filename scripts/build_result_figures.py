@@ -4,7 +4,7 @@ the LaTeX caption is the title, per repo convention).
 
   comparator_f1.png / comparator_r2.png  -- composition, DNA encoders, ESM-2
         (comparator) on macro-F1 (sec 3.1) and GenePT R^2 (sec 3.2).
-  substrate_collapse.png  -- CDS vs TSS kappa for 4-mer + DNA encoders, plus
+  substrate_collapse.png  -- CDS vs TSS macro-F1 for 4-mer + DNA encoders, plus
         the supervised Enformer TSS comparator (sec 3.4).
   split_bars.png  -- random vs homology grouped bars per comparator (sec 3.5).
 
@@ -162,11 +162,11 @@ def fig_comparator_r2():
 
 def fig_substrate_collapse():
     cats = ["CDS 4-mer"] + [ENC_DISP[e] for e in ENCODERS] + ["Enformer"]
-    kmer_cds = next(r["test_kappa"] for r in M if r.get("task") == "family5" and r["feature_source"] == "kmer")
-    kmer_tss = next(r["test_kappa"] for r in M if r.get("task") == "family5" and r["feature_source"] == "enformer_tss_4mer")
-    enf_tss = max(r["test_kappa"] for r in ENFH if r.get("task") == "family5")
-    cds = [kmer_cds] + [_best_cls(M, e, False, "test_kappa") for e in ENCODERS] + [np.nan]
-    tss = [kmer_tss] + [_best_cls(M, e, True, "test_kappa") for e in ENCODERS] + [enf_tss]
+    kmer_cds = next(r["test_macro_f1"] for r in M if r.get("task") == "family5" and r["feature_source"] == "kmer")
+    kmer_tss = next(r["test_macro_f1"] for r in M if r.get("task") == "family5" and r["feature_source"] == "enformer_tss_4mer")
+    enf_tss = max(r["test_macro_f1"] for r in ENFH if r.get("task") == "family5")
+    cds = [kmer_cds] + [_best_cls(M, e, False, "test_macro_f1") for e in ENCODERS] + [np.nan]
+    tss = [kmer_tss] + [_best_cls(M, e, True, "test_macro_f1") for e in ENCODERS] + [enf_tss]
     cols = [C_COMP] + [C_DNA] * 4 + [C_ESM]
     x = np.arange(len(cats))
     w = 0.38
@@ -176,8 +176,9 @@ def fig_substrate_collapse():
     _no_title(ax)
     ax.set_xticks(x)
     ax.set_xticklabels(cats, fontsize=8.5)
-    ax.set_ylabel("5-way family $\\kappa$ (best pool)")
+    ax.set_ylabel("5-way family macro-F1 (best pool)")
     ax.set_ylim(0, 0.8)
+    ax.axhline(FLOOR, color="#555", ls="--", lw=0.9)
     _label_bars(ax, x - w / 2, cds, fmt="{:.2f}", fontsize=6, dy=0.008)
     _label_bars(ax, x + w / 2, tss, fmt="{:.2f}", fontsize=6, dy=0.008)
     ax.legend(handles=[Patch(facecolor="#777", label="CDS"),

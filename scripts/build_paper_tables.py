@@ -135,9 +135,9 @@ SPECS = {
     "ridge_main": dict(setup=r"\setlength{\tabcolsep}{2.5pt}",
                        width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llrrr@{}",
                        header=r"Source & Pool & $R^2$ & $\Delta$ & Cos."),
-    "cds_tss": dict(setup=r"\setlength{\tabcolsep}{3pt}",
-                    width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
-                    header=r"Source & $\kappa$ & $\Delta\kappa$ & $R^2$ & $\Delta R^2$"),
+    "cds_tss": dict(setup=r"\setlength{\tabcolsep}{2.5pt}\fontsize{8}{9.5}\selectfont",
+                    width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrrr@{}",
+                    header=r"Source & F1 & $\Delta$F1 & $\kappa$ & $R^2$ & $\Delta R^2$"),
     "protein_comparison": dict(setup=r"\setlength{\tabcolsep}{3pt}",
                                width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
                                header=r"Source & Macro-F1 & $\kappa$ & GenePT $R^2$"),
@@ -274,15 +274,17 @@ def build_family5_main():
         rows.append((ENC_DISPLAY[enc], tt(pool), r["test_macro_f1"], r["test_kappa"],
                      r["test_kappa"] - base_k, r["test_accuracy"], False))
     # bold per-column max among non-controls; ESM-2 added below as upper bound
-    body = render_main_rows(rows, dp=3, cols=("f1", "kappa", "dkappa", "acc"))
+    body = render_main_rows(rows, dp=3, cols=("f1", "kappa", "dkappa", "acc"),
+                            rule_after=1 + len(MAIN_COMPOSITION))
     esm = CLS["esm2_650m"]
     esm_row = (f"ESM-2 650M & --- & {f(esm['test_macro_f1'], 3)} & {f(esm['test_kappa'], 3)} "
                f"& {sgn(esm['test_kappa'] - base_k, 3)} & {f(esm['test_accuracy'], 3)} \\\\")
     return body + "\n" + r"\midrule" + "\n" + esm_row
 
 
-def render_main_rows(rows, dp, cols):
+def render_main_rows(rows, dp, cols, rule_after=None):
     # rows: (display, pool, f1, kappa, dkappa, acc, is_control)
+    # rule_after: insert a \midrule after this many leading (baseline) rows.
     vals = {c: [] for c in cols}
     for (disp, pool, v_f1, v_k, v_dk, v_acc, ctrl) in rows:
         m = dict(f1=v_f1, kappa=v_k, dkappa=v_dk, acc=v_acc)
@@ -290,7 +292,7 @@ def render_main_rows(rows, dp, cols):
             vals[c].append((m[c], ctrl))
     best = {c: max((v for v, ctrl in vals[c] if not ctrl)) for c in cols}
     out = []
-    for (disp, pool, v_f1, v_k, v_dk, v_acc, ctrl) in rows:
+    for i, (disp, pool, v_f1, v_k, v_dk, v_acc, ctrl) in enumerate(rows):
         m = dict(f1=v_f1, kappa=v_k, dkappa=v_dk, acc=v_acc)
         cells = []
         for c in ("f1", "kappa", "dkappa", "acc"):
@@ -299,6 +301,8 @@ def render_main_rows(rows, dp, cols):
                 txt = bold(txt)
             cells.append(txt)
         out.append(f"{disp} & {pool} & {cells[0]} & {cells[1]} & {cells[2]} & {cells[3]} \\\\")
+        if rule_after is not None and i == rule_after - 1:
+            out.append(r"\midrule")
     return "\n".join(out)
 
 
@@ -322,10 +326,12 @@ def build_ridge_main():
     best_r2 = max(r[2] for r in rows)
     best_cos = max(r[4] for r in rows)
     out = []
-    for (disp, pool, r2, delta, cos) in rows:
+    for i, (disp, pool, r2, delta, cos) in enumerate(rows):
         r2t = bold(f(r2, 3)) if r2 == best_r2 else f(r2, 3)
         cost = bold(f(cos, 3)) if cos == best_cos else f(cos, 3)
         out.append(f"{disp} & {pool} & {r2t} & {sgn(delta,3)} & {cost} \\\\")
+        if i == len(MAIN_COMPOSITION) - 1:
+            out.append(r"\midrule")
     esm = REG["esm2_650m"]
     esm_row = (f"ESM-2 650M & --- & {f(esm['test_r2_macro'], 3)} "
                f"& {sgn(esm['test_r2_macro'] - base_r2, 3)} & {f(esm['test_mean_cosine'], 3)} \\\\")
@@ -334,54 +340,67 @@ def build_ridge_main():
 
 # ===================================================================
 # Table 3: substrate ablation CDS vs TSS (main text)
-# Columns: Source & kappa & Dkappa & R^2 & DR^2.
-# Enformer dropped (no homology run); TSS R^2 has no 4-mer baseline -> DR^2 '---'.
+# Columns: Source & F1 & DF1 & kappa & R^2 & DR^2.
+# Headline metric is macro-F1 (matches the best-pool/C selection criterion);
+# kappa is reported as a secondary column. TSS 4-mer R^2 from the
+# enformer_tss_4mer regression record; TSS DR^2 stays '---' because the TSS
+# 4-mer R^2 is itself below noise (<0), so a within-TSS R^2 delta would be
+# anchored to a sub-zero baseline; absolute TSS R^2 (all at noise) is reported
+# instead (regression deltas are within CDS only, per Methods).
+# Enformer: a single best-F1 variant (trunk_center) is reported across
+# F1/kappa/R^2 so the columns never mix variants.
 # ===================================================================
 def build_cds_tss():
     out = []
     # --- CDS ---
-    out.append(r"\multicolumn{5}{@{}l}{\textbf{Coding sequence (CDS)}}\\")
+    out.append(r"\multicolumn{6}{@{}l}{\textbf{Coding sequence (CDS)}}\\")
+    base_f1 = CLS[CDS_4MER]["test_macro_f1"]
     base_k = CLS[CDS_4MER]["test_kappa"]
     base_r2 = REG[CDS_4MER]["test_r2_macro"]
-    out.append(f"\\quad 4-mer & {f(base_k,3)} & {sgn(0,3)} & {f(base_r2,3)} & {sgn(0,3)} \\\\")
+    out.append(f"\\quad 4-mer & {f(base_f1,3)} & {sgn(0,3)} & {f(base_k,3)} & {f(base_r2,3)} & {sgn(0,3)} \\\\")
     cds_rows = []
     for enc in ENCODERS:
         _, kc = cls_best_pool(enc, "CDS")
         _, rc = reg_best_pool(enc, "CDS")
-        k = kc["test_kappa"]; r2 = rc["test_r2_macro"]
-        cds_rows.append((enc, k, k - base_k, r2, r2 - base_r2))
-    bk = max(r[1] for r in cds_rows); br2 = max(r[3] for r in cds_rows)
-    for enc, k, dk, r2, dr2 in cds_rows:
+        f1 = kc["test_macro_f1"]; k = kc["test_kappa"]; r2 = rc["test_r2_macro"]
+        cds_rows.append((enc, f1, f1 - base_f1, k, r2, r2 - base_r2))
+    bf = max(r[1] for r in cds_rows); br2 = max(r[4] for r in cds_rows)
+    for enc, f1, df1, k, r2, dr2 in cds_rows:
         name = ENC_DISPLAY[enc]
-        kt = bold(f(k, 3)) if k == bk else f(k, 3)
-        dkt = bold(sgn(dk, 3)) if k == bk else sgn(dk, 3)
+        f1t = bold(f(f1, 3)) if f1 == bf else f(f1, 3)
+        df1t = bold(sgn(df1, 3)) if f1 == bf else sgn(df1, 3)
         r2t = bold(f(r2, 3)) if r2 == br2 else f(r2, 3)
         dr2t = bold(sgn(dr2, 3)) if r2 == br2 else sgn(dr2, 3)
         if enc == "nt_v2":
             name = bold(name)
-        out.append(f"\\quad {name} & {kt} & {dkt} & {r2t} & {dr2t} \\\\")
+        out.append(f"\\quad {name} & {f1t} & {df1t} & {f(k,3)} & {r2t} & {dr2t} \\\\")
     out.append(r"\midrule")
     # --- TSS ---
-    out.append(r"\multicolumn{5}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
-    tss_base_k = CLS[TSS_4MER]["test_kappa"]
-    out.append(f"\\quad 4-mer & {f(tss_base_k,3)} & {sgn(0,3)} & --- & --- \\\\")
+    out.append(r"\multicolumn{6}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
+    tb_f1 = CLS[TSS_4MER]["test_macro_f1"]
+    tb_k = CLS[TSS_4MER]["test_kappa"]
+    tb_r2 = REG[TSS_4MER]["test_r2_macro"]
+    out.append(f"\\quad 4-mer & {f(tb_f1,3)} & {sgn(0,3)} & {f(tb_k,3)} & {f(tb_r2,3)} & --- \\\\")
     tss_rows = []
     for enc in ENCODERS:
         _, kc = cls_best_pool(enc, "TSS")
         _, rc = reg_best_pool(enc, "TSS")
-        k = kc["test_kappa"]; r2 = rc["test_r2_macro"]
-        tss_rows.append((enc, k, k - tss_base_k, r2))
-    bk = max(r[1] for r in tss_rows)
-    for enc, k, dk, r2 in tss_rows:
+        f1 = kc["test_macro_f1"]; k = kc["test_kappa"]; r2 = rc["test_r2_macro"]
+        tss_rows.append((enc, f1, f1 - tb_f1, k, r2))
+    bf = max(r[1] for r in tss_rows)
+    for enc, f1, df1, k, r2 in tss_rows:
         name = ENC_DISPLAY[enc]
-        kt = bold(f(k, 3)) if k == bk else f(k, 3)
-        dkt = bold(sgn(dk, 3)) if k == bk else sgn(dk, 3)
+        f1t = bold(f(f1, 3)) if f1 == bf else f(f1, 3)
+        df1t = bold(sgn(df1, 3)) if f1 == bf else sgn(df1, 3)
         if enc == "nt_v2":
             name = bold(name)
-        out.append(f"\\quad {name} & {kt} & {dkt} & {f(r2,3)} & --- \\\\")
-    enf_k = max(r["test_kappa"] for r in ENFH if r.get("task") == "family5")
-    enf_r2 = max(r["test_r2_macro"] for r in ENFH if r.get("task") is None)
-    out.append(f"\\quad Enformer$^\\dagger$ & {f(enf_k,3)} & {sgn(enf_k-tss_base_k,3)} & {f(enf_r2,3)} & --- \\\\")
+        out.append(f"\\quad {name} & {f1t} & {df1t} & {f(k,3)} & {f(r2,3)} & --- \\\\")
+    enf_cls = max((r for r in ENFH if r.get("task") == "family5"),
+                  key=lambda r: r["test_macro_f1"])
+    enf_var = enf_cls["feature_source"]  # e.g. enformer_trunk_center
+    enf_reg = next(r for r in ENFH if r.get("task") is None and enf_var in (r.get("dataset") or ""))
+    enf_f1 = enf_cls["test_macro_f1"]; enf_k = enf_cls["test_kappa"]; enf_r2 = enf_reg["test_r2_macro"]
+    out.append(f"\\quad Enformer$^\\dagger$ & {f(enf_f1,3)} & {sgn(enf_f1-tb_f1,3)} & {f(enf_k,3)} & {f(enf_r2,3)} & --- \\\\")
     return "\n".join(out)
 
 
@@ -454,6 +473,7 @@ def build_regression_full():
         out.append(row(disp, "---", REG[rid]))
     out.append(r"\midrule")
     out.append(r"\multicolumn{6}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
+    out.append(row("TSS 4-mer", "baseline", REG[TSS_4MER], delta=False))
     for enc in ENCODERS:
         for pool in POOLS:
             s = f"tss_{enc}_{pool}"
@@ -661,7 +681,7 @@ CMP_DISPLAY = {"kmer": "CDS 4-mer", "kmer6": "CDS 6-mer", "codon": "Codon", "gc"
                "dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "gena_lm": "GENA-LM", "hyena_dna": "HyenaDNA",
                "esm2_150m": "ESM-2 150M", "esm2_650m": "ESM-2 650M"}
 CMP_HEADLINE = ["kmer", "aa2", "aa3", "codon", "nt_v2", "dnabert2", "esm2_650m"]
-CMP_FULL = ["kmer", "kmer6", "codon", "gc", "aa1", "aa2", "aa3",
+CMP_FULL = ["kmer", "kmer6", "codon", "aa1", "aa2", "aa3",
             "dnabert2", "nt_v2", "gena_lm", "hyena_dna", "esm2_650m"]
 
 
