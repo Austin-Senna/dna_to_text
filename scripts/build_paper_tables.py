@@ -766,7 +766,6 @@ def main():
     write("leakage", build_leakage())
     write("split_comparison", build_split_comparison())
     write("split_comparison_full", build_split_comparison_full())
-    write("protein_comparison", build_protein_comparison())
     write("s_pooling_full", build_pooling_full())
     write("s_regression_full", build_regression_full())
     write("s_pooling_full_random", build_pooling_full_random())
