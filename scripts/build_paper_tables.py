@@ -171,6 +171,12 @@ SPECS = {
     "s_cds_tss_paired": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{6.5}{7.5}\selectfont",
                              width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lccr@{}",
                              header=r"Encoder & $\Delta$Macro-F1 [95\% CI] & $\Delta R^2$ [95\% CI] & $P(\textrm{CDS}{>}\textrm{TSS})$"),
+    "s_headline_ci_cls": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
+                              width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llcc@{}",
+                              header=r"Source & Pool & Macro-F1 [95\% CI] & $\kappa$ [95\% CI]"),
+    "s_headline_ci_reg": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
+                              width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llc@{}",
+                              header=r"Source & Pool & GenePT $R^2$ [95\% CI]"),
 }
 
 
@@ -554,6 +560,66 @@ def build_cds_tss_paired():
 
 
 # ===================================================================
+# Tables A6/A7: headline-cell 95% bootstrap CIs (appendix). Makes good the
+# Methods promise that every headline cell carries a test-set CI, without
+# crowding the main best-cell tables. The POINT estimate in each row is the
+# canonical recorded value (identical to the main tables); the bracket is the
+# 1,000-iteration test-set bootstrap from data/bootstrap_metrics.json (which
+# refits the probe, so its own point may differ by <0.01 -- every recorded
+# point falls inside the reported interval). Pools mirror the main best-cell
+# tables exactly (classification by macro-F1, regression by R^2).
+# ===================================================================
+def _ci(pair, dp=3):
+    return f"[{f(pair[0], dp)}, {f(pair[1], dp)}]"
+
+
+def build_headline_ci_cls():
+    bc = BOOT["classification"]
+    # (display, pool_tex, point_f1, point_kappa, boot_key)
+    rows = [("Shuffled labels", "---", CLS_SHUF["test_macro_f1"],
+             CLS_SHUF["test_kappa"], "shuffled")]
+    for rid, disp in MAIN_COMPOSITION:
+        r = CLS[rid]
+        rows.append((disp, "---", r["test_macro_f1"], r["test_kappa"], rid))
+    rule1 = len(rows)  # \midrule after shuffled + composition
+    for enc in ENCODERS:
+        pool, r = cls_best_pool(enc)
+        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_macro_f1"],
+                     r["test_kappa"], f"{enc}_{pool}"))
+    rule2 = len(rows)  # \midrule before ESM-2 upper bound
+    e = CLS["esm2_650m"]
+    rows.append(("ESM-2 650M", "---", e["test_macro_f1"], e["test_kappa"], "esm2_650m"))
+    out = []
+    for i, (disp, pool, f1, kap, key) in enumerate(rows):
+        f1c = f"{f(f1, 3)} {_ci(bc[key]['macro_f1_ci95'])}"
+        kc = f"{f(kap, 3)} {_ci(bc[key]['kappa_ci95'])}"
+        out.append(f"{disp} & {pool} & {f1c} & {kc} \\\\")
+        if i + 1 in (rule1, rule2):
+            out.append(r"\midrule")
+    return "\n".join(out)
+
+
+def build_headline_ci_reg():
+    br = BOOT["regression"]
+    rows = []
+    for rid, disp in MAIN_COMPOSITION:
+        rows.append((disp, "---", REG[rid]["test_r2_macro"], rid))
+    rule1 = len(rows)
+    for enc in ENCODERS:
+        pool, r = reg_best_pool(enc)
+        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_r2_macro"], f"{enc}_{pool}"))
+    rule2 = len(rows)
+    rows.append(("ESM-2 650M", "---", REG["esm2_650m"]["test_r2_macro"], "esm2_650m"))
+    out = []
+    for i, (disp, pool, r2, key) in enumerate(rows):
+        r2c = f"{f(r2, 3)} {_ci(br[key]['r2_macro_ci95'])}"
+        out.append(f"{disp} & {pool} & {r2c} \\\\")
+        if i + 1 in (rule1, rule2):
+            out.append(r"\midrule")
+    return "\n".join(out)
+
+
+# ===================================================================
 # Table (sec 3.5): protein-LM comparison (main text, 3 dp)
 # ESM-2 vs the best DNA encoder vs the composition floor, both readouts.
 # Columns: Source & Macro-F1 & kappa & GenePT R^2.
@@ -870,6 +936,8 @@ def _cell_order():
     for enc in ENCODERS:
         for pool in POOLS:
             yield ("row", ENC_DISPLAY[enc], tt(pool), f"tss_{enc}_{pool}")
+    yield ("rule",)  # supervised Enformer TSS comparator, set off like Table 6
+    yield ("row", "Enformer", "---", "enformer_trunk_center")
 
 
 def _side_by_side(homidx, randidx, mcells):
@@ -960,14 +1028,20 @@ def build_pooling_combined():
             return "--- & --- & ---"
         k = rec.get("test_kappa")
         kt = f(k) if k is not None else "---"
-        return f"{f(rec['test_macro_f1'])} & {kt} & {f(rec['test_accuracy'])}"
+        acc = rec.get("test_accuracy")
+        at = f(acc) if acc is not None else "---"
+        return f"{f(rec['test_macro_f1'])} & {kt} & {at}"
+    enf = next((r for r in ENFH if r.get("task") == "family5"
+                and r.get("feature_source") == "enformer_trunk_center"), None)
     return _side_longtable(
         r"Encoder-pooling cells for 5-way family classification, CDS and TSS: "
         r"homology-aware split (left) versus random-stratified split (right). "
-        r"Random DNA-LM runs have no cached $\kappa$ (shown ``---'').",
+        r"Random DNA-LM runs have no cached $\kappa$ (shown ``---''); the "
+        r"supervised Enformer comparator (\texttt{trunk\_center}) closes the "
+        r"TSS block.",
         "tab:s-pooling-full",
         r"Source & Pooling & Macro-F1 & $\kappa$ & Accuracy",
-        _side_by_side(CLS, CLS_RAND, mc))
+        _side_by_side({**CLS, "enformer_trunk_center": enf}, CLS_RAND, mc))
 
 
 def _reg_section(idx):
@@ -1013,12 +1087,15 @@ def build_regression_combined():
         a = rec.get("alpha")
         at = alpha_str(a) if a is not None else "---"
         return f"{f(rec['test_r2_macro'])} & {cos} & {at}"
+    enf = next((r for r in ENFH if r.get("task") is None
+                and "enformer_trunk_center" in (r.get("dataset") or "")), None)
     return _side_longtable(
         r"Ridge-to-GenePT cells, CDS and TSS: homology-aware split (left) "
-        r"versus random-stratified split (right).",
+        r"versus random-stratified split (right). The supervised Enformer "
+        r"comparator (\texttt{trunk\_center}) closes the TSS block.",
         "tab:s-regression-full",
         r"Source & Pooling & $R^2$ macro & Mean cosine & $\alpha$",
-        _side_by_side(REG, REG_RAND, mc))
+        _side_by_side({**REG, "enformer_trunk_center": enf}, REG_RAND, mc))
 
 
 def main():
@@ -1030,6 +1107,8 @@ def main():
     write_raw("regression_combined", build_regression_combined())
     write("s_seed_sensitivity", build_seed_sensitivity())
     write("s_cds_tss_paired", build_cds_tss_paired())
+    write("s_headline_ci_cls", build_headline_ci_cls())
+    write("s_headline_ci_reg", build_headline_ci_reg())
     print("\nAll fragments written to", OUT)
 
 
