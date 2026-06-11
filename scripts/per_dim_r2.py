@@ -19,6 +19,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+from sklearn.linear_model import Ridge
+
 from splits import load_split
 
 REPO = Path(__file__).resolve().parents[1]
@@ -27,14 +29,25 @@ ANALYSIS_FIG = REPO / "analysis" / "figures"
 OUT_JSON = DATA / "per_dim_r2.json"
 OUT_PNG = ANALYSIS_FIG / "per_dim_r2_distribution.png"
 
-# Headline regression cells: (label, probe_npz, dataset_parquet)
+# Homology-split headline regression cells: (label, dataset_parquet). The Ridge
+# probe is re-fit on the homology train+val (alpha read from
+# metrics_homology.json), not loaded from the random-split npz caches.
 CELLS = [
-    ("CDS DNABERT-2 meanG",  "probe_dnabert2_meanG.npz",  "dataset_dnabert2_meanG.parquet"),
-    ("CDS NT-v2 meanmean",   "probe_nt_v2_meanmean.npz",  "dataset_nt_v2_meanmean.parquet"),
-    ("CDS HyenaDNA special", "probe_hyena_dna_specialmean.npz", "dataset_hyena_dna_specialmean.parquet"),
-    ("CDS GENA-LM meanmean", "probe_gena_lm_meanmean.npz", "dataset_gena_lm_meanmean.parquet"),
-    ("TSS DNABERT-2 meanmean", "probe_tss_dnabert2_meanmean.npz", "dataset_tss_dnabert2_meanmean.parquet"),
+    ("CDS DNABERT-2 meanD",    "dataset_dnabert2_meanD.parquet"),
+    ("CDS NT-v2 meanG",        "dataset_nt_v2_meanG.parquet"),
+    ("CDS HyenaDNA meanG",     "dataset_hyena_dna_meanG.parquet"),
+    ("CDS GENA-LM meanG",      "dataset_gena_lm_meanG.parquet"),
+    ("TSS DNABERT-2 meanmean", "dataset_tss_dnabert2_meanmean.parquet"),
 ]
+
+_METRICS_HOMOLOGY = json.loads((DATA / "metrics_homology.json").read_text())
+
+
+def _alpha_for(dataset_name: str) -> float:
+    for run in _METRICS_HOMOLOGY:
+        if run.get("model") == "linear_probe" and run.get("dataset") == dataset_name:
+            return float(run["alpha"])
+    return 10.0
 
 
 def per_dim_r2(Y_true: np.ndarray, Y_pred: np.ndarray) -> np.ndarray:
@@ -47,20 +60,19 @@ def per_dim_r2(Y_true: np.ndarray, Y_pred: np.ndarray) -> np.ndarray:
 def main() -> None:
     results: dict[str, dict] = {}
 
-    for label, probe_name, dataset_name in CELLS:
-        probe_path = DATA / probe_name
+    for label, dataset_name in CELLS:
         dataset_path = DATA / dataset_name
-        if not probe_path.exists() or not dataset_path.exists():
-            print(f"  SKIP {label}: missing {probe_path.name} or {dataset_path.name}")
+        if not dataset_path.exists():
+            print(f"  SKIP {label}: missing {dataset_path.name}")
             continue
 
         print(f"=== {label} ===")
-        probe = np.load(probe_path)
-        W, b = probe["W"], probe["b"]
-        alpha = float(probe["alpha"])
-
+        alpha = _alpha_for(dataset_name)
+        X_tr, Y_tr, _ = load_split("train", dataset_path=dataset_path)
+        X_va, Y_va, _ = load_split("val", dataset_path=dataset_path)
         X_te, Y_te, _ = load_split("test", dataset_path=dataset_path)
-        Y_pred = X_te @ W + b
+        model = Ridge(alpha=alpha).fit(np.vstack([X_tr, X_va]), np.vstack([Y_tr, Y_va]))
+        Y_pred = model.predict(X_te)
         r2 = per_dim_r2(Y_te, Y_pred)
 
         r2_sorted = np.sort(r2)[::-1]
@@ -81,7 +93,6 @@ def main() -> None:
         print(f"  dims to reach 50% of summed R² = {cum50} / {len(r2)}")
 
         results[label] = {
-            "probe": probe_name,
             "dataset": dataset_name,
             "alpha": alpha,
             "n_dims": int(len(r2)),
@@ -115,7 +126,7 @@ def main() -> None:
     ax.axvline(0, color="#888", linewidth=0.8, linestyle="--")
     ax.set_xlabel("per-dim test R²")
     ax.set_ylabel("count of GenePT dims (of 1,536)")
-    ax.set_title("Per-dimension R² histogram")
+    # [no-title convention] ax.set_title("Per-dimension R² histogram")
     ax.grid(axis="both", color="#dddddd", linewidth=0.5)
     ax.set_axisbelow(True)
     ax.legend(fontsize=8, loc="upper right")
@@ -127,11 +138,12 @@ def main() -> None:
     ax.axhline(0, color="#888", linewidth=0.8, linestyle="--")
     ax.set_xlabel("dim rank (best → worst)")
     ax.set_ylabel("per-dim test R²")
-    ax.set_title("Rank-ordered per-dim R²")
+    # [no-title convention] ax.set_title("Rank-ordered per-dim R²")
     ax.grid(axis="both", color="#dddddd", linewidth=0.5)
     ax.set_axisbelow(True)
 
-    fig.tight_layout()
+    # [no-title convention] fig.suptitle("GenePT regression: per-dimension R² across 1,536 dims")
+    fig.tight_layout(rect=[0, 0.0, 1, 0.95])
     fig.savefig(OUT_PNG, dpi=140, bbox_inches="tight")
     print(f"wrote {OUT_PNG}")
 

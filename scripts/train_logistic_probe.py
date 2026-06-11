@@ -26,7 +26,8 @@ from sklearn.metrics import (
 )
 
 from binary_tasks import load_binary_split, BINARY_TASKS
-from kmer_baseline import featurize_cds
+from kmer_baseline import featurize_kmer
+from composition_baseline import featurize_aa_kmer, featurize_codon, featurize_gc
 from data_loader.sequence_fetcher import fetch_cds
 from data_loader.model_registry import dataset_paths
 from data_loader.pooling_aggregator import POOLING_VARIANTS
@@ -52,17 +53,48 @@ for _encoder in ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"):
         DATASET_PATHS[f"tss_{_encoder}_{_variant}"] = DATA / f"dataset_tss_{_encoder}_{_variant}.parquet"
 del _encoder, _variant
 
-META_PARQUET = DATASET_PATHS["dnabert2"]
+# ESM-2 protein-LM comparator (#9): real parquet-backed feature sources.
+DATASET_PATHS["esm2_150m"] = DATA / "dataset_esm2_150m.parquet"
+DATASET_PATHS["esm2_650m"] = DATA / "dataset_esm2_650m.parquet"
+
+# Any encoder parquet supplies the shared {ensembl_id, family, gene_symbol,
+# genept_vec} metadata used to build synthetic (on-the-fly) features. Prefer
+# the canonical base if present, else fall back to a pooling variant that is
+# always materialised.
+def _pick_meta_parquet() -> Path:
+    for key in ("dnabert2", "dnabert2_meanmean", "gena_lm_meanmean"):
+        p = DATASET_PATHS.get(key)
+        if p is not None and Path(p).exists():
+            return Path(p)
+    raise FileNotFoundError("no metadata parquet found for synthetic features")
 
 
-def _kmer_features_for_meta(meta: pd.DataFrame) -> np.ndarray:
-    out = np.zeros((len(meta), 256), dtype=np.float32)
-    for i, eid in enumerate(meta["ensembl_id"].tolist()):
+META_PARQUET = _pick_meta_parquet()
+
+# On-the-fly compositional feature sources (computed from cached CDS, not
+# parquet-backed). Maps dataset name -> per-sequence featuriser. Added for the
+# journal revision's stronger-baselines requirement: higher-order k-mer,
+# codon, translated amino-acid k-mer, and GC/length controls.
+SYNTHETIC_FEATURIZERS = {
+    "kmer": lambda s: featurize_kmer(s, 4),
+    "kmer6": lambda s: featurize_kmer(s, 6),
+    "codon": featurize_codon,
+    "aa1": lambda s: featurize_aa_kmer(s, 1),
+    "aa2": lambda s: featurize_aa_kmer(s, 2),
+    "aa3": lambda s: featurize_aa_kmer(s, 3),
+    "gc": featurize_gc,
+}
+
+
+def _synthetic_features_for_meta(dataset: str, meta: pd.DataFrame) -> np.ndarray:
+    fn = SYNTHETIC_FEATURIZERS[dataset]
+    rows = []
+    for eid in meta["ensembl_id"].tolist():
         seq = fetch_cds(eid, SEQUENCES_DIR)
         if not seq:
             raise RuntimeError(f"missing cached CDS for {eid}")
-        out[i] = featurize_cds(seq)
-    return out
+        rows.append(fn(seq))
+    return np.stack(rows).astype(np.float32)
 
 def _load_split_for(
     dataset: str,
@@ -73,12 +105,11 @@ def _load_split_for(
     if task == "family5":
         if dataset in DATASET_PATHS:
             X, _, meta = load_split(name, dataset_path=DATASET_PATHS[dataset])
-        else:
+        elif dataset in SYNTHETIC_FEATURIZERS:
             _, _, meta = load_split(name, dataset_path=META_PARQUET)
-            if dataset == "kmer":
-                X = _kmer_features_for_meta(meta)
-            else:
-                raise ValueError(f"unknown dataset: {dataset!r}")
+            X = _synthetic_features_for_meta(dataset, meta)
+        else:
+            raise ValueError(f"unknown dataset: {dataset!r}")
         y = meta["family"].to_numpy()
         return X, y, meta
 
@@ -86,12 +117,11 @@ def _load_split_for(
         raise ValueError(f"unknown task: {task!r}")
     if dataset in DATASET_PATHS:
         X, y, meta = load_binary_split(task, name, dataset_path=DATASET_PATHS[dataset])
-    else:
+    elif dataset in SYNTHETIC_FEATURIZERS:
         _, y, meta = load_binary_split(task, name, dataset_path=META_PARQUET)
-        if dataset == "kmer":
-            X = _kmer_features_for_meta(meta)
-        else:
-            raise ValueError(f"unknown dataset: {dataset!r}")
+        X = _synthetic_features_for_meta(dataset, meta)
+    else:
+        raise ValueError(f"unknown dataset: {dataset!r}")
     return X, y, meta
 
 
@@ -166,7 +196,7 @@ def _append_metrics(path: Path, entry: dict) -> None:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", required=True,
-                    choices=sorted(set(DATASET_PATHS.keys()) | {"kmer"}))
+                    choices=sorted(set(DATASET_PATHS.keys()) | set(SYNTHETIC_FEATURIZERS)))
     ap.add_argument("--task", required=True,
                     choices=["family5", "tf_vs_gpcr", "tf_vs_kinase"])
     ap.add_argument("--shuffle-labels", action="store_true",

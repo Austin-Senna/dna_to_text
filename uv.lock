@@ -351,6 +351,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "einops" },
+    { name = "fair-esm" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "pandas" },
@@ -372,6 +373,7 @@ enformer = [
 requires-dist = [
     { name = "einops", specifier = ">=0.7" },
     { name = "enformer-pytorch", marker = "extra == 'enformer'", specifier = ">=0.8" },
+    { name = "fair-esm", specifier = ">=2.0.0" },
     { name = "matplotlib", specifier = ">=3.8" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pandas", specifier = ">=2.2" },
@@ -426,6 +428,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f2/44/b4d54e4a38b4114ffd601e31df49707f0a7faf6bbd9ed02bced5474c7c34/enformer_pytorch-0.8.11.tar.gz", hash = "sha256:8b8af1bb2dc09bcf302064841dfb33601dbd98d90eeaac15e0b9ad3d260a9702", size = 101007, upload-time = "2025-07-07T19:41:55.474Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/60/a9/6cc5966d1d6488a172225514b1b1476683db8a92504ab957728821d37cd1/enformer_pytorch-0.8.11-py3-none-any.whl", hash = "sha256:7dff88fd7b68b482d3b6acb916a65e07adec82708a76a49f8e5074d4ef1ca323", size = 97095, upload-time = "2025-07-07T19:41:53.805Z" },
+]
+
+[[package]]
+name = "fair-esm"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/fb/61ddfd2f058c298491d500b606808aab6729944da844fbe63cb7be405a9a/fair-esm-2.0.0.tar.gz", hash = "sha256:4ed34d4598ec75ed6550a4e581d023bf8d4a8375317ecba6269bb68135f80c85", size = 84217, upload-time = "2022-11-01T03:06:29.285Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/79/26/1cc82571f507b9dae3b36d4242764edc6e4ae9f3f81f44a6382c15fad565/fair_esm-2.0.0-py3-none-any.whl", hash = "sha256:7dcb58828a401155d1457d071a03800bd1a50331ddf24ac79ad1dd0f2ea682a2", size = 93125, upload-time = "2022-11-01T03:06:26.845Z" },
 ]
 
 [[package]]
