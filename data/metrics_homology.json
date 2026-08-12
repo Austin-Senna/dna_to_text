@@ -7597,5 +7597,49 @@
     "test_mean_cosine": 0.9297191500663757,
     "test_median_cosine": 0.9293572902679443,
     "test_r2_macro": 0.18128585815429688
+  },
+  {
+    "run_id": "probe_2026-05-31T07:24:52+00:00",
+    "timestamp": "2026-05-31T07:24:52+00:00",
+    "model": "linear_probe",
+    "dataset": "dataset_enformer_tss_4mer.parquet",
+    "alpha": 1.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.9093588590621948,
+        "r2": -0.0342530719935894
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.9090520739555359,
+        "r2": -0.036910269409418106
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.9096120595932007,
+        "r2": -0.030349737033247948
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.9093441963195801,
+        "r2": -0.033176977187395096
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9092575311660767,
+        "r2": -0.03410879522562027
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9092478156089783,
+        "r2": -0.03421442583203316
+      }
+    ],
+    "test_mean_cosine": 0.9103422164916992,
+    "test_median_cosine": 0.9111083745956421,
+    "test_r2_macro": -0.020968543365597725,
+    "feature_source": "enformer_tss_4mer"
   }
 ]

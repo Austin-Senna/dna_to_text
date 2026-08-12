@@ -31,7 +31,7 @@ Large intermediate caches such as fetched sequences, encoder chunk reductions, E
 
 ## Pipeline
 
-The workflow has six numbered stages. Stage 4 is the TSS branch: Stage 4.1 maps the CDS gene set to TSS-centered windows, and Stage 4.2 runs the TSS-window NT-v2 and Enformer comparisons. Most report-facing commands operate on tracked caches; full encoder extraction can take much longer and may require GPU or Apple Silicon MPS hardware.
+The workflow has seven numbered stages. Stage 4 is the TSS branch: Stage 4.1 maps the CDS gene set to TSS-centered windows, and Stage 4.2 runs the TSS-window NT-v2 and Enformer comparisons. Stage 6 builds the `analysis/` diagnostic artifacts; Stage 7 renders the manuscript figures and LaTeX table fragments under `dna_to_text_paper/paper/` (see `docs/stage7-paper-figures-tables.md`). Most report-facing commands operate on tracked caches; full encoder extraction can take much longer and may require GPU or Apple Silicon MPS hardware.
 
 Small sample inputs and outputs for each stage live in `samples/`. They are reviewer-readable examples of the data shape at each stage, not a separate lightweight execution path.
 
@@ -41,8 +41,12 @@ Report-supporting cached reproduction:
 # Stage 5: regenerate 1000-run bootstrap confidence intervals (see docs/stage5-bootstrap.md).
 uv run python scripts/bootstrap_test_uncertainty.py
 
-# Stage 6: regenerate report tables and figures from tracked metrics/caches.
+# Stage 6: regenerate the analysis/ diagnostic tables and figures from tracked metrics/caches.
 uv run python scripts/build_analysis_artifacts.py --overwrite
+
+# Stage 7: regenerate the manuscript figures and LaTeX table fragments (see docs/stage7-paper-figures-tables.md).
+uv run python scripts/build_result_figures.py
+uv run python scripts/build_paper_tables.py
 ```
 
 Fast Stage 6 smoke version without UMAP:
@@ -94,8 +98,12 @@ uv run python scripts/train_probe.py --dataset data/dataset_enformer_trunk_cente
 # Stage 5: regenerate 1000-run bootstrap confidence intervals (see docs/stage5-bootstrap.md).
 uv run python scripts/bootstrap_test_uncertainty.py
 
-# Stage 6: regenerate final report analysis tables and figures.
+# Stage 6: regenerate the analysis/ diagnostic tables and figures.
 uv run python scripts/build_analysis_artifacts.py --overwrite
+
+# Stage 7: regenerate the manuscript figures and LaTeX table fragments.
+uv run python scripts/build_result_figures.py
+uv run python scripts/build_paper_tables.py
 ```
 
 ## Setup

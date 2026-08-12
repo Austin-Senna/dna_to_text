@@ -37,14 +37,6 @@ ENFORMER_SOURCES = (
 )
 CONTEXT_ABLATION_SPECS = (
     {
-        "label": "CDS NT-v2 meanD",
-        "context": "CDS",
-        "model_group": "self-supervised encoder",
-        "family5_feature_source": "nt_v2_meanD",
-        "regression_dataset": "dataset_nt_v2_meanD.parquet",
-        "regression_feature_source": "nt_v2_meanD",
-    },
-    {
         "label": "CDS 4-mer",
         "context": "CDS",
         "model_group": "composition",
@@ -53,12 +45,12 @@ CONTEXT_ABLATION_SPECS = (
         "regression_feature_source": "kmer",
     },
     {
-        "label": "TSS NT-v2 meanmean",
-        "context": "TSS window",
+        "label": "CDS NT-v2 meanD",
+        "context": "CDS",
         "model_group": "self-supervised encoder",
-        "family5_feature_source": "tss_nt_v2_meanmean",
-        "regression_dataset": "dataset_tss_nt_v2_meanmean.parquet",
-        "regression_feature_source": "tss_nt_v2_meanmean",
+        "family5_feature_source": "nt_v2_meanD",
+        "regression_dataset": "dataset_nt_v2_meanD.parquet",
+        "regression_feature_source": "nt_v2_meanD",
     },
     {
         "label": "TSS 4-mer",
@@ -67,6 +59,14 @@ CONTEXT_ABLATION_SPECS = (
         "family5_feature_source": "enformer_tss_4mer",
         "regression_dataset": "dataset_enformer_tss_4mer.parquet",
         "regression_feature_source": "enformer_tss_4mer",
+    },
+    {
+        "label": "TSS NT-v2 meanmean",
+        "context": "TSS window",
+        "model_group": "self-supervised encoder",
+        "family5_feature_source": "tss_nt_v2_meanmean",
+        "regression_dataset": "dataset_tss_nt_v2_meanmean.parquet",
+        "regression_feature_source": "tss_nt_v2_meanmean",
     },
     {
         "label": "Enformer trunk",
