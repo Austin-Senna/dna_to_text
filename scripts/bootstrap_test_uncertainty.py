@@ -265,6 +265,8 @@ PAIRED_REG = [
     ("nt_v2_meanmean - aa3", "nt_v2_meanmean", 10.0, "aa3",  0.01),
     ("dnabert2_meanD - kmer","dnabert2_meanD", 10.0, "kmer", 0.01),
     ("aa3 - kmer",           "aa3",            0.01, "kmer", 0.01),
+    ("aa3 - aa2",            "aa3",            0.01, "aa2",  0.01),  # R1's example: 0.090 vs 0.060
+    ("aa2 - aa1",            "aa2",            0.01, "aa1",  0.01),  # AA composition ladder is monotone
     # ESM-2 protein-LM comparator (#9): vs AA-3mer, vs best DNA-LM, and scaling.
     ("esm2_650m - aa3",            "esm2_650m", 10.0, "aa3",            0.01),
     ("esm2_650m - dnabert2_meanD", "esm2_650m", 10.0, "dnabert2_meanD", 10.0),

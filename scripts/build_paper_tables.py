@@ -159,6 +159,15 @@ SPECS = {
     "s_cds_tss_paired": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{6.5}{7.5}\selectfont",
                              width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lccr@{}",
                              header=r"Encoder & $\Delta$Macro-F1 [95\% CI] & $\Delta R^2$ [95\% CI] & $P(\textrm{CDS}{>}\textrm{TSS})$"),
+    "s_tss_disjoint": dict(setup=r"\setlength{\tabcolsep}{3pt}",
+                           width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
+                           header=r"Source & Homology F1 & Disjoint F1 & $\Delta$"),
+    "s_paired_diff": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.4}\selectfont",
+                          width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lcr@{}",
+                          header=r"Comparison & $\Delta$ [95\% CI] & $P(A{>}B)$"),
+    "s_ridge_robust": dict(setup=r"\setlength{\tabcolsep}{3pt}",
+                           width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
+                           header=r"Method & Macro-$R^2$ & Pooled-$R^2$ & Retr.@5 & Med.\ rank"),
 }
 
 
@@ -572,6 +581,78 @@ def build_leakage():
     return "\n".join(out)
 
 
+# ===================================================================
+# Supplementary (MLCB rebuttal): genomic-interval-disjoint TSS split (R2-Q4).
+# Best-pool TSS macro-F1 on the primary homology split vs a split where TSS
+# windows are also interval-disjoint. Removing window leakage pushes TSS toward
+# the 0.224 chance floor -> the collapse conclusion is conservative.
+# ===================================================================
+def build_tss_disjoint():
+    MTD = load("metrics_tss_disjoint.json")
+
+    def t4(metrics):
+        return [r for r in metrics if r.get("task") == "family5"
+                and r["feature_source"] == TSS_4MER][0]["test_macro_f1"]
+
+    out = [f"Shuffled labels (floor) & {f(CLS_SHUF['test_macro_f1'],3)} & --- & --- \\\\",
+           f"TSS 4-mer & {f(t4(M),3)} & {f(t4(MTD),3)} & {sgn(t4(MTD)-t4(M),3)} \\\\",
+           r"\midrule"]
+    for enc in ENCODERS:
+        h = _best_f1_family5(M, enc, tss=True)
+        d = _best_f1_family5(MTD, enc, tss=True)
+        out.append(f"{ENC_DISPLAY[enc]} & {f(h,3)} & {f(d,3)} & {sgn(d-h,3)} \\\\")
+    return "\n".join(out)
+
+
+# ===================================================================
+# Supplementary (MLCB rebuttal): head-to-head paired-difference CIs (R1).
+# Direct answer to "is 0.090 different from 0.060?" and the small-sample worry:
+# every structural claim's paired CI excludes 0.
+# ===================================================================
+def build_paired_diff():
+    pc, pr = BOOT["paired"]["classification"], BOOT["paired"]["regression"]
+    out = [r"\multicolumn{3}{@{}l}{\textbf{Classification ($\Delta$Macro-F1)}}\\"]
+    for disp, key in [
+        ("NT-v2 (best) $-$ AA 2-mer", "nt_v2_meanD - aa2"),
+        ("NT-v2 (best) $-$ 4-mer floor", "nt_v2_meanD - kmer"),
+        ("ESM-2 650M $-$ AA 2-mer", "esm2_650m - aa2"),
+        ("ESM-2 650M $-$ NT-v2 (best)", "esm2_650m - nt_v2_meanG"),
+        ("ESM-2 650M $-$ ESM-2 150M", "esm2_650m - esm2_150m"),
+    ]:
+        c = pc[key]
+        lo, hi = c["delta_macro_f1_ci95"]
+        out.append(f"\\quad {disp} & {sgn(c['delta_macro_f1_point'],3)} "
+                   f"[{sgn(lo,3)}, {sgn(hi,3)}] & {c['frac_A_gt_B_f1']:.3f} \\\\")
+    out.append(r"\midrule")
+    out.append(r"\multicolumn{3}{@{}l}{\textbf{Regression ($\Delta$GenePT $R^2$)}}\\")
+    for disp, key in [
+        ("AA 3-mer $-$ AA 2-mer", "aa3 - aa2"),
+        ("AA 3-mer $-$ 4-mer floor", "aa3 - kmer"),
+        ("DNABERT-2 (best) $-$ AA 3-mer", "dnabert2_meanD - aa3"),
+        ("ESM-2 650M $-$ AA 3-mer", "esm2_650m - aa3"),
+        ("ESM-2 650M $-$ DNABERT-2 (best)", "esm2_650m - dnabert2_meanD"),
+    ]:
+        r = pr[key]
+        lo, hi = r["delta_r2_macro_ci95"]
+        out.append(f"\\quad {disp} & {sgn(r['delta_r2_macro_point'],3)} "
+                   f"[{sgn(lo,3)}, {sgn(hi,3)}] & {r['frac_A_gt_B']:.3f} \\\\")
+    return "\n".join(out)
+
+
+# ===================================================================
+# Supplementary (MLCB rebuttal): rotation-invariant Ridge metrics (R2-W4).
+# macro-R^2 vs pooled (variance-weighted) R^2 vs coordinate-free retrieval@k;
+# the method ordering is metric-invariant.
+# ===================================================================
+def build_ridge_robust():
+    RR = load("ridge_robust.json")
+    return "\n".join(
+        f"{r['label']} & {f(r['macro_r2'],3)} & {f(r['pooled_r2'],3)} "
+        f"& {r['top5']*100:.1f}\\% & {r['median_rank']:.0f} \\\\"
+        for r in RR
+    )
+
+
 def main():
     write("family5_main", build_family5_main())
     write("ridge_main", build_ridge_main())
@@ -582,6 +663,9 @@ def main():
     write("s_regression_full", build_regression_full())
     write("s_seed_sensitivity", build_seed_sensitivity())
     write("s_cds_tss_paired", build_cds_tss_paired())
+    write("s_tss_disjoint", build_tss_disjoint())
+    write("s_paired_diff", build_paired_diff())
+    write("s_ridge_robust", build_ridge_robust())
     print("\nAll fragments written to", OUT)
 
 

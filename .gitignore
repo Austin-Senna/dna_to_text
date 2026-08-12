@@ -24,6 +24,9 @@ data/chunk_reductions_hyena_dna/
 data/tss_chunk_reductions_*/
 data/enformer_windows/
 data/enformer_features/
+# ESM-2 per-gene embedding caches — large, regeneratable from scripts/run_esm2.py
+data/esm2_150m_embeddings/
+data/esm2_650m_embeddings/
 
 # Pitch deck PDF — kept locally, not authoritative source
 Genomics Project (1).pdf
@@ -40,3 +43,13 @@ data/annotation/
 data/sequences_protein/
 data/tss_masked_windows/
 data/cluster_work/
+
+# CONFIDENTIAL — this is a PUBLIC repo. Peer reviews, rebuttal strategy, and the
+# session handoff stay local: never commit reviews, review analysis, or local paths.
+docs/reviews/
+MINA.md
+STATUS.md
+
+# Runtime logs/outputs (contain local absolute paths)
+logs/
+outputs/
