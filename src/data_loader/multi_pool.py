@@ -121,11 +121,16 @@ def embed_all_multi_pool(
     stride: int,
     device: str | None = None,
     desc: str = "multi-pool embed",
+    collect: bool = True,
 ) -> dict[str, dict[str, np.ndarray]]:
     """Run multi-pool extraction over all CDS, caching one .npz per gene.
 
     `load_model_fn` is the encoder's existing `load_model(device)` returning
     (model, tokenizer, device). Loaded only if there are pending sequences.
+
+    `collect=False` skips retaining the per-gene arrays in the returned dict
+    (values become None) so long-window runs do not accumulate GB of reductions
+    in RAM; the per-gene .npz cache is still written. `len(out)` stays correct.
     """
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -138,7 +143,7 @@ def embed_all_multi_pool(
             with np.load(cache_file) as data:
                 cached = {k: data[k] for k in REDUCTION_KEYS if k in data.files}
             if "special_mean" in cached:
-                out[eid] = cached
+                out[eid] = cached if collect else None
             else:
                 pending.append((eid, seq))
         else:
@@ -155,5 +160,5 @@ def embed_all_multi_pool(
             max_content_tokens=max_content_tokens, stride=stride,
         )
         np.savez(cache_dir / f"{eid}.npz", **red)
-        out[eid] = red
+        out[eid] = red if collect else None
     return out

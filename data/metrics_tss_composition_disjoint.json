@@ -1,0 +1,378 @@
+[
+  {
+    "run_id": "logistic_tss_dnabert2_chunk4mergc_family5_2026-08-15T12:57:11+00:00",
+    "timestamp": "2026-08-15T12:57:11+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_dnabert2_chunk4mergc",
+    "feature_source": "tss_dnabert2_chunk4mergc",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.2458333333333333
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.259882754839526
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.26491333136518913
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.28075808823893544
+      }
+    ],
+    "test_macro_f1": 0.23490594303485418,
+    "test_kappa": 0.1408327042373716,
+    "test_balanced_accuracy": 0.25450629523148605,
+    "test_accuracy": 0.5585215605749486,
+    "test_per_class_accuracy": {
+      "gpcr": 0.2840909090909091,
+      "immune": 0.0,
+      "ion": 0.03333333333333333,
+      "kinase": 0.023809523809523808,
+      "tf": 0.9312977099236641
+    }
+  },
+  {
+    "run_id": "logistic_tss_dnabert2_chunk6mer_family5_2026-08-15T12:57:13+00:00",
+    "timestamp": "2026-08-15T12:57:13+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_dnabert2_chunk6mer",
+    "feature_source": "tss_dnabert2_chunk6mer",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.26624419322789394
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.2706786497016925
+      }
+    ],
+    "test_macro_f1": 0.21219196829317735,
+    "test_kappa": 0.12255845378977115,
+    "test_balanced_accuracy": 0.24014986285978654,
+    "test_accuracy": 0.5482546201232033,
+    "test_per_class_accuracy": {
+      "gpcr": 0.26136363636363635,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.011904761904761904,
+      "tf": 0.9274809160305344
+    }
+  },
+  {
+    "run_id": "logistic_tss_nt_v2_chunk4mergc_family5_2026-08-15T12:57:16+00:00",
+    "timestamp": "2026-08-15T12:57:16+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_nt_v2_chunk4mergc",
+    "feature_source": "tss_nt_v2_chunk4mergc",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.24883040935672515
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.2636919573193876
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.2684574766316036
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.29193034312323746
+      }
+    ],
+    "test_macro_f1": 0.20272665992585104,
+    "test_kappa": 0.09123706210191074,
+    "test_balanced_accuracy": 0.2304038200984766,
+    "test_accuracy": 0.5379876796714579,
+    "test_per_class_accuracy": {
+      "gpcr": 0.20454545454545456,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.023809523809523808,
+      "tf": 0.9236641221374046
+    }
+  },
+  {
+    "run_id": "logistic_tss_nt_v2_chunk6mer_family5_2026-08-15T12:57:18+00:00",
+    "timestamp": "2026-08-15T12:57:18+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_nt_v2_chunk6mer",
+    "feature_source": "tss_nt_v2_chunk6mer",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.26064105194259646
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.27743446880544453
+      }
+    ],
+    "test_macro_f1": 0.19415312113103558,
+    "test_kappa": 0.08062232452617724,
+    "test_balanced_accuracy": 0.22789729354614852,
+    "test_accuracy": 0.5318275154004107,
+    "test_per_class_accuracy": {
+      "gpcr": 0.22727272727272727,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.0,
+      "tf": 0.9122137404580153
+    }
+  },
+  {
+    "run_id": "logistic_tss_gena_lm_chunk4mergc_family5_2026-08-15T12:57:20+00:00",
+    "timestamp": "2026-08-15T12:57:20+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_gena_lm_chunk4mergc",
+    "feature_source": "tss_gena_lm_chunk4mergc",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.24409656024274318
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.26021671441026284
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.2644880068184586
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.2744525568483761
+      }
+    ],
+    "test_macro_f1": 0.23660819092173813,
+    "test_kappa": 0.13365796873334812,
+    "test_balanced_accuracy": 0.25459717127656056,
+    "test_accuracy": 0.5544147843942505,
+    "test_per_class_accuracy": {
+      "gpcr": 0.2840909090909091,
+      "immune": 0.0,
+      "ion": 0.03333333333333333,
+      "kinase": 0.03571428571428571,
+      "tf": 0.9198473282442748
+    }
+  },
+  {
+    "run_id": "logistic_tss_gena_lm_chunk6mer_family5_2026-08-15T12:57:23+00:00",
+    "timestamp": "2026-08-15T12:57:23+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_gena_lm_chunk6mer",
+    "feature_source": "tss_gena_lm_chunk6mer",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.2643409458730444
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.26782255773367425
+      }
+    ],
+    "test_macro_f1": 0.20556253928346954,
+    "test_kappa": 0.10454851780053742,
+    "test_balanced_accuracy": 0.23927827897293544,
+    "test_accuracy": 0.5462012320328542,
+    "test_per_class_accuracy": {
+      "gpcr": 0.2727272727272727,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.0,
+      "tf": 0.9236641221374046
+    }
+  },
+  {
+    "run_id": "logistic_tss_hyena_dna_chunk4mergc_family5_2026-08-15T12:57:25+00:00",
+    "timestamp": "2026-08-15T12:57:25+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_hyena_dna_chunk4mergc",
+    "feature_source": "tss_hyena_dna_chunk4mergc",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.2407316040997905
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.25713478184066424
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.2702053881034943
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.2706724286949006
+      }
+    ],
+    "test_macro_f1": 0.2117184560613706,
+    "test_kappa": 0.1143405085474325,
+    "test_balanced_accuracy": 0.24165923135388784,
+    "test_accuracy": 0.5482546201232033,
+    "test_per_class_accuracy": {
+      "gpcr": 0.2727272727272727,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.011904761904761904,
+      "tf": 0.9236641221374046
+    }
+  },
+  {
+    "run_id": "logistic_tss_hyena_dna_chunk6mer_family5_2026-08-15T12:57:27+00:00",
+    "timestamp": "2026-08-15T12:57:27+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_hyena_dna_chunk6mer",
+    "feature_source": "tss_hyena_dna_chunk6mer",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.13975903614457832
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.24615384615384617
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.2584422512670045
+      }
+    ],
+    "test_macro_f1": 0.19765689391263394,
+    "test_kappa": 0.0828776740728504,
+    "test_balanced_accuracy": 0.23091603053435117,
+    "test_accuracy": 0.5318275154004107,
+    "test_per_class_accuracy": {
+      "gpcr": 0.25,
+      "immune": 0.0,
+      "ion": 0.0,
+      "kinase": 0.0,
+      "tf": 0.9045801526717557
+    }
+  }
+]

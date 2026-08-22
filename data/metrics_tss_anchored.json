@@ -1,0 +1,190 @@
+[
+  {
+    "run_id": "logistic_tss_dnabert2_tssanchored_family5_2026-08-15T12:22:59+00:00",
+    "timestamp": "2026-08-15T12:22:59+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_dnabert2_tssanchored",
+    "feature_source": "tss_dnabert2_tssanchored",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.19395586237285647
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.21239585450111767
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.2265404200129058
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.2765011398878382
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.28194336184162927
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.2746806816372033
+      }
+    ],
+    "test_macro_f1": 0.2869223480694393,
+    "test_kappa": 0.19077785855229001,
+    "test_balanced_accuracy": 0.2853147690467233,
+    "test_accuracy": 0.5071868583162218,
+    "test_per_class_accuracy": {
+      "gpcr": 0.25842696629213485,
+      "immune": 0.13043478260869565,
+      "ion": 0.03333333333333333,
+      "kinase": 0.23809523809523808,
+      "tf": 0.7662835249042146
+    }
+  },
+  {
+    "run_id": "logistic_tss_nt_v2_tssanchored_family5_2026-08-15T12:23:04+00:00",
+    "timestamp": "2026-08-15T12:23:04+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_nt_v2_tssanchored",
+    "feature_source": "tss_nt_v2_tssanchored",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.21068888437309488
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.24113922750132274
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.25846932565198816
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.3077209345276572
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.34050159556470916
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.3236115764386961
+      }
+    ],
+    "test_macro_f1": 0.35163347275690093,
+    "test_kappa": 0.22379121139981417,
+    "test_balanced_accuracy": 0.34006264657933205,
+    "test_accuracy": 0.5174537987679672,
+    "test_per_class_accuracy": {
+      "gpcr": 0.39325842696629215,
+      "immune": 0.17391304347826086,
+      "ion": 0.16666666666666666,
+      "kinase": 0.25,
+      "tf": 0.7164750957854407
+    }
+  },
+  {
+    "run_id": "logistic_tss_gena_lm_tssanchored_family5_2026-08-15T12:23:09+00:00",
+    "timestamp": "2026-08-15T12:23:09+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_gena_lm_tssanchored",
+    "feature_source": "tss_gena_lm_tssanchored",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.354597433846192
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.4105423878341609
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.45204166119497924
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.47768041397799177
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.4899121205721501
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.46564735014460795
+      }
+    ],
+    "test_macro_f1": 0.4323317634149236,
+    "test_kappa": 0.37321827319703726,
+    "test_balanced_accuracy": 0.4373806034382487,
+    "test_accuracy": 0.5893223819301848,
+    "test_per_class_accuracy": {
+      "gpcr": 0.2808988764044944,
+      "immune": 0.08695652173913043,
+      "ion": 0.2,
+      "kinase": 0.9523809523809523,
+      "tf": 0.6666666666666666
+    }
+  },
+  {
+    "run_id": "logistic_tss_hyena_dna_tssanchored_family5_2026-08-15T12:23:14+00:00",
+    "timestamp": "2026-08-15T12:23:14+00:00",
+    "model": "logistic_probe",
+    "encoder": "tss_hyena_dna_tssanchored",
+    "feature_source": "tss_hyena_dna_tssanchored",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.19872739158858138
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.2042943063352045
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.2146479050297258
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.24525075611378747
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.2715351639439231
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.3046078228916761
+      }
+    ],
+    "test_macro_f1": 0.2850494034237038,
+    "test_kappa": 0.14112401419418164,
+    "test_balanced_accuracy": 0.2800969017898755,
+    "test_accuracy": 0.49075975359342916,
+    "test_per_class_accuracy": {
+      "gpcr": 0.25842696629213485,
+      "immune": 0.17391304347826086,
+      "ion": 0.06666666666666667,
+      "kinase": 0.14285714285714285,
+      "tf": 0.7586206896551724
+    }
+  }
+]

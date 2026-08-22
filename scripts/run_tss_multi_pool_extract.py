@@ -67,6 +67,7 @@ def main() -> None:
         stride=spec.stride,
         device=device,
         desc=f"tss {args.encoder} multi-pool",
+        collect=False,
     )
     print(f"  done: {len(out)} genes cached at {cache_dir}")
 

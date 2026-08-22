@@ -51,6 +51,10 @@ for _encoder in ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"):
     DATASET_PATHS[f"tss_{_encoder}"] = DATA / f"dataset_tss_{_encoder}.parquet"
     for _variant in POOLING_VARIANTS:
         DATASET_PATHS[f"tss_{_encoder}_{_variant}"] = DATA / f"dataset_tss_{_encoder}_{_variant}.parquet"
+    # TSS-anchored chunk pooling (E5 confirmatory re-probe). Not an aggregate()
+    # variant — it selects the TSS-centered chunk per gene using external window
+    # info — so it is registered directly rather than added to POOLING_VARIANTS.
+    DATASET_PATHS[f"tss_{_encoder}_tssanchored"] = DATA / f"dataset_tss_{_encoder}_tssanchored.parquet"
 del _encoder, _variant
 
 # ESM-2 protein-LM comparator (#9): real parquet-backed feature sources.

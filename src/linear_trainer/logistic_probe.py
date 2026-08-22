@@ -35,7 +35,7 @@ class LogisticProbe:
 
 
 def _make_logreg(C: float) -> LogisticRegression:
-    return LogisticRegression(C=C, max_iter=2000, solver="lbfgs")
+    return LogisticRegression(C=C, max_iter=5000, solver="lbfgs")
 
 
 def fit(X: np.ndarray, y: np.ndarray, C: float) -> LogisticProbe:

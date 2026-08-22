@@ -1,0 +1,162 @@
+[
+  {
+    "encoder": "dnabert2",
+    "split": "homology",
+    "global_pool": "meanmean",
+    "C_anchored": 100.0,
+    "C_global": 1000.0,
+    "delta_macro_f1_point": -0.03910929199482083,
+    "delta_macro_f1_ci95": [
+      -0.10216571105636917,
+      0.023428343763939485
+    ],
+    "frac_anchored_gt_global": 0.111,
+    "delta_kappa_point": 0.016280670170204736,
+    "delta_kappa_ci95": [
+      -0.05364370466218695,
+      0.09277440297938279
+    ],
+    "n_common": 487,
+    "n_iters": 1000
+  },
+  {
+    "encoder": "nt_v2",
+    "split": "homology",
+    "global_pool": "meanmean",
+    "C_anchored": 100.0,
+    "C_global": 1000.0,
+    "delta_macro_f1_point": 0.046919763571503736,
+    "delta_macro_f1_ci95": [
+      -0.021471821612496982,
+      0.11065355118440298
+    ],
+    "frac_anchored_gt_global": 0.906,
+    "delta_kappa_point": 0.043701787685969995,
+    "delta_kappa_ci95": [
+      -0.034191490738517634,
+      0.12131944490246657
+    ],
+    "n_common": 487,
+    "n_iters": 1000
+  },
+  {
+    "encoder": "gena_lm",
+    "split": "homology",
+    "global_pool": "clsmean",
+    "C_anchored": 100.0,
+    "C_global": 1000.0,
+    "delta_macro_f1_point": 0.16098637450071607,
+    "delta_macro_f1_ci95": [
+      0.10499033251884916,
+      0.21499690524187812
+    ],
+    "frac_anchored_gt_global": 1.0,
+    "delta_kappa_point": 0.2961775934636325,
+    "delta_kappa_ci95": [
+      0.22323445601528863,
+      0.37591644632481375
+    ],
+    "n_common": 487,
+    "n_iters": 1000
+  },
+  {
+    "encoder": "hyena_dna",
+    "split": "homology",
+    "global_pool": "meanD",
+    "C_anchored": 1000.0,
+    "C_global": 1000.0,
+    "delta_macro_f1_point": 0.031376273833227886,
+    "delta_macro_f1_ci95": [
+      -0.0300875032260257,
+      0.08828618722967332
+    ],
+    "frac_anchored_gt_global": 0.834,
+    "delta_kappa_point": 0.046768922845175864,
+    "delta_kappa_ci95": [
+      -0.02449030795574618,
+      0.11987483000637475
+    ],
+    "n_common": 487,
+    "n_iters": 1000
+  },
+  {
+    "encoder": "dnabert2",
+    "split": "disjoint",
+    "global_pool": "meanmean",
+    "C_anchored": 10.0,
+    "C_global": 1000.0,
+    "delta_macro_f1_point": 0.011462328321159454,
+    "delta_macro_f1_ci95": [
+      -0.04578462773762647,
+      0.0676533766529324
+    ],
+    "frac_anchored_gt_global": 0.654,
+    "delta_kappa_point": 0.046190886639006945,
+    "delta_kappa_ci95": [
+      -0.029361704474475232,
+      0.11779378609921398
+    ],
+    "n_common": 487,
+    "n_iters": 1000
+  },
+  {
+    "encoder": "nt_v2",
+    "split": "disjoint",
+    "global_pool": "maxmean",
+    "C_anchored": 10.0,
+    "C_global": 100.0,
+    "delta_macro_f1_point": 0.103254536190311,
+    "delta_macro_f1_ci95": [
+      0.03000202771224009,
+      0.17657670246895557
+    ],
+    "frac_anchored_gt_global": 0.995,
+    "delta_kappa_point": 0.1395952594156974,
+    "delta_kappa_ci95": [
+      0.05020644804946316,
+      0.2294138613996576
+    ],
+    "n_common": 487,
+    "n_iters": 1000
+  },
+  {
+    "encoder": "gena_lm",
+    "split": "disjoint",
+    "global_pool": "meanG",
+    "C_anchored": 0.1,
+    "C_global": 10.0,
+    "delta_macro_f1_point": 0.20536189815840195,
+    "delta_macro_f1_ci95": [
+      0.16237251969706729,
+      0.24559225320555395
+    ],
+    "frac_anchored_gt_global": 1.0,
+    "delta_kappa_point": 0.465027269845965,
+    "delta_kappa_ci95": [
+      0.39153802868129717,
+      0.5344654756946765
+    ],
+    "n_common": 487,
+    "n_iters": 1000
+  },
+  {
+    "encoder": "hyena_dna",
+    "split": "disjoint",
+    "global_pool": "meanG",
+    "C_anchored": 1000.0,
+    "C_global": 10.0,
+    "delta_macro_f1_point": 0.018307922033752533,
+    "delta_macro_f1_ci95": [
+      -0.040402101592674114,
+      0.07379612374719839
+    ],
+    "frac_anchored_gt_global": 0.724,
+    "delta_kappa_point": -0.005372148902587082,
+    "delta_kappa_ci95": [
+      -0.0834935710769363,
+      0.06784121097393116
+    ],
+    "n_common": 487,
+    "n_iters": 1000
+  }
+]
