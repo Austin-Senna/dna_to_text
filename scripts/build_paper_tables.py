@@ -1139,8 +1139,8 @@ def build_paired_diff():
     pc, pr = BOOT["paired"]["classification"], BOOT["paired"]["regression"]
     out = [r"\multicolumn{3}{@{}l}{\textbf{Classification ($\Delta$Macro-F1)}}\\"]
     for disp, key in [
-        ("NT-v2 (best) $-$ AA 2-mer", "nt_v2_meanD - aa2"),
-        ("NT-v2 (best) $-$ 4-mer floor", "nt_v2_meanD - kmer"),
+        ("NT-v2 (meanG) $-$ AA 2-mer", "nt_v2_meanG - aa2"),
+        ("NT-v2 (meanG) $-$ 4-mer floor", "nt_v2_meanG - kmer"),
         ("ESM-2 650M $-$ AA 2-mer", "esm2_650m - aa2"),
         ("ESM-2 650M $-$ NT-v2 (best)", "esm2_650m - nt_v2_meanG"),
         ("ESM-2 650M $-$ ESM-2 150M", "esm2_650m - esm2_150m"),

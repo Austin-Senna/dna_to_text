@@ -276,8 +276,8 @@ def bootstrap_regression(dataset: str, alpha: float, shuffled: bool,
 # are the current recorded bests; they are refreshed by the homology-split
 # re-run before the final numbers are reported.
 PAIRED_CLS = [
-    ("nt_v2_meanD - aa2",  "nt_v2_meanD", 10.0,   "aa2",  1000.0),  # headline: DNA-LM vs AA composition
-    ("nt_v2_meanD - kmer", "nt_v2_meanD", 10.0,   "kmer", 1000.0),
+    ("nt_v2_meanG - aa2",  "nt_v2_meanG", 10.0,   "aa2",  1000.0),  # headline: DNA-LM (meanG, matches main table) vs AA composition
+    ("nt_v2_meanG - kmer", "nt_v2_meanG", 10.0,   "kmer", 1000.0),
     ("aa2 - kmer",         "aa2",         1000.0, "kmer", 1000.0),
     # ESM-2 protein-LM comparator (#9): vs AA composition, vs best DNA-LM, and scaling.
     ("esm2_650m - aa2",        "esm2_650m", 100.0, "aa2",         1000.0),
