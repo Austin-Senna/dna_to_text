@@ -40,17 +40,22 @@ coding sequence, but only up to protein composition (NT-v2 0.727 vs AA-2mer 0.73
 ESM-2 0.960); regulatory (TSS) context collapses to near chance (0.313); GenePT text
 recovery weak (R²=0.077). Numbers are the accepted MLCB results.
 
-## Open items before printing (see also ~/.claude/plans/…)
+## Status: draft complete (accuracy + visual passes done)
 
-1. **QR code** — currently a placeholder. Decide target (repo / paper PDF / Zenodo DOI),
-   then generate and drop into the header box.
-2. **Faculty mentor / lab** — URF template expects "Name, Mentor's Name/Lab". Confirm
-   whether a mentor line is required or the affiliation stays "Columbia University, CS".
-3. **Title wording** — subtitle currently reads "linear probes"; camera-ready may switch
-   to "linear evaluation". Pick one.
-4. **URF title/abstract** — confirm what was submitted at acceptance; edits allowed only
-   until Sept 24 (email ugrad-urf@columbia.edu).
-5. **Proofread** — one non-specialist read per URF guidance.
+Builds and passes all hard checks. An independent accuracy audit found zero numeric
+errors; a four-perspective visual pass (general-audience, expert, design, accessibility)
+drove the colour-blind-safe figures (bars grey/blue/orange; UMAP Okabe-Ito + marker
+shapes), legibility bumps, and general-audience scaffolding (higher-is-better cue, colour
+decoder, hero pull-stat, "Composition" vocab) now in place. Subtitle uses "linear
+evaluation"; no faculty mentor (Columbia CS affiliation only); QR points to this repo.
+
+## Open items before printing
+
+1. **Scan-test the QR** on the printed proof.
+2. **URF booklet title/abstract** — a general-audience draft exists; email
+   ugrad-urf@columbia.edu only if updating what's on file (deadline Sept 24).
+3. **Proofread** — one non-specialist read per URF guidance.
+4. **Submit** by Sept 24: Print Services portal + URF Poster Submission Form.
 
 ## Files
 
@@ -59,3 +64,5 @@ recovery weak (R²=0.077). Numbers are the accepted MLCB results.
   accessors + `scripts/build_umap_compare.py` UMAP compute (paper scripts untouched).
 - `build.sh` — pdflatex ×2 + verification prints.
 - `figures/` — generated vector PDFs (regenerable; safe to delete and rebuild).
+- `figures/qr.pdf` — QR to the repo; regenerate with:
+  `uv run --with segno python -c "import segno; segno.make('https://github.com/Austin-Senna/dna_to_text', error='m').save('poster/figures/qr.pdf', scale=12, border=2)"`
