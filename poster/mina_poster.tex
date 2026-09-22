@@ -159,7 +159,8 @@
     \centering\includegraphics[width=\linewidth]{substrate_collapse.pdf}\par\vspace{9pt}
     \RaggedRight\Large Swap coding sequence for the gene's 196{,}608 bp regulatory (TSS)
     window and family signal falls to near chance (NT-v2 \textbf{0.313} vs.\ 0.224).
-    Predicting a gene's natural-language description is weak throughout (best $R^2=0.077$).
+    Predicting a gene's natural-language description is weak everywhere (best
+    $R^2=0.077$ on coding sequence; near zero on the TSS window).
     The same collapse holds under a stricter \emph{disjoint}-TSS split
     (NT-v2 $0.313\!\rightarrow\!0.259$).
   \end{panel}
@@ -167,9 +168,10 @@
   \begin{panel}
     \panelhead{Honest evaluation matters}
     \centering\includegraphics[width=0.82\linewidth]{split_bars.pdf}\par\vspace{6pt}
-    \RaggedRight\Large A naive \textbf{random} split inflates every score, because
-    near-identical genes leak across train and test. The effect is largest for the
-    regulatory arm.
+    \RaggedRight\Large A naive \textbf{random} split inflates scores by letting
+    near-identical genes leak between train and test. ESM-2 barely moves
+    ($0.96$); the DNA encoders drop most (NT-v2 $0.83\!\rightarrow\!0.73$),
+    because part of their apparent skill was leaked look-alikes.
   \end{panel}
 
 \end{column}
