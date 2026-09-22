@@ -62,10 +62,8 @@
 \end{column}
 \begin{column}{0.17\paperwidth}
   \centering
-  \begin{tcolorbox}[enhanced,colback=white,colframe=colAccent!70,boxrule=1.1pt,arc=5pt,
-      width=7.5cm,halign=center,valign=center,height=7.5cm]
-    \large QR\\[4pt]repo / paper\\[4pt]\emph{(pending)}
-  \end{tcolorbox}\par\vspace{8pt}
+  \includegraphics[width=7cm]{qr.pdf}\par\vspace{1pt}
+  {\normalsize\color{black!70}Paper \& code}\par\vspace{9pt}
   {\Large\color{colAccent}\textbf{MLCB 2026 spotlight}}
 \end{column}
 \end{columns}
@@ -121,6 +119,7 @@
     \textbf{Frozen} --- the model is used as-is; we never retrain it.\\[6pt]
     \textbf{Linear probe} --- a tiny read-out we do train, to test what the numbers already contain.\\[6pt]
     \textbf{CDS} --- a gene's protein-coding sequence. \textbf{TSS window} --- the region around a gene's start, mostly regulatory (non-coding).\\[6pt]
+    \textbf{Composition} --- how often each short building block (k-mer or amino acid) appears, ignoring order.\\[6pt]
     \textbf{Homology-aware split} --- keep near-identical genes on the same side of train/test, so the model can't just recognise a look-alike.
   \end{panel}
 
@@ -139,12 +138,14 @@
 
   \begin{panel}
     \panelhead{\ldots but only up to composition}
-    \centering\includegraphics[width=\linewidth]{comparator_f1.pdf}\par\vspace{9pt}
-    \RaggedRight\Large The best DNA encoder (NT-v2, \textbf{0.727}) beats simple 4-mer
-    composition (0.633) --- but only \emph{ties} translated amino-acid composition
-    (0.735), and sits far below a dedicated protein model, ESM-2 (\textbf{0.960}).
-    And encoders are \emph{not} interchangeable: GENA-LM (0.415) falls below the baseline.
-    \par\vspace{7pt}{\large\color{colBlue}\textbf{Paired test:} vs.\ 4-mer
+    \centering\includegraphics[width=\linewidth]{comparator_f1.pdf}\par\vspace{5pt}
+    {\normalsize\color{black!70}Grey = simple counting baselines \textperiodcentered\ blue = the
+    DNA AI models tested \textperiodcentered\ orange = a specialized protein model (gold standard).}
+    \par\vspace{7pt}
+    \RaggedRight{\color{colBlue}\bfseries\Large The best AI model (0.73) only \emph{ties} plain
+    amino-acid counting (0.74), and trails the protein model (0.96). GENA-LM (0.41) even falls
+    below the baseline --- the encoders aren't interchangeable.}
+    \par\vspace{6pt}{\large\color{colBlue}\textbf{Paired test:} vs.\ 4-mer
     $+0.094\,[+0.030,+0.166]$; vs.\ amino-acid composition $-0.008\,[-0.064,+0.056]$,
     a statistical tie.}
   \end{panel}

@@ -113,7 +113,7 @@ def fig_comparator_f1():
     _grid(ax)
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=35, ha="right")
-    ax.set_ylabel("5-way family macro-F1")
+    ax.set_ylabel("5-way family macro-F1\n(higher is better)")
     _legend(ax, [Patch(facecolor=PC_COMP, label="composition baseline"),
                  Patch(facecolor=PC_DNA, label="frozen DNA encoder"),
                  Patch(facecolor=PC_ESM, hatch="//", label="ESM-2 (protein LM, ceiling)")],
@@ -141,7 +141,7 @@ def fig_substrate_collapse():
     ax.bar(x + w / 2, tss_f1, w, color=cols, alpha=0.42, hatch="//", edgecolor="white", linewidth=1.5)
     _chance(ax, x=-0.15)
     _grid(ax)
-    ax.set_ylabel("5-way family macro-F1")
+    ax.set_ylabel("5-way family macro-F1\n(higher is better)")
     ax.set_ylim(0, 1.15)
     _bar_labels(ax, x - w / 2, cds_f1, dy=0.015, fs=15)
     _bar_labels(ax, x + w / 2, tss_f1, dy=0.015, fs=15)
@@ -173,7 +173,7 @@ def fig_split_bars():
     ax.bar(x + w / 2, f1_hom, w, color=cols, edgecolor="white", linewidth=1.5)
     _chance(ax, x=-0.15)
     _grid(ax)
-    ax.set_ylabel("5-way family macro-F1")
+    ax.set_ylabel("5-way family macro-F1\n(higher is better)")
     ax.set_ylim(0, 1.15)
     _bar_labels(ax, x - w / 2, f1_rand, dy=0.016, fs=16)
     _bar_labels(ax, x + w / 2, f1_hom, dy=0.016, fs=16)
