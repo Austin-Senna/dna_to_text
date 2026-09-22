@@ -82,7 +82,7 @@
 
   \begin{panel}
     \panelhead{The question}
-    \Large DNA ``foundation models'' are increasingly used as off-the-shelf feature
+    \RaggedRight\Large DNA ``foundation models'' are increasingly used as off-the-shelf feature
     extractors, and often treated as interchangeable. \textbf{MINA asks a simple
     question:} what do their frozen embeddings \emph{already} know, with no extra
     training --- real biology, or surface patterns?
@@ -92,23 +92,23 @@
     \panelhead{How we tested it}
     \centering
     \begin{tikzpicture}[node distance=7mm]
-      \node[fbox,text width=23cm] (g)
+      \node[fbox,text width=24cm] (g)
         {\Large\textbf{3{,}244 human genes} in 5 families\\[7pt]
          {\large\famdot{famTF}~TF \ \ \famdot{famGPCR}~GPCR \ \ \famdot{famKin}~Kinase\\[5pt]
           \famdot{famIon}~Ion channel \ \ \famdot{famImm}~Immune receptor}};
-      \node[fbox,text width=22cm,below=of g] (e)
+      \node[fbox,text width=24cm,below=of g] (e)
         {\Large\textbf{4 frozen DNA encoders}\\[4pt]
          {\large DNABERT-2 \textperiodcentered\ NT-v2 \textperiodcentered\ GENA-LM
           \textperiodcentered\ HyenaDNA}\\[4pt]
          {\large\itshape weights never trained} $\rightarrow$ a fixed list of numbers};
-      \node[fbox,text width=22cm,below=of e] (p)
+      \node[fbox,text width=24cm,below=of e] (p)
         {\Large\textbf{Simple linear probe}\\[3pt]{\large the only part that learns}};
-      \node[fbox,text width=22cm,below=of p] (q)
+      \node[fbox,text width=24cm,below=of p] (q)
         {\Large\textbf{Two read-outs}\\[4pt]
          {\large Q1 \textperiodcentered\ which protein family?\\
           Q2 \textperiodcentered\ predict the gene's text description}};
       \draw[farr] (g)--(e); \draw[farr] (e)--(p); \draw[farr] (p)--(q);
-      \node[fbox,draw=cCompos,dash pattern=on 6pt off 4pt,text width=22cm,below=9mm of q]
+      \node[fbox,draw=cCompos,dash pattern=on 6pt off 4pt,text width=24cm,below=9mm of q]
         {\large Benchmarked against \textbf{counting amino acids} (composition)
          and a \textbf{real protein model} (ESM-2)};
     \end{tikzpicture}
@@ -116,7 +116,7 @@
 
   \begin{panel}
     \panelhead{Words to know}
-    \large
+    \RaggedRight\large
     \textbf{Encoder} --- an AI model that turns a DNA sequence into a list of numbers.\\[6pt]
     \textbf{Frozen} --- the model is used as-is; we never retrain it.\\[6pt]
     \textbf{Linear probe} --- a tiny read-out we do train, to test what the numbers already contain.\\[6pt]
@@ -132,9 +132,9 @@
   \begin{panel}
     \panelhead{Coding genes carry a family signal}
     \centering\includegraphics[width=\linewidth]{umap_cds_vs_tss.pdf}\par\vspace{9pt}
-    \RaggedRight\Large From a gene's \textbf{coding sequence}, the families separate on
-    their own (GPCRs, orange, split off cleanly). Feed the same genes' \textbf{regulatory
-    window} and the structure dissolves into one cloud.
+    \RaggedRight\Large \textbf{NT-v2} embeddings. From a gene's \textbf{coding sequence},
+    GPCRs (orange) split off cleanly and family structure is visible; feed the same genes'
+    \textbf{regulatory window} and the families dissolve into one cloud.
   \end{panel}
 
   \begin{panel}
@@ -180,7 +180,7 @@
 
 \vspace{10pt}
 \begin{takeaway}
-  {\color{colBlue}\bfseries\LARGE So what?}\enspace
+  \RaggedRight {\color{colBlue}\bfseries\LARGE So what?}\enspace
   \Large Don't treat DNA encoders as generic gene-function models. Trust a benchmark only
   if it has \textbf{(1)} a translated-composition baseline and \textbf{(2)} a homology-aware
   split --- otherwise memorised similarity masquerades as understanding.
@@ -191,11 +191,11 @@
 \vfill
 {\color{colAccent!60}\hrule height 1pt}
 \vspace{6pt}
-{\normalsize\color{cCompos}
- 3{,}244 human genes, 5 families \textperiodcentered\ 4 frozen DNA encoders $\times$ 6 poolings
- \textperiodcentered\ homology-aware split (MMseqs2, 40\% identity)
- \textperiodcentered\ macro-F1 with 95\% bootstrap CIs.\hfill
- References: GenePT; ESM-2 (Lin et al.); Nucleotide Transformer; DNABERT-2.\hfill
+{\large\color{black!68}%
+ \noindent 3{,}244 human genes, 5 families \textperiodcentered\ 4 frozen DNA encoders $\times$ 6 poolings (best pool)
+ \textperiodcentered\ homology-aware split (MMseqs2, 40\% id) \textperiodcentered\ macro-F1 vs.\ a
+ shuffled-label chance floor (0.224), with 95\% bootstrap CIs.\\[3pt]
+ \noindent References: GenePT; ESM-2 (Lin et al.); Nucleotide Transformer; DNABERT-2.\hfill
  Code: github.com/Austin-Senna/dna\_to\_text}
 
 \end{frame}
