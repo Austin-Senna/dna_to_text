@@ -3,7 +3,7 @@
 % Sans = Helvetica (URW, Type1) via helvet: this TeX Live has no luaotfload,
 % so lualatex+fontspec is unavailable; helvet embeds cleanly under pdflatex.
 \documentclass[final]{beamer}
-\usepackage[orientation=landscape,size=custom,width=104.14,height=91.44,scale=1.17]{beamerposter}
+\usepackage[orientation=landscape,size=custom,width=104.14,height=91.44,scale=1.14]{beamerposter}
 \usepackage[T1]{fontenc}
 \usepackage{helvet}
 \renewcommand{\familydefault}{\sfdefault}
@@ -144,6 +144,9 @@
     composition (0.633) --- but only \emph{ties} translated amino-acid composition
     (0.735), and sits far below a dedicated protein model, ESM-2 (\textbf{0.960}).
     And encoders are \emph{not} interchangeable: GENA-LM (0.415) falls below the baseline.
+    \par\vspace{7pt}{\large\color{colBlue}\textbf{Paired test:} vs.\ 4-mer
+    $+0.094\,[+0.030,+0.166]$; vs.\ amino-acid composition $-0.008\,[-0.064,+0.056]$,
+    a statistical tie.}
   \end{panel}
 
 \end{column}
@@ -157,6 +160,8 @@
     \RaggedRight\Large Swap coding sequence for the gene's 196{,}608 bp regulatory (TSS)
     window and family signal falls to near chance (NT-v2 \textbf{0.313} vs.\ 0.224).
     Predicting a gene's natural-language description is weak throughout (best $R^2=0.077$).
+    The same collapse holds under a stricter \emph{disjoint}-TSS split
+    (NT-v2 $0.313\!\rightarrow\!0.259$).
   \end{panel}
 
   \begin{panel}
@@ -171,7 +176,7 @@
 
 \end{columns}
 
-\vspace{18pt}
+\vspace{10pt}
 \begin{takeaway}
   {\color{colBlue}\bfseries\LARGE So what?}\enspace
   \Large Don't treat DNA encoders as generic gene-function models. Trust a benchmark only
