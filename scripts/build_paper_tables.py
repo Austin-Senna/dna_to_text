@@ -542,6 +542,12 @@ def build_seed_sensitivity():
     ]
     out = []
     for disp, cs, rs in cells:
+        # A row whose selected cell has not been re-probed on every seed is left out
+        # (and reported) rather than filled with a different cell's seed runs.
+        missing = [s for s in seeds if cs not in SEED[s]["cls"] or rs not in SEED[s]["reg"]]
+        if missing:
+            print(f"  seed table: omitting {disp} ({cs}/{rs}); no runs for seeds {missing}")
+            continue
         f1s = [CLS[cs]["test_macro_f1"]] + [SEED[s]["cls"][cs] for s in seeds]
         r2s = [REG[rs]["test_r2_macro"]] + [SEED[s]["reg"][rs] for s in seeds]
         out.append(f"{disp} & {f(min(f1s),3)}--{f(max(f1s),3)} "
