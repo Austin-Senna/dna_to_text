@@ -1,0 +1,96 @@
+[
+  {
+    "run_id": "logistic_enformer_trunk_global_family5_2026-09-24T18:52:30+00:00",
+    "timestamp": "2026-09-24T18:52:30+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_trunk_global",
+    "feature_source": "enformer_trunk_global",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.29854005432318687
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.42204922957523516
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.3909789199584708
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.39904586679916
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.3877859687092379
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.3807615147755257
+      }
+    ],
+    "test_macro_f1": 0.35651050321952066,
+    "test_kappa": 0.16144932677101342,
+    "test_balanced_accuracy": 0.32559210496410435,
+    "test_accuracy": 0.5215605749486653,
+    "test_per_class_accuracy": {
+      "gpcr": 0.20224719101123595,
+      "immune": 0.34782608695652173,
+      "ion": 0.06666666666666667,
+      "kinase": 0.21428571428571427,
+      "tf": 0.7969348659003831
+    }
+  },
+  {
+    "run_id": "logistic_enformer_trunk_center_family5_2026-09-24T18:52:36+00:00",
+    "timestamp": "2026-09-24T18:52:36+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_trunk_center",
+    "feature_source": "enformer_trunk_center",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.3774805530232551
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.3959154275100337
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.4090412925697369
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.39913945625708325
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.3724008472220259
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.373234371365793
+      }
+    ],
+    "test_macro_f1": 0.40101314727123877,
+    "test_kappa": 0.2460640653711793,
+    "test_balanced_accuracy": 0.38928778253997665,
+    "test_accuracy": 0.5277207392197125,
+    "test_per_class_accuracy": {
+      "gpcr": 0.25842696629213485,
+      "immune": 0.43478260869565216,
+      "ion": 0.2,
+      "kinase": 0.32142857142857145,
+      "tf": 0.7318007662835249
+    }
+  }
+]

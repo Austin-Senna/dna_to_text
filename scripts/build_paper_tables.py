@@ -18,6 +18,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from data_loader.pool_names import POOL_DISPLAY, display_label
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 OUT = ROOT / "dna_to_text_paper" / "paper" / "tables"
@@ -111,8 +113,8 @@ def sgn(x, d=4):
     return f"{x:+.{d}f}"
 
 
-def tt(s):
-    return r"\texttt{" + s + "}" if s and s != "base" else "---"
+def pool_name(s):
+    return POOL_DISPLAY[s] if s and s != "base" else "---"
 
 
 def bold(s):
@@ -183,6 +185,9 @@ SPECS = {
     "s_paired_diff": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.4}\selectfont",
                           width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lcr@{}",
                           header=r"Comparison & $\Delta$ [95\% CI] & $P(A{>}B)$"),
+    "s_tss_anchored": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
+                           width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrcr@{}",
+                           header=r"Model & Whole window & TSS-Anchored [95\% CI] & 4-mer+GC"),
     "s_ridge_robust": dict(setup=r"\setlength{\tabcolsep}{3pt}",
                            width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
                            header=r"Method & Macro-$R^2$ & Pooled-$R^2$ & Retr.@5 & Med.\ rank"),
@@ -286,7 +291,7 @@ def build_family5_main():
                      r["test_kappa"], r["test_accuracy"], False))
     for enc in ENCODERS:
         pool, r = cls_best_pool(enc)
-        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_macro_f1"], r["test_macro_f1"] - base_f1,
+        rows.append((ENC_DISPLAY[enc], pool_name(pool), r["test_macro_f1"], r["test_macro_f1"] - base_f1,
                      r["test_kappa"], r["test_accuracy"], False))
     # bold per-column max among non-controls; ESM-2 added below as upper bound
     body = render_main_rows(rows, dp=3, cols=("f1", "df1", "kappa", "acc"),
@@ -335,7 +340,7 @@ def build_ridge_main():
                      r["test_mean_cosine"]))
     for enc in ENCODERS:
         pool, r = reg_best_pool(enc)
-        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_r2_macro"],
+        rows.append((ENC_DISPLAY[enc], pool_name(pool), r["test_r2_macro"],
                      r["test_r2_macro"] - base_r2, r["test_mean_cosine"]))
     # bold per-column max among non-controls; ESM-2 added below as upper bound
     best_r2 = max(r[2] for r in rows)
@@ -362,8 +367,8 @@ def build_ridge_main():
 # 4-mer R^2 is itself below noise (<0), so a within-TSS R^2 delta would be
 # anchored to a sub-zero baseline; absolute TSS R^2 (all at noise) is reported
 # instead (regression deltas are within CDS only, per Methods).
-# Enformer: a single best-F1 variant (trunk_center) is reported across
-# F1/kappa/R^2 so the columns never mix variants.
+# Enformer: its whole-window mean (trunk_global), pooled like the encoder rows;
+# the central 2,048 bp readout belongs with TSS-Anchored pooling (s_tss_anchored).
 # ===================================================================
 def build_cds_tss():
     out = []
@@ -410,12 +415,11 @@ def build_cds_tss():
         if enc == "nt_v2":
             name = bold(name)
         out.append(f"\\quad {name} & {f1t} & {df1t} & {f(k,3)} & {f(r2,3)} & {sgn(dr2,3)} \\\\")
-    enf_cls = max((r for r in ENFH if r.get("task") == "family5"),
-                  key=lambda r: r["test_macro_f1"])
-    enf_var = enf_cls["feature_source"]  # e.g. enformer_trunk_center
+    enf_var = "enformer_trunk_global"
+    enf_cls = next(r for r in ENFH if r.get("task") == "family5" and r["feature_source"] == enf_var)
     enf_reg = next(r for r in ENFH if r.get("task") is None and enf_var in (r.get("dataset") or ""))
     enf_f1 = enf_cls["test_macro_f1"]; enf_k = enf_cls["test_kappa"]; enf_r2 = enf_reg["test_r2_macro"]
-    out.append(f"\\quad Enformer$^\\dagger$ & {f(enf_f1,3)} & {sgn(enf_f1-tb_f1,3)} & {f(enf_k,3)} & {f(enf_r2,3)} & {sgn(enf_r2-tb_r2,3)} \\\\")
+    out.append(f"\\quad Enformer (whole window) & {f(enf_f1,3)} & {sgn(enf_f1-tb_f1,3)} & {f(enf_k,3)} & {f(enf_r2,3)} & {sgn(enf_r2-tb_r2,3)} \\\\")
     return "\n".join(out)
 
 
@@ -438,7 +442,7 @@ def build_pooling_full():
         for pool in POOLS:
             fsrc = f"{enc}_{pool}"
             if fsrc in CLS:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), CLS[fsrc]))
+                out.append(row(ENC_DISPLAY[enc], pool_name(pool), CLS[fsrc]))
     out.append(r"\midrule")
     out.append(r"\multicolumn{6}{@{}l}{\textbf{Protein language model (translated CDS)}}\\")
     for rid, disp in ESM:
@@ -456,7 +460,7 @@ def build_pooling_full():
         for pool in POOLS:
             fsrc = f"tss_{enc}_{pool}"
             if fsrc in CLS:
-                out.append(trow(ENC_DISPLAY[enc], tt(pool), CLS[fsrc]))
+                out.append(trow(ENC_DISPLAY[enc], pool_name(pool), CLS[fsrc]))
     return "\n".join(out)
 
 
@@ -481,7 +485,7 @@ def build_regression_full():
         for pool in POOLS:
             s = f"{enc}_{pool}"
             if s in REG:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), REG[s]))
+                out.append(row(ENC_DISPLAY[enc], pool_name(pool), REG[s]))
     out.append(r"\midrule")
     out.append(r"\multicolumn{6}{@{}l}{\textbf{Protein language model (translated CDS)}}\\")
     for rid, disp in ESM:
@@ -493,7 +497,7 @@ def build_regression_full():
         for pool in POOLS:
             s = f"tss_{enc}_{pool}"
             if s in REG:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), REG[s], delta=False))
+                out.append(row(ENC_DISPLAY[enc], pool_name(pool), REG[s], delta=False))
     return "\n".join(out)
 
 
@@ -593,7 +597,7 @@ def build_headline_ci_cls():
     rule1 = len(rows)  # \midrule after shuffled + composition
     for enc in ENCODERS:
         pool, r = cls_best_pool(enc)
-        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_macro_f1"],
+        rows.append((ENC_DISPLAY[enc], pool_name(pool), r["test_macro_f1"],
                      r["test_kappa"], f"{enc}_{pool}"))
     rule2 = len(rows)  # \midrule before ESM-2 upper bound
     e = CLS["esm2_650m"]
@@ -616,12 +620,13 @@ def build_headline_ci_reg():
     rule1 = len(rows)
     for enc in ENCODERS:
         pool, r = reg_best_pool(enc)
-        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_r2_macro"], f"{enc}_{pool}"))
+        rows.append((ENC_DISPLAY[enc], pool_name(pool), r["test_r2_macro"], f"{enc}_{pool}"))
     rule2 = len(rows)
     rows.append(("ESM-2 650M", "---", REG["esm2_650m"]["test_r2_macro"], "esm2_650m"))
     out = []
     for i, (disp, pool, r2, key) in enumerate(rows):
-        r2c = f"{f(r2, 3)} {_ci(br[key]['r2_macro_ci95'])}"
+        # 4 dp: the AA 3-mer vs AA 2-mer gap (0.0904 vs 0.0604) was quoted to R1 at this precision.
+        r2c = f"{f(r2, 4)} {_ci(br[key]['r2_macro_ci95'], 4)}"
         out.append(f"{disp} & {pool} & {r2c} \\\\")
         if i + 1 in (rule1, rule2):
             out.append(r"\midrule")
@@ -855,7 +860,7 @@ def build_pooling_full_random():
         for pool in POOLS:
             fsrc = f"{enc}_{pool}"
             if fsrc in CLS_RAND:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), CLS_RAND[fsrc]))
+                out.append(row(ENC_DISPLAY[enc], pool_name(pool), CLS_RAND[fsrc]))
     out.append(r"\midrule")
     out.append(r"\multicolumn{5}{l}{\textbf{Protein language model (translated CDS)}}\\")
     for rid, disp in ESM:
@@ -874,7 +879,7 @@ def build_pooling_full_random():
         for pool in POOLS:
             fsrc = f"tss_{enc}_{pool}"
             if fsrc in CLS_RAND:
-                out.append(trow(ENC_DISPLAY[enc], tt(pool), CLS_RAND[fsrc]))
+                out.append(trow(ENC_DISPLAY[enc], pool_name(pool), CLS_RAND[fsrc]))
     return "\n".join(out)
 
 
@@ -897,7 +902,7 @@ def build_regression_full_random():
         for pool in POOLS:
             s = f"{enc}_{pool}"
             if s in REG_RAND:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), REG_RAND[s]))
+                out.append(row(ENC_DISPLAY[enc], pool_name(pool), REG_RAND[s]))
     out.append(r"\midrule")
     out.append(r"\multicolumn{6}{@{}l}{\textbf{Protein language model (translated CDS)}}\\")
     for rid, disp in ESM:
@@ -909,7 +914,7 @@ def build_regression_full_random():
         for pool in POOLS:
             s = f"tss_{enc}_{pool}"
             if s in REG_RAND:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), REG_RAND[s], delta=False))
+                out.append(row(ENC_DISPLAY[enc], pool_name(pool), REG_RAND[s], delta=False))
     return "\n".join(out)
 
 
@@ -935,7 +940,7 @@ def _cell_order():
     yield ("rule",)
     for enc in ENCODERS:
         for pool in POOLS:
-            yield ("row", ENC_DISPLAY[enc], tt(pool), f"{enc}_{pool}")
+            yield ("row", ENC_DISPLAY[enc], pool_name(pool), f"{enc}_{pool}")
     yield ("rule",)  # ESM-2 set off by a rule, like Table 6 (no sub-header)
     for rid, disp in ESM:
         yield ("row", disp, "---", rid)
@@ -944,20 +949,20 @@ def _cell_order():
     yield ("rule",)
     for enc in ENCODERS:
         for pool in POOLS:
-            yield ("row", ENC_DISPLAY[enc], tt(pool), f"tss_{enc}_{pool}")
+            yield ("row", ENC_DISPLAY[enc], pool_name(pool), f"tss_{enc}_{pool}")
     yield ("rule",)  # supervised Enformer TSS comparator, set off like Table 6
     yield ("row", "Enformer", "---", "enformer_trunk_center")
 
 
 def _side_by_side(homidx, randidx, mcells):
-    """Body rows for a side-by-side matrix: Enc|Pool|<hom metrics> | Enc|Pool|<rand metrics>."""
+    """Body rows for a side-by-side matrix: Enc|Pool|<hom metrics> | <rand metrics>."""
     out, first = [], True
     for item in _cell_order():
         kind = item[0]
         if kind == "ctx":
             if not first:
                 out.append(r"\midrule")
-            out.append(r"\multicolumn{10}{l}{\textbf{" + item[1] + r"}}\\")
+            out.append(r"\multicolumn{8}{l}{\textbf{" + item[1] + r"}}\\")
             first = False
         elif kind == "rule":
             out.append(r"\midrule")
@@ -966,31 +971,32 @@ def _side_by_side(homidx, randidx, mcells):
             h, r = homidx.get(key), randidx.get(key)
             if h is None and r is None:
                 continue
-            out.append(f"{disp} & {pool} & {mcells(h)} & {disp} & {pool} & {mcells(r)} \\\\")
+            out.append(f"{disp} & {pool} & {mcells(h)} & {mcells(r)} \\\\")
     return "\n".join(out)
 
 
-def _side_longtable(caption, label, names, body):
-    """Complete full-width page-breaking longtable with two side-by-side 5-column
-    blocks (homology | random). Generated whole so the \\input sits at top level."""
-    hdr = (r"\multicolumn{5}{c}{\textbf{Homology-aware split}} & "
-           r"\multicolumn{5}{c}{\textbf{Random-stratified split}} \\" + "\n"
-           + names + " & " + names + r" \\")
+def _side_longtable(caption, label, metrics, body):
+    """Complete full-width page-breaking longtable: shared Source|Pooling columns,
+    then the homology and random-split metric blocks side by side. Generated
+    whole so the \\input sits at top level."""
+    hdr = (r" & & \multicolumn{3}{c}{\textbf{Homology-aware split}} & "
+           r"\multicolumn{3}{c}{\textbf{Random-stratified split}} \\" + "\n"
+           + "Source & Pooling & " + metrics + " & " + metrics + r" \\")
     return "\n".join([
         r"{\scriptsize",
         r"\setlength{\tabcolsep}{4pt}\setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}\setlength{\LTcapwidth}{\textwidth}",
-        r"\begin{longtable}{@{}llrrr@{\hspace{0.9em}\vrule width 1.1pt\hspace{0.9em}}llrrr@{}}",
+        r"\begin{longtable}{@{}llrrr@{\hspace{0.9em}\vrule width 1.1pt\hspace{0.9em}}rrr@{}}",
         r"\caption{" + caption + r"\label{" + label + r"}}\\",
         r"\toprule",
         hdr,
         r"\midrule",
         r"\endfirsthead",
-        r"\multicolumn{10}{l}{\emph{\tablename~\thetable\ -- continued}}\\",
+        r"\multicolumn{8}{l}{\emph{\tablename~\thetable\ -- continued}}\\",
         r"\toprule",
         hdr,
         r"\midrule",
         r"\endhead",
-        r"\midrule \multicolumn{10}{r}{\emph{continued on next page}}\\",
+        r"\midrule \multicolumn{8}{r}{\emph{continued on next page}}\\",
         r"\endfoot",
         r"\bottomrule",
         r"\endlastfoot",
@@ -1012,7 +1018,7 @@ def _pool_section(idx):
         for pool in POOLS:
             fsrc = f"{enc}_{pool}"
             if fsrc in idx:
-                o.append(crow(ENC_DISPLAY[enc], tt(pool), idx[fsrc]))
+                o.append(crow(ENC_DISPLAY[enc], pool_name(pool), idx[fsrc]))
     if any(rid in idx for rid, _ in ESM):
         o.append(r"\midrule")
         o.append(r"\multicolumn{5}{l}{\textit{Protein language model (translated CDS)}}\\")
@@ -1027,7 +1033,7 @@ def _pool_section(idx):
         for pool in POOLS:
             fsrc = f"tss_{enc}_{pool}"
             if fsrc in idx:
-                o.append(crow(ENC_DISPLAY[enc], tt(pool), idx[fsrc]))
+                o.append(crow(ENC_DISPLAY[enc], pool_name(pool), idx[fsrc]))
     return o
 
 
@@ -1046,10 +1052,10 @@ def build_pooling_combined():
         r"Encoder-pooling cells for 5-way family classification, CDS and TSS: "
         r"homology-aware split (left) versus random-stratified split (right). "
         r"Random DNA-LM runs have no cached $\kappa$ (shown ``---''); the "
-        r"supervised Enformer comparator (\texttt{trunk\_center}) closes the "
+        r"supervised Enformer comparator (central 2{,}048\,bp readout) closes the "
         r"TSS block.",
         "tab:s-pooling-full",
-        r"Source & Pooling & Macro-F1 & $\kappa$ & Accuracy",
+        r"Macro-F1 & $\kappa$ & Accuracy",
         _side_by_side({**CLS, "enformer_trunk_center": enf}, CLS_RAND, mc))
 
 
@@ -1068,7 +1074,7 @@ def _reg_section(idx):
         for pool in POOLS:
             s = f"{enc}_{pool}"
             if s in idx:
-                o.append(rrow(ENC_DISPLAY[enc], tt(pool), idx[s]))
+                o.append(rrow(ENC_DISPLAY[enc], pool_name(pool), idx[s]))
     if any(rid in idx for rid, _ in ESM):
         o.append(r"\midrule")
         o.append(r"\multicolumn{5}{l}{\textit{Protein language model (translated CDS)}}\\")
@@ -1083,7 +1089,7 @@ def _reg_section(idx):
         for pool in POOLS:
             s = f"tss_{enc}_{pool}"
             if s in idx:
-                o.append(rrow(ENC_DISPLAY[enc], tt(pool), idx[s]))
+                o.append(rrow(ENC_DISPLAY[enc], pool_name(pool), idx[s]))
     return o
 
 
@@ -1101,9 +1107,9 @@ def build_regression_combined():
     return _side_longtable(
         r"Ridge-to-GenePT cells, CDS and TSS: homology-aware split (left) "
         r"versus random-stratified split (right). The supervised Enformer "
-        r"comparator (\texttt{trunk\_center}) closes the TSS block.",
+        r"comparator (central 2{,}048\,bp readout) closes the TSS block.",
         "tab:s-regression-full",
-        r"Source & Pooling & $R^2$ macro & Mean cosine & $\alpha$",
+        r"$R^2$ macro & Mean cosine & $\alpha$",
         _side_by_side({**REG, "enformer_trunk_center": enf}, REG_RAND, mc))
 
 
@@ -1127,6 +1133,58 @@ def build_tss_disjoint():
         h = _best_f1_family5(M, enc, tss=True)
         d = _best_f1_family5(MTD, enc, tss=True)
         out.append(f"{ENC_DISPLAY[enc]} & {f(h,3)} & {f(d,3)} & {sgn(d-h,3)} \\\\")
+    out.append(r"\midrule")
+    EP = load("enformer_pooling.json")
+    for src, disp in (("enformer_trunk_global", "Enformer (whole window)"),
+                      ("enformer_trunk_center", "Enformer (central 2{,}048\\,bp)")):
+        h = EP["homology"]["enformer_cells"][src]["macro_f1_point"]
+        d = EP["disjoint"]["enformer_cells"][src]["macro_f1_point"]
+        out.append(f"{disp} & {f(h,3)} & {f(d,3)} & {sgn(d-h,3)} \\\\")
+    return "\n".join(out)
+
+
+# ===================================================================
+# Supplementary (MLCB E5): TSS-Anchored vs whole-window pooling (R2 point 3).
+# Per split: each encoder's best whole-window pool (frozen paper value), the TSS-Anchored
+# chunk with its test-set bootstrap CI, and 4-mer+GC composition of the same chunk.
+# Enformer pairs its whole-window mean with its central 2,048 bp readout. No paired
+# delta column: paired_tss_anchored.json was fit under a different probe max_iter than
+# the anchored cells, so its points do not reconcile with these columns.
+# ===================================================================
+def build_tss_anchored():
+    BA = {(r["encoder"], r["split"]): r for r in load("bootstrap_tss_anchored.json")}
+    EP = load("enformer_pooling.json")
+    whole_metrics = {"homology": M, "disjoint": load("metrics_tss_disjoint.json")}
+    comp_metrics = {"homology": load("metrics_tss_composition.json"),
+                    "disjoint": load("metrics_tss_composition_disjoint.json")}
+
+    def cell(metrics, src):
+        return next(r for r in metrics if r.get("task") == "family5"
+                    and not r.get("shuffled_labels") and r["feature_source"] == src)["test_macro_f1"]
+
+    def with_ci(point, pair, clears):
+        txt = f"{f(point,3)} [{f(pair[0],3)}, {f(pair[1],3)}]"
+        return bold(txt) if clears else txt
+
+    out = []
+    for split, title in (("homology", "Homology-aware split"),
+                         ("disjoint", "Genomic-interval-disjoint split")):
+        if out:
+            out.append(r"\midrule")
+        out.append(r"\multicolumn{4}{@{}l}{\textbf{" + title + r"}}\\")
+        mt = whole_metrics[split]
+        for enc in ENCODERS:
+            b = BA[(enc, split)]
+            whole = _best_f1_family5(mt, enc, tss=True)
+            comp = cell(comp_metrics[split], f"tss_{enc}_chunk4mergc")
+            out.append(f"{ENC_DISPLAY[enc]} & {f(whole,3)} & "
+                       f"{with_ci(b['macro_f1_point'], b['macro_f1_ci95'], b['macro_f1_ci95'][0] > whole)} "
+                       f"& {f(comp,3)} \\\\")
+        cells = EP[split]["enformer_cells"]
+        g, c = cells["enformer_trunk_global"], cells["enformer_trunk_center"]
+        out.append(f"Enformer & {f(g['macro_f1_point'],3)} & "
+                   f"{with_ci(c['macro_f1_point'], c['macro_f1_ci95'], c['macro_f1_ci95'][0] > g['macro_f1_point'])} "
+                   f"& --- \\\\")
     return "\n".join(out)
 
 
@@ -1139,8 +1197,8 @@ def build_paired_diff():
     pc, pr = BOOT["paired"]["classification"], BOOT["paired"]["regression"]
     out = [r"\multicolumn{3}{@{}l}{\textbf{Classification ($\Delta$Macro-F1)}}\\"]
     for disp, key in [
-        ("NT-v2 (meanG) $-$ AA 2-mer", "nt_v2_meanG - aa2"),
-        ("NT-v2 (meanG) $-$ 4-mer floor", "nt_v2_meanG - kmer"),
+        (f"NT-v2 ({POOL_DISPLAY['meanG']}) $-$ AA 2-mer", "nt_v2_meanG - aa2"),
+        (f"NT-v2 ({POOL_DISPLAY['meanG']}) $-$ 4-mer floor", "nt_v2_meanG - kmer"),
         ("ESM-2 650M $-$ AA 2-mer", "esm2_650m - aa2"),
         ("ESM-2 650M $-$ NT-v2 (best)", "esm2_650m - nt_v2_meanG"),
         ("ESM-2 650M $-$ ESM-2 150M", "esm2_650m - esm2_150m"),
@@ -1173,7 +1231,7 @@ def build_paired_diff():
 def build_ridge_robust():
     RR = load("ridge_robust.json")
     return "\n".join(
-        f"{r['label']} & {f(r['macro_r2'],3)} & {f(r['pooled_r2'],3)} "
+        f"{display_label(r['label']).replace('SHUFFLED-TARGET', 'Shuffled-target')} & {f(r['macro_r2'],3)} & {f(r['pooled_r2'],3)} "
         f"& {r['top5']*100:.1f}\\% & {r['median_rank']:.0f} \\\\"
         for r in RR
     )
@@ -1193,6 +1251,7 @@ def main():
     write("s_tss_disjoint", build_tss_disjoint())
     write("s_paired_diff", build_paired_diff())
     write("s_ridge_robust", build_ridge_robust())
+    write("s_tss_anchored", build_tss_anchored())
     print("\nAll fragments written to", OUT)
 
 

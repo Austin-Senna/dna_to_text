@@ -6,8 +6,9 @@ the LaTeX caption is the title, per repo convention).
         (comparator) on macro-F1 (sec 3.1) and GenePT R^2 (sec 3.2).
   pooling_heatmap_family5_column.png  -- encoder x pooling macro-F1 heatmap
         (sec 3.3), adaptive label colours for legibility.
-  substrate_collapse.png  -- CDS vs TSS macro-F1 for 4-mer + DNA encoders, plus
-        the supervised Enformer TSS comparator (sec 3.4).
+  tss_context.png  -- TSS arm in one panel: per model, CDS vs TSS whole-window vs
+        TSS-Anchored macro-F1, Enformer pooled to match, plus the anchored chunk's
+        best composition baseline (sec 3.4).
   split_bars.png  -- random vs homology grouped bars per comparator (sec 3.5).
 
 Run: uv run scripts/build_result_figures.py
@@ -24,6 +25,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
 
+from data_loader.pool_names import POOL_DISPLAY
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 OUT = ROOT / "dna_to_text_paper" / "paper" / "figures"
@@ -32,6 +35,8 @@ M = json.loads((DATA / "metrics_homology.json").read_text())
 RAND = json.loads((DATA / "metrics.json").read_text())
 RANDC = json.loads((DATA / "metrics_random_comparators.json").read_text())
 ENFH = json.loads((DATA / "metrics_enformer_homology.json").read_text())
+ANCH = json.loads((DATA / "metrics_tss_anchored.json").read_text())
+COMP = json.loads((DATA / "metrics_tss_composition.json").read_text())
 
 ENCODERS = ["dnabert2", "nt_v2", "gena_lm", "hyena_dna"]
 ENC_DISP = {"dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "gena_lm": "GENA-LM", "hyena_dna": "HyenaDNA"}
@@ -183,59 +188,54 @@ def fig_comparator_r2():
     _comparator_panel(r2_of, "Ridge-to-GenePT $R^2$", (0, 0.20), None, "comparator_r2.png", fmt="{:.3f}")
 
 
-def fig_substrate_collapse():
-    cats = ["CDS 4-mer"] + [ENC_DISP[e] for e in ENCODERS] + ["Enformer"]
-    cols = [C_COMP] + [C_DNA] * 4 + [C_ESM]
+def fig_tss_context():
+    """TSS arm in one panel (homology split): per model, CDS | TSS whole-window | TSS-Anchored.
+
+    Every TSS bar pools the same way across models: encoders at their best whole-window
+    rule vs the chunk nearest the TSS; Enformer at its whole-window mean (``trunk_global``)
+    vs its central 2,048 bp readout (``trunk_center``). The 4-mer has no anchored bar
+    because its chunk depends on the encoder. Diamonds: the best composition baseline
+    (4-mer+GC or 6-mer) of each encoder's anchored chunk.
+    """
+    enf = {r["feature_source"]: r["test_macro_f1"] for r in ENFH if r.get("task") == "family5"}
+    cats = ["4-mer"] + [ENC_DISP[e] for e in ENCODERS] + ["Enformer"]
+    hues = [C_COMP] + [C_DNA] * 4 + [C_ESM]
+    cds = [_cell_cls(M, "kmer")] + [_best_cls(M, e, False) for e in ENCODERS] + [np.nan]
+    whole = [_cell_cls(M, "enformer_tss_4mer")] + [_best_cls(M, e, True) for e in ENCODERS] \
+        + [enf["enformer_trunk_global"]]
+    anchored = [np.nan] + [_cell_cls(ANCH, f"tss_{e}_tssanchored") for e in ENCODERS] \
+        + [enf["enformer_trunk_center"]]
+    comp = [max(_cell_cls(COMP, f"tss_{e}_{v}") for v in ("chunk4mergc", "chunk6mer")) for e in ENCODERS]
+
     x = np.arange(len(cats))
-    w = 0.38
-
-    # classification (macro-F1), CDS vs TSS
-    kmer_cds_f1 = next(r["test_macro_f1"] for r in M if r.get("task") == "family5" and r["feature_source"] == "kmer")
-    kmer_tss_f1 = next(r["test_macro_f1"] for r in M if r.get("task") == "family5" and r["feature_source"] == "enformer_tss_4mer")
-    enf_cls = max((r for r in ENFH if r.get("task") == "family5"), key=lambda r: r["test_macro_f1"])
-    enf_var = enf_cls["feature_source"]  # best-F1 Enformer variant (trunk_center)
-    cds_f1 = [kmer_cds_f1] + [_best_cls(M, e, False, "test_macro_f1") for e in ENCODERS] + [np.nan]
-    tss_f1 = [kmer_tss_f1] + [_best_cls(M, e, True, "test_macro_f1") for e in ENCODERS] + [enf_cls["test_macro_f1"]]
-
-    # regression (Ridge-to-GenePT R^2), CDS vs TSS -- same Enformer variant
-    enf_tss_r2 = next(r["test_r2_macro"] for r in ENFH if r.get("task") is None and enf_var in str(r.get("dataset", "")))
-    cds_r2 = [_cell_reg(M, "kmer")] + [_best_reg_enc_ctx(M, e, False) for e in ENCODERS] + [np.nan]
-    tss_r2 = [_cell_reg(M, "enformer_tss_4mer")] + [_best_reg_enc_ctx(M, e, True) for e in ENCODERS] + [enf_tss_r2]
-
-    fig, (axT, axB) = plt.subplots(2, 1, figsize=(7.0, 6.0), sharex=True)
-
-    # (top) macro-F1
-    axT.bar(x - w / 2, cds_f1, w, color=cols, edgecolor="white")
-    axT.bar(x + w / 2, tss_f1, w, color=cols, alpha=0.45, hatch="//", edgecolor="white")
-    axT.axhline(FLOOR, color="#555", ls="--", lw=0.9)
-    axT.text(0.0, FLOOR + 0.012, f"chance {FLOOR:.3f}", fontsize=8, color="#555")
-    _no_title(axT)
-    axT.set_ylabel("5-way family macro-F1 (best pool)")
-    axT.set_ylim(0, 0.8)
-    _label_bars(axT, x - w / 2, cds_f1, fmt="{:.2f}", fontsize=7.5, dy=0.008)
-    _label_bars(axT, x + w / 2, tss_f1, fmt="{:.2f}", fontsize=7.5, dy=0.008)
-    axT.legend(handles=[Patch(facecolor="#777", label="CDS"),
-                        Patch(facecolor="#777", alpha=0.45, hatch="//", label="TSS window"),
-                        Patch(facecolor=C_ESM, label="supervised comparator (TSS)")],
-               fontsize=8.5, frameon=False)
-
-    # (bottom) Ridge-to-GenePT R^2
-    axB.bar(x - w / 2, cds_r2, w, color=cols, edgecolor="white")
-    axB.bar(x + w / 2, tss_r2, w, color=cols, alpha=0.45, hatch="//", edgecolor="white")
-    axB.axhline(0, color="#555", lw=0.8)
-    _no_title(axB)
-    axB.set_ylabel("Ridge-to-GenePT $R^2$ (best pool)")
-    axB.set_ylim(-0.05, 0.12)
-    _label_bars(axB, x - w / 2, cds_r2, fmt="{:.3f}", fontsize=7.5, dy=0.003)
-    _label_bars(axB, x + w / 2, tss_r2, fmt="{:.3f}", fontsize=7.5, dy=0.003)
-    axB.set_xticks(x)
-    axB.set_xticklabels(cats, fontsize=9)
+    w = 0.27
+    fig, ax = plt.subplots(figsize=(11.0, 4.0))
+    ax.bar(x - w, cds, w, color=hues, edgecolor="white")
+    ax.bar(x, whole, w, color=hues, alpha=0.4, hatch="//", edgecolor="white")
+    ax.bar(x + w, anchored, w, color=hues, alpha=0.75, edgecolor="#222", linewidth=0.9)
+    ax.scatter(x[1:5] + w, comp, marker="D", s=24, color="#222", zorder=3)
+    for xs, vals in ((x - w, cds), (x, whole), (x + w, anchored)):
+        _label_bars(ax, xs, vals, fontsize=8.5, dy=0.008)
+    ax.axhline(FLOOR, color="#555", ls="--", lw=0.9)
+    _no_title(ax)
+    ax.set_ylim(0, 0.95)
+    ax.set_ylabel("5-way family macro-F1", fontsize=10)
+    ax.set_xticks(x)
+    ax.set_xticklabels(cats, fontsize=10)
+    ax.legend(handles=[Patch(facecolor="#777", label="CDS"),
+                       Patch(facecolor="#777", alpha=0.4, hatch="//", label="TSS window, whole-window pooling"),
+                       Patch(facecolor="#777", alpha=0.75, edgecolor="#222", linewidth=0.9,
+                             label="TSS-Anchored (Enformer: central 2,048 bp)"),
+                       plt.Line2D([], [], marker="D", color="#222", ls="", markersize=5,
+                                  label="best composition of the anchored chunk"),
+                       plt.Line2D([], [], color="#555", ls="--", lw=0.9, label=f"chance ({FLOOR:.3f})")],
+              fontsize=8.5, frameon=False, loc="upper right", ncol=2)
 
     fig.tight_layout()
-    fig.savefig(OUT / "substrate_collapse.png", dpi=180, bbox_inches="tight")
+    fig.savefig(OUT / "tss_context.png", dpi=180, bbox_inches="tight")
     plt.close(fig)
-    print("substrate F1 CDS:", [round(v, 3) for v in cds_f1], "TSS:", [round(v, 3) for v in tss_f1])
-    print("substrate R2 CDS:", [round(v, 3) for v in cds_r2], "TSS:", [round(v, 3) for v in tss_r2])
+    print("tss_context CDS:", [round(v, 3) for v in cds], "whole:", [round(v, 3) for v in whole],
+          "anchored:", [round(v, 3) for v in anchored], "comp:", [round(v, 3) for v in comp])
 
 
 def fig_split_bars():
@@ -288,7 +288,7 @@ def fig_pooling_heatmap():
 
     Per-cell labels use an adaptive text colour (white on dark cells, black on
     light) keyed to colormap luminance, so the dark NT-v2 row stays legible;
-    pool names are monospaced to match their \\texttt rendering in the paper.
+    pool names use the reader-facing labels from ``pool_names.POOL_DISPLAY``.
     """
     vals = np.full((len(ENCODERS), len(POOLS)), np.nan)
     for i, enc in enumerate(ENCODERS):
@@ -303,7 +303,7 @@ def fig_pooling_heatmap():
     im = ax.imshow(vals, cmap=cmap, vmin=vmin, vmax=vmax)
     ax.set_xticks(range(len(POOLS)))
     ax.set_yticks(range(len(ENCODERS)))
-    ax.set_xticklabels(POOLS, rotation=35, ha="right", fontfamily="monospace")
+    ax.set_xticklabels([POOL_DISPLAY[p] for p in POOLS], rotation=35, ha="right")
     ax.set_yticklabels([ENC_DISP[e] for e in ENCODERS])
     for i in range(len(ENCODERS)):
         for j in range(len(POOLS)):
@@ -328,7 +328,7 @@ def main():
     fig_comparator_f1()
     fig_comparator_r2()
     fig_pooling_heatmap()
-    fig_substrate_collapse()
+    fig_tss_context()
     fig_split_bars()
     print("wrote figures to", OUT)
 

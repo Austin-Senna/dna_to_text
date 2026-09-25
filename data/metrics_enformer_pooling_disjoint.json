@@ -1,0 +1,96 @@
+[
+  {
+    "run_id": "logistic_enformer_trunk_global_family5_2026-09-24T18:53:14+00:00",
+    "timestamp": "2026-09-24T18:53:14+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_trunk_global",
+    "feature_source": "enformer_trunk_global",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.35454012371209825
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.44813527112501284
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.4435023329770873
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.42001319714722857
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.4004589793495229
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.4198495948495949
+      }
+    ],
+    "test_macro_f1": 0.31875729965352606,
+    "test_kappa": 0.18952318227849907,
+    "test_balanced_accuracy": 0.3167140012327533,
+    "test_accuracy": 0.5174537987679672,
+    "test_per_class_accuracy": {
+      "gpcr": 0.125,
+      "immune": 0.13043478260869565,
+      "ion": 0.2,
+      "kinase": 0.35714285714285715,
+      "tf": 0.7709923664122137
+    }
+  },
+  {
+    "run_id": "logistic_enformer_trunk_center_family5_2026-09-24T18:53:22+00:00",
+    "timestamp": "2026-09-24T18:53:22+00:00",
+    "model": "logistic_probe",
+    "encoder": "enformer_trunk_center",
+    "feature_source": "enformer_trunk_center",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.1,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.41634665236384283
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.4569367261932413
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.45232521141165327
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.4568307064959975
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.44736142587957073
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.4545011567379988
+      }
+    ],
+    "test_macro_f1": 0.3784353119138012,
+    "test_kappa": 0.26951116467652236,
+    "test_balanced_accuracy": 0.3817556389843147,
+    "test_accuracy": 0.5297741273100616,
+    "test_per_class_accuracy": {
+      "gpcr": 0.2727272727272727,
+      "immune": 0.13043478260869565,
+      "ion": 0.36666666666666664,
+      "kinase": 0.44047619047619047,
+      "tf": 0.6984732824427481
+    }
+  }
+]

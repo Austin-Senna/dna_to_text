@@ -7,12 +7,15 @@ computes per-output-dim R² across the 1,536 GenePT dimensions. Outputs:
   - data/per_dim_r2.json   (rank-ordered per-dim R² per cell, summary stats)
   - analysis/figures/per_dim_r2_distribution.png   (histogram + cumulative)
 
+``--plot-only`` redraws the figure from the saved JSON without refitting.
+
 Goal: distinguish "modest macro-R² because a few dims are very well
 predicted (e.g., text-length proxies) and the rest are flat" from
 "modest macro-R² because every dim is modestly predicted."
 """
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -21,6 +24,7 @@ import numpy as np
 
 from sklearn.linear_model import Ridge
 
+from data_loader.pool_names import display_label
 from splits import load_split
 
 REPO = Path(__file__).resolve().parents[1]
@@ -57,7 +61,7 @@ def per_dim_r2(Y_true: np.ndarray, Y_pred: np.ndarray) -> np.ndarray:
     return 1.0 - ss_res / np.where(ss_tot == 0, 1e-12, ss_tot)
 
 
-def main() -> None:
+def compute() -> dict[str, dict]:
     results: dict[str, dict] = {}
 
     for label, dataset_name in CELLS:
@@ -109,7 +113,10 @@ def main() -> None:
 
     OUT_JSON.write_text(json.dumps(results, indent=2))
     print(f"\nwrote {OUT_JSON}")
+    return results
 
+
+def plot(results: dict[str, dict]) -> None:
     if not results:
         print("no cells, skipping plot")
         return
@@ -122,7 +129,7 @@ def main() -> None:
     bins = np.linspace(-0.2, 0.6, 41)
     for i, (label, res) in enumerate(results.items()):
         r2 = np.asarray(res["r2_per_dim_sorted_desc"])
-        ax.hist(r2, bins=bins, histtype="step", linewidth=1.8, color=colors(i), label=label)
+        ax.hist(r2, bins=bins, histtype="step", linewidth=1.8, color=colors(i), label=display_label(label))
     ax.axvline(0, color="#888", linewidth=0.8, linestyle="--")
     ax.set_xlabel("per-dim test R²")
     ax.set_ylabel("count of GenePT dims (of 1,536)")
@@ -134,7 +141,7 @@ def main() -> None:
     ax = axes[1]
     for i, (label, res) in enumerate(results.items()):
         r2 = np.asarray(res["r2_per_dim_sorted_desc"])
-        ax.plot(np.arange(1, len(r2) + 1), r2, color=colors(i), label=label, linewidth=1.5)
+        ax.plot(np.arange(1, len(r2) + 1), r2, color=colors(i), label=display_label(label), linewidth=1.5)
     ax.axhline(0, color="#888", linewidth=0.8, linestyle="--")
     ax.set_xlabel("dim rank (best → worst)")
     ax.set_ylabel("per-dim test R²")
@@ -146,6 +153,14 @@ def main() -> None:
     fig.tight_layout(rect=[0, 0.0, 1, 0.95])
     fig.savefig(OUT_PNG, dpi=140, bbox_inches="tight")
     print(f"wrote {OUT_PNG}")
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--plot-only", action="store_true",
+                    help=f"redraw from {OUT_JSON.name} without refitting the probes")
+    args = ap.parse_args()
+    plot(json.loads(OUT_JSON.read_text()) if args.plot_only else compute())
 
 
 if __name__ == "__main__":
