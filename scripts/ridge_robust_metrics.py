@@ -22,21 +22,32 @@ import numpy as np
 from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score
 
+from headline_cells import BEST_DNA_REG, ENCODERS, REG_BEST, REG_BEST_TSS, REG_RECS
+from linear_trainer.selection import val_score
 from splits import load_split
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
 
-# (display label, dataset parquet). ESM-2 upper bound -> best DNA -> weakest -> TSS.
-CELLS = [
-    ("ESM-2 650M (upper bound)", "dataset_esm2_650m.parquet"),
-    ("ESM-2 150M", "dataset_esm2_150m.parquet"),
-    ("DNABERT-2 meanD (best DNA)", "dataset_dnabert2_meanD.parquet"),
-    ("NT-v2 meanG", "dataset_nt_v2_meanG.parquet"),
-    ("HyenaDNA meanG", "dataset_hyena_dna_meanG.parquet"),
-    ("GENA-LM meanG (weakest)", "dataset_gena_lm_meanG.parquet"),
-    ("TSS DNABERT-2 meanmean", "dataset_tss_dnabert2_meanmean.parquet"),
-]
+ENC_DISPLAY = {"dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "gena_lm": "GENA-LM", "hyena_dna": "HyenaDNA"}
+
+
+def _cells() -> list[tuple[str, str]]:
+    """(display label, dataset parquet): ESM-2 upper bound, then each DNA encoder at its
+    validation-selected pool ordered best to weakest on validation, then TSS."""
+    order = sorted(ENCODERS, key=lambda e: -val_score(REG_RECS[REG_BEST[e]]))
+    rows = [("ESM-2 650M (upper bound)", "dataset_esm2_650m.parquet"),
+            ("ESM-2 150M", "dataset_esm2_150m.parquet")]
+    for i, e in enumerate(order):
+        tag = " (best DNA)" if i == 0 else " (weakest)" if i == len(order) - 1 else ""
+        pool = REG_BEST[e].rsplit("_", 1)[1]
+        rows.append((f"{ENC_DISPLAY[e]} {pool}{tag}", f"dataset_{REG_BEST[e]}.parquet"))
+    tss = REG_BEST_TSS["dnabert2"]
+    rows.append((f"TSS DNABERT-2 {tss.rsplit('_', 1)[1]}", f"dataset_{tss}.parquet"))
+    return rows
+
+
+CELLS = _cells()
 
 
 def alpha_for(ds: str, metrics: list[dict]) -> float:
@@ -105,7 +116,7 @@ def main() -> None:
 
     metrics = json.loads((DATA / "metrics_homology.json").read_text())
     rows = [r for label, ds in CELLS if (r := run_cell(label, ds, metrics))]
-    ctrl = run_cell("SHUFFLED-TARGET control", "dataset_dnabert2_meanD.parquet",
+    ctrl = run_cell("SHUFFLED-TARGET control", f"dataset_{BEST_DNA_REG}.parquet",
                     metrics, shuffle=True)
     if ctrl:
         rows.append(ctrl)

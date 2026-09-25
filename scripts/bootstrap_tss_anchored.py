@@ -29,6 +29,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(SCRIPTS))
 
 import bootstrap_test_uncertainty as bt  # noqa: E402
+from paired_tss_anchored import GLOBAL_POOL, POOL_METRICS  # noqa: E402
 from splits.loader import SPLITS_PATH  # noqa: E402
 
 ENCODERS = ["dnabert2", "nt_v2", "gena_lm", "hyena_dna"]
@@ -43,13 +44,14 @@ METRICS_FILE = {
     "homology": DATA / "metrics_tss_anchored.json",
     "disjoint": DATA / "metrics_tss_anchored_disjoint.json",
 }
-# Global-pool point estimates for the overlap check (family5 macro-F1). These are the
-# FROZEN accepted-paper global-pool numbers (metrics_homology.json / metrics_tss_disjoint.json,
-# computed at max_iter=2000) — the published bar the anchored CI must clear. NOT regenerated.
-GLOBAL_POOL = {
-    "homology": {"dnabert2": 0.326, "nt_v2": 0.313, "gena_lm": 0.244, "hyena_dna": 0.287},
-    "disjoint": {"dnabert2": 0.254, "nt_v2": 0.259, "gena_lm": 0.206, "hyena_dna": 0.265},
-}
+# Global-pool bar for the overlap check (family5 test macro-F1): each encoder's
+# validation-selected whole-window pool on that split, read from its metrics file.
+def _global_point(split_label: str, enc: str) -> float:
+    fs = f"tss_{enc}_{GLOBAL_POOL[split_label][enc]}"
+    rows = json.loads(POOL_METRICS[split_label].read_text())
+    return next(float(r["test_macro_f1"]) for r in rows
+                if r.get("task") == "family5" and not r.get("shuffled_labels")
+                and r.get("feature_source") == fs)
 
 
 def _anchored_C(split_label: str, enc: str) -> float:
@@ -75,7 +77,7 @@ def _run_split(split_label: str) -> list[dict]:
     for enc in ENCODERS:
         C = _anchored_C(split_label, enc)
         res = bt.bootstrap_classification(f"tss_{enc}_tssanchored", C=C, shuffled=False, n_iters=N_ITERS)
-        gp = GLOBAL_POOL[split_label][enc]
+        gp = _global_point(split_label, enc)
         lo, hi = res["macro_f1_ci95"]
         clears_global = lo > gp
         rows.append({

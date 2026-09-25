@@ -31,6 +31,8 @@ from kmer_baseline import featurize_kmer
 from composition_baseline import featurize_aa_kmer, featurize_codon, featurize_gc
 from data_loader.sequence_fetcher import fetch_cds
 from splits import load_split
+from headline_cells import (BEST_DNA_CLS, BEST_DNA_REG, CLS_BEST, CLS_BEST_TSS, CLS_RECS,
+                            ENCODERS, HOMOLOGY, REG_BEST, REG_BEST_TSS, REG_RECS)
 
 # On-the-fly compositional feature sources (mirror train_logistic_probe).
 SYNTHETIC_FEATURIZERS = {
@@ -84,81 +86,25 @@ del _enc, _v, _p, _base, _tss_base, _tss_kmer, _esm, _ep
 META_PARQUET = DATA / "dataset_dnabert2_meanmean.parquet"
 
 # Headline cells to bootstrap. Each tuple is (cell_name, dataset_for_X_loading,
-# recorded_hyperparam, is_shuffled). Rather than hard-code pools (which silently
-# drift from the main tables when the best-pool selection changes), we DERIVE the
-# headline set from the homology-split metrics the main tables are built from
-# (data/metrics_homology.json): the best-macro-F1 pool per encoder for
-# classification, the best-R^2 pool per encoder for regression, every
-# composition comparator, the ESM-2 upper bound, and the shuffled-label control.
-# This guarantees the bootstrapped point estimate matches the value it brackets.
-ENCODERS = ("dnabert2", "nt_v2", "gena_lm", "hyena_dna")
+# recorded_hyperparam, is_shuffled). Every cell is derived from the
+# validation-selected pools in headline_cells.py (same rule as the main tables),
+# so the bootstrapped point estimate matches the value it brackets.
 COMPARATORS = ("kmer", "codon", "aa1", "aa2", "aa3")
-HOMOLOGY = json.loads((DATA / "metrics_homology.json").read_text())
+CLS_RECS = {**CLS_RECS, "tss_4mer": CLS_RECS["enformer_tss_4mer"]}
+REG_RECS = {**REG_RECS, "tss_4mer": REG_RECS["enformer_tss_4mer"]}
 
 
-def _reg_source(rec: dict) -> str | None:
-    """Source id for a regression record (mirrors build_paper_tables.reg_raw)."""
-    if rec.get("model") == "linear_probe" and rec.get("dataset"):
-        return rec["dataset"].replace("dataset_", "").replace(".parquet", "")
-    return rec.get("feature_source")
+def _cells(recs: dict[str, dict], names, hp: str) -> list[tuple[str, str, float, bool]]:
+    return [(n, "enformer_tss_4mer" if n == "tss_4mer" else n, float(recs[n][hp]), False)
+            for n in names]
 
 
-def _derive_headline_cls() -> list[tuple[str, str, float, bool]]:
-    cls = [r for r in HOMOLOGY
-           if r.get("task") == "family5" and not r.get("shuffled_labels")]
-    by_src = {r["feature_source"]: r for r in cls}
-    cells = [(c, c, float(by_src[c]["C"]), False) for c in COMPARATORS]
-    for enc in ENCODERS:
-        best = max((r for r in cls if r["feature_source"].startswith(enc + "_")),
-                   key=lambda r: r["test_macro_f1"])
-        cells.append((best["feature_source"], best["feature_source"],
-                      float(best["C"]), False))
-    cells.append(("esm2_650m", "esm2_650m", float(by_src["esm2_650m"]["C"]), False))
-    shuf = next(r for r in HOMOLOGY
-                if r.get("task") == "family5" and r.get("shuffled_labels"))
-    cells.append(("shuffled", shuf["feature_source"], float(shuf["C"]), True))
-    return cells
-
-
-def _derive_headline_reg() -> list[tuple[str, str, float, bool]]:
-    reg = [r for r in HOMOLOGY if r.get("task") is None and "test_r2_macro" in r]
-    by_src: dict[str, dict] = {}
-    for r in reg:
-        s = _reg_source(r)
-        if s and s not in by_src:
-            by_src[s] = r
-    cells = [(c, c, float(by_src[c]["alpha"]), False) for c in COMPARATORS]
-    for enc in ENCODERS:
-        best = max((r for r in reg if (_reg_source(r) or "").startswith(enc + "_")),
-                   key=lambda r: r["test_r2_macro"])
-        src = _reg_source(best)
-        cells.append((src, src, float(best["alpha"]), False))
-    cells.append(("esm2_650m", "esm2_650m", float(by_src["esm2_650m"]["alpha"]), False))
-    return cells
-
-
-HEADLINE_CLS = _derive_headline_cls()
-HEADLINE_REG = _derive_headline_reg()
-
-# TSS-context headline cells (added during the revision/tss-and-gene-scope work).
-# Hyperparameters are the recorded best from each encoder's TSS probe sweep.
-HEADLINE_CLS_TSS = [
-    # (cell_name,                  dataset_for_X_loading,       recorded_C, shuffled_labels)
-    ("tss_4mer",                   "enformer_tss_4mer",         1000.0,     False),
-    ("tss_nt_v2_meanmean",         "tss_nt_v2_meanmean",        100.0,      False),
-    ("tss_hyena_dna_meanmean",     "tss_hyena_dna_meanmean",    1000.0,     False),
-    ("tss_dnabert2_maxmean",       "tss_dnabert2_maxmean",      100.0,      False),
-    ("tss_gena_lm_clsmean",        "tss_gena_lm_clsmean",       1000.0,     False),
-]
-
-HEADLINE_REG_TSS = [
-    # (cell_name,                  dataset_for_X_loading,       recorded_alpha, shuffled_y)
-    ("tss_4mer",                   "enformer_tss_4mer",         0.01,           False),
-    ("tss_nt_v2_meanmean",         "tss_nt_v2_meanmean",        0.1,            False),
-    ("tss_hyena_dna_meanmean",     "tss_hyena_dna_meanmean",    0.1,            False),
-    ("tss_dnabert2_meanmean",      "tss_dnabert2_meanmean",     0.1,            False),
-    ("tss_gena_lm_meanmean",       "tss_gena_lm_meanmean",      1.0,            False),
-]
+_shuf = next(r for r in HOMOLOGY if r.get("task") == "family5" and r.get("shuffled_labels"))
+HEADLINE_CLS = (_cells(CLS_RECS, COMPARATORS + tuple(CLS_BEST.values()) + ("esm2_650m",), "C")
+                + [("shuffled", _shuf["feature_source"], float(_shuf["C"]), True)])
+HEADLINE_REG = _cells(REG_RECS, COMPARATORS + tuple(REG_BEST.values()) + ("esm2_650m",), "alpha")
+HEADLINE_CLS_TSS = _cells(CLS_RECS, ("tss_4mer",) + tuple(CLS_BEST_TSS.values()), "C")
+HEADLINE_REG_TSS = _cells(REG_RECS, ("tss_4mer",) + tuple(REG_BEST_TSS.values()), "alpha")
 
 
 def _synth_features(dataset: str, meta: pd.DataFrame) -> np.ndarray:
@@ -272,48 +218,40 @@ def bootstrap_regression(dataset: str, alpha: float, shuffled: bool,
 # paired bootstrap p-value analogue).
 # ---------------------------------------------------------------------------
 
-# Paired classification comparisons: (label, dsA, C_A, dsB, C_B). Hyperparameters
-# are the current recorded bests; they are refreshed by the homology-split
-# re-run before the final numbers are reported.
-PAIRED_CLS = [
-    ("nt_v2_meanG - aa2",  "nt_v2_meanG", 10.0,   "aa2",  1000.0),  # headline: DNA-LM (meanG, matches main table) vs AA composition
-    ("nt_v2_meanG - kmer", "nt_v2_meanG", 10.0,   "kmer", 1000.0),
-    ("aa2 - kmer",         "aa2",         1000.0, "kmer", 1000.0),
-    # ESM-2 protein-LM comparator (#9): vs AA composition, vs best DNA-LM, and scaling.
-    ("esm2_650m - aa2",        "esm2_650m", 100.0, "aa2",         1000.0),
-    ("esm2_650m - nt_v2_meanG","esm2_650m", 100.0, "nt_v2_meanG", 10.0),
-    ("esm2_650m - esm2_150m",  "esm2_650m", 100.0, "esm2_150m",   1000.0),
-    # CDS arm vs TSS arm within each DNA-LM encoder (#10): each encoder's best CDS
-    # classification pool vs its best TSS classification pool, matching the
-    # main-table best-macro-F1 selection (data/metrics_homology.json).
-    ("dnabert2 CDS - TSS",  "dnabert2_meanG",  10.0, "tss_dnabert2_meanmean",  1000.0),
-    ("nt_v2 CDS - TSS",     "nt_v2_meanG",     10.0, "tss_nt_v2_meanmean",     1000.0),
-    ("gena_lm CDS - TSS",   "gena_lm_meanD",  100.0, "tss_gena_lm_clsmean",    1000.0),
-    ("hyena_dna CDS - TSS", "hyena_dna_meanD",100.0, "tss_hyena_dna_meanD",    1000.0),
-    ("kmer CDS - TSS 4mer", "kmer",          1000.0, "enformer_tss_4mer",      1000.0),
-]
+# Paired comparisons: (label, dsA, hp_A, dsB, hp_B), derived from the same
+# validation-selected cells as the headline set above.
+def _pair(recs: dict[str, dict], hp: str, label: str, a: str, b: str):
+    return (label, "enformer_tss_4mer" if a == "tss_4mer" else a, float(recs[a][hp]),
+            "enformer_tss_4mer" if b == "tss_4mer" else b, float(recs[b][hp]))
 
-# Paired regression comparisons: (label, dsA, alpha_A, dsB, alpha_B).
-PAIRED_REG = [
-    ("dnabert2_meanD - aa3", "dnabert2_meanD", 10.0, "aa3",  0.01),  # headline reg: best DNA-LM vs AA-3mer
-    ("nt_v2_meanmean - aa3", "nt_v2_meanmean", 10.0, "aa3",  0.01),
-    ("dnabert2_meanD - kmer","dnabert2_meanD", 10.0, "kmer", 0.01),
-    ("aa3 - kmer",           "aa3",            0.01, "kmer", 0.01),
-    ("aa3 - aa2",            "aa3",            0.01, "aa2",  0.01),  # R1's example: 0.090 vs 0.060
-    ("aa2 - aa1",            "aa2",            0.01, "aa1",  0.01),  # AA composition ladder is monotone
+
+PAIRED_CLS = [_pair(CLS_RECS, "C", *x) for x in [
+    (f"{BEST_DNA_CLS} - aa2", BEST_DNA_CLS, "aa2"),  # headline: best DNA-LM vs AA composition
+    (f"{BEST_DNA_CLS} - kmer", BEST_DNA_CLS, "kmer"),
+    ("aa2 - kmer", "aa2", "kmer"),
+    # ESM-2 protein-LM comparator (#9): vs AA composition, vs best DNA-LM, and scaling.
+    ("esm2_650m - aa2", "esm2_650m", "aa2"),
+    (f"esm2_650m - {BEST_DNA_CLS}", "esm2_650m", BEST_DNA_CLS),
+    ("esm2_650m - esm2_150m", "esm2_650m", "esm2_150m"),
+    # CDS arm vs TSS arm within each DNA-LM encoder (#10).
+    *[(f"{e} CDS - TSS", CLS_BEST[e], CLS_BEST_TSS[e]) for e in ENCODERS],
+    ("kmer CDS - TSS 4mer", "kmer", "tss_4mer"),
+]]
+
+PAIRED_REG = [_pair(REG_RECS, "alpha", *x) for x in [
+    (f"{BEST_DNA_REG} - aa3", BEST_DNA_REG, "aa3"),  # headline reg: best DNA-LM vs AA-3mer
+    (f"{BEST_DNA_REG} - kmer", BEST_DNA_REG, "kmer"),
+    ("aa3 - kmer", "aa3", "kmer"),
+    ("aa3 - aa2", "aa3", "aa2"),  # R1's example: 0.090 vs 0.060
+    ("aa2 - aa1", "aa2", "aa1"),  # AA composition ladder is monotone
     # ESM-2 protein-LM comparator (#9): vs AA-3mer, vs best DNA-LM, and scaling.
-    ("esm2_650m - aa3",            "esm2_650m", 10.0, "aa3",            0.01),
-    ("esm2_650m - dnabert2_meanD", "esm2_650m", 10.0, "dnabert2_meanD", 10.0),
-    ("esm2_650m - esm2_150m",      "esm2_650m", 10.0, "esm2_150m",      10.0),
-    # CDS arm vs TSS arm within each DNA-LM encoder (#10): each encoder's best CDS
-    # regression pool vs its best TSS regression pool, matching the main-table
-    # best-R^2 selection (data/metrics_homology.json).
-    ("dnabert2 CDS - TSS",  "dnabert2_meanD",  10.0, "tss_dnabert2_meanmean",   0.1),
-    ("nt_v2 CDS - TSS",     "nt_v2_meanG",    100.0, "tss_nt_v2_meanmean",      1.0),
-    ("gena_lm CDS - TSS",   "gena_lm_meanG", 1000.0, "tss_gena_lm_meanmean",  100.0),
-    ("hyena_dna CDS - TSS", "hyena_dna_meanG", 10.0, "tss_hyena_dna_maxmean",1000.0),
-    ("kmer CDS - TSS 4mer", "kmer",            0.01, "enformer_tss_4mer",       1.0),
-]
+    ("esm2_650m - aa3", "esm2_650m", "aa3"),
+    (f"esm2_650m - {BEST_DNA_REG}", "esm2_650m", BEST_DNA_REG),
+    ("esm2_650m - esm2_150m", "esm2_650m", "esm2_150m"),
+    # CDS arm vs TSS arm within each DNA-LM encoder (#10).
+    *[(f"{e} CDS - TSS", REG_BEST[e], REG_BEST_TSS[e]) for e in ENCODERS],
+    ("kmer CDS - TSS 4mer", "kmer", "tss_4mer"),
+]]
 
 
 def _resolvable(dataset: str) -> bool:

@@ -26,6 +26,7 @@ import numpy as np
 from matplotlib.patches import Patch
 
 from data_loader.pool_names import POOL_DISPLAY
+from linear_trainer.selection import select_by_val
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -61,13 +62,18 @@ def _best_cls(metrics, src, tss=False, metric="test_macro_f1"):
         core = fs[4:] if is_tss else fs
         if core == src or core.startswith(src + "_"):
             cells.append(r)
-    return max(cells, key=lambda r: r[metric])[metric] if cells else None
+    return select_by_val(cells)[metric] if cells else None
+
+
+def _cls_rec(metrics, src):
+    c = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
+         and r.get("feature_source") == src]
+    return c[0] if c else None
 
 
 def _cell_cls(metrics, src):
-    c = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
-         and r.get("feature_source") == src]
-    return c[0]["test_macro_f1"] if c else None
+    r = _cls_rec(metrics, src)
+    return r["test_macro_f1"] if r else None
 
 
 def _best_reg_enc(metrics, enc):
@@ -75,7 +81,7 @@ def _best_reg_enc(metrics, enc):
              and not str(r.get("dataset", "")).startswith("dataset_tss_")
              and (str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "") == enc
                   or str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "").startswith(enc + "_"))]
-    return max(cells, key=lambda r: r["test_r2_macro"])["test_r2_macro"] if cells else None
+    return select_by_val(cells)["test_r2_macro"] if cells else None
 
 
 def _best_reg_enc_ctx(metrics, enc, tss=False):
@@ -90,10 +96,10 @@ def _best_reg_enc_ctx(metrics, enc, tss=False):
         core = ds.replace("dataset_tss_", "").replace("dataset_", "").replace(".parquet", "")
         if core == enc or core.startswith(enc + "_"):
             cells.append(r)
-    return max(cells, key=lambda r: r["test_r2_macro"])["test_r2_macro"] if cells else None
+    return select_by_val(cells)["test_r2_macro"] if cells else None
 
 
-def _cell_reg(metrics, src):
+def _reg_rec(metrics, src):
     base = {"kmer_baseline_4": "kmer", "kmer_baseline_6": "kmer6", "codon_baseline": "codon",
             "gc_baseline": "gc", "aa_baseline_1": "aa1", "aa_baseline_2": "aa2", "aa_baseline_3": "aa3"}
     for r in metrics:
@@ -101,8 +107,13 @@ def _cell_reg(metrics, src):
             continue
         ds = str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "")
         if base.get(r.get("model", "")) == src or ds == src or r.get("feature_source") == src:
-            return r["test_r2_macro"]
+            return r
     return None
+
+
+def _cell_reg(metrics, src):
+    r = _reg_rec(metrics, src)
+    return r["test_r2_macro"] if r else None
 
 
 def f1_of(m, src):
@@ -137,8 +148,9 @@ CELLS = [("CDS 4-mer", "kmer", C_COMP), ("Codon", "codon", C_COMP), ("AA comp.",
          ("ESM-2 650M", "esm2_650m", C_ESM)]
 
 
-def _aa_best(fn):
-    return max(fn(M, s) for s in ("aa1", "aa2", "aa3"))
+def _aa_best(rec_fn, metric):
+    """AA-composition k chosen on validation, reported on test."""
+    return select_by_val(rec_fn(M, s) for s in ("aa1", "aa2", "aa3"))[metric]
 
 
 def _label_bars(ax, xs, vals, fmt="{:.2f}", fontsize=7, dy=0.01, rot=0):
@@ -150,10 +162,10 @@ def _label_bars(ax, xs, vals, fmt="{:.2f}", fontsize=7, dy=0.01, rot=0):
                 ha="center", va="bottom", fontsize=fontsize, color="#222", rotation=rot)
 
 
-def _comparator_panel(value_fn, ylabel, ylim, floor, fname, fmt="{:.2f}"):
+def _comparator_panel(value_fn, aa_value, ylabel, ylim, floor, fname, fmt="{:.2f}"):
     labels = [c[0] for c in CELLS]
     colors = [c[2] for c in CELLS]
-    vals = [_aa_best(value_fn) if c[1] == "aa_best" else value_fn(M, c[1]) for c in CELLS]
+    vals = [aa_value if c[1] == "aa_best" else value_fn(M, c[1]) for c in CELLS]
     x = np.arange(len(CELLS))
     fig, ax = plt.subplots(figsize=(6.2, 4.2))
     ax.bar(x, vals, color=colors, edgecolor="white",
@@ -181,11 +193,11 @@ def _comparator_panel(value_fn, ylabel, ylim, floor, fname, fmt="{:.2f}"):
 
 
 def fig_comparator_f1():
-    _comparator_panel(f1_of, "5-way family macro-F1", (0, 1.0), FLOOR, "comparator_f1.png")
+    _comparator_panel(f1_of, _aa_best(_cls_rec, "test_macro_f1"), "5-way family macro-F1", (0, 1.0), FLOOR, "comparator_f1.png")
 
 
 def fig_comparator_r2():
-    _comparator_panel(r2_of, "Ridge-to-GenePT $R^2$", (0, 0.20), None, "comparator_r2.png", fmt="{:.3f}")
+    _comparator_panel(r2_of, _aa_best(_reg_rec, "test_r2_macro"), "Ridge-to-GenePT $R^2$", (0, 0.20), None, "comparator_r2.png", fmt="{:.3f}")
 
 
 def fig_tss_context():
@@ -194,7 +206,7 @@ def fig_tss_context():
     Every TSS bar pools the same way across models: encoders at their best whole-window
     rule vs the chunk nearest the TSS; Enformer at its whole-window mean (``trunk_global``)
     vs its central 2,048 bp readout (``trunk_center``). The 4-mer has no anchored bar
-    because its chunk depends on the encoder. Diamonds: the best composition baseline
+    because its chunk depends on the encoder. Diamonds: the validation-selected composition baseline
     (4-mer+GC or 6-mer) of each encoder's anchored chunk.
     """
     enf = {r["feature_source"]: r["test_macro_f1"] for r in ENFH if r.get("task") == "family5"}
@@ -205,7 +217,8 @@ def fig_tss_context():
         + [enf["enformer_trunk_global"]]
     anchored = [np.nan] + [_cell_cls(ANCH, f"tss_{e}_tssanchored") for e in ENCODERS] \
         + [enf["enformer_trunk_center"]]
-    comp = [max(_cell_cls(COMP, f"tss_{e}_{v}") for v in ("chunk4mergc", "chunk6mer")) for e in ENCODERS]
+    comp = [select_by_val(_cls_rec(COMP, f"tss_{e}_{v}") for v in ("chunk4mergc", "chunk6mer"))
+            ["test_macro_f1"] for e in ENCODERS]
 
     x = np.arange(len(cats))
     w = 0.27

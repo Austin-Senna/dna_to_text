@@ -9,7 +9,8 @@ re-probe the headline cells that carry the paper's three conclusions:
 
 The canonical ``data/splits.json`` is backed up and restored in a finally block (it is
 also git-tracked, so recoverable regardless). Per-seed metrics land in
-``data/seed_sensitivity/metrics_seed{N}.json``; a summary is printed and written to
+``data/seed_sensitivity/metrics_seed{N}.json`` and each seed's split in
+``data/seed_sensitivity/splits_seed{N}.json``; a summary is printed and written to
 ``data/seed_sensitivity/summary.json``.
 
 Run: uv run scripts/seed_sensitivity.py --seeds 1 7 123
@@ -33,14 +34,17 @@ import train_logistic_probe as tlp  # noqa: E402
 import train_baseline as tb  # noqa: E402
 import train_probe as tp  # noqa: E402
 from cluster import cluster_dataframe  # noqa: E402
+from headline_cells import BEST_DNA_CLS, BEST_DNA_REG, CLS_BEST_TSS, REG_BEST_TSS  # noqa: E402
 from splits.loader import resolve_dataset_path  # noqa: E402
 from splits.make_splits import write_cluster_splits_json  # noqa: E402
 
 SPLITS = DATA / "splits.json"
 
 # Headline cells (carry the three conclusions); kept small so N seeds stays cheap.
-CLS_CELLS = ["nt_v2_meanG", "aa2", "kmer", "tss_dnabert2_meanmean", "esm2_150m", "esm2_650m"]
-REG_PARQUETS = ["dataset_dnabert2_meanD.parquet", "dataset_tss_dnabert2_meanmean.parquet",
+# The DNA-LM pools are the primary split's validation-selected ones, held fixed
+# across seeds.
+CLS_CELLS = [BEST_DNA_CLS, "aa2", "kmer", CLS_BEST_TSS["dnabert2"], "esm2_150m", "esm2_650m"]
+REG_PARQUETS = [f"dataset_{BEST_DNA_REG}.parquet", f"dataset_{REG_BEST_TSS['dnabert2']}.parquet",
                 "dataset_esm2_150m.parquet", "dataset_esm2_650m.parquet"]
 REG_BASELINES = ["aa3"]
 
@@ -107,6 +111,8 @@ def main() -> None:
         for seed in args.seeds:
             print(f"\n########## SEED {seed} ##########", flush=True)
             payload = write_cluster_splits_json(df_clustered, SPLITS, stats, seed=seed)
+            # Keep each seed's split so the probes rerun without MMseqs2.
+            (out_dir / f"splits_seed{seed}.json").write_bytes(SPLITS.read_bytes())
             print(f"  split sizes: train={len(payload['train'])} val={len(payload['val'])} "
                   f"test={len(payload['test'])}", flush=True)
             metrics_path = out_dir / f"metrics_seed{seed}.json"

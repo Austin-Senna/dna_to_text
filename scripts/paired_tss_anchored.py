@@ -14,10 +14,9 @@ from ``bootstrap_tss_anchored.py``); global-pool C = the recorded best C read fr
 split's metrics file (not hard-coded), so the paired point estimate reproduces the
 known grid.
 
-Best global pool per (encoder, split) — each encoder's hardest bar, matching
-``center_chunk_finding.md`` and ``metrics_{homology,tss_disjoint}.json``:
-  homology: dnabert2 meanmean, nt_v2 meanmean, gena_lm clsmean, hyena_dna meanD
-  disjoint: dnabert2 meanmean, nt_v2 maxmean, gena_lm meanG,   hyena_dna meanG
+Global pool per (encoder, split): the whole-window rule with the best validation
+macro-F1 in ``metrics_{homology,tss_disjoint}.json`` (same selection rule as the
+paper tables), so the comparison never uses a test-picked baseline.
 
 No GPU. Never writes tracked data/metrics.json or data/splits.json (the disjoint pass
 backs up + restores splits.json in a finally).
@@ -38,6 +37,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(SCRIPTS))
 
 import bootstrap_test_uncertainty as bt  # noqa: E402
+from linear_trainer.selection import select_by_val  # noqa: E402
 from splits.loader import SPLITS_PATH  # noqa: E402
 
 ENCODERS = ["dnabert2", "nt_v2", "gena_lm", "hyena_dna"]
@@ -45,11 +45,9 @@ DISJOINT = DATA / "splits_tss_disjoint.json"
 OUT = DATA / "paired_tss_anchored.json"
 N_ITERS = 1000
 
-# Best global pool per (split, encoder). C is looked up from the frozen paper metrics.
-GLOBAL_POOL = {
-    "homology": {"dnabert2": "meanmean", "nt_v2": "meanmean", "gena_lm": "clsmean", "hyena_dna": "meanD"},
-    "disjoint": {"dnabert2": "meanmean", "nt_v2": "maxmean", "gena_lm": "meanG", "hyena_dna": "meanG"},
-}
+# Whole-window pooling rules; the best one per (split, encoder) is chosen on
+# VALIDATION from that split's metrics file (see _global_pool), never on test.
+WHOLE_WINDOW_POOLS = ("meanmean", "specialmean", "maxmean", "clsmean", "meanD", "meanG")
 # Recorded best C. Anchored C is read from the anchored probe's own output (re-swept by
 # the max_iter=5000 re-freeze); global-pool C from the frozen accepted-paper grid.
 ANCHORED_METRICS = {
@@ -69,6 +67,20 @@ def _C_from(metrics_path: Path, feature_source: str) -> float:
                 and r.get("feature_source") == feature_source):
             return float(r["C"])
     raise KeyError(f"{feature_source} not found in {metrics_path.name}")
+
+
+def _global_pool(split_label: str, enc: str) -> str:
+    """Validation-selected whole-window pool for an encoder on a split."""
+    rows = json.loads(POOL_METRICS[split_label].read_text())
+    cells = {r["feature_source"]: r for r in rows
+             if r.get("task") == "family5" and not r.get("shuffled_labels")
+             and r.get("feature_source") in {f"tss_{enc}_{p}" for p in WHOLE_WINDOW_POOLS}}
+    best = select_by_val(cells.values())
+    return best["feature_source"].rsplit("_", 1)[1]
+
+
+GLOBAL_POOL = {split: {enc: _global_pool(split, enc) for enc in ENCODERS}
+               for split in POOL_METRICS}
 
 
 def _register(split_label: str) -> None:

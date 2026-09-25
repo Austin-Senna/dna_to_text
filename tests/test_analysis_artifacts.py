@@ -46,7 +46,7 @@ class AnalysisArtifactTests(unittest.TestCase):
         self.assertEqual(latest[("nt_v2_meanD", "family5", False)]["test_macro_f1"], 0.8)
         self.assertEqual(latest[("nt_v2_meanD", "family5", True)]["test_macro_f1"], 0.2)
 
-    def test_best_family5_rows_choose_best_pooling_per_registered_encoder(self):
+    def test_best_family5_rows_choose_validation_best_pooling_per_registered_encoder(self):
         from scripts.build_analysis_artifacts import best_family5_rows, latest_logistic_runs
 
         metrics = [
@@ -64,6 +64,7 @@ class AnalysisArtifactTests(unittest.TestCase):
                 "timestamp": "2026-01-01T00:00:00+00:00",
                 "encoder": "nt_v2_meanG",
                 "task": "family5",
+                "C_sweep": [{"C": 1.0, "macro_f1": 0.85}],
                 "test_macro_f1": 0.80,
                 "test_kappa": 0.78,
                 "test_accuracy": 0.86,
@@ -73,6 +74,7 @@ class AnalysisArtifactTests(unittest.TestCase):
                 "timestamp": "2026-01-01T00:00:00+00:00",
                 "encoder": "nt_v2_meanD",
                 "task": "family5",
+                "C_sweep": [{"C": 1.0, "macro_f1": 0.79}],
                 "test_macro_f1": 0.83,
                 "test_kappa": 0.82,
                 "test_accuracy": 0.88,
@@ -82,6 +84,7 @@ class AnalysisArtifactTests(unittest.TestCase):
                 "timestamp": "2026-01-01T00:00:00+00:00",
                 "encoder": "hyena_dna_meanG",
                 "task": "family5",
+                "C_sweep": [{"C": 1.0, "macro_f1": 0.70}],
                 "test_macro_f1": 0.71,
                 "test_kappa": 0.69,
                 "test_accuracy": 0.81,
@@ -91,9 +94,10 @@ class AnalysisArtifactTests(unittest.TestCase):
         rows = best_family5_rows(latest_logistic_runs(metrics), ["nt_v2", "hyena_dna", "gena_lm"])
 
         self.assertEqual(rows.iloc[0]["encoder"], "nt_v2")
-        self.assertEqual(rows.iloc[0]["feature_source"], "nt_v2_meanD")
-        self.assertAlmostEqual(rows.iloc[0]["delta_f1_vs_4mer"], 0.16)
-        self.assertAlmostEqual(rows.iloc[0]["delta_kappa_vs_4mer"], 0.12)
+        # meanD has the higher TEST score; selection must follow validation.
+        self.assertEqual(rows.iloc[0]["feature_source"], "nt_v2_meanG")
+        self.assertAlmostEqual(rows.iloc[0]["delta_f1_vs_4mer"], 0.13)
+        self.assertAlmostEqual(rows.iloc[0]["delta_kappa_vs_4mer"], 0.08)
         self.assertEqual(rows.iloc[1]["encoder"], "hyena_dna")
         self.assertEqual(rows.iloc[1]["feature_source"], "hyena_dna_meanG")
         self.assertNotIn("gena_lm", rows["encoder"].tolist())
@@ -111,6 +115,7 @@ class AnalysisArtifactTests(unittest.TestCase):
                 "model": "anti_baseline_shuffled_y",
                 "timestamp": "2026-01-02T00:00:00+00:00",
                 "dataset": "dataset.parquet",
+                "alpha_sweep": [{"alpha": 1000, "mean_cosine": 0.88}],
                 "test_r2_macro": -0.02,
                 "test_mean_cosine": 0.90,
                 "alpha": 1000,
@@ -119,6 +124,7 @@ class AnalysisArtifactTests(unittest.TestCase):
                 "model": "anti_baseline_shuffled_y",
                 "timestamp": "2026-01-02T00:00:01+00:00",
                 "dataset": "dataset_nt_v2.parquet",
+                "alpha_sweep": [{"alpha": 1000, "mean_cosine": 0.89}],
                 "test_r2_macro": -0.01,
                 "test_mean_cosine": 0.91,
                 "alpha": 1000,

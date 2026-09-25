@@ -3,10 +3,11 @@
 figure titles -- the LaTeX caption is the title; small per-panel labels stay,
 since the caption cannot identify individual panels).
 
-  umap_cds_vs_tss.png  -- NT-v2 CDS (meanG) beside NT-v2 TSS-window (meanmean):
+  umap_cds_vs_tss.png  -- NT-v2 CDS beside NT-v2 TSS-window, each at its
+        validation-selected pooling:
         the family clusters present on coding sequence dissolve on the
         196,608 bp regulatory window (substrate collapse, sec 3.4).
-  umap_cds_vs_esm.png  -- NT-v2 CDS (meanG) beside ESM-2 650M (translated CDS):
+  umap_cds_vs_esm.png  -- NT-v2 CDS beside ESM-2 650M (translated CDS):
         the frozen DNA encoder versus the protein-LM upper bound (sec 3.6).
 
 Run: uv run scripts/build_umap_compare.py
@@ -23,6 +24,8 @@ import numpy as np
 import pandas as pd
 import umap
 from matplotlib.lines import Line2D
+
+from headline_cells import CLS_BEST, CLS_BEST_TSS
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -76,8 +79,8 @@ def _figure(left, right, fname):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    cds = (_coords("dataset_nt_v2_meanG.parquet"), "NT-v2 CDS")
-    tss = (_coords("dataset_tss_nt_v2_meanmean.parquet"), "NT-v2 TSS window")
+    cds = (_coords(f"dataset_{CLS_BEST['nt_v2']}.parquet"), "NT-v2 CDS")
+    tss = (_coords(f"dataset_{CLS_BEST_TSS['nt_v2']}.parquet"), "NT-v2 TSS window")
     esm = (_coords("dataset_esm2_650m.parquet"), "ESM-2 650M (protein)")
     _figure(cds, tss, "umap_cds_vs_tss.png")
     _figure(cds, esm, "umap_cds_vs_esm.png")

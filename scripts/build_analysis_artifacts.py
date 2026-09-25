@@ -20,6 +20,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from linear_trainer.selection import select_by_val
+
 from data_loader.model_registry import ENCODER_SPECS
 from data_loader.pooling_aggregator import POOLING_VARIANTS
 
@@ -279,10 +281,8 @@ def best_family5_rows(
                 candidates.append((feature_source, run))
         if not candidates:
             continue
-        best_feature, best_run = max(
-            candidates,
-            key=lambda item: _metric_value(item[1], "test_macro_f1") or float("-inf"),
-        )
+        best_run = select_by_val(run for _, run in candidates)
+        best_feature = next(fs for fs, run in candidates if run is best_run)
         rows.append(_family5_record(best_feature, best_run, baseline=baseline))
     return _ordered_encoder_frame(rows)
 
@@ -362,10 +362,7 @@ def regression_full_table(latest_regression: dict[str, dict]) -> pd.DataFrame:
             continue
         rows.append(_regression_record(feature, run, baseline_r2))
     if shuffled_runs:
-        best_shuffled = max(
-            shuffled_runs,
-            key=lambda run: _metric_value(run, "test_r2_macro") or float("-inf"),
-        )
+        best_shuffled = select_by_val(shuffled_runs)
         rows.append(_shuffled_regression_record(best_shuffled, baseline_r2))
     return _ordered_encoder_frame(rows)
 

@@ -33,11 +33,13 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from build_result_figures import (  # noqa: E402  (sys.path set just above)
     CELLS, C_COMP, C_DNA, C_ESM, ENCODERS, ENC_DISP, ENFH, FLOOR, M, POOLS,
-    _aa_best, _best_cls, _cell_cls, _rand_f1, f1_of, r2_of,
+    _aa_best, _best_cls, _cell_cls, _cls_rec, _rand_f1, _reg_rec, f1_of, r2_of,
 )
 from build_umap_compare import (  # noqa: E402
     FAM_DISP, FAM_ORDER, _coords,
 )
+from headline_cells import CLS_BEST, CLS_BEST_TSS  # noqa: E402
+from linear_trainer.selection import select_by_val  # noqa: E402
 
 OUT = ROOT / "poster" / "figures"
 
@@ -107,7 +109,7 @@ def fig_comparator_f1():
     """The rigorous panel: 5-way family macro-F1, homology split."""
     labels = ["AA 2-mer" if c[0] == "AA comp." else c[0] for c in CELLS]
     colors = [_ROLE[c[2]] for c in CELLS]
-    vals = [_aa_best(f1_of) if c[1] == "aa_best" else f1_of(M, c[1]) for c in CELLS]
+    vals = [_aa_best(_cls_rec, "test_macro_f1") if c[1] == "aa_best" else f1_of(M, c[1]) for c in CELLS]
     x = np.arange(len(CELLS))
     fig, ax = plt.subplots(figsize=(9.8, 6.6))
     ax.bar(x, vals, color=colors, edgecolor="white", linewidth=1.6,
@@ -130,7 +132,7 @@ def fig_comparator_f1():
 
 def fig_comparator_r2():
     """Ridge-to-GenePT R^2 (text-embedding alignment), homology split."""
-    aa = max(("aa1", "aa2", "aa3"), key=lambda s: r2_of(M, s))
+    aa = select_by_val(_reg_rec(M, s) for s in ("aa1", "aa2", "aa3"))["feature_source"]
     labels = [f"AA {aa[-1]}-mer" if c[0] == "AA comp." else c[0] for c in CELLS]
     colors = [_ROLE[c[2]] for c in CELLS]
     vals = [r2_of(M, aa) if c[1] == "aa_best" else r2_of(M, c[1]) for c in CELLS]
@@ -267,8 +269,8 @@ def _umap_panel(ax, coords, fams, label):
 
 def fig_umap_cds_vs_tss():
     """Hero: NT-v2 embeddings cluster by family on CDS, collapse on the TSS window."""
-    cds_c, cds_f = _coords("dataset_nt_v2_meanG.parquet")
-    tss_c, tss_f = _coords("dataset_tss_nt_v2_meanmean.parquet")
+    cds_c, cds_f = _coords(f"dataset_{CLS_BEST['nt_v2']}.parquet")
+    tss_c, tss_f = _coords(f"dataset_{CLS_BEST_TSS['nt_v2']}.parquet")
     fig, axes = plt.subplots(1, 2, figsize=(11.4, 5.9))
     _umap_panel(axes[0], cds_c, cds_f, "Coding sequence (CDS)")
     _umap_panel(axes[1], tss_c, tss_f, "TSS regulatory window")

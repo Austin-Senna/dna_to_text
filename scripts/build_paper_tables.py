@@ -12,6 +12,8 @@ fragment. Re-run to refresh every number; nothing is hand-transcribed.
 
 Primary split: homology-aware MMseqs2, 40% identity (``data/metrics_homology.json``).
 Alpha for ridge is selected by validation macro-R^2 (``select_by == "r2"``).
+Each encoder's pooling is selected jointly with C / alpha on validation
+(``linear_trainer.selection``); test metrics are only ever reported, never ranked.
 """
 from __future__ import annotations
 
@@ -19,6 +21,7 @@ import json
 from pathlib import Path
 
 from data_loader.pool_names import POOL_DISPLAY, display_label
+from linear_trainer.selection import select_by_val
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -257,22 +260,44 @@ for r in list(RAND) + list(RANDC):
 
 
 def cls_best_pool(enc, ctx="CDS"):
-    """Best-macro-F1 pool record for an encoder in a context."""
+    """Validation-selected (pool, record) for an encoder's classification probe."""
     prefix = ("tss_" if ctx == "TSS" else "") + enc + "_"
-    cells = [(fsrc, rec) for fsrc, rec in CLS.items() if fsrc.startswith(prefix)]
+    cells = {fsrc: rec for fsrc, rec in CLS.items() if fsrc.startswith(prefix)}
     if not cells:
         return None, None
-    fsrc, rec = max(cells, key=lambda kv: kv[1]["test_macro_f1"])
-    return fsrc.split("_")[-1], rec
+    rec = select_by_val(cells.values())
+    return rec["feature_source"].split("_")[-1], rec
 
 
 def reg_best_pool(enc, ctx="CDS"):
+    """Validation-selected (pool, record) for an encoder's Ridge probe."""
     prefix = ("tss_" if ctx == "TSS" else "") + enc + "_"
-    cells = [(s, rec) for s, rec in REG.items() if s.startswith(prefix)]
+    cells = {s: rec for s, rec in REG.items() if s.startswith(prefix)}
     if not cells:
         return None, None
-    s, rec = max(cells, key=lambda kv: kv[1]["test_r2_macro"])
+    rec = select_by_val(cells.values())
+    s = next(k for k, r in cells.items() if r is rec)
     return s.split("_")[-1], rec
+
+
+def best_dna_sources():
+    """(cls_source, reg_source) of the validation-selected best CDS DNA encoder cell."""
+    cls = {e: cls_best_pool(e) for e in ENCODERS}
+    reg = {e: reg_best_pool(e) for e in ENCODERS}
+    ce = next(e for e in ENCODERS if cls[e][1] is select_by_val(r for _, r in cls.values()))
+    re_ = next(e for e in ENCODERS if reg[e][1] is select_by_val(r for _, r in reg.values()))
+    return f"{ce}_{cls[ce][0]}", f"{re_}_{reg[re_][0]}"
+
+
+BEST_DNA_CLS, BEST_DNA_REG = best_dna_sources()
+TSS_DNABERT2_CLS = f"tss_dnabert2_{cls_best_pool('dnabert2', 'TSS')[0]}"
+TSS_DNABERT2_REG = f"tss_dnabert2_{reg_best_pool('dnabert2', 'TSS')[0]}"
+
+
+def src_label(src):
+    """'NT-v2 (Ends + Mean)'-style label for an encoder_pool source id."""
+    enc, pool = src.rsplit("_", 1)
+    return f"{ENC_DISPLAY[enc]} ({POOL_DISPLAY[pool]})"
 
 
 # ===================================================================
@@ -511,9 +536,9 @@ def build_seed_sensitivity():
     # (display, cls_source, reg_source)
     cells = [
         ("ESM-2 650M", "esm2_650m", "esm2_650m"),
-        ("Best DNA-LM", "nt_v2_meanG", "dnabert2_meanD"),
+        ("Best DNA-LM", BEST_DNA_CLS, BEST_DNA_REG),
         ("AA-composition", "aa2", "aa3"),
-        ("TSS (DNABERT-2)", "tss_dnabert2_meanmean", "tss_dnabert2_meanmean"),
+        ("TSS (DNABERT-2)", TSS_DNABERT2_CLS, TSS_DNABERT2_REG),
     ]
     out = []
     for disp, cs, rs in cells:
@@ -540,10 +565,10 @@ def build_homology70():
     # (display, cls_source, reg_source)
     cells = [
         ("ESM-2 650M", "esm2_650m", "esm2_650m"),
-        ("Best DNA-LM", "nt_v2_meanG", "dnabert2_meanD"),
+        ("Best DNA-LM", BEST_DNA_CLS, BEST_DNA_REG),
         ("AA-composition", "aa2", "aa3"),
         ("CDS 4-mer", "kmer", None),
-        ("TSS (DNABERT-2)", "tss_dnabert2_meanmean", "tss_dnabert2_meanmean"),
+        ("TSS (DNABERT-2)", TSS_DNABERT2_CLS, TSS_DNABERT2_REG),
     ]
     out = []
     for disp, cs, rs in cells:
@@ -640,16 +665,16 @@ def build_headline_ci_reg():
 # ===================================================================
 def build_protein_comparison():
     k4, r4 = CLS[CDS_4MER], REG[CDS_4MER]
-    aa_cls = max(["aa1", "aa2", "aa3"], key=lambda s: CLS[s]["test_macro_f1"])
-    aa_reg = max(["aa1", "aa2", "aa3"], key=lambda s: REG[s]["test_r2_macro"])
-    dna_cls = max(ENCODERS, key=lambda e: cls_best_pool(e)[1]["test_macro_f1"])
-    dna_reg = max(ENCODERS, key=lambda e: reg_best_pool(e)[1]["test_r2_macro"])
+    aa_cls = select_by_val(CLS[s] for s in ("aa1", "aa2", "aa3"))
+    aa_reg = select_by_val(REG[s] for s in ("aa1", "aa2", "aa3"))
+    dna_cls = select_by_val(cls_best_pool(e)[1] for e in ENCODERS)
+    dna_reg = select_by_val(reg_best_pool(e)[1] for e in ENCODERS)
     rows = [
         ("CDS 4-mer", k4["test_macro_f1"], k4["test_kappa"], r4["test_r2_macro"]),
-        ("AA composition", CLS[aa_cls]["test_macro_f1"], CLS[aa_cls]["test_kappa"],
-         REG[aa_reg]["test_r2_macro"]),
-        ("Best DNA encoder", cls_best_pool(dna_cls)[1]["test_macro_f1"],
-         cls_best_pool(dna_cls)[1]["test_kappa"], reg_best_pool(dna_reg)[1]["test_r2_macro"]),
+        ("AA composition", aa_cls["test_macro_f1"], aa_cls["test_kappa"],
+         aa_reg["test_r2_macro"]),
+        ("Best DNA encoder", dna_cls["test_macro_f1"], dna_cls["test_kappa"],
+         dna_reg["test_r2_macro"]),
         ("ESM-2 650M", CLS["esm2_650m"]["test_macro_f1"], CLS["esm2_650m"]["test_kappa"],
          REG["esm2_650m"]["test_r2_macro"]),
     ]
@@ -680,7 +705,7 @@ def _best_f1_family5(metrics, enc, tss=False):
         core = fs[4:] if is_tss else fs
         if core == enc or core.startswith(enc + "_"):
             cells.append(r)
-    return max(cells, key=lambda r: r["test_macro_f1"])["test_macro_f1"] if cells else None
+    return select_by_val(cells)["test_macro_f1"] if cells else None
 
 
 def _kmer_f1(metrics, *names):
@@ -723,7 +748,7 @@ def _cls_f1(metrics, src):
         cells = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
                  and not r["feature_source"].startswith("tss_")
                  and (r["feature_source"] == src or r["feature_source"].startswith(src + "_"))]
-        return max(cells, key=lambda r: r["test_macro_f1"])["test_macro_f1"] if cells else None
+        return select_by_val(cells)["test_macro_f1"] if cells else None
     cells = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
              and r.get("feature_source") == src]
     return cells[0]["test_macro_f1"] if cells else None
@@ -736,7 +761,7 @@ def _reg_r2(metrics, src):
                  and not str(r.get("dataset", "")).startswith("dataset_tss_")
                  and (str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "") == src
                       or str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "").startswith(src + "_"))]
-        return max(cells, key=lambda r: r["test_r2_macro"])["test_r2_macro"] if cells else None
+        return select_by_val(cells)["test_r2_macro"] if cells else None
     for r in recs:
         try:
             if reg_raw(r) == src:
@@ -752,7 +777,7 @@ def _reg_r2_tss(metrics, enc):
              and str(r.get("dataset", "")).startswith("dataset_tss_")
              and (str(r.get("dataset", "")).replace("dataset_tss_", "").replace(".parquet", "") == enc
                   or str(r.get("dataset", "")).replace("dataset_tss_", "").replace(".parquet", "").startswith(enc + "_"))]
-    return max(cells, key=lambda r: r["test_r2_macro"])["test_r2_macro"] if cells else None
+    return select_by_val(cells)["test_r2_macro"] if cells else None
 
 
 def _rand_cls(src):
@@ -1197,10 +1222,10 @@ def build_paired_diff():
     pc, pr = BOOT["paired"]["classification"], BOOT["paired"]["regression"]
     out = [r"\multicolumn{3}{@{}l}{\textbf{Classification ($\Delta$Macro-F1)}}\\"]
     for disp, key in [
-        (f"NT-v2 ({POOL_DISPLAY['meanG']}) $-$ AA 2-mer", "nt_v2_meanG - aa2"),
-        (f"NT-v2 ({POOL_DISPLAY['meanG']}) $-$ 4-mer floor", "nt_v2_meanG - kmer"),
+        (f"{src_label(BEST_DNA_CLS)} $-$ AA 2-mer", f"{BEST_DNA_CLS} - aa2"),
+        (f"{src_label(BEST_DNA_CLS)} $-$ 4-mer floor", f"{BEST_DNA_CLS} - kmer"),
         ("ESM-2 650M $-$ AA 2-mer", "esm2_650m - aa2"),
-        ("ESM-2 650M $-$ NT-v2 (best)", "esm2_650m - nt_v2_meanG"),
+        (f"ESM-2 650M $-$ {ENC_DISPLAY[BEST_DNA_CLS.rsplit('_', 1)[0]]} (best)", f"esm2_650m - {BEST_DNA_CLS}"),
         ("ESM-2 650M $-$ ESM-2 150M", "esm2_650m - esm2_150m"),
     ]:
         c = pc[key]
@@ -1212,9 +1237,9 @@ def build_paired_diff():
     for disp, key in [
         ("AA 3-mer $-$ AA 2-mer", "aa3 - aa2"),
         ("AA 3-mer $-$ 4-mer floor", "aa3 - kmer"),
-        ("DNABERT-2 (best) $-$ AA 3-mer", "dnabert2_meanD - aa3"),
+        (f"{ENC_DISPLAY[BEST_DNA_REG.rsplit('_', 1)[0]]} (best) $-$ AA 3-mer", f"{BEST_DNA_REG} - aa3"),
         ("ESM-2 650M $-$ AA 3-mer", "esm2_650m - aa3"),
-        ("ESM-2 650M $-$ DNABERT-2 (best)", "esm2_650m - dnabert2_meanD"),
+        (f"ESM-2 650M $-$ {ENC_DISPLAY[BEST_DNA_REG.rsplit('_', 1)[0]]} (best)", f"esm2_650m - {BEST_DNA_REG}"),
     ]:
         r = pr[key]
         lo, hi = r["delta_r2_macro_ci95"]

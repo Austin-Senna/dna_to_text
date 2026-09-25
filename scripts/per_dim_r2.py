@@ -25,6 +25,7 @@ import numpy as np
 from sklearn.linear_model import Ridge
 
 from data_loader.pool_names import display_label
+from headline_cells import REG_BEST, REG_BEST_TSS
 from splits import load_split
 
 REPO = Path(__file__).resolve().parents[1]
@@ -36,13 +37,12 @@ OUT_PNG = ANALYSIS_FIG / "per_dim_r2_distribution.png"
 # Homology-split headline regression cells: (label, dataset_parquet). The Ridge
 # probe is re-fit on the homology train+val (alpha read from
 # metrics_homology.json), not loaded from the random-split npz caches.
-CELLS = [
-    ("CDS DNABERT-2 meanD",    "dataset_dnabert2_meanD.parquet"),
-    ("CDS NT-v2 meanG",        "dataset_nt_v2_meanG.parquet"),
-    ("CDS HyenaDNA meanG",     "dataset_hyena_dna_meanG.parquet"),
-    ("CDS GENA-LM meanG",      "dataset_gena_lm_meanG.parquet"),
-    ("TSS DNABERT-2 meanmean", "dataset_tss_dnabert2_meanmean.parquet"),
-]
+# Each encoder at its validation-selected pool (headline_cells).
+_ENC_DISPLAY = {"dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "hyena_dna": "HyenaDNA", "gena_lm": "GENA-LM"}
+CELLS = [(f"CDS {d} {REG_BEST[e].rsplit('_', 1)[1]}", f"dataset_{REG_BEST[e]}.parquet")
+         for e, d in _ENC_DISPLAY.items()]
+CELLS.append((f"TSS DNABERT-2 {REG_BEST_TSS['dnabert2'].rsplit('_', 1)[1]}",
+              f"dataset_{REG_BEST_TSS['dnabert2']}.parquet"))
 
 _METRICS_HOMOLOGY = json.loads((DATA / "metrics_homology.json").read_text())
 
