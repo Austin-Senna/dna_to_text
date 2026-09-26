@@ -32,6 +32,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from build_result_figures import (  # noqa: E402  (sys.path set just above)
+    BOUNDARY_POOLS, NO_BOUNDARY_TOKEN,
     CELLS, C_COMP, C_DNA, C_ESM, ENCODERS, ENC_DISP, ENFH, FLOOR, M, POOLS,
     _aa_best, _best_cls, _cell_cls, _cls_rec, _rand_f1, _reg_rec, f1_of, r2_of,
 )
@@ -164,25 +165,51 @@ POOL_NAME = {"meanmean": "Mean", "specialmean": "Mean +\nBoundary",
 
 
 def fig_pooling_heatmap():
-    """Encoder x pooling rule, 5-way family macro-F1, homology split."""
-    vals = np.array([[_cell_cls(M, f"{e}_{p}") for p in POOLS] for e in ENCODERS], dtype=float)
-    cmap = plt.get_cmap("Blues")
-    norm = plt.Normalize(vmin=0.0, vmax=0.8)
+    """Encoder x pooling rule, 5-way family macro-F1, homology split.
+
+    Same encoding as the paper figure: colour centred on the CDS 4-mer floor
+    (white; green above, red below), boxes on each encoder's validation-selected
+    rule, and n/a for boundary-token rules on encoders pretrained without one.
+    """
+    from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
+    from matplotlib.patches import Rectangle
+
+    floor = _cell_cls(M, "kmer")
+    vals = np.full((len(ENCODERS), len(POOLS)), np.nan)
+    for i, e in enumerate(ENCODERS):
+        for j, p in enumerate(POOLS):
+            if not (e in NO_BOUNDARY_TOKEN and p in BOUNDARY_POOLS):
+                vals[i, j] = _cell_cls(M, f"{e}_{p}")
+    norm = TwoSlopeNorm(vmin=min(float(np.nanmin(vals)), floor - 0.01), vcenter=floor,
+                        vmax=max(float(np.nanmax(vals)), floor + 0.01))
+    cmap = LinearSegmentedColormap.from_list("floor_rg", ["#b2182b", "#ffffff", "#1b7837"])
+    cmap.set_bad("#e6e6e6")
     fig, ax = plt.subplots(figsize=(10.4, 7.2))
-    im = ax.imshow(vals, cmap=cmap, norm=norm, aspect="auto")
+    im = ax.imshow(np.ma.masked_invalid(vals), cmap=cmap, norm=norm, aspect="auto")
     ax.set_xticks(range(len(POOLS)))
     ax.set_xticklabels([POOL_NAME[p] for p in POOLS], rotation=35, ha="right", fontsize=19)
     ax.set_yticks(range(len(ENCODERS)))
     ax.set_yticklabels([ENC_DISP[e] for e in ENCODERS], fontsize=21)
+    ax.tick_params(length=0)
     for i in range(len(ENCODERS)):
         for j in range(len(POOLS)):
             v = vals[i, j]
+            if np.isnan(v):
+                ax.text(j, i, "n/a", ha="center", va="center", fontsize=19, color="#666")
+                continue
             r, g, b, _ = cmap(norm(v))
             ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=23,
                     color="white" if 0.299 * r + 0.587 * g + 0.114 * b < 0.5 else "#222")
+    for i, e in enumerate(ENCODERS):
+        j = POOLS.index(CLS_BEST[e].rsplit("_", 1)[1])
+        ax.add_patch(Rectangle((j - 0.5, i - 0.5), 1, 1, fill=False, edgecolor="black", lw=3.5))
     for sp in ax.spines.values():
         sp.set_visible(False)
     cbar = fig.colorbar(im, ax=ax, fraction=0.04, pad=0.03)
+    ticks = [t for t in (0.3, 0.4, 0.5) if norm.vmin <= t] + [floor] + [t for t in (0.7,) if t <= norm.vmax]
+    cbar.set_ticks(ticks)
+    cbar.set_ticklabels([f"4-mer {t:.2f}" if t == floor else f"{t:.1f}" for t in ticks])
+    cbar.ax.axhline(floor, color="black", lw=1.5)
     cbar.set_label("5-way family macro-F1")
     fig.tight_layout()
     fig.savefig(OUT / "pooling_heatmap.pdf")
