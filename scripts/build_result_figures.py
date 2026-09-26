@@ -47,7 +47,7 @@ FLOOR = 0.224
 
 C_COMP = "#9e9e9e"   # composition (grey)
 C_DNA = "#3a7d44"    # DNA encoders (green)
-C_ESM = "#c0504d"    # protein/supervised comparator (red)
+C_ESM = "#2b5c8a"    # reference models: ESM-2, Enformer (blue, hatched)
 
 
 # ---------- accessors ----------

@@ -56,7 +56,7 @@ plt.rcParams.update({
 # Colour-blind-safe role palette for the bar charts (no red/green): grey =
 # composition, blue = frozen DNA encoder, orange = protein-LM ceiling. Remap
 # the imported paper colours onto these roles.
-PC_COMP, PC_DNA, PC_ESM = "#8A8A8A", "#3B6FB0", "#E07B39"
+PC_COMP, PC_DNA, PC_ESM = "#8A8A8A", "#3a7d44", "#2b5c8a"  # same roles as the paper: grey / green / blue
 _ROLE = {C_COMP: PC_COMP, C_DNA: PC_DNA, C_ESM: PC_ESM}
 _CHANCE = "#444444"
 
