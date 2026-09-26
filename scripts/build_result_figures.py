@@ -319,12 +319,12 @@ HEATMAP_LABELS = {"meanmean": "Mean", "specialmean": "Mean\n(Boundary-incl.)", "
 def fig_pooling_heatmap():
     """Encoder x pooling macro-F1 heatmap (sec 3.3), homology split.
 
-    Colour is centred on the CDS 4-mer floor (green above, red below), so the
+    Colour is centred on the CDS 4-mer floor (white): green above, red below, darker further away, so the
     claim that pooling alone can move an encoder across composition is visible
     directly. Boxes mark each encoder's validation-selected rule; boundary-token
     rules are n/a for encoders pretrained without such a token.
     """
-    from matplotlib.colors import TwoSlopeNorm
+    from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
     from matplotlib.patches import Rectangle
 
     floor = _cell_cls(M, "kmer")
@@ -338,7 +338,8 @@ def fig_pooling_heatmap():
                 vals[i, j] = v
     vmin, vmax = float(np.nanmin(vals)), float(np.nanmax(vals))
     norm = TwoSlopeNorm(vmin=min(vmin, floor - 0.01), vcenter=floor, vmax=max(vmax, floor + 0.01))
-    cmap = plt.get_cmap("RdYlGn").copy()
+    # Two hues only: lightness carries the distance from the floor (white = 4-mer).
+    cmap = LinearSegmentedColormap.from_list("floor_rg", ["#b2182b", "#ffffff", "#1b7837"])
     cmap.set_bad("#e6e6e6")
 
     fig, ax = plt.subplots(figsize=(7.6, 3.4))
@@ -358,7 +359,10 @@ def fig_pooling_heatmap():
             if np.isnan(v):
                 ax.text(j, i, "n/a", ha="center", va="center", fontsize=8, color="#666")
                 continue
-            ax.text(j, i, f"{v:.3f}", ha="center", va="center", fontsize=8.5, color="black")
+            r, g, b, _ = cmap(norm(v))
+            dark = 0.299 * r + 0.587 * g + 0.114 * b < 0.5
+            ax.text(j, i, f"{v:.3f}", ha="center", va="center", fontsize=8.5,
+                    color="white" if dark else "black")
     for i, enc in enumerate(ENCODERS):
         j = POOLS.index(CLS_BEST[enc].rsplit("_", 1)[1])
         ax.add_patch(Rectangle((j - 0.5, i - 0.5), 1, 1, fill=False, edgecolor="black", lw=2))
