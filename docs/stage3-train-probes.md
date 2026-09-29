@@ -26,6 +26,7 @@ Additional encoder/pooling cells use the same probe scripts with different
 | File | What it does |
 | --- | --- |
 | `scripts/make_splits.py` | Creates the frozen 70/15/15 train/validation/test split. |
+| `scripts/check_split_reproduction.py` | Re-clusters with the local MMseqs2 build and checks that it reproduces `data/splits.json` (40%) or `data/splits_homology70.json` (70%); `--keep-tsv` saves the cluster assignments. |
 | `scripts/train_logistic_probe.py` | Trains multinomial family5 probes and classification baselines. |
 | `scripts/train_probe.py` | Trains Ridge probes from DNA features into GenePT text embeddings. |
 | `scripts/train_baseline.py` | Runs 4-mer Ridge baseline cells. |
@@ -43,6 +44,7 @@ Additional encoder/pooling cells use the same probe scripts with different
 ## Outputs
 
 - `data/splits.json` - frozen 70/15/15 split.
+- `data/clusters/homology_id40.tsv`, `data/clusters/homology_id70.tsv` - canonical MMseqs2 cluster assignments (representative, member) behind the two homology splits.
 - `data/metrics.json` - appended probe and baseline metrics.
 - `data/confusion_5way_*.json` - family-classification confusion summaries.
 - `analysis/tables/main_family5.md` - best family5 cell per encoder.

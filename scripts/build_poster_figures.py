@@ -7,9 +7,9 @@ value matches the paper exactly, then re-renders larger, thicker, print-legible
 panels into poster/figures/ as PDF. The paper's own figure scripts are left
 untouched; only styling, colour, and output path/format differ here.
 
-Colour-vision-deficiency safety: the bar charts use a role palette with no
-red/green (grey composition, blue DNA encoder, orange protein-LM ceiling), and
-the UMAP uses the Okabe-Ito family palette PLUS a distinct marker shape per
+Colour: the bar charts use the paper's role palette (grey composition, green
+DNA encoder, blue hatched protein-LM reference); the heatmap's red/green scale
+also prints the value in each cell. The UMAP uses the Okabe-Ito family palette PLUS a distinct marker shape per
 family, so families stay separable under red-green CVD on dense overlapping
 points.
 
@@ -54,9 +54,9 @@ plt.rcParams.update({
     "pdf.fonttype": 42,
 })
 
-# Colour-blind-safe role palette for the bar charts (no red/green): grey =
-# composition, blue = frozen DNA encoder, orange = protein-LM ceiling. Remap
-# the imported paper colours onto these roles.
+# Role palette for the bar charts, the same as the paper's: grey = composition,
+# green = frozen DNA encoder, blue (hatched) = protein-LM reference. Remap the
+# imported paper colours onto these roles.
 PC_COMP, PC_DNA, PC_ESM = "#8A8A8A", "#3a7d44", "#2b5c8a"  # same roles as the paper: grey / green / blue
 _ROLE = {C_COMP: PC_COMP, C_DNA: PC_DNA, C_ESM: PC_ESM}
 _CHANCE = "#444444"

@@ -5,10 +5,13 @@ the LaTeX caption is the title, per repo convention).
   comparator_f1.png / comparator_r2.png  -- composition, DNA encoders, ESM-2
         (comparator) on macro-F1 (sec 3.1) and GenePT R^2 (sec 3.2).
   pooling_heatmap_family5_column.png  -- encoder x pooling macro-F1 heatmap
-        (sec 3.3), adaptive label colours for legibility.
-  tss_context.png  -- TSS arm in one panel: per model, CDS vs TSS whole-window vs
-        TSS-Anchored macro-F1, Enformer pooled to match, plus the anchored chunk's
-        best composition baseline (sec 3.4).
+        (sec 3.3), colour centred on the CDS 4-mer floor (red below, green above),
+        boxes on each encoder's validation-selected rule, n/a for boundary-token
+        rules on HyenaDNA.
+  tss_context.png  -- TSS arm in two panels, macro-F1 (left) and Ridge-to-GenePT
+        R^2 (right): per model, CDS vs TSS whole-window vs TSS-Anchored, Enformer
+        pooled to match, plus the anchored chunk's best composition baseline
+        (sec 3.4).
   split_bars.png  -- random vs homology grouped bars per comparator (sec 3.5).
 
 Run: uv run scripts/build_result_figures.py
