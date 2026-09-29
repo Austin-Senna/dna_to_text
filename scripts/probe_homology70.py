@@ -7,11 +7,8 @@ restoring the canonical split in a ``finally`` block), re-probes the same headli
 cells ``seed_sensitivity.py`` uses, and prints a 70%-vs-40% comparison.
 
 Headline metrics are written to ``data/metrics_homology70.json`` — the canonical
-``data/metrics_homology.json`` is NOT touched. The classification cells overwrite the
-fixed ``data/confusion_5way_*.json`` paths (a known side effect, see
-``train_logistic_probe.py``); restore them after the run with
-``git checkout -- data/confusion_5way_*.json`` and ``rm`` any newly-created untracked
-ones.
+``data/metrics_homology.json`` is NOT touched. Probe runs no longer write confusion
+matrices unless asked (``--confusion-dir``), so ``data/confusion_5way_*.json`` is left alone.
 
 Run: uv run scripts/probe_homology70.py
 """
@@ -68,8 +65,6 @@ def main() -> None:
             v40 = h40[task].get(cell)
             v40s = f"{v40:+.4f}" if v40 is not None else "   —   "
             print(f"    {cell:<28s} {v70:+.4f}  |  {v40s}")
-    print("\nNOTE: restore clobbered confusion matrices: "
-          "git checkout -- data/confusion_5way_*.json")
 
 
 if __name__ == "__main__":

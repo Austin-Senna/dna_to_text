@@ -64,8 +64,8 @@ thread count, `n_iter`).
 - `data/splits.json` - frozen 70/15/15 split.
 - `data/clusters/homology_id40.tsv`, `data/clusters/homology_id70.tsv` - canonical MMseqs2 cluster assignments (representative, member) behind the two homology splits.
 - `data/metrics.json` - appended probe and baseline metrics.
-- `data/confusion_5way_*.json` - family-classification confusion summaries (written now only with `--confusion-dir`).
-- `outputs/predictions/<metrics stem>/*.npz` - each cell's stored test predictions, which the bootstraps rescore (gitignored).
+- `data/confusion_5way_*.json` - family-classification confusion summaries from the May 2026 runs. Probe runs now write them only for unshuffled family5 cells, and only into the directory given by `--confusion-dir` (pass `--confusion-dir data` to refresh these).
+- `outputs/predictions/<metrics stem>/*.npz` - each cell's stored test predictions (content-addressed names), which the bootstraps rescore; `--pred-dir` overrides the location (gitignored).
 - `analysis/tables/main_family5.md` - best family5 cell per encoder.
 - `analysis/tables/main_regression.md` - best Ridge-to-GenePT cell per encoder.
 

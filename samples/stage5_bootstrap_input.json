@@ -3,15 +3,7 @@
   "stage": "5",
   "n_iters": 1000,
   "seed": 42,
-  "metrics": "data/metrics.json",
-  "splits": "data/splits.json",
-  "sequence_cache": "data/sequences/",
-  "headline_feature_datasets": [
-    "data/dataset_nt_v2_meanD.parquet",
-    "data/dataset_dnabert2_meanD.parquet",
-    "data/dataset_hyena_dna_meanG.parquet",
-    "data/dataset_dnabert2_meanG.parquet",
-    "data/dataset_nt_v2_meanmean.parquet"
-  ],
+  "records": "data/metrics_homology.json (headline cells chosen on validation by scripts/headline_cells.py)",
+  "stored_predictions": "outputs/predictions/<metrics stem>/<cell>__<task>__<sha>.npz (each record's pred_file, verified against pred_sha256)",
   "documentation": "docs/stage5-bootstrap.md"
 }

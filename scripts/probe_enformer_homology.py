@@ -4,8 +4,10 @@
 The Enformer comparator was only probed on the random split in the original
 run; its per-gene features are cached and split-independent, so this re-fits
 the family5 logistic probe and the Ridge-to-GenePT probe on the homology
-train+val and evaluates on the homology test set, matching the protocol used
-for the other homology comparators. Writes data/metrics_enformer_homology.json.
+train+val and evaluates on the homology test set. It still uses its own May-era
+loop (C and alpha over 0.01..1000, max_iter 3000, unscaled features), not the
+shared fit path in ``linear_trainer.fit`` that the other probes now use.
+Writes data/metrics_enformer_homology.json.
 
     uv run scripts/probe_enformer_homology.py
 """

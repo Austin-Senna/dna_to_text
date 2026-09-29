@@ -17,8 +17,9 @@ Steps per split:
   3. paired bootstrap: Enformer center - global, and each encoder vs Enformer within
      each part (same test genes resampled for both predictions)
 
-The disjoint pass swaps in ``splits_tss_disjoint.json``; ``splits.json`` and every
-``confusion_5way_*.json`` are restored in a ``finally`` block. Never writes the tracked
+The disjoint pass swaps in ``splits_tss_disjoint.json``; ``splits.json`` is restored in
+a ``finally`` block (the confusion-matrix backup is a no-op now that probe runs don't
+write them). The bootstraps rescore each record's stored test predictions. Never writes the tracked
 ``data/metrics.json``. No GPU: all features are cached and split-independent.
 
 Part 2 needs ``dataset_tss_<enc>_tssanchored.parquet`` (gitignored; built by

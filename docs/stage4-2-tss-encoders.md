@@ -15,6 +15,8 @@ the same family-classification and GenePT-regression targets.
 ```bash
 uv pip install ".[enformer]"
 uv run python scripts/run_enformer_features.py --device auto
+# Probe fits refuse to run unless every BLAS/OpenMP pool is pinned to one thread.
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
 
 # All four self-supervised encoders on TSS windows (RTX 5060: HyenaDNA
 # ~80 min, DNABERT-2 ~110 min, GENA-LM ~70 min, NT-v2 already done).
@@ -29,7 +31,7 @@ uv run python scripts/train_probe.py --dataset data/dataset_enformer_tss_4mer.pa
 uv run python scripts/train_logistic_probe.py --dataset enformer_trunk_global --task family5
 uv run python scripts/train_probe.py --dataset data/dataset_enformer_trunk_center.parquet --probe-out data/probe_enformer_trunk_center.npz
 
-# Refresh bootstrap CIs over all 22 cells (12 CDS + 10 TSS)
+# Refresh bootstrap CIs over the CDS and TSS headline cells (rescores stored predictions)
 uv run python scripts/bootstrap_test_uncertainty.py
 ```
 

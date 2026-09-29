@@ -2,8 +2,9 @@
 
 Reviewer 2 noted the 196,608 bp TSS windows overlap across the protein-cluster split
 (48.3% of test genes). ``make_tss_disjoint_split.py`` builds a split with zero
-cross-split window overlap; this swaps it in (restoring the canonical split AND any
-clobbered ``confusion_5way_*.json`` in a ``finally`` block) and re-probes ONLY the TSS
+cross-split window overlap; this swaps it in (restoring the canonical split in a
+``finally`` block; the confusion-matrix backup is a no-op now that probe runs don't
+write them) and re-probes ONLY the TSS
 arm via ``rerun_on_split --only-tss``, writing to ``data/metrics_tss_disjoint.json`` so
 ``data/metrics_homology.json`` is untouched. The TSS embeddings are split-independent,
 so no GPU re-extraction is needed.

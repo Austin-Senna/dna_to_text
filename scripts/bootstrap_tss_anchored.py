@@ -4,8 +4,8 @@ The confirmatory re-probe gave point estimates only; nt_v2's anchored number in
 particular (disjoint 0.374 > homology 0.351, wrong direction) needs a CI before it
 can be trusted. This puts a stratified test-set bootstrap CI on the anchored
 macro-F1 for all 4 encoders on both splits, reusing the repo's existing
-``bootstrap_test_uncertainty.bootstrap_classification`` (refit with the given C,
-predict test, resample test 1000x stratified by family, 2.5/97.5 percentile).
+``bootstrap_test_uncertainty.bootstrap_classification`` (rescore the record's stored
+test predictions, resample test 1000x stratified by family, 2.5/97.5 percentile).
 
 A ``--seed`` re-run would be useless (lbfgs is deterministic on a fixed split);
 the test-set bootstrap is the correct uncertainty source.

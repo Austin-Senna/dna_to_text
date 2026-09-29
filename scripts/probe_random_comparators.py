@@ -10,9 +10,8 @@ findings can be reported.
 The canonical ``splits.json`` (currently the 40% homology split) is backed up and
 restored in a ``finally`` block. Metrics land in ``data/metrics_random_comparators.json``
 — the legacy ``data/metrics.json`` and the primary ``data/metrics_homology.json`` are
-NOT touched. ESM-2 classification overwrites the tracked
-``data/confusion_5way_esm2_*.json`` matrices — restore after the run with
-``git checkout -- data/confusion_5way_esm2_*.json``.
+NOT touched, and neither are the tracked ``data/confusion_5way_*.json`` matrices (probe
+runs write confusion matrices only with ``--confusion-dir``).
 
 Run: uv run scripts/probe_random_comparators.py
 """
@@ -96,8 +95,6 @@ def main() -> None:
             SPLITS.write_bytes(backup)
             print(f"\nrestored canonical {SPLITS.name}", flush=True)
 
-    print("\nNOTE: restore clobbered ESM-2 confusion matrices: "
-          "git checkout -- data/confusion_5way_esm2_*.json")
 
 
 if __name__ == "__main__":

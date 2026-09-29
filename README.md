@@ -39,6 +39,8 @@ Report-supporting cached reproduction:
 
 ```bash
 # Stage 5: regenerate 1000-run bootstrap confidence intervals (see docs/stage5-bootstrap.md).
+# It rescores each headline cell's stored test predictions (outputs/predictions/, not
+# tracked), so rerun the Stage 3/4 probe cells in this checkout first.
 uv run python scripts/bootstrap_test_uncertainty.py
 
 # Stage 6: regenerate the analysis/ diagnostic tables and figures from tracked metrics/caches.
@@ -73,7 +75,9 @@ uv run python scripts/build_pooling_datasets.py --encoder nt_v2
 uv run python scripts/build_pooling_datasets.py --encoder gena_lm
 uv run python scripts/build_pooling_datasets.py --encoder hyena_dna
 
-# Stage 3: make frozen splits and train headline probes/baselines.
+# Stage 3: make frozen splits and train headline probes/baselines. Probe fits refuse to
+# run unless every BLAS/OpenMP pool is pinned to one thread (it changes lbfgs results).
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
 uv run python scripts/make_splits.py
 uv run python scripts/train_logistic_probe.py --dataset nt_v2_meanD --task family5
 uv run python scripts/train_probe.py --dataset data/dataset_dnabert2_meanG.parquet
@@ -132,19 +136,17 @@ External large inputs:
 
 ## Testing
 
-```bash
-uv run python -m unittest
-```
-
-If `pytest` is available in your environment, the same tests can also be run with:
+pytest is a dev dependency (`uv sync` installs it); `tests/conftest.py` pins one thread.
 
 ```bash
-uv run pytest
+uv run pytest            # fast suite, a few seconds
+uv run pytest -m slow    # real-data acceptance checks, a few minutes
 ```
 
 ## Troubleshooting
 
-- `pytest: No such file or directory`: this project uses `unittest` tests and does not require pytest by default. Use `uv run python -m unittest`, or install pytest in your environment if you prefer that runner.
+- `ThreadPinError` from a probe script: set `OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1` before Python starts. The thread count changes lbfgs results, so probe fits refuse to run unpinned.
+- `pytest: No such file or directory`: run `uv sync` (pytest is a dev dependency), then `uv run pytest`.
 - `pip: command not found`: use `uv run python ...` for scripts and `uv pip ...` to manage packages inside the project environment.
 - `uv pip install triton` fails on Apple Silicon + Python 3.12: Triton wheels are not available for this platform combination, and DNABERT-2 inference in this repo does not require Triton.
 - Encoder runs are expensive. Do not launch multiple concurrent encoder processes on the same MPS or GPU device; keep one encoder process per device.

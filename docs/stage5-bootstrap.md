@@ -9,11 +9,13 @@ and Results §3.1–§3.2.
 ## Pipeline placement
 
 This is Stage 5 of the repository pipeline. Run it after the Stage 3 probe and
-baseline metrics are available, and after the Stage 4 TSS context branch if
-you want the full report-supporting cache set present. The command
-does not rebuild encoder embeddings; it consumes the cached feature datasets,
-`data/metrics.json`, `data/splits.json`, and CDS sequence cache, then writes
-`data/bootstrap_metrics.json`.
+baseline cells and the Stage 4 TSS cells have been run in this checkout. It
+fits nothing: it reads each headline cell's record from
+`data/metrics_homology.json` (chosen on validation by `scripts/headline_cells.py`),
+loads the test predictions that run stored (`pred_file` under
+`outputs/predictions/`, not tracked), and writes `data/bootstrap_metrics.json`.
+Records from before stored predictions existed have no `pred_file`; the script
+stops with "no stored predictions; rerun the cell".
 
 Sample input and output shapes are tracked in
 `samples/stage5_bootstrap_input.json` and
@@ -23,22 +25,23 @@ Sample input and output shapes are tracked in
 
 | File | What it does |
 | --- | --- |
-| `scripts/bootstrap_test_uncertainty.py` | Refit headline probes, bootstrap held-out test metrics, and write confidence intervals. |
+| `scripts/bootstrap_test_uncertainty.py` | Rescore each headline record's stored, hash-verified test predictions, bootstrap the test metrics, and write confidence intervals. |
+| `scripts/headline_cells.py` | Validation-selected headline cells (explicit pool lists), read from `data/metrics_homology.json`. |
 | `data/bootstrap_metrics.json` | Cached 1,000-run bootstrap output used by the report. |
-| `data/metrics.json` | Source of recorded probe metrics and selected hyperparameters. |
-| `data/splits.json` | Frozen split membership used to identify train/validation/test genes. |
-| `data/sequences/` | CDS FASTA cache used to rebuild 4-mer cells during bootstrap. |
+| `outputs/predictions/<metrics stem>/` | Stored test predictions, one content-addressed `.npz` per record (not tracked). |
 | `samples/stage5_bootstrap_input.json` | Tiny summary of bootstrap inputs and settings. |
 | `samples/stage5_bootstrap_output.json` | Tiny excerpt of bootstrap confidence interval output. |
 
 ## What it does
 
-For each headline cell (12 total: 6 classification + 6 regression):
+For each headline cell:
 
-1. **Refit** the probe at the recorded best hyperparameter on `train + val`,
-   matching the original protocol exactly. Hyperparameters come from the
-   latest matching entry in `data/metrics.json`.
-2. **Predict** once on the held-out test split.
+1. **Load** the record's stored test predictions (`pred_file`) and verify them
+   against `pred_sha256`. Nothing is refitted: a refit can land on a different
+   model (another machine, thread count or `max_iter`), and the interval would
+   then no longer bracket the reported value.
+2. **Check** that the predictions reproduce the record's test value exactly;
+   the script stops otherwise.
 3. **Resample** the test split 1,000 times with replacement, recompute the
    metric on each resample, and take the 2.5th / 97.5th percentiles as the
    95% CI.
@@ -62,33 +65,20 @@ The report Methods section states this scope explicitly.
 
 ## Cells covered
 
-### Classification (`HEADLINE_CLS`)
+The cells come from `scripts/headline_cells.py`, so they follow the
+validation-selected picks rather than a fixed list:
 
-| Cell name | Dataset | C | Notes |
-|---|---|---|---|
-| `kmer` | 4-mer baseline | 1000.0 | k-mers re-featurised from CDS at runtime |
-| `dnabert2_meanD` | DNABERT-2, meanD pooling | 10.0 | |
-| `nt_v2_meanD` | NT-v2, meanD pooling | 1.0 | headline encoder |
-| `gena_lm_clsmean` | GENA-LM, clsmean pooling | 1.0 | |
-| `hyena_dna_meanG` | HyenaDNA, meanG pooling | 10.0 | |
-| `shuffled` | NT-v2 with shuffled labels | 100.0 | sanity-check anti-baseline |
-
-Reported metrics: macro-F1 + Cohen's κ (both point estimate and CI), plus
-per-class F1 across {tf, gpcr, kinase, ion, immune}.
-
-### Regression (`HEADLINE_REG`)
-
-| Cell name | Dataset | α | Notes |
-|---|---|---|---|
-| `kmer` | 4-mer baseline | 0.01 | |
-| `dnabert2_meanG` | DNABERT-2, meanG pooling | 10.0 | headline encoder for regression |
-| `nt_v2_meanmean` | NT-v2, meanmean pooling | 10.0 | |
-| `gena_lm_meanmean` | GENA-LM, meanmean pooling | 100.0 | |
-| `hyena_dna_specialmean` | HyenaDNA, specialmean pooling | 1.0 | |
-| `shuffled_y` | NT-v2 with shuffled GenePT vectors | 1000.0 | anti-baseline |
-
-Reported metric: macro-R² across the 1,536 GenePT dimensions (point estimate
-and CI).
+- **Classification (`HEADLINE_CLS`, `HEADLINE_CLS_TSS`):** the composition
+  comparators (4-mer, codon, amino-acid 1/2/3-mer), each DNA encoder's
+  validation-selected pool, ESM-2 650M, the shuffled-label anti-baseline, and
+  on the TSS window the TSS 4-mer plus each encoder's selected pool.
+  Reported: macro-F1 and Cohen's kappa (point and CI), plus per-class F1.
+- **Regression (`HEADLINE_REG`, `HEADLINE_REG_TSS`):** the same comparators,
+  each encoder's selected pool and ESM-2 650M, on CDS and TSS. Reported:
+  macro-R^2 across the 1,536 GenePT dimensions (point and CI).
+- **Paired differences (`--paired`):** `PAIRED_CLS` / `PAIRED_REG` resample the
+  same test genes for both cells of each comparison; CDS vs TSS pairs use the
+  genes common to both test sets.
 
 ## Running it
 
@@ -98,12 +88,10 @@ uv run python scripts/bootstrap_test_uncertainty.py
 
 Optional flags:
 
-- `--n-iters N` — number of bootstrap iterations (default `1000`).
-- `--seed S` — RNG seed for reproducibility (default `42`).
-- `--out PATH` — override output path (default `data/bootstrap_metrics.json`).
-
-The 4-mer cells re-featurise CDS sequences from `data/sequences/` at runtime;
-all encoder cells load embeddings from `data/dataset_<encoder>_<pooling>.parquet`.
+- `--n-iters N`: number of bootstrap iterations (default `1000`).
+- `--seed S`: RNG seed for reproducibility (default `42`).
+- `--out PATH`: override output path (default `data/bootstrap_metrics.json`).
+- `--paired`: also compute paired-difference CIs.
 
 ## Output schema
 
@@ -136,6 +124,9 @@ all encoder cells load embeddings from `data/dataset_<encoder>_<pooling>.parquet
 ```
 
 ## What the results show
+
+These readings are from the May 2026 protocol and will be re-checked after the
+camera-ready recompute.
 
 - **NT-v2 vs 4-mer (classification):** CIs are non-overlapping on both
   macro-F1 and κ. The encoder gain is not a test-split artifact.

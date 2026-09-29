@@ -9,8 +9,8 @@ datasets (``dataset_tss_<enc>_tssanchored.parquet``, built by
   - genomic-interval-disjoint            -> data/metrics_tss_anchored_disjoint.json
 
 The disjoint pass swaps in ``splits_tss_disjoint.json`` and restores the canonical
-split AND any clobbered ``confusion_5way_*.json`` in a ``finally`` block (same safety
-pattern as ``probe_tss_disjoint.py``). Never writes the tracked ``data/metrics.json``.
+split in a ``finally`` block (same safety pattern as ``probe_tss_disjoint.py``; the
+``confusion_5way_*.json`` backup there is a no-op now that probe runs don't write them). Never writes the tracked ``data/metrics.json``.
 No GPU: TSS-anchored features are cached + split-independent.
 
 Run: uv run scripts/probe_tss_anchored.py
