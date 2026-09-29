@@ -37,7 +37,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(SCRIPTS))
 
 import bootstrap_test_uncertainty as bt  # noqa: E402
-from linear_trainer.selection import select_by_val  # noqa: E402
+from linear_trainer.selection import MissingRecord, select_pool  # noqa: E402
 from splits.loader import SPLITS_PATH  # noqa: E402
 
 ENCODERS = ["dnabert2", "nt_v2", "gena_lm", "hyena_dna"]
@@ -60,23 +60,23 @@ POOL_METRICS = {
 }
 
 
-def _C_from(metrics_path: Path, feature_source: str) -> float:
-    rows = json.loads(metrics_path.read_text())
-    for r in rows:
-        if (r.get("task") == "family5" and not r.get("shuffled_labels")
-                and r.get("feature_source") == feature_source):
-            return float(r["C"])
-    raise KeyError(f"{feature_source} not found in {metrics_path.name}")
+def _rec_from(metrics_path: Path, feature_source: str) -> dict:
+    """The latest family5 record of a cell (later records win, as in headline_cells)."""
+    rows = [r for r in json.loads(metrics_path.read_text())
+            if r.get("task") == "family5" and not r.get("shuffled_labels")
+            and r.get("feature_source") == feature_source]
+    if not rows:
+        raise MissingRecord(f"{feature_source} not found in {metrics_path.name}")
+    return rows[-1]
 
 
 def _global_pool(split_label: str, enc: str) -> str:
     """Validation-selected whole-window pool for an encoder on a split."""
     rows = json.loads(POOL_METRICS[split_label].read_text())
     cells = {r["feature_source"]: r for r in rows
-             if r.get("task") == "family5" and not r.get("shuffled_labels")
-             and r.get("feature_source") in {f"tss_{enc}_{p}" for p in WHOLE_WINDOW_POOLS}}
-    best = select_by_val(cells.values())
-    return best["feature_source"].rsplit("_", 1)[1]
+             if r.get("task") == "family5" and not r.get("shuffled_labels")}
+    best = select_pool(cells, [f"tss_{enc}_{p}" for p in WHOLE_WINDOW_POOLS])
+    return best.rsplit("_", 1)[1]
 
 
 GLOBAL_POOL = {split: {enc: _global_pool(split, enc) for enc in ENCODERS}
@@ -99,10 +99,10 @@ def _run_split(split_label: str) -> list[dict]:
     rows = []
     for enc in ENCODERS:
         pool = GLOBAL_POOL[split_label][enc]
-        c_anc = _C_from(ANCHORED_METRICS[split_label], f"tss_{enc}_tssanchored")
-        c_pool = _C_from(POOL_METRICS[split_label], f"tss_{enc}_{pool}")
-        res = bt.paired_bootstrap_classification(
-            f"tss_{enc}_tssanchored", c_anc, f"tss_{enc}_{pool}", c_pool, n_iters=N_ITERS)
+        r_anc = _rec_from(ANCHORED_METRICS[split_label], f"tss_{enc}_tssanchored")
+        r_pool = _rec_from(POOL_METRICS[split_label], f"tss_{enc}_{pool}")
+        c_anc, c_pool = r_anc["C"], r_pool["C"]
+        res = bt.paired_bootstrap_classification(r_anc, r_pool, n_iters=N_ITERS)
         lo, hi = res["delta_macro_f1_ci95"]
         rows.append({
             "encoder": enc, "split": split_label,

@@ -32,12 +32,18 @@ from __future__ import annotations
 
 import numpy as np
 
-POOLING_VARIANTS = ("meanmean", "centermean", "specialmean", "maxmean", "clsmean", "meanD", "meanG")
+# The CDS sweep pools. `centermean` is TSS-only: it is the template the E5
+# TSS-anchored builders read, not a pool that competes in validation selection.
+POOLING_VARIANTS = ("meanmean", "specialmean", "maxmean", "clsmean", "meanD", "meanG")
+TSS_POOLING_VARIANTS = POOLING_VARIANTS + ("centermean",)
 
 
-def available_variants(per_chunk: dict[str, np.ndarray]) -> tuple[str, ...]:
-    """Return pooling variants supported by the available per-chunk reductions."""
-    variants = ["meanmean", "centermean"]
+def available_variants(per_chunk: dict[str, np.ndarray], include_center: bool = False) -> tuple[str, ...]:
+    """Return pooling variants supported by the available per-chunk reductions.
+
+    ``include_center`` adds the TSS-only ``centermean`` (see TSS_POOLING_VARIANTS).
+    """
+    variants = ["meanmean", "centermean"] if include_center else ["meanmean"]
     if "special_mean" in per_chunk:
         variants.append("specialmean")
     if "max" in per_chunk:

@@ -44,7 +44,7 @@ sys.path.insert(0, str(SCRIPTS))
 
 import bootstrap_test_uncertainty as bt  # noqa: E402
 import train_logistic_probe as tlp  # noqa: E402
-from paired_tss_anchored import GLOBAL_POOL, ANCHORED_METRICS, POOL_METRICS, _C_from  # noqa: E402
+from paired_tss_anchored import GLOBAL_POOL, ANCHORED_METRICS, POOL_METRICS, _rec_from  # noqa: E402
 from splits.loader import SPLITS_PATH  # noqa: E402
 
 ENCODERS = ["dnabert2", "nt_v2", "gena_lm", "hyena_dna"]
@@ -78,8 +78,10 @@ def _register(split_label: str, parts: list[str]) -> None:
         bt.DATASET_PATHS[f"tss_{enc}_{pool}"] = DATA / f"dataset_tss_{enc}_{pool}.parquet"
 
 
-def _paired(split_label: str, part: str, ds_a: str, c_a: float, ds_b: str, c_b: float) -> dict:
-    res = bt.paired_bootstrap_classification(ds_a, c_a, ds_b, c_b, n_iters=N_ITERS)
+def _paired(split_label: str, part: str, rec_a: dict, rec_b: dict) -> dict:
+    ds_a, c_a = rec_a["feature_source"], rec_a["C"]
+    ds_b, c_b = rec_b["feature_source"], rec_b["C"]
+    res = bt.paired_bootstrap_classification(rec_a, rec_b, n_iters=N_ITERS)
     lo, hi = res["delta_macro_f1_ci95"]
     print(f"  [{split_label}/{part}] {ds_a:28} - {ds_b:24} "
           f"dF1={res['delta_macro_f1_point']:+.4f} [{lo:+.3f},{hi:+.3f}] "
@@ -100,27 +102,25 @@ def _run_split(split_label: str, parts: list[str]) -> dict:
         _probe(ds, metrics_out)
 
     _register(split_label, parts)
-    enf_C = {k: _C_from(metrics_out, ds) for k, ds in ENFORMER.items()}
+    enf = {k: _rec_from(metrics_out, ds) for k, ds in ENFORMER.items()}
+    enf_C = {k: r["C"] for k, r in enf.items()}
     cells = {}
     for k, ds in ENFORMER.items():
-        b = bt.bootstrap_classification(ds, enf_C[k], shuffled=False, n_iters=N_ITERS)
+        b = bt.bootstrap_classification(enf[k], n_iters=N_ITERS)
         cells[ds] = {"C": enf_C[k], "macro_f1_point": b["macro_f1_point"],
                      "macro_f1_ci95": b["macro_f1_ci95"], "per_class_f1": b["per_class_f1"]}
         lo, hi = b["macro_f1_ci95"]
         print(f"  [{split_label}] {ds:24} F1={b['macro_f1_point']:.4f} [{lo:.3f},{hi:.3f}] C={enf_C[k]}",
               flush=True)
 
-    paired = [_paired(split_label, "enformer", ENFORMER["center"], enf_C["center"],
-                      ENFORMER["global"], enf_C["global"])]
+    paired = [_paired(split_label, "enformer", enf["center"], enf["global"])]
     for enc in ENCODERS if "whole_window" in parts else []:
         pool = GLOBAL_POOL[split_label][enc]
-        c_pool = _C_from(POOL_METRICS[split_label], f"tss_{enc}_{pool}")
-        paired.append(_paired(split_label, "whole_window", f"tss_{enc}_{pool}", c_pool,
-                              ENFORMER["global"], enf_C["global"]))
+        r_pool = _rec_from(POOL_METRICS[split_label], f"tss_{enc}_{pool}")
+        paired.append(_paired(split_label, "whole_window", r_pool, enf["global"]))
     for enc in ENCODERS if "tss_centred" in parts else []:
-        c_anc = _C_from(ANCHORED_METRICS[split_label], f"tss_{enc}_tssanchored")
-        paired.append(_paired(split_label, "tss_centred", f"tss_{enc}_tssanchored", c_anc,
-                              ENFORMER["center"], enf_C["center"]))
+        r_anc = _rec_from(ANCHORED_METRICS[split_label], f"tss_{enc}_tssanchored")
+        paired.append(_paired(split_label, "tss_centred", r_anc, enf["center"]))
     return {"enformer_cells": cells, "paired": paired}
 
 

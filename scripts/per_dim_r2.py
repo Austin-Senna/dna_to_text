@@ -25,6 +25,7 @@ import numpy as np
 from sklearn.linear_model import Ridge
 
 from data_loader.pool_names import display_label
+from linear_trainer.selection import MissingRecord, legacy_alpha
 from headline_cells import REG_BEST, REG_BEST_TSS
 from splits import load_split
 
@@ -48,10 +49,12 @@ _METRICS_HOMOLOGY = json.loads((DATA / "metrics_homology.json").read_text())
 
 
 def _alpha_for(dataset_name: str) -> float:
-    for run in _METRICS_HOMOLOGY:
-        if run.get("model") == "linear_probe" and run.get("dataset") == dataset_name:
-            return float(run["alpha"])
-    return 10.0
+    """Recorded validation-selected alpha (the latest record, as in headline_cells)."""
+    runs = [r for r in _METRICS_HOMOLOGY
+            if r.get("model") == "linear_probe" and r.get("dataset") == dataset_name]
+    if not runs:
+        raise MissingRecord(f"no linear_probe record for {dataset_name} in metrics_homology.json")
+    return legacy_alpha(runs[-1])
 
 
 def per_dim_r2(Y_true: np.ndarray, Y_pred: np.ndarray) -> np.ndarray:

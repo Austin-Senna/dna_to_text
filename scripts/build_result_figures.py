@@ -30,7 +30,7 @@ from matplotlib.patches import Patch
 
 from data_loader.pool_names import POOL_DISPLAY
 from headline_cells import CLS_BEST
-from linear_trainer.selection import select_by_val
+from linear_trainer.selection import encoder_cells, select_by_val
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -64,7 +64,7 @@ def _best_cls(metrics, src, tss=False, metric="test_macro_f1"):
         if is_tss != tss:
             continue
         core = fs[4:] if is_tss else fs
-        if core == src or core.startswith(src + "_"):
+        if core in encoder_cells(src):
             cells.append(r)
     return select_by_val(cells)[metric] if cells else None
 
@@ -83,8 +83,8 @@ def _cell_cls(metrics, src):
 def _best_reg_enc(metrics, enc):
     cells = [r for r in metrics if r.get("task") is None and r.get("model") == "linear_probe"
              and not str(r.get("dataset", "")).startswith("dataset_tss_")
-             and (str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "") == enc
-                  or str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "").startswith(enc + "_"))]
+             and str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "")
+             in encoder_cells(enc)]
     return select_by_val(cells)["test_r2_macro"] if cells else None
 
 
@@ -98,7 +98,7 @@ def _best_reg_enc_ctx(metrics, enc, tss=False):
         if ds.startswith("dataset_tss_") != tss:
             continue
         core = ds.replace("dataset_tss_", "").replace("dataset_", "").replace(".parquet", "")
-        if core == enc or core.startswith(enc + "_"):
+        if core in encoder_cells(enc):
             cells.append(r)
     return select_by_val(cells)["test_r2_macro"] if cells else None
 

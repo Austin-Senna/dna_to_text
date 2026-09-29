@@ -3,9 +3,10 @@
 R1 asked for extra decimal places in the supplement "to future-proof". The two CI
 tables (``s_headline_ci_cls.tex``, ``s_headline_ci_reg.tex``) had lost their generator
 (the headline cell list was later trimmed), so they were static. This recreates them,
-data-driven: for each displayed cell it reads the recorded validation-selected
-hyperparameter from ``metrics_homology.json`` and calls the paper's own bootstrap
-functions (1,000 iters, seed 42), formatting at 4 dp. Nothing is hand-transcribed.
+data-driven: for each displayed cell it takes the validation-selected record from
+``metrics_homology.json`` and calls the paper's own bootstrap functions, which
+rescore the record's stored test predictions (1,000 iters, seed 42), formatting
+at 4 dp. Nothing is hand-transcribed.
 
 Reuses the display indexes/helpers in ``build_paper_tables`` (DRY). Reads the current
 ``data/splits.json`` (must be the canonical homology split).
@@ -37,34 +38,31 @@ def _wrap(setup: str, cols: str, header: str, body: str) -> str:
 
 def build_cls() -> str:
     """Source | Pool | Macro-F1 [95% CI] | kappa [95% CI], at 4 dp."""
-    def row(disp, pool, src, c, shuf):
-        res = bootstrap_classification(src, float(c), shuf, n_iters=N_ITERS, seed=SEED)
+    def row(disp, pool, rec):
+        res = bootstrap_classification(rec, n_iters=N_ITERS, seed=SEED)
         return (f"{disp} & {pool} & {_ci(res['macro_f1_point'], res['macro_f1_ci95'])} "
                 f"& {_ci(res['kappa_point'], res['kappa_ci95'])} \\\\")
 
-    comp = [row("Shuffled labels", "---", T.CLS_SHUF["feature_source"], T.CLS_SHUF["C"], True)]
+    comp = [row("Shuffled labels", "---", T.CLS_SHUF)]
     for rid, disp in [("kmer", "CDS 4-mer")] + T.COMPOSITION[2:]:  # 4-mer, codon, aa1-3
-        comp.append(row(disp, "---", rid, T.CLS[rid]["C"], False))
-    enc = [row(T.ENC_DISPLAY[e], T.tt(p), rec["feature_source"], rec["C"], False)
+        comp.append(row(disp, "---", T.CLS[rid]))
+    enc = [row(T.ENC_DISPLAY[e], T.tt(p), rec)
            for e in T.ENCODERS for p, rec in [T.cls_best_pool(e)]]
-    esm = [row("ESM-2 650M", "---", "esm2_650m", T.CLS["esm2_650m"]["C"], False)]
+    esm = [row("ESM-2 650M", "---", T.CLS["esm2_650m"])]
     return "\n".join(comp + [r"\midrule"] + enc + [r"\midrule"] + esm)
 
 
 def build_reg() -> str:
     """Source | Pool | GenePT R^2 [95% CI], at 4 dp."""
-    def row(disp, pool, src, alpha):
-        res = bootstrap_regression(src, float(alpha), False, n_iters=N_ITERS, seed=SEED)
+    def row(disp, pool, rec):
+        res = bootstrap_regression(rec, n_iters=N_ITERS, seed=SEED)
         return f"{disp} & {pool} & {_ci(res['r2_macro_point'], res['r2_macro_ci95'])} \\\\"
 
-    def reg_src(rec):
-        return rec["dataset"].replace("dataset_", "").replace(".parquet", "")
-
-    comp = [row(disp, "---", rid, T.REG[rid]["alpha"])
+    comp = [row(disp, "---", T.REG[rid])
             for rid, disp in [("kmer", "CDS 4-mer")] + T.COMPOSITION[2:]]
-    enc = [row(T.ENC_DISPLAY[e], T.tt(p), reg_src(rec), rec["alpha"])
+    enc = [row(T.ENC_DISPLAY[e], T.tt(p), rec)
            for e in T.ENCODERS for p, rec in [T.reg_best_pool(e)]]
-    esm = [row("ESM-2 650M", "---", "esm2_650m", T.REG["esm2_650m"]["alpha"])]
+    esm = [row("ESM-2 650M", "---", T.REG["esm2_650m"])]
     return "\n".join(comp + [r"\midrule"] + enc + [r"\midrule"] + esm)
 
 

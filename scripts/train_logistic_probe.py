@@ -1,200 +1,34 @@
-"""Train a logistic regression classification probe.
+"""Train a logistic regression classification probe (one cell).
 
-One script for the entire 15-cell run matrix. Flags pick which feature
-source X comes from (--dataset) and which classification task (--task);
---shuffle-labels turns the run into the anti-baseline.
+Flags pick which feature source X comes from (--dataset) and which
+classification task (--task); --shuffle-labels turns the run into the
+anti-baseline. The fit, validation sweep and test scoring are
+``linear_trainer.cell.run_cell`` under the V2 protocol.
 
 Outputs:
-  - one entry appended to data/metrics.json per run
-  - for the 5-way task, a confusion matrix saved as a JSON file
+  - one record appended to --metrics-out per run
+  - the cell's test predictions under --pred-dir (bootstraps rescore these)
+  - with --confusion-dir, a 5-way confusion matrix JSON
 """
 from __future__ import annotations
 
 import argparse
-import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-from sklearn.metrics import (
-    accuracy_score,
-    balanced_accuracy_score,
-    cohen_kappa_score,
-    confusion_matrix,
-    f1_score,
-)
-
-from binary_tasks import load_binary_split, BINARY_TASKS
-from kmer_baseline import featurize_kmer
-from composition_baseline import featurize_aa_kmer, featurize_codon, featurize_gc
-from data_loader.sequence_fetcher import fetch_cds
-from data_loader.model_registry import dataset_paths
-from data_loader.pooling_aggregator import POOLING_VARIANTS
-from linear_trainer import fit_logistic, sweep_C
-from splits import load_split
+from linear_trainer import sources
+from linear_trainer.cell import append_record, run_cell
+from linear_trainer.protocol import V2
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
-SEQUENCES_DIR = DATA / "sequences"
+PRED_ROOT = REPO_ROOT / "outputs" / "predictions"
 
-DEFAULT_CS = [1e-2, 1e-1, 1.0, 10.0, 100.0, 1000.0]
-
-DATASET_PATHS = dataset_paths(include_variants=True)
-DATASET_PATHS.update({
-    "enformer_trunk_global": DATA / "dataset_enformer_trunk_global.parquet",
-    "enformer_trunk_center": DATA / "dataset_enformer_trunk_center.parquet",
-    "enformer_tracks_center": DATA / "dataset_enformer_tracks_center.parquet",
-    "enformer_tss_4mer": DATA / "dataset_enformer_tss_4mer.parquet",
-})
-for _encoder in ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"):
-    DATASET_PATHS[f"tss_{_encoder}"] = DATA / f"dataset_tss_{_encoder}.parquet"
-    for _variant in POOLING_VARIANTS:
-        DATASET_PATHS[f"tss_{_encoder}_{_variant}"] = DATA / f"dataset_tss_{_encoder}_{_variant}.parquet"
-    # TSS-anchored chunk pooling (E5 confirmatory re-probe). Not an aggregate()
-    # variant — it selects the TSS-centered chunk per gene using external window
-    # info — so it is registered directly rather than added to POOLING_VARIANTS.
-    DATASET_PATHS[f"tss_{_encoder}_tssanchored"] = DATA / f"dataset_tss_{_encoder}_tssanchored.parquet"
-del _encoder, _variant
-
-# ESM-2 protein-LM comparator (#9): real parquet-backed feature sources.
-DATASET_PATHS["esm2_150m"] = DATA / "dataset_esm2_150m.parquet"
-DATASET_PATHS["esm2_650m"] = DATA / "dataset_esm2_650m.parquet"
-
-# Any encoder parquet supplies the shared {ensembl_id, family, gene_symbol,
-# genept_vec} metadata used to build synthetic (on-the-fly) features. Prefer
-# the canonical base if present, else fall back to a pooling variant that is
-# always materialised.
-def _pick_meta_parquet() -> Path:
-    for key in ("dnabert2", "dnabert2_meanmean", "gena_lm_meanmean"):
-        p = DATASET_PATHS.get(key)
-        if p is not None and Path(p).exists():
-            return Path(p)
-    raise FileNotFoundError("no metadata parquet found for synthetic features")
-
-
-META_PARQUET = _pick_meta_parquet()
-
-# On-the-fly compositional feature sources (computed from cached CDS, not
-# parquet-backed). Maps dataset name -> per-sequence featuriser. Added for the
-# journal revision's stronger-baselines requirement: higher-order k-mer,
-# codon, translated amino-acid k-mer, and GC/length controls.
-SYNTHETIC_FEATURIZERS = {
-    "kmer": lambda s: featurize_kmer(s, 4),
-    "kmer6": lambda s: featurize_kmer(s, 6),
-    "codon": featurize_codon,
-    "aa1": lambda s: featurize_aa_kmer(s, 1),
-    "aa2": lambda s: featurize_aa_kmer(s, 2),
-    "aa3": lambda s: featurize_aa_kmer(s, 3),
-    "gc": featurize_gc,
-}
-
-
-def _synthetic_features_for_meta(dataset: str, meta: pd.DataFrame) -> np.ndarray:
-    fn = SYNTHETIC_FEATURIZERS[dataset]
-    rows = []
-    for eid in meta["ensembl_id"].tolist():
-        seq = fetch_cds(eid, SEQUENCES_DIR)
-        if not seq:
-            raise RuntimeError(f"missing cached CDS for {eid}")
-        rows.append(fn(seq))
-    return np.stack(rows).astype(np.float32)
-
-def _load_split_for(
-    dataset: str,
-    task: str,
-    name: str,
-) -> tuple[np.ndarray, np.ndarray, pd.DataFrame]:
-    """Return (X, y, meta) for the given (dataset, task, name) cell."""
-    if task == "family5":
-        if dataset in DATASET_PATHS:
-            X, _, meta = load_split(name, dataset_path=DATASET_PATHS[dataset])
-        elif dataset in SYNTHETIC_FEATURIZERS:
-            _, _, meta = load_split(name, dataset_path=META_PARQUET)
-            X = _synthetic_features_for_meta(dataset, meta)
-        else:
-            raise ValueError(f"unknown dataset: {dataset!r}")
-        y = meta["family"].to_numpy()
-        return X, y, meta
-
-    if task not in BINARY_TASKS:
-        raise ValueError(f"unknown task: {task!r}")
-    if dataset in DATASET_PATHS:
-        X, y, meta = load_binary_split(task, name, dataset_path=DATASET_PATHS[dataset])
-    elif dataset in SYNTHETIC_FEATURIZERS:
-        _, y, meta = load_binary_split(task, name, dataset_path=META_PARQUET)
-        X = _synthetic_features_for_meta(dataset, meta)
-    else:
-        raise ValueError(f"unknown dataset: {dataset!r}")
-    return X, y, meta
-
-
-def _assert_splits_disjoint(meta_tr, meta_val, meta_te) -> None:
-    s_tr, s_val, s_te = (
-        set(meta_tr["ensembl_id"]),
-        set(meta_val["ensembl_id"]),
-        set(meta_te["ensembl_id"]),
-    )
-    assert s_tr.isdisjoint(s_val), "train/val overlap"
-    assert s_tr.isdisjoint(s_te), "train/test overlap"
-    assert s_val.isdisjoint(s_te), "val/test overlap"
-
-
-def _assert_class_presence(y_tr, y_val, y_te, task: str) -> None:
-    if task == "family5":
-        for split_name, y in (("train", y_tr), ("val", y_val), ("test", y_te)):
-            classes_present = set(np.unique(y).tolist())
-            assert len(classes_present) == 5, (
-                f"family5 split {split_name} has {len(classes_present)} classes, expected 5"
-            )
-    else:
-        for split_name, y in (("train", y_tr), ("val", y_val), ("test", y_te)):
-            bal = float(np.mean(y == 1))
-            assert 0.45 <= bal <= 0.55, (
-                f"binary split {split_name} class balance {bal:.3f} outside [0.45, 0.55]"
-            )
-
-
-def _eval_test(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
-    macro_f1 = float(f1_score(y_true, y_pred, average="macro"))
-    bal_acc = float(balanced_accuracy_score(y_true, y_pred))
-    acc = float(accuracy_score(y_true, y_pred))
-    classes = sorted(set(y_true.tolist()))
-    per_class = {}
-    for c in classes:
-        mask = y_true == c
-        if mask.sum() == 0:
-            per_class[str(c)] = None
-        else:
-            per_class[str(c)] = float((y_pred[mask] == c).mean())
-    return {
-        "test_macro_f1": macro_f1,
-        "test_kappa": float(cohen_kappa_score(y_true, y_pred)),
-        "test_balanced_accuracy": bal_acc,
-        "test_accuracy": acc,
-        "test_per_class_accuracy": per_class,
-    }
-
-
-def _save_confusion_matrix(
-    y_true: np.ndarray,
-    y_pred: np.ndarray,
-    out_path: Path,
-) -> None:
-    classes = sorted(set(y_true.tolist()))
-    cm = confusion_matrix(y_true, y_pred, labels=classes).tolist()
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps({"classes": classes, "matrix": cm}, indent=2))
-
-
-def _append_metrics(path: Path, entry: dict) -> None:
-    runs: list = []
-    if path.exists():
-        runs = json.loads(path.read_text())
-        if not isinstance(runs, list):
-            raise ValueError(f"{path} is not a JSON array")
-    runs.append(entry)
-    path.write_text(json.dumps(runs, indent=2))
+# The registry lives in linear_trainer.sources; these are the same objects, so a
+# script that registers a parquet here is seen by every reader.
+DATASET_PATHS = sources.DATASET_PATHS
+SYNTHETIC_FEATURIZERS = sources.SYNTHETIC_FEATURIZERS
+META_PARQUET = sources.META_PARQUET
 
 
 def main():
@@ -206,50 +40,27 @@ def main():
     ap.add_argument("--shuffle-labels", action="store_true",
                     help="anti-baseline: permute y in train+val before fit")
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--Cs", type=float, nargs="+", default=DEFAULT_CS)
+    ap.add_argument("--splits", default=str(DATA / "splits.json"))
     ap.add_argument("--metrics-out", default=str(DATA / "metrics.json"))
+    ap.add_argument("--pred-dir", default=None,
+                    help="where test predictions go (default: outputs/predictions/<metrics stem>/)")
+    ap.add_argument("--confusion-dir", default=None,
+                    help="write confusion_5way_<dataset>.json here (default: not written)")
     args = ap.parse_args()
+    pred_dir = Path(args.pred_dir) if args.pred_dir else PRED_ROOT / Path(args.metrics_out).stem
 
-    print(f"=== loading splits: dataset={args.dataset} task={args.task} ===")
-    X_tr,  y_tr,  meta_tr  = _load_split_for(args.dataset, args.task, "train")
-    X_val, y_val, meta_val = _load_split_for(args.dataset, args.task, "val")
-    X_te,  y_te,  meta_te  = _load_split_for(args.dataset, args.task, "test")
-    print(f"  train={X_tr.shape} val={X_val.shape} test={X_te.shape}")
-
-    _assert_splits_disjoint(meta_tr, meta_val, meta_te)
-    _assert_class_presence(y_tr, y_val, y_te, args.task)
-
-    if args.shuffle_labels:
-        rng = np.random.default_rng(args.seed)
-        y_tr_use = rng.permutation(y_tr)
-        y_val_use = rng.permutation(y_val)
-        print(f"  ANTI-BASELINE: shuffled labels in train+val (seed={args.seed})")
-    else:
-        y_tr_use, y_val_use = y_tr, y_val
-
-    print("\n=== C sweep (macro_f1 on val) ===")
-    best_C, sweep = sweep_C(X_tr, y_tr_use, X_val, y_val_use, args.Cs)
-    for r in sweep:
-        mark = " *" if r["C"] == best_C else ""
-        print(f"  C={r['C']:>8.3g}  macro_f1={r['macro_f1']:.4f}{mark}")
-    print(f"  best C = {best_C}")
-
-    print("\n=== refit on train+val, evaluate on test ===")
-    X_fit = np.vstack([X_tr, X_val])
-    y_fit = np.concatenate([y_tr_use, y_val_use])
-    probe = fit_logistic(X_fit, y_fit, best_C)
-    y_pred = probe.predict(X_te)
-    metrics = _eval_test(y_te, y_pred)
-    print(f"  test_macro_f1          = {metrics['test_macro_f1']:.4f}")
-    print(f"  test_kappa             = {metrics['test_kappa']:.4f}")
-    print(f"  test_balanced_accuracy = {metrics['test_balanced_accuracy']:.4f}")
-    print(f"  test_accuracy          = {metrics['test_accuracy']:.4f}")
-    print(f"  per-class:               {metrics['test_per_class_accuracy']}")
-
-    if args.task == "family5" and not args.shuffle_labels and args.dataset in DATASET_PATHS:
-        cm_path = DATA / f"confusion_5way_{args.dataset}.json"
-        _save_confusion_matrix(y_te, y_pred, cm_path)
-        print(f"  wrote confusion matrix → {cm_path}")
+    print(f"=== cell: dataset={args.dataset} task={args.task} splits={args.splits} ===")
+    res = run_cell(args.dataset, args.task, Path(args.splits), V2, pred_dir=pred_dir,
+                   label_seed=args.seed if args.shuffle_labels else None,
+                   confusion_dir=Path(args.confusion_dir) if args.confusion_dir else None)
+    for r in res["sweep"]:
+        mark = " *" if r["C"] == res["hp"] else ""
+        flag = "" if r["converged"] else "  (not converged)"
+        print(f"  C={r['C']:>8.3g}  val macro_f1={r['macro_f1']:.4f}{mark}{flag}")
+    m = res["metrics"]
+    print(f"  best C = {res['hp']:g}  edge={res['edge']}")
+    print(f"  test_macro_f1 = {m['test_macro_f1']:.4f}  kappa = {m['test_kappa']:.4f}  "
+          f"balanced_acc = {m['test_balanced_accuracy']:.4f}  acc = {m['test_accuracy']:.4f}")
 
     ts = datetime.now(timezone.utc).isoformat(timespec="seconds")
     encoder_label = "shuffled" if args.shuffle_labels else args.dataset
@@ -261,11 +72,12 @@ def main():
         "feature_source": args.dataset,
         "task": args.task,
         "shuffled_labels": args.shuffle_labels,
-        "C": best_C,
-        "C_sweep": sweep,
-        **metrics,
+        "C": res["hp"],
+        "C_sweep": res["sweep"],
+        **m,
+        **res["provenance"],
     }
-    _append_metrics(Path(args.metrics_out), entry)
+    append_record(Path(args.metrics_out), entry)
     print(f"  appended metrics → {args.metrics_out}")
 
 

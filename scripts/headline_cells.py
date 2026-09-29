@@ -11,7 +11,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from linear_trainer.selection import select_by_val
+from data_loader.pooling_aggregator import POOLING_VARIANTS
+from linear_trainer.selection import select_pool
 
 DATA = Path(__file__).resolve().parents[1] / "data"
 ENCODERS = ("dnabert2", "nt_v2", "gena_lm", "hyena_dna")
@@ -32,11 +33,13 @@ REG_RECS = {reg_source(r): r for r in HOMOLOGY
             if r.get("task") is None and "test_r2_macro" in r and reg_source(r)}
 
 
-def best(recs: dict[str, dict], prefix: str) -> str:
-    """Validation-selected source among those starting with ``prefix``."""
-    cells = {s: r for s, r in recs.items() if s.startswith(prefix)}
-    top = select_by_val(cells.values())
-    return next(s for s, r in cells.items() if r is top)
+def best(recs: dict[str, dict], prefix: str, pools=POOLING_VARIANTS) -> str:
+    """Validation-selected source among ``prefix + pool`` for the named pools.
+
+    The candidates are named explicitly, not matched by prefix, so E5 cells
+    (``tssanchored``, ``centermean``) never join the pick (ledger G14).
+    """
+    return select_pool(recs, [prefix + p for p in pools])
 
 
 CLS_BEST = {e: best(CLS_RECS, e + "_") for e in ENCODERS}
@@ -44,5 +47,5 @@ REG_BEST = {e: best(REG_RECS, e + "_") for e in ENCODERS}
 CLS_BEST_TSS = {e: best(CLS_RECS, f"tss_{e}_") for e in ENCODERS}
 REG_BEST_TSS = {e: best(REG_RECS, f"tss_{e}_") for e in ENCODERS}
 # Best CDS DNA-encoder cell across encoders, again chosen on validation.
-BEST_DNA_CLS = best({s: CLS_RECS[s] for s in CLS_BEST.values()}, "")
-BEST_DNA_REG = best({s: REG_RECS[s] for s in REG_BEST.values()}, "")
+BEST_DNA_CLS = select_pool(CLS_RECS, [CLS_BEST[e] for e in ENCODERS])
+BEST_DNA_REG = select_pool(REG_RECS, [REG_BEST[e] for e in ENCODERS])

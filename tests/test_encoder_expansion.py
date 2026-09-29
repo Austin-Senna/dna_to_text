@@ -222,3 +222,14 @@ class RegressionTableTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_centermean_is_a_tss_only_pool():
+    """centermean is the E5 template, not a CDS sweep pool (it leaked in at caf37dc)."""
+    from data_loader.pooling_aggregator import POOLING_VARIANTS, TSS_POOLING_VARIANTS
+    import train_logistic_probe as tlp
+
+    assert "centermean" not in POOLING_VARIANTS
+    assert "centermean" in TSS_POOLING_VARIANTS
+    assert "dnabert2_centermean" not in tlp.DATASET_PATHS
+    assert "tss_dnabert2_centermean" in tlp.DATASET_PATHS

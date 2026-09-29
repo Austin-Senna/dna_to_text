@@ -21,7 +21,8 @@ import json
 from pathlib import Path
 
 from data_loader.pool_names import POOL_DISPLAY, display_label
-from linear_trainer.selection import select_by_val
+from data_loader.pooling_aggregator import POOLING_VARIANTS
+from linear_trainer.selection import encoder_cells, select_by_val, select_pool
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -262,22 +263,21 @@ for r in list(RAND) + list(RANDC):
 def cls_best_pool(enc, ctx="CDS"):
     """Validation-selected (pool, record) for an encoder's classification probe."""
     prefix = ("tss_" if ctx == "TSS" else "") + enc + "_"
-    cells = {fsrc: rec for fsrc, rec in CLS.items() if fsrc.startswith(prefix)}
-    if not cells:
+    try:
+        src = select_pool(CLS, [prefix + p for p in POOLING_VARIANTS])
+    except LookupError:
         return None, None
-    rec = select_by_val(cells.values())
-    return rec["feature_source"].split("_")[-1], rec
+    return src[len(prefix):], CLS[src]
 
 
 def reg_best_pool(enc, ctx="CDS"):
     """Validation-selected (pool, record) for an encoder's Ridge probe."""
     prefix = ("tss_" if ctx == "TSS" else "") + enc + "_"
-    cells = {s: rec for s, rec in REG.items() if s.startswith(prefix)}
-    if not cells:
+    try:
+        src = select_pool(REG, [prefix + p for p in POOLING_VARIANTS])
+    except LookupError:
         return None, None
-    rec = select_by_val(cells.values())
-    s = next(k for k, r in cells.items() if r is rec)
-    return s.split("_")[-1], rec
+    return src[len(prefix):], REG[src]
 
 
 def best_dna_sources():
@@ -709,7 +709,7 @@ def _best_f1_family5(metrics, enc, tss=False):
         if tss != is_tss:
             continue
         core = fs[4:] if is_tss else fs
-        if core == enc or core.startswith(enc + "_"):
+        if core in encoder_cells(enc):
             cells.append(r)
     return select_by_val(cells)["test_macro_f1"] if cells else None
 
@@ -753,7 +753,7 @@ def _cls_f1(metrics, src):
     if src in ENCODERS:
         cells = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
                  and not r["feature_source"].startswith("tss_")
-                 and (r["feature_source"] == src or r["feature_source"].startswith(src + "_"))]
+                 and r["feature_source"] in encoder_cells(src)]
         return select_by_val(cells)["test_macro_f1"] if cells else None
     cells = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
              and r.get("feature_source") == src]
@@ -765,8 +765,8 @@ def _reg_r2(metrics, src):
     if src in ENCODERS:
         cells = [r for r in recs if r.get("model") == "linear_probe"
                  and not str(r.get("dataset", "")).startswith("dataset_tss_")
-                 and (str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "") == src
-                      or str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "").startswith(src + "_"))]
+                 and str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "")
+                 in encoder_cells(src)]
         return select_by_val(cells)["test_r2_macro"] if cells else None
     for r in recs:
         try:
@@ -781,8 +781,8 @@ def _reg_r2_tss(metrics, enc):
     """Best-pool Ridge R^2 for an encoder on the TSS window."""
     cells = [r for r in metrics if r.get("task") is None and r.get("model") == "linear_probe"
              and str(r.get("dataset", "")).startswith("dataset_tss_")
-             and (str(r.get("dataset", "")).replace("dataset_tss_", "").replace(".parquet", "") == enc
-                  or str(r.get("dataset", "")).replace("dataset_tss_", "").replace(".parquet", "").startswith(enc + "_"))]
+             and str(r.get("dataset", "")).replace("dataset_tss_", "").replace(".parquet", "")
+             in encoder_cells(enc)]
     return select_by_val(cells)["test_r2_macro"] if cells else None
 
 

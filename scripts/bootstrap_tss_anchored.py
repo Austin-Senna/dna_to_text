@@ -29,6 +29,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(SCRIPTS))
 
 import bootstrap_test_uncertainty as bt  # noqa: E402
+from linear_trainer.selection import MissingRecord  # noqa: E402
 from paired_tss_anchored import GLOBAL_POOL, POOL_METRICS  # noqa: E402
 from splits.loader import SPLITS_PATH  # noqa: E402
 
@@ -54,14 +55,14 @@ def _global_point(split_label: str, enc: str) -> float:
                 and r.get("feature_source") == fs)
 
 
-def _anchored_C(split_label: str, enc: str) -> float:
+def _anchored_rec(split_label: str, enc: str) -> dict:
     rows = json.loads(METRICS_FILE[split_label].read_text())
     fs = f"tss_{enc}_tssanchored"
-    for r in rows:
-        if (r.get("task") == "family5" and not r.get("shuffled_labels")
-                and r.get("feature_source") == fs):
-            return float(r["C"])
-    raise KeyError(f"{fs} not in {METRICS_FILE[split_label].name}; run probe_tss_anchored.py first")
+    rows = [r for r in rows if r.get("task") == "family5" and not r.get("shuffled_labels")
+            and r.get("feature_source") == fs]
+    if not rows:
+        raise MissingRecord(f"{fs} not in {METRICS_FILE[split_label].name}; run probe_tss_anchored.py first")
+    return rows[-1]
 
 
 def _register_anchored() -> None:
@@ -75,8 +76,9 @@ def _register_anchored() -> None:
 def _run_split(split_label: str) -> list[dict]:
     rows = []
     for enc in ENCODERS:
-        C = _anchored_C(split_label, enc)
-        res = bt.bootstrap_classification(f"tss_{enc}_tssanchored", C=C, shuffled=False, n_iters=N_ITERS)
+        rec = _anchored_rec(split_label, enc)
+        C = rec["C"]
+        res = bt.bootstrap_classification(rec, n_iters=N_ITERS)
         gp = _global_point(split_label, enc)
         lo, hi = res["macro_f1_ci95"]
         clears_global = lo > gp

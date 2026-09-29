@@ -22,6 +22,7 @@ import numpy as np
 from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score
 
+from linear_trainer.selection import MissingRecord, legacy_alpha
 from headline_cells import BEST_DNA_REG, ENCODERS, REG_BEST, REG_BEST_TSS, REG_RECS
 from linear_trainer.selection import val_score
 from splits import load_split
@@ -51,11 +52,11 @@ CELLS = _cells()
 
 
 def alpha_for(ds: str, metrics: list[dict]) -> float:
-    """Recorded validation-selected Ridge alpha for a dataset (default 10.0)."""
-    for run in metrics:
-        if run.get("model") == "linear_probe" and run.get("dataset") == ds:
-            return float(run["alpha"])
-    return 10.0
+    """Recorded validation-selected Ridge alpha (the latest record, as in headline_cells)."""
+    runs = [r for r in metrics if r.get("model") == "linear_probe" and r.get("dataset") == ds]
+    if not runs:
+        raise MissingRecord(f"no linear_probe record for {ds}")
+    return legacy_alpha(runs[-1])
 
 
 def pooled_r2(y_true: np.ndarray, y_pred: np.ndarray) -> float:

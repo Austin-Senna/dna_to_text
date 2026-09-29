@@ -9,7 +9,7 @@ import pandas as pd
 
 from data_loader.model_registry import get_encoder_spec, main_encoder_names
 from data_loader.pooling_aggregator import (
-    POOLING_VARIANTS,
+    TSS_POOLING_VARIANTS,
     aggregate,
     available_variants,
     output_dim,
@@ -27,8 +27,8 @@ def main() -> None:
     ap.add_argument(
         "--variants",
         nargs="+",
-        default=list(POOLING_VARIANTS),
-        choices=list(POOLING_VARIANTS),
+        default=list(TSS_POOLING_VARIANTS),
+        choices=list(TSS_POOLING_VARIANTS),
     )
     args = ap.parse_args()
 
@@ -57,7 +57,7 @@ def main() -> None:
         )
 
     sample_d = next(iter(per_gene.values()))["mean"].shape[1]
-    supported = set(available_variants(next(iter(per_gene.values()))))
+    supported = set(available_variants(next(iter(per_gene.values())), include_center=True))
     print(f"  per-chunk dim d={sample_d}")
 
     for variant in args.variants:

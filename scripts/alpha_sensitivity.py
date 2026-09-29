@@ -78,7 +78,7 @@ def _rerun_cosine(cell: dict) -> float | None:
                    "--metrics-out", str(tmp)])
     else:
         feat = cell.get("feature_source")
-        if feat not in tb.FEATURE_LOADERS:
+        if feat not in tb.MODEL_LABELS:
             return None
         _call(tb, ["train_baseline.py", "--feature", feat,
                    "--select-by", "cosine", "--metrics-out", str(tmp)])
