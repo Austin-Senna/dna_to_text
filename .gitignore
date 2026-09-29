@@ -26,12 +26,18 @@ data/chunk_reductions_dnabert2/
 data/chunk_reductions_nt_v2/
 data/chunk_reductions_gena_lm/
 data/chunk_reductions_hyena_dna/
+data/chunk_reductions_v2_*/
 data/tss_chunk_reductions_*/
 data/enformer_windows/
 data/enformer_features/
+data/enformer_features_v2/
+# Canonical-TSS windows (Phase 1B), rebuilt by scripts/build_tss_windows.py;
+# the manifest data/tss_windows.tsv is tracked and pins every window's sha256.
+data/tss_windows_e*/
 # ESM-2 per-gene embedding caches — large, regeneratable from scripts/run_esm2.py
 data/esm2_150m_embeddings/
 data/esm2_650m_embeddings/
+data/esm2_*_embeddings_v2/
 
 # Pitch deck PDF — kept locally, not authoritative source
 Genomics Project (1).pdf

@@ -37,6 +37,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(SCRIPTS))
 
 import bootstrap_test_uncertainty as bt  # noqa: E402
+from data_loader.model_registry import encoder_pools  # noqa: E402
 from linear_trainer.selection import MissingRecord, select_pool  # noqa: E402
 from splits.loader import SPLITS_PATH  # noqa: E402
 
@@ -45,9 +46,9 @@ DISJOINT = DATA / "splits_tss_disjoint.json"
 OUT = DATA / "paired_tss_anchored.json"
 N_ITERS = 1000
 
-# Whole-window pooling rules; the best one per (split, encoder) is chosen on
-# VALIDATION from that split's metrics file (see _global_pool), never on test.
-WHOLE_WINDOW_POOLS = ("meanmean", "specialmean", "maxmean", "clsmean", "meanD", "meanG")
+# Whole-window pooling rules are the encoder's TSS grid (encoder_pools); the best
+# one per (split, encoder) is chosen on VALIDATION from that split's metrics file
+# (see _global_pool), never on test.
 # Recorded best C. Anchored C is read from the anchored probe's own output (re-swept by
 # the max_iter=5000 re-freeze); global-pool C from the frozen accepted-paper grid.
 ANCHORED_METRICS = {
@@ -75,7 +76,7 @@ def _global_pool(split_label: str, enc: str) -> str:
     rows = json.loads(POOL_METRICS[split_label].read_text())
     cells = {r["feature_source"]: r for r in rows
              if r.get("task") == "family5" and not r.get("shuffled_labels")}
-    best = select_pool(cells, [f"tss_{enc}_{p}" for p in WHOLE_WINDOW_POOLS])
+    best = select_pool(cells, [f"tss_{enc}_{p}" for p in encoder_pools(enc, "TSS")])
     return best.rsplit("_", 1)[1]
 
 
@@ -127,7 +128,7 @@ def main() -> None:
     results += _run_split("homology")
 
     if not DISJOINT.exists():
-        raise SystemExit(f"missing {DISJOINT}; run make_tss_disjoint_split.py first")
+        raise FileNotFoundError(f"missing {DISJOINT}; run make_tss_disjoint_split.py first")
     split_backup = SPLITS_PATH.read_bytes()
     try:
         SPLITS_PATH.write_bytes(DISJOINT.read_bytes())

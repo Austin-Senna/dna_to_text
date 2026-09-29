@@ -14,8 +14,7 @@ import numpy as np
 
 from binary_tasks import BINARY_TASKS, load_binary_split
 from composition_baseline import featurize_aa_kmer, featurize_codon, featurize_gc
-from data_loader.model_registry import dataset_paths
-from data_loader.pooling_aggregator import TSS_POOLING_VARIANTS
+from data_loader.model_registry import dataset_paths, encoder_pools
 from data_loader.sequence_fetcher import fetch_cds
 from kmer_baseline import featurize_kmer
 from splits import load_split
@@ -39,7 +38,8 @@ DATASET_PATHS.update({
 })
 for _encoder in ENCODERS:
     DATASET_PATHS[f"tss_{_encoder}"] = DATA / f"dataset_tss_{_encoder}.parquet"
-    for _variant in TSS_POOLING_VARIANTS:
+    # The encoder's TSS grid plus the TSS-only centermean template.
+    for _variant in (*encoder_pools(_encoder, "TSS"), "centermean"):
         DATASET_PATHS[f"tss_{_encoder}_{_variant}"] = DATA / f"dataset_tss_{_encoder}_{_variant}.parquet"
     # TSS-anchored chunk pooling (E5). Not an aggregate() variant: it picks the
     # TSS-centred chunk per gene from external window info.
@@ -95,6 +95,34 @@ def synthetic_features(source: str, ids: list[str]) -> np.ndarray:
     return np.stack(rows).astype(np.float32)
 
 
+# A matrix whose columns barely move across genes carries no gene signal (the May
+# HyenaDNA Mean-CLS: every gene got the same vector, G3). The statistic is the
+# median over columns of std/|mean|, skipping all-zero columns (sparse k-mer
+# features have many), so one large constant column cannot mask real signal.
+# Measured Sept 29 over the 72 local parquets: HyenaDNA clsmean 3.7e-6 (CDS) and
+# 7.0e-7 (TSS); the lowest real source 6.2e-3 (TSS GENA-LM clsmean); synthetic
+# kmer6/aa3/gc 2.3/6.7/0.044. The threshold sits well clear of both sides.
+CONSTANT_RTOL = 1e-4
+
+
+class ConstantFeatures(RuntimeError):
+    """A feature matrix is (numerically) the same vector for every gene."""
+
+
+def check_not_constant(X: np.ndarray, name: str) -> float:
+    """Raise ``ConstantFeatures`` unless the columns vary across genes (G3)."""
+    X = np.asarray(X, dtype=np.float64)
+    live = np.abs(X).max(axis=0) > 0
+    if not live.any():
+        raise ConstantFeatures(f"{name}: every feature is zero")
+    sd, mu = X[:, live].std(axis=0), np.abs(X[:, live].mean(axis=0))
+    spread = float(np.median(sd / np.maximum(mu, 1e-300)))
+    if spread < CONSTANT_RTOL:
+        raise ConstantFeatures(f"{name}: median column std/|mean| is {spread:.1e} "
+                               f"(< {CONSTANT_RTOL:g}); the features carry no gene signal")
+    return spread
+
+
 def split_file(task: str, splits_path: Path) -> Path:
     """The split file a cell actually reads (binary tasks carry their own)."""
     if task in BINARY_TASKS:
@@ -121,6 +149,7 @@ def load(source: str | Path, task: str, split: str, splits_path: Path
     ids = meta["ensembl_id"].to_numpy()
     if parquet is None:
         X = synthetic_features(source, ids.tolist())
+    check_not_constant(X, f"{cell_name(source)} ({split})")
     return X, y, ids
 
 

@@ -16,7 +16,11 @@ import transformers.pytorch_utils as _tf_pytorch_utils
 from transformers import AutoConfig, AutoModelForMaskedLM, AutoTokenizer, PreTrainedModel
 from transformers.models.esm.configuration_esm import EsmConfig
 
-MODEL_NAME = "InstaDeepAI/nucleotide-transformer-v2-100m-multi-species"
+from data_loader.load_checks import check_state_dict_load
+from data_loader.model_registry import ENCODER_SPECS
+
+MODEL_NAME = ENCODER_SPECS["nt_v2"].model_name
+MODEL_REVISION = ENCODER_SPECS["nt_v2"].revision
 
 
 # NT-v2's remote code was written against an older transformers API. Two
@@ -58,7 +62,7 @@ def load_model(device: str | None = None):
     if device is None:
         device = _auto_device()
 
-    snapshot_dir = Path(snapshot_download(MODEL_NAME))
+    snapshot_dir = Path(snapshot_download(MODEL_NAME, revision=MODEL_REVISION))
     tokenizer = AutoTokenizer.from_pretrained(snapshot_dir, trust_remote_code=True)
 
     # NT-v2 uses Gated Linear Units in the FFN (intermediate dim doubled), which
@@ -70,7 +74,9 @@ def load_model(device: str | None = None):
     #
     # from_config + manual state-dict load bypasses from_pretrained's newer
     # checks (all_tied_weights_keys etc.) that the remote code hasn't been
-    # updated for. strict=False absorbs the MLM head keys we don't need.
+    # updated for. The load is non-strict so the result can be checked here with
+    # a clear message: the checkpoint fills all 342 tensors, nothing may be
+    # missing and nothing unexpected may be dropped.
     config = AutoConfig.from_pretrained(snapshot_dir, trust_remote_code=True)
     for key, value in EsmConfig().to_dict().items():
         if not hasattr(config, key):
@@ -79,7 +85,8 @@ def load_model(device: str | None = None):
     state_dict = torch.load(
         snapshot_dir / "pytorch_model.bin", map_location="cpu", weights_only=True
     )
-    masked_lm.load_state_dict(state_dict, strict=False)
+    check_state_dict_load(masked_lm.load_state_dict(state_dict, strict=False),
+                          what=f"{MODEL_NAME}@{MODEL_REVISION[:8]}")
 
     model = masked_lm.esm if hasattr(masked_lm, "esm") else masked_lm.base_model
     model.to(device).eval()

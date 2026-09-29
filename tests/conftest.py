@@ -11,9 +11,13 @@ for _var in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
     os.environ[_var] = "1"
 
 ROOT = Path(__file__).resolve().parents[1]
-for _p in (ROOT / "src", ROOT / "scripts", ROOT / "tests", ROOT):
-    if str(_p) not in sys.path:
-        sys.path.insert(0, str(_p))
+# Inserted in reverse so src/ ends up first (moved to the front even when the
+# editable install already lists it last): scripts/tss_overlap.py must not
+# shadow the src/tss_overlap package.
+for _p in (ROOT, ROOT / "tests", ROOT / "scripts", ROOT / "src"):
+    while str(_p) in sys.path:
+        sys.path.remove(str(_p))
+    sys.path.insert(0, str(_p))
 
 import pytest  # noqa: E402
 

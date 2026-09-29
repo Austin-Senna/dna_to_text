@@ -1,165 +1,134 @@
-"""Build a genomic-interval-disjoint homology split for the TSS arm (MLCB R2-Q4).
+"""Build the TSS-primary split: disjoint on genomic windows and protein clusters.
 
-The primary homology split (``data/splits.json``) clusters translated proteins at
-40% identity, but the 196,608 bp TSS-centered windows of genomically adjacent genes
-that land in *different* protein clusters still overlap (48.3% of test genes share a
-window with a train/val gene). This builds a stricter split that is disjoint on BOTH
-axes: genes are grouped by the union of two edge sets — (a) overlapping TSS windows,
-(b) shared 40%-identity protein cluster — and whole groups are assigned family-balanced
-70/15/15 by the same greedy assigner the primary split uses. No TSS window can then
-straddle the train/val/test boundary.
+The homology split (``data/splits.json``) clusters translated proteins at 40%
+identity, but genomically adjacent genes in different protein clusters still
+have overlapping 196,608 bp TSS windows. This split groups genes by the union
+of window overlap and shared protein cluster (``splits.tss_disjoint``), so no
+window can straddle train/val/test.
 
-Reuses the cached MMseqs2 cluster tsv (no re-clustering) and the loader's own
-``centered_window`` so the window geometry is identical to what the encoders saw.
+Inputs are all tracked and stamped into the output with their sha256 (G21):
+the window manifest (canonical-TSS spans, ``data/tss_windows.tsv``), the MMseqs2
+40% cluster assignments (``data/clusters/homology_id40.tsv``), the family
+labels (``data/dataset_dnabert2_meanmean.parquet``), and the gene universe
+(``data/splits.json``). The script also writes the cross-split window-overlap
+statistics for the homology split and the new split (G2); the new split must
+have none, and no protein cluster may straddle it.
 
 Run: uv run scripts/make_tss_disjoint_split.py
+Seeds: --seed N --out data/... --leak-out analysis/... (a seed never overwrites
+the primary split).
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
-from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
 
 from cluster.mmseqs_cluster import parse_cluster_tsv
-from data_loader.enformer_windows import ENFORMER_WINDOW_LENGTH, centered_window
-from splits.loader import resolve_dataset_path
-from splits.make_splits import SEED, write_cluster_splits_json
+from data_loader.enformer_windows import ENFORMER_WINDOW_LENGTH, MANIFEST, window_spans
+from splits.make_splits import DEFAULT_FRACS, SEED, STRATIFY_COL
+from splits.tss_disjoint import build_tss_disjoint
+from splits.window_leak import window_leak_stats
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
-LOOKUP_DIR = DATA / "enformer_windows" / "_lookup"
-CLUSTER_TSV = DATA / "cluster_work" / "id40" / "res_cluster.tsv"
+CLUSTER_TSV = DATA / "clusters" / "homology_id40.tsv"
+UNIVERSE = DATA / "splits.json"
+FAMILIES = DATA / "dataset_dnabert2_meanmean.parquet"
+OUT = DATA / "splits_tss_disjoint.json"
+LEAK_OUT = REPO_ROOT / "analysis" / "tss_overlap" / "window_leak.json"
 
 
-class UnionFind:
-    """Minimal union-find over gene ids (path-halving + union-by-nothing)."""
-
-    def __init__(self, items: list[str]) -> None:
-        self.parent = {x: x for x in items}
-
-    def find(self, x: str) -> str:
-        while self.parent[x] != x:
-            self.parent[x] = self.parent[self.parent[x]]
-            x = self.parent[x]
-        return x
-
-    def union(self, a: str, b: str) -> None:
-        ra, rb = self.find(a), self.find(b)
-        if ra != rb:
-            self.parent[ra] = rb
+class ResidualOverlap(RuntimeError):
+    """A built split still has windows overlapping across splits."""
 
 
-def _windows(genes: list[str]) -> list[tuple[str, str, int, int]]:
-    """Reconstruct each gene's (chrom, w0, w1) TSS window from the cached lookups."""
-    out: list[tuple[str, str, int, int]] = []
-    missing: list[str] = []
-    for g in genes:
-        lk = LOOKUP_DIR / f"{g}.json"
-        if not lk.exists():
-            missing.append(g)
-            continue
-        d = json.loads(lk.read_text())
-        chrom, w0, w1 = centered_window(
-            seq_region_name=str(d["seq_region_name"]),
-            start=int(d["start"]),
-            end=int(d["end"]),
-            strand=int(d.get("strand", 1)),
-        )
-        out.append((g, chrom, w0, w1))
-    if missing:
-        raise SystemExit(f"{len(missing)} genes missing window lookup: {missing[:10]}")
-    return out
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def _window_overlap_edges(windows: list[tuple[str, str, int, int]]) -> list[tuple[str, str]]:
-    """Every pair of genes whose windows overlap on the same chromosome (sweep)."""
-    by_chrom: dict[str, list[tuple[int, int, str]]] = defaultdict(list)
-    for g, chrom, w0, w1 in windows:
-        by_chrom[chrom].append((w0, w1, g))
-    edges: list[tuple[str, str]] = []
-    for recs in by_chrom.values():
-        recs.sort()
-        n = len(recs)
-        for i in range(n):
-            w0i, w1i, gi = recs[i]
-            for j in range(i + 1, n):
-                w0j, _w1j, gj = recs[j]
-                if w0j > w1i:  # sorted by w0: nothing further can overlap i
-                    break
-                edges.append((gi, gj))
-    return edges
+def _labels_stamp(path: Path, fams: pd.DataFrame) -> dict:
+    """The family labels themselves, hashed: the parquet holding them is rebuilt by
+    every extraction, but the labels must not change."""
+    pairs = "\n".join(f"{g}\t{f}" for g, f in sorted(zip(fams["ensembl_id"], fams[STRATIFY_COL])))
+    return {"path": _stamp(path)["path"], "labels_sha256": hashlib.sha256(pairs.encode()).hexdigest()}
 
 
-def _cross_split_overlaps(
-    windows: list[tuple[str, str, int, int]],
-    split_of: dict[str, str],
-) -> int:
-    """Count gene pairs in different splits whose windows overlap (must be 0)."""
-    return sum(
-        1
-        for gi, gj in _window_overlap_edges(windows)
-        if split_of[gi] != split_of[gj]
-    )
+def _stamp(path: Path) -> dict:
+    """Path (repo-relative when inside the repo: no local paths in tracked files) and sha256."""
+    path = Path(path).resolve()
+    shown = path.relative_to(REPO_ROOT).as_posix() if path.is_relative_to(REPO_ROOT) else str(path)
+    return {"path": shown, "sha256": _sha256(path)}
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    ap.add_argument("--dataset", default=None,
-                    help="parquet for gene/family table (default: auto-resolve)")
-    ap.add_argument("--out", type=Path, default=DATA / "splits_tss_disjoint.json")
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--manifest", type=Path, default=MANIFEST)
+    ap.add_argument("--clusters", type=Path, default=CLUSTER_TSV)
+    ap.add_argument("--families", type=Path, default=FAMILIES,
+                    help="parquet with ensembl_id and family")
+    ap.add_argument("--splits", type=Path, default=UNIVERSE,
+                    help="homology split: gene universe and the leak comparison")
+    ap.add_argument("--out", type=Path, default=OUT)
+    ap.add_argument("--leak-out", type=Path, default=LEAK_OUT)
     ap.add_argument("--seed", type=int, default=SEED)
     args = ap.parse_args()
+    if args.seed != SEED and (args.out.resolve() == OUT.resolve()
+                              or args.leak_out.resolve() == LEAK_OUT.resolve()):
+        raise ValueError(f"seed {args.seed} is not the primary split: pass --out and --leak-out")
 
-    dataset_path = resolve_dataset_path(Path(args.dataset) if args.dataset else None)
-    df = pd.read_parquet(dataset_path, columns=["ensembl_id", "family"])
-    df = df.drop_duplicates("ensembl_id").reset_index(drop=True)
-    genes = df["ensembl_id"].tolist()
-    print(f"=== gene table from {dataset_path.name}: {len(genes)} genes ===")
+    universe = json.loads(args.splits.read_text())
+    genes = sorted(g for s in ("train", "val", "test") for g in universe[s])
+    fams = pd.read_parquet(args.families, columns=["ensembl_id", STRATIFY_COL])
+    fams = fams[fams["ensembl_id"].isin(genes)].drop_duplicates("ensembl_id")
+    if len(fams) != len(genes):
+        raise KeyError(f"{len(genes) - len(fams)} universe genes have no family in {args.families}")
+    spans = window_spans(args.manifest)
+    protein_map = parse_cluster_tsv(args.clusters)
 
-    windows = _windows(genes)
-    win_edges = _window_overlap_edges(windows)
-    protein_map = parse_cluster_tsv(CLUSTER_TSV)  # member -> representative
-    print(f"  window-overlap edges: {len(win_edges)}; "
-          f"protein clusters: {len(set(protein_map.values()))}")
-
-    uf = UnionFind(genes)
-    for gi, gj in win_edges:
-        uf.union(gi, gj)
-    for member, rep in protein_map.items():
-        if member in uf.parent and rep in uf.parent:
-            uf.union(member, rep)
-
-    df["cluster_id"] = df["ensembl_id"].map(uf.find)
-    n_groups = df["cluster_id"].nunique()
-    print(f"  combined groups (window-overlap ∪ protein-cluster): {n_groups}")
-
-    stats = {
-        "method": "genomic_window_and_protein_cluster_disjoint",
-        "n_genes": len(genes),
-        "n_window_overlap_edges": len(win_edges),
-        "n_protein_clusters": len(set(protein_map.values())),
-        "n_combined_groups": int(n_groups),
-        "window_length_bp": ENFORMER_WINDOW_LENGTH,
-        "protein_min_seq_id": 0.40,
-        "protein_coverage": 0.80,
+    parts, stats = build_tss_disjoint(fams, spans, protein_map, seed=args.seed)
+    stats.update(window_length_bp=ENFORMER_WINDOW_LENGTH, protein_min_seq_id=0.40,
+                 protein_coverage=0.80)
+    payload = {
+        "train": parts["train"], "val": parts["val"], "test": parts["test"],
+        "seed": args.seed, "stratify": STRATIFY_COL, "method": "homology_cluster",
+        "fracs": list(DEFAULT_FRACS), "cluster_stats": stats,
+        "family_proportions": parts["family_proportions"],
+        "inputs": {"window_manifest": _stamp(args.manifest),
+                   "cluster_tsv": _stamp(args.clusters),
+                   "gene_universe": _stamp(args.splits),
+                   "families": _labels_stamp(args.families, fams)},
     }
-    payload = write_cluster_splits_json(df, args.out, stats, seed=args.seed)
 
-    split_of = {g: s for s in ("train", "val", "test") for g in payload[s]}
-    residual = _cross_split_overlaps(windows, split_of)
-    print(f"\nwrote {args.out.name}: train={len(payload['train'])} "
-          f"val={len(payload['val'])} test={len(payload['test'])}")
-    for split, props in payload["family_proportions"].items():
+    leak = {args.splits.name: window_leak_stats(universe, spans),
+            args.out.name: window_leak_stats(payload, spans)}
+    if leak[args.out.name]["cross_split_pairs"]:
+        raise ResidualOverlap(f"{leak[args.out.name]['cross_split_pairs']} cross-split "
+                              "window overlaps remain")
+
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(payload, indent=2) + "\n")
+    args.leak_out.parent.mkdir(parents=True, exist_ok=True)
+    args.leak_out.write_text(json.dumps(
+        {**leak, "window_manifest_sha256": payload["inputs"]["window_manifest"]["sha256"]},
+        indent=2) + "\n")
+
+    print(f"wrote {args.out.name}: train={len(parts['train'])} val={len(parts['val'])} "
+          f"test={len(parts['test'])} ({stats['n_combined_groups']} groups, "
+          f"{stats['n_window_overlap_edges']} window-overlap edges)")
+    for split, props in parts["family_proportions"].items():
         print(f"    {split:<5s} {props}")
-    print(f"\nresidual cross-split window overlaps: {residual} (must be 0)")
-    if residual != 0:
-        raise SystemExit(f"FAILED: {residual} cross-split window overlaps remain")
-    print("OK: windows are interval-disjoint across splits.")
+    shared = len(set(parts["test"]) & set(universe["test"]))
+    print(f"  test genes shared with {args.splits.name}: {shared}")
+    h = leak[args.splits.name]
+    print(f"  {args.splits.name}: {h['test_overlapping_trainval']}/{h['n_test']} test genes "
+          f"({100 * h['frac_test_overlapping_trainval']:.1f}%) overlap a train/val window; "
+          f"{h['cross_split_pairs']} cross-split pairs")
+    print(f"  {args.out.name}: 0 cross-split window overlaps -> {args.leak_out}")
 
 
 if __name__ == "__main__":

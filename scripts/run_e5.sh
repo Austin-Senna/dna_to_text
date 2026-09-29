@@ -7,7 +7,8 @@
 # and both splits; none writes tracked data/metrics.json.
 #
 # PREREQUISITE (step 1, GPU, not run here): the per-chunk reduction cache
-# data/tss_chunk_reductions_<enc>/ must exist. Build it (GPU-gated) with:
+# data/tss_chunk_reductions_v2_<enc>/ (canonical-TSS windows) must exist. Build it
+# (GPU-gated) with:
 #   uv run scripts/run_tss_extract_capped.py --encoder <enc> ...
 # hyena_dna is the WSL hard-hang risk — run it capped and last.
 #

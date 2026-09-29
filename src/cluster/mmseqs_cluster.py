@@ -41,7 +41,8 @@ def write_protein_fasta(
             if not seq:
                 missing.append(eid)
                 continue
-            protein = translate_cds(seq, to_stop=True)
+            # First-stop proteins: the frozen data/splits.json was clustered on these (G5).
+            protein = translate_cds(seq, mode="first_stop")
             if not protein:
                 missing.append(eid)
                 continue

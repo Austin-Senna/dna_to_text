@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from data_loader.pooling_aggregator import POOLING_VARIANTS
+from data_loader.model_registry import encoder_pools
 from linear_trainer.selection import select_pool
 
 DATA = Path(__file__).resolve().parents[1] / "data"
@@ -33,12 +33,17 @@ REG_RECS = {reg_source(r): r for r in HOMOLOGY
             if r.get("task") is None and "test_r2_macro" in r and reg_source(r)}
 
 
-def best(recs: dict[str, dict], prefix: str, pools=POOLING_VARIANTS) -> str:
+def best(recs: dict[str, dict], prefix: str, pools=None) -> str:
     """Validation-selected source among ``prefix + pool`` for the named pools.
 
     The candidates are named explicitly, not matched by prefix, so E5 cells
-    (``tssanchored``, ``centermean``) never join the pick (ledger G14).
+    (``tssanchored``, ``centermean``) never join the pick (ledger G14). By
+    default the pools are the encoder's own CDS or TSS grid, read from the
+    prefix (``"hyena_dna_"``, ``"tss_nt_v2_"``).
     """
+    if pools is None:
+        tss = prefix.startswith("tss_")
+        pools = encoder_pools(prefix[4 if tss else 0:-1], "TSS" if tss else "CDS")
     return select_pool(recs, [prefix + p for p in pools])
 
 

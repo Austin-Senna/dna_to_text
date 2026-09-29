@@ -59,7 +59,9 @@ V2_TARGETS = [
     ("kmer", "family5", 0.01, 0.6508, "test_macro_f1"),
     ("esm2_650m", "family5", 100.0, 0.9488, "test_macro_f1"),
     ("dnabert2_meanD", "genept", 1e4, 0.0752, "test_r2_macro"),
-    ("aa3", "genept", 1e4, 0.0937, "test_r2_macro"),
+    # Sept 25 preview 0.093715 on first-stop proteins; 0.093628 once the 17
+    # truncated translations run full length (G5, Sept 29). AA2 is unchanged.
+    ("aa3", "genept", 1e4, 0.0936, "test_r2_macro"),
 ]
 
 

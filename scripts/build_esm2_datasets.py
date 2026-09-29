@@ -20,10 +20,15 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from data_loader.cache_meta import StaleCache, read_meta, sha256_text  # noqa: E402
+from data_loader.sequence_fetcher import fetch_cds  # noqa: E402
+from protein import translate_cds  # noqa: E402
 from splits.loader import resolve_dataset_path  # noqa: E402
 
 DATA = REPO_ROOT / "data"
 DIMS = {"150m": 640, "650m": 1280}
+MODELS = {"150m": "esm2_t30_150M_UR50D", "650m": "esm2_t33_650M_UR50D"}
+RUN_KEYS = ("model", "fp16", "device", "max_residues", "translation")
 
 
 def main() -> None:
@@ -32,10 +37,11 @@ def main() -> None:
     ap.add_argument("--template", type=Path, default=None,
                     help="dataset parquet supplying meta+y (default: auto-resolve)")
     ap.add_argument("--emb-cache", type=Path, default=None)
+    ap.add_argument("--seq-cache", type=Path, default=DATA / "sequences")
     ap.add_argument("--out", type=Path, default=None)
     args = ap.parse_args()
 
-    emb_cache = args.emb_cache or (DATA / f"esm2_{args.size}_embeddings")
+    emb_cache = args.emb_cache or (DATA / f"esm2_{args.size}_embeddings_v2")
     out = args.out or (DATA / f"dataset_esm2_{args.size}.parquet")
     template = args.template or resolve_dataset_path()
 
@@ -44,19 +50,25 @@ def main() -> None:
     base = base[keep].copy()
     print(f"=== ESM-2 {args.size} dataset: {len(base)} genes from {Path(template).name} ===")
 
-    xs, missing = [], []
+    xs, missing, runs = [], [], set()
     for eid in base["ensembl_id"]:
-        f = emb_cache / f"{eid}.npy"
+        f = emb_cache / f"{eid}.npz"
         if not f.exists():
             missing.append(eid)
-            xs.append(None)
             continue
-        xs.append(np.load(f).astype(np.float32))
+        rec = read_meta(f)
+        protein = translate_cds(fetch_cds(eid, args.seq_cache), mode="through")
+        if rec is None or rec["protein_sha256"] != sha256_text(protein):
+            raise StaleCache(f"{f}: embedding was not built from the current protein")
+        runs.add(tuple(rec[k] for k in RUN_KEYS))
+        with np.load(f, allow_pickle=False) as data:
+            xs.append(data["emb"].astype(np.float32))
     if missing:
-        print(f"  WARNING: {len(missing)} genes have no embedding (dropped): "
-              f"{missing[:10]}{' ...' if len(missing) > 10 else ''}")
+        raise RuntimeError(f"{len(missing)} genes have no embedding in {emb_cache}: "
+                         f"{missing[:10]}{' ...' if len(missing) > 10 else ''}")
+    if len(runs) != 1 or next(iter(runs))[0] != MODELS[args.size]:
+        raise StaleCache(f"embeddings come from more than one run or the wrong model: {sorted(runs)}")
     base["x"] = xs
-    base = base[base["x"].notna()].reset_index(drop=True)
 
     dims = {int(v.shape[0]) for v in base["x"]}
     assert dims == {DIMS[args.size]}, f"unexpected embedding dims {dims}, expected {DIMS[args.size]}"

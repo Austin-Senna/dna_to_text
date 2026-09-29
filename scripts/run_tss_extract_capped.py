@@ -15,19 +15,26 @@ import os
 import runpy
 from pathlib import Path
 
-os.environ.setdefault(
-    "PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True,max_split_size_mb:128"
-)
 
-import torch
+def main() -> None:
+    # Set before torch touches CUDA; only when run as a script (an import must
+    # never start a GPU extraction).
+    os.environ.setdefault(
+        "PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True,max_split_size_mb:128"
+    )
+    import torch
 
-FRACTION = float(os.environ.get("MEM_FRACTION", "0.55"))
-if torch.cuda.is_available():
-    torch.cuda.set_per_process_memory_fraction(FRACTION, 0)
-    total_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
-    print(f"[capped] GPU cap = {FRACTION:.2f} x {total_gb:.1f} GB = {FRACTION * total_gb:.1f} GB")
+    fraction = float(os.environ.get("MEM_FRACTION", "0.55"))
+    if torch.cuda.is_available():
+        torch.cuda.set_per_process_memory_fraction(fraction, 0)
+        total_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
+        print(f"[capped] GPU cap = {fraction:.2f} x {total_gb:.1f} GB = {fraction * total_gb:.1f} GB")
 
-runpy.run_path(
-    str(Path(__file__).resolve().parent / "run_tss_multi_pool_extract.py"),
-    run_name="__main__",
-)
+    runpy.run_path(
+        str(Path(__file__).resolve().parent / "run_tss_multi_pool_extract.py"),
+        run_name="__main__",
+    )
+
+
+if __name__ == "__main__":
+    main()

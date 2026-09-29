@@ -63,10 +63,13 @@ def encoder_cells(encoder: str, pools: Sequence[str] | None = None) -> frozenset
 
     Builders filter records by membership in this set instead of a name prefix
     (ledger G14), so ``<encoder>_tssanchored``-style cells never join a pick.
+    The default pools are the encoder's own (``model_registry.encoder_pools``),
+    so HyenaDNA's dropped clsmean/specialmean records can never be candidates.
     """
     if pools is None:
+        from data_loader.model_registry import ENCODER_SPECS, encoder_pools
         from data_loader.pooling_aggregator import POOLING_VARIANTS
-        pools = POOLING_VARIANTS
+        pools = encoder_pools(encoder) if encoder in ENCODER_SPECS else POOLING_VARIANTS
     return frozenset([encoder, *(f"{encoder}_{p}" for p in pools)])
 
 

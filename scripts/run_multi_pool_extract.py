@@ -1,8 +1,9 @@
-"""Phase 4b: re-extract per-chunk reductions (mean / max / cls) for one encoder.
+"""Extract per-chunk reductions over each gene's CDS for one encoder.
 
-One forward pass per chunk; stores three per-chunk arrays per gene to
-`data/chunk_reductions_{encoder}/{ENSG}.npz`. Idempotent: cached genes
-are skipped on rerun. Materialise the per-pooling-variant datasets with
+One forward pass per chunk; stores the per-chunk arrays per gene, with a meta
+record, in ``EncoderSpec.chunk_dir`` (``data/chunk_reductions_v2_{encoder}``).
+A rerun reuses a gene only if its meta matches (same CDS, revision, chunking,
+boundary tokens; G19). Materialise the pooled datasets with
 `scripts/build_pooling_datasets.py`.
 """
 from __future__ import annotations
@@ -16,6 +17,7 @@ import pandas as pd
 from data_loader.model_registry import get_encoder_spec, main_encoder_names
 from data_loader.sequence_fetcher import fetch_cds
 from data_loader.multi_pool import embed_all_multi_pool
+from linear_trainer.sources import META_PARQUET
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
@@ -30,7 +32,7 @@ def _load_encoder(name: str):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--encoder", required=True, choices=main_encoder_names())
-    ap.add_argument("--gene-table", default=str(DATA / "gene_table.parquet"))
+    ap.add_argument("--gene-table", default=str(META_PARQUET))
     ap.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu", "mps"])
     args = ap.parse_args()
 
@@ -54,8 +56,7 @@ def main():
         cds,
         load_model_fn=load_fn,
         cache_dir=cache_dir,
-        max_content_tokens=spec.max_content_tokens,
-        stride=spec.stride,
+        spec=spec,
         device=device,
         desc=f"{args.encoder} multi-pool",
     )

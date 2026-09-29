@@ -34,23 +34,56 @@ AMINO_ACIDS = "ACDEFGHIKLMNPQRSTVWY"
 UNKNOWN_AA = "X"
 
 
-def translate_cds(seq: str, to_stop: bool = True) -> str:
-    """Translate a coding DNA sequence to its protein string.
+MODES = ("through", "first_stop")
+STOPS = frozenset(c for c, aa in CODON_TABLE.items() if aa == "*")
 
-    - Reads in frame 0, codon by codon. A trailing 1-2 nt remainder is dropped.
-    - Codons with any non-ACGT base map to ``UNKNOWN_AA`` ('X').
-    - With ``to_stop=True`` (default) translation halts at the first stop codon
-      and the stop is not included; otherwise stops are emitted as '*'.
+
+def translate_cds(seq: str, *, mode: str) -> str:
+    """Translate a coding DNA sequence to its protein string, frame 0.
+
+    ``mode`` is required, so every caller states what happens at a stop:
+
+    - ``"through"``: full length. Internal stops become ``UNKNOWN_AA`` ('X') and
+      a terminal stop is dropped. This is what Ensembl's own peptide holds (with
+      '*' for X) and what the protein comparators use (G5).
+    - ``"first_stop"``: halt at the first stop. Kept only for the MMseqs2
+      clustering behind the frozen ``data/splits.json``; changing it would be a
+      re-split.
+
+    A trailing 1-2 nt remainder is dropped; codons with a non-ACGT base map to
+    'X'. CDSs that break the rules are listed by :func:`check_translation`.
     """
+    if mode not in MODES:
+        raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
     s = seq.upper()
+    codons = [s[i:i + 3] for i in range(0, len(s) - len(s) % 3, 3)]
     out: list[str] = []
-    for i in range(0, len(s) - len(s) % 3, 3):
-        codon = s[i:i + 3]
+    for i, codon in enumerate(codons):
         aa = CODON_TABLE.get(codon, UNKNOWN_AA)
         if aa == "*":
-            if to_stop:
+            if mode == "first_stop" or i == len(codons) - 1:
                 break
-            out.append(aa)
-        else:
-            out.append(aa)
+            aa = UNKNOWN_AA
+        out.append(aa)
     return "".join(out)
+
+
+def check_translation(seq: str) -> list[str]:
+    """Reasons a CDS breaks "protein length = CDS/3 - 1, no internal stop".
+
+    Returns ``[]`` for a clean CDS. The genes that fail are listed in
+    ``data/translation_exceptions.tsv``; tests/test_translation.py checks the
+    list against the CDS cache.
+    """
+    s = seq.upper()
+    codons = [s[i:i + 3] for i in range(0, len(s) - len(s) % 3, 3)]
+    reasons = []
+    if len(s) % 3:
+        reasons.append("length_not_multiple_of_3")
+    if any(c in STOPS for c in codons[:-1]):
+        reasons.append("internal_stop")
+    if not codons or codons[-1] not in STOPS:
+        reasons.append("no_terminal_stop")
+    if set(s) - set("ACGT"):
+        reasons.append("non_acgt")
+    return reasons

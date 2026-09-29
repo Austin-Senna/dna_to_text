@@ -9,7 +9,8 @@ feature by selecting, per gene, the chunk whose content is most TSS-centered
 same-locus TSS pooling for a controlled family5 comparison.
 
 No GPU / no re-extraction: the per-chunk ``mean`` vectors are already cached in
-``data/tss_chunk_reductions_<enc>/*.npz``; we only pick a different row.
+``EncoderSpec.tss_chunk_dir``; we only pick a different row. Each gene's cache
+is checked against its manifest window and the pinned revision (G19).
 
 Run: uv run scripts/build_tss_anchored_datasets.py
 Writes: data/dataset_tss_<enc>_tssanchored.parquet (one per encoder).
@@ -22,7 +23,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from data_loader.enformer_windows import read_window
 from data_loader.model_registry import get_encoder_spec, main_encoder_names
+from data_loader.multi_pool import load_reductions
+
+from check_tss_center_chunk import verify_offsets  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
@@ -45,7 +50,7 @@ def build_encoder(enc: str, anchor: str = "nearestcenter") -> Path:
     idx_col, out_stem = ANCHOR_RULES[anchor]
     spec = get_encoder_spec(enc)
     base_path = DATA / f"dataset_tss_{spec.dataset_stem}_centermean.parquet"
-    chunk_dir = DATA / f"tss_chunk_reductions_{spec.cache_name}"
+    chunk_dir = spec.tss_chunk_dir
     offsets_csv = OFFSETS_DIR / f"center_chunk_offsets_{enc}.csv"
     for p in (base_path, chunk_dir, offsets_csv):
         if not p.exists():
@@ -57,9 +62,12 @@ def build_encoder(enc: str, anchor: str = "nearestcenter") -> Path:
         raise RuntimeError(
             f"{enc}: {offsets_csv.name} lacks '{idx_col}' — regenerate with "
             "check_tss_center_chunk.py (GAP 5).")
+    verify_offsets(anchors, spec, base["ensembl_id"].tolist())
     print(f"=== {enc}: {len(base)} genes | base={base_path.name} anchors={offsets_csv.name} "
           f"| anchor={anchor} ({idx_col}) ===")
 
+    # One call over every gene, so the builder also refuses a cache mixing devices.
+    reductions = load_reductions(chunk_dir, spec, {eid: read_window(eid) for eid in base["ensembl_id"]})
     x_col = []
     changed = 0    # anchor chunk != n//2 center chunk
     fallback = 0   # containstss: no bracketing chunk, fell back to nearest-center
@@ -72,8 +80,7 @@ def build_encoder(enc: str, anchor: str = "nearestcenter") -> Path:
             anchor_idx = int(row["tss_chunk_idx"])
             fallback += 1
         n_chunks_csv = int(row["n_chunks"])
-        with np.load(chunk_dir / f"{eid}.npz") as npz:
-            mean = npz["mean"]
+        mean = reductions[eid]["mean"]
         if mean.shape[0] != n_chunks_csv:
             raise RuntimeError(
                 f"{enc}/{eid}: npz n_chunks {mean.shape[0]} != diagnostic {n_chunks_csv} "

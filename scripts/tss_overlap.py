@@ -6,9 +6,9 @@ intergenic space. Emits a per-gene table, a per-family summary (mutually-
 exclusive partition + raw overlapping fractions), and two figures.
 
 Gene set + family labels come from a TSS encoder parquet (meta is identical
-across encoders). Genomic coordinates come from the cached Ensembl lookups in
-``data/enformer_windows/_lookup`` and the Ensembl GTF in ``data/annotation``.
-All inputs are local -- no network.
+across encoders). Window spans come from the window manifest
+(``data/tss_windows.tsv``) and features from the pinned Ensembl GTF in
+``data/annotation``. All inputs are local -- no network.
 
 Run: ``uv run scripts/tss_overlap.py``
 """
@@ -28,6 +28,7 @@ import pandas as pd  # noqa: E402
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from data_loader.enformer_windows import ENSEMBL_RELEASE, GTF_PATH, MANIFEST  # noqa: E402
 from tss_overlap import compute_all, index_by_chrom, load_gtf_features  # noqa: E402
 from tss_overlap.overlap import PARTITION_BUCKETS, RAW_FRACTIONS  # noqa: E402
 
@@ -126,9 +127,10 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dataset", type=Path, default=DATA / "dataset_tss_dnabert2.parquet",
                     help="TSS encoder parquet for the gene/family table")
-    ap.add_argument("--lookup-dir", type=Path, default=DATA / "enformer_windows" / "_lookup")
-    ap.add_argument("--gtf", type=Path, default=DATA / "annotation" / "Homo_sapiens.GRCh38.110.gtf.gz")
-    ap.add_argument("--gtf-cache", type=Path, default=DATA / "annotation" / "gtf_features.parquet")
+    ap.add_argument("--manifest", type=Path, default=MANIFEST)
+    ap.add_argument("--gtf", type=Path, default=GTF_PATH)
+    ap.add_argument("--gtf-cache", type=Path,
+                    default=DATA / "annotation" / f"gtf_features_e{ENSEMBL_RELEASE}.parquet")
     ap.add_argument("--out", type=Path, default=REPO_ROOT / "analysis" / "tss_overlap")
     ap.add_argument("--rebuild-gtf", action="store_true", help="re-parse the GTF even if a cache exists")
     args = ap.parse_args()
@@ -141,13 +143,13 @@ def main() -> None:
     print(f"  {len(gtf):,} feature rows across {gtf['chrom'].nunique()} chromosomes")
     gtf_index = index_by_chrom(gtf)
 
-    per_gene, skipped = compute_all(meta, args.lookup_dir, gtf_index)
+    per_gene, skipped = compute_all(meta, args.manifest, gtf_index)
 
     # Partition buckets are leftover-complete, so they must sum to 1.0 per window.
     part_sums = per_gene[list(PARTITION_BUCKETS)].sum(axis=1)
     if not np.allclose(part_sums.to_numpy(), 1.0, atol=1e-6):
         bad = int((~np.isclose(part_sums.to_numpy(), 1.0, atol=1e-6)).sum())
-        raise SystemExit(f"partition buckets do not sum to 1.0 for {bad} windows")
+        raise RuntimeError(f"partition buckets do not sum to 1.0 for {bad} windows")
 
     n_in_gtf = int(per_gene["in_gtf"].sum())
     tables_dir = args.out / "tables"
@@ -176,7 +178,7 @@ def main() -> None:
     intron = per_gene.loc[per_gene["in_gtf"], "target_intron"].mean()
     print(f"\nprocessed {len(per_gene)} genes ({n_in_gtf} found in GTF); skipped {len(skipped)}")
     if skipped:
-        print(f"  skipped (no cached lookup): {[e for e, _ in skipped][:10]}{' ...' if len(skipped) > 10 else ''}")
+        print(f"  skipped (not in the window manifest): {[e for e, _ in skipped][:10]}{' ...' if len(skipped) > 10 else ''}")
     print(f"mean window composition (in-GTF genes): "
           f"target-CDS={coding:.4f}, target-intron={intron:.4f}, intergenic={intergenic:.4f}")
     print(f"wrote tables -> {tables_dir}")

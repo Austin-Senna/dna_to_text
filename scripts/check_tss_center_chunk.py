@@ -1,8 +1,10 @@
 """E5 center-chunk-position check (MLCB camera-ready diagnostic).
 
 `centermean` pooling reduces each gene to the chunk at token-count index
-``n_chunks // 2`` (``pooling_aggregator.aggregate``). For fixed-stride encoders
-that chunk sits at the base-pair center of the TSS-centered window (the TSS).
+``n_chunks // 2`` (``pooling_aggregator.aggregate``). Every window is in gene
+orientation with the canonical TSS at ``TSS_INDEX``, but the ``n // 2`` chunk is
+a count-based midpoint: it sits 3' of the base-pair centre (for HyenaDNA the
+whole chunk lies past the TSS), so it is not the TSS chunk.
 gena_lm uses variable-length BPE, so ``n//2``-by-token-count can land on a
 genomic region *offset* from the TSS, and on a different locus than the other
 encoders' center chunks. This makes centermean a possibly-uncontrolled
@@ -11,8 +13,8 @@ comparison and is the one open confound on the gena_lm centermean outlier
 
 This script measures, per gene, where the ``n//2`` chunk actually lands in
 base pairs relative to the TSS, using ONLY the tokenizer (no model forward
-pass, no GPU, no network — the TSS windows are already cached). gena_lm is the
-subject; nt_v2, hyena_dna, dnabert2 are controls.
+pass, no GPU, no network: the windows are read from the manifest-checked
+cache). gena_lm is the subject; nt_v2, hyena_dna, dnabert2 are controls.
 
 Read-only: writes only under ``analysis/tss_overlap/``.
 """
@@ -26,40 +28,45 @@ import numpy as np
 import pandas as pd
 from transformers import AutoTokenizer
 
-from data_loader.enformer_windows import centered_window, fetch_tss_window
+from data_loader.cache_meta import StaleCache
+from data_loader.enformer_windows import (
+    ENFORMER_WINDOW_LENGTH,
+    TSS_INDEX,
+    load_manifest,
+    read_window,
+    sha256_seq,
+)
 from data_loader.model_registry import get_encoder_spec, main_encoder_names
 from data_loader.multi_pool import _chunk_ids
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
 OUT_DIR = REPO_ROOT / "analysis" / "tss_overlap"
-WINDOW_CACHE = DATA / "enformer_windows"
-LOOKUP_DIR = WINDOW_CACHE / "_lookup"
 
 # Tokens whose surface string does not correspond to consumed base pairs.
 _SPECIAL_MARKERS = ("##", "▁", "Ġ")  # WordPiece "##", SentencePiece "_", GPT2 "G-dot"
 
 
-def _tss_offset_bp(gene_id: str, seq_len: int, length: int) -> int | None:
-    """0-based index of the TSS within the cached forward-strand window.
+def verify_offsets(anchors: pd.DataFrame, spec, genes) -> None:
+    """Refuse offsets computed on other windows or with another tokenizer (G19).
 
-    Recomputed from the cached Ensembl lookup + ``centered_window`` rather than
-    assumed to be ``length // 2`` so chromosome-start-clipped genes are correct.
+    ``anchors`` is an offsets CSV indexed by ``ensembl_id``. Each row carries the
+    sha256 of the window it was computed on and the tokenizer revision; both
+    must match the manifest and the encoder spec for every gene in ``genes``.
     """
-    lookup = LOOKUP_DIR / f"{gene_id}.json"
-    if not lookup.exists():
-        return None
-    data = json.loads(lookup.read_text())
-    _, region_start, _ = centered_window(
-        seq_region_name=str(data["seq_region_name"]),
-        start=int(data["start"]),
-        end=int(data["end"]),
-        strand=int(data.get("strand", 1)),
-        length=length,
-    )
-    tss = int(data["start"]) if int(data.get("strand", 1)) >= 0 else int(data["end"])
-    offset = tss - region_start
-    return int(np.clip(offset, 0, seq_len - 1))
+    need = {"window_sha256", "tokenizer_revision"}
+    if not need <= set(anchors.columns):
+        raise StaleCache(f"{spec.name}: offsets lack {sorted(need - set(anchors.columns))}; "
+                         "rerun scripts/check_tss_center_chunk.py on the current windows")
+    missing = [g for g in genes if g not in anchors.index]
+    if missing:
+        raise StaleCache(f"{spec.name}: no offsets for {len(missing)} genes: {missing[:5]}")
+    shas = load_manifest()["sha256"]
+    stale = [g for g in genes if anchors.at[g, "window_sha256"] != shas[g]
+             or anchors.at[g, "tokenizer_revision"] != spec.revision]
+    if stale:
+        raise StaleCache(f"{spec.name}: offsets for {len(stale)} genes come from other windows "
+                         f"or another tokenizer revision: {stale[:5]}")
 
 
 def _bp_lengths(seq: str, tok, is_fast: bool) -> np.ndarray | None:
@@ -139,7 +146,8 @@ def _analyze_gene(bp_lens: np.ndarray, tss_bp: int, max_tokens: int, stride: int
 
 def run_encoder(enc: str, length: int, max_genes: int | None) -> pd.DataFrame:
     spec = get_encoder_spec(enc)
-    tok = AutoTokenizer.from_pretrained(spec.model_name, trust_remote_code=True)
+    tok = AutoTokenizer.from_pretrained(spec.model_name, revision=spec.revision,
+                                        trust_remote_code=True)
     parquet = DATA / f"dataset_tss_{spec.cache_name}_centermean.parquet"
     gene_ids = pd.read_parquet(parquet, columns=["ensembl_id"])["ensembl_id"].tolist()
     if max_genes is not None:
@@ -150,14 +158,8 @@ def run_encoder(enc: str, length: int, max_genes: int | None) -> pd.DataFrame:
     rows = []
     skipped = 0
     for i, gid in enumerate(gene_ids):
-        seq = fetch_tss_window(gid, WINDOW_CACHE, length=length)
-        if not seq:
-            skipped += 1
-            continue
-        tss_bp = _tss_offset_bp(gid, len(seq), length)
-        if tss_bp is None:
-            skipped += 1
-            continue
+        seq = read_window(gid, length=length)
+        tss_bp = TSS_INDEX  # gene orientation, N-padded at edges: the TSS never moves
         bp_lens = _bp_lengths(seq, tok, tok.is_fast)
         if bp_lens is None or len(bp_lens) == 0:
             skipped += 1
@@ -165,11 +167,13 @@ def run_encoder(enc: str, length: int, max_genes: int | None) -> pd.DataFrame:
         r = _analyze_gene(bp_lens, tss_bp, spec.max_content_tokens, spec.stride)
         r["ensembl_id"] = gid
         r["seq_len"] = len(seq)
+        r["window_sha256"] = sha256_seq(seq)
+        r["tokenizer_revision"] = spec.revision
         rows.append(r)
         if (i + 1) % 500 == 0:
             print(f"    {i + 1}/{len(gene_ids)}")
     if skipped:
-        print(f"    skipped {skipped} genes (missing window/lookup or bp reconstruction mismatch)")
+        print(f"    skipped {skipped} genes (bp reconstruction mismatch)")
     return pd.DataFrame(rows)
 
 
@@ -202,7 +206,6 @@ def main() -> None:
     ap.add_argument("--max-genes", type=int, default=None, help="debug limit")
     args = ap.parse_args()
 
-    from data_loader.enformer_windows import ENFORMER_WINDOW_LENGTH
     length = args.length or ENFORMER_WINDOW_LENGTH
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -212,7 +215,8 @@ def main() -> None:
         if df.empty:
             print(f"    {enc}: no rows, skipping outputs")
             continue
-        csv = OUT_DIR / f"center_chunk_offsets_{enc}.csv"
+        pilot = "_pilot" if args.max_genes is not None else ""  # never overwrite the real table
+        csv = OUT_DIR / f"center_chunk_offsets_{enc}{pilot}.csv"
         df.to_csv(csv, index=False)
         s = summarize(enc, df)
         summaries.append(s)
@@ -221,7 +225,7 @@ def main() -> None:
               f"median|Δchunks|={s['median_abs_delta_chunks']:.0f} "
               f"bp/tok={s['median_bp_per_token']:.1f}")
 
-    if summaries:
+    if summaries and args.max_genes is None:
         (OUT_DIR / "center_chunk_summary.json").write_text(json.dumps(summaries, indent=2))
         print(f"\nwrote {OUT_DIR / 'center_chunk_summary.json'}")
 

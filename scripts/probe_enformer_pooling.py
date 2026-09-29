@@ -23,7 +23,7 @@ write them). The bootstraps rescore each record's stored test predictions. Never
 ``data/metrics.json``. No GPU: all features are cached and split-independent.
 
 Part 2 needs ``dataset_tss_<enc>_tssanchored.parquet`` (gitignored; built by
-``build_tss_anchored_datasets.py`` from the GPU-extracted ``tss_chunk_reductions_<enc>/``
+``build_tss_anchored_datasets.py`` from the GPU-extracted ``tss_chunk_reductions_v2_<enc>/``
 cache). ``--parts whole_window`` runs steps 1-2, the Enformer center-global test, and
 Part 1 without it.
 

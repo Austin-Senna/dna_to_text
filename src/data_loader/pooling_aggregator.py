@@ -13,14 +13,20 @@ Variants:
     meanD     : concat[first, last, mean] of (mean tokens).           3d
     meanG     : concat[first, last, mean, max] of (mean tokens).      4d
 
+TSS windows are in gene orientation (Phase 1B), so for every gene the first
+chunk is the most upstream and the last the most downstream; meanD/meanG's
+first/last read the window's 5' and 3' ends. (Before Phase 1B minus-strand
+windows were forward strand, so "first" was downstream for 48% of genes.)
+
 `centermean` takes the chunk at index ``n_chunks // 2``, a count-based midpoint
 and NOT the TSS. Chunks overlap by ``stride`` and the last chunk is aligned to
 the sequence end, so this chunk sits systematically 3' of the window's bp
-midpoint: median offset +1.2 kb (DNABERT-2), +1.4 kb (GENA-LM), +5.6 kb (NT-v2,
-HyenaDNA). It contains the TSS base in ~50% of genes for the 510-token encoders
-but only 0.03% for the wide-window ones, so it is a TSS-*downstream* chunk and
-is not a same-locus comparison across encoders. Measured in
-``analysis/tss_overlap/center_chunk_finding.md`` (``check_tss_center_chunk.py``).
+midpoint, i.e. downstream of the TSS. The May 2026 measurement (forward-strand
+windows): median offset +1.2 kb (DNABERT-2), +1.4 kb (GENA-LM), +5.6 kb (NT-v2,
+HyenaDNA); it contained the TSS base in ~50% of genes for the 510-token
+encoders but only 0.03% for the wide-window ones, so it is not a same-locus
+comparison across encoders (``analysis/tss_overlap/center_chunk_finding.md``,
+to be re-measured on the canonical-TSS windows by ``check_tss_center_chunk.py``).
 For a genuine TSS-anchored feature (``argmin_k |chunk_bp_center - TSS|``) use
 ``scripts/build_tss_anchored_datasets.py``.
 

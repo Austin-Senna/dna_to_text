@@ -173,6 +173,11 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
     prov = {"pred_file": _rel(pred_file), "pred_sha256": pred_sha, **prov}
     stored = load_predictions(prov)
     metrics = score(kind, stored["y_true"], stored["pred"])
+    # G3: a probe that predicts one class (or one vector) for every test gene
+    # scores at the majority level whatever its features; 1E refuses such a
+    # confirmatory cell.
+    degenerate = (len(np.unique(stored["pred"])) == 1 if kind == "logistic"
+                  else bool(np.all(np.ptp(stored["pred"], axis=0) == 0)))
 
     if confusion_dir is not None and task == "family5" and label_seed is None:
         classes = sorted(set(stored["y_true"].tolist()))
@@ -191,6 +196,7 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
         "edge": sel.edge,
         "n_iter": probe.n_iter,          # the refit; each sweep row carries its own
         "converged": probe.converged,
+        "degenerate": bool(degenerate),
         **prov,
     }
     return {"kind": kind, "hp": sel.hp, "sweep": sel.sweep, "edge": sel.edge,

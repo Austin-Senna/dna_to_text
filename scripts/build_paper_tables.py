@@ -21,7 +21,7 @@ import json
 from pathlib import Path
 
 from data_loader.pool_names import POOL_DISPLAY, display_label
-from data_loader.pooling_aggregator import POOLING_VARIANTS
+from data_loader.model_registry import encoder_pools
 from linear_trainer.selection import encoder_cells, select_by_val, select_pool
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -264,7 +264,7 @@ def cls_best_pool(enc, ctx="CDS"):
     """Validation-selected (pool, record) for an encoder's classification probe."""
     prefix = ("tss_" if ctx == "TSS" else "") + enc + "_"
     try:
-        src = select_pool(CLS, [prefix + p for p in POOLING_VARIANTS])
+        src = select_pool(CLS, [prefix + p for p in encoder_pools(enc, ctx)])
     except LookupError:
         return None, None
     return src[len(prefix):], CLS[src]
@@ -274,7 +274,7 @@ def reg_best_pool(enc, ctx="CDS"):
     """Validation-selected (pool, record) for an encoder's Ridge probe."""
     prefix = ("tss_" if ctx == "TSS" else "") + enc + "_"
     try:
-        src = select_pool(REG, [prefix + p for p in POOLING_VARIANTS])
+        src = select_pool(REG, [prefix + p for p in encoder_pools(enc, ctx)])
     except LookupError:
         return None, None
     return src[len(prefix):], REG[src]

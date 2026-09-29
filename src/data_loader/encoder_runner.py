@@ -11,8 +11,10 @@ from tqdm import tqdm
 from transformers import AutoConfig, AutoModelForMaskedLM, AutoTokenizer, BertConfig as HFBertConfig
 from transformers import dynamic_module_utils
 
-MODEL_NAME = "zhihan1996/DNABERT-2-117M"
-MODEL_REVISION = "7bce263b15377fc15361f52cfab88f8b586abda0"
+from data_loader.model_registry import ENCODER_SPECS
+
+MODEL_NAME = ENCODER_SPECS["dnabert2"].model_name
+MODEL_REVISION = ENCODER_SPECS["dnabert2"].revision
 OPTIONAL_REMOTE_IMPORTS = {"flash_attn_triton"}
 
 
@@ -67,7 +69,7 @@ def load_model(device: str | None = None):
         )
     weights_path = snapshot_dir / "pytorch_model.bin"
     state_dict = torch.load(weights_path, map_location="cpu", weights_only=True)
-    masked_lm.load_state_dict(state_dict)
+    masked_lm.load_state_dict(state_dict)  # strict: a missing weight raises
     model = masked_lm.bert
 
     model.to(device).eval()

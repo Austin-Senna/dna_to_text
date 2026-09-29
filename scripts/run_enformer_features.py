@@ -1,4 +1,8 @@
-"""Extract Enformer comparator features and matched TSS-window 4-mer features."""
+"""Extract Enformer comparator features and matched TSS-window 4-mer features.
+
+Windows are the canonical-TSS windows (gene orientation, TSS at index 98,304),
+read through ``enformer_windows.read_window``.
+"""
 from __future__ import annotations
 
 import argparse
@@ -8,21 +12,17 @@ import numpy as np
 import pandas as pd
 
 from data_loader.enformer_encoder import embed_all_enformer
-from data_loader.enformer_windows import ENFORMER_WINDOW_LENGTH, fetch_tss_window
+from data_loader.enformer_windows import read_window
 from kmer_baseline import featurize_sequence
+from linear_trainer.sources import META_PARQUET
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
 FEATURE_NAMES = ("trunk_global", "trunk_center", "tracks_center")
 
 
-def _load_windows(meta: pd.DataFrame, cache_dir: Path, length: int) -> dict[str, str]:
-    windows: dict[str, str] = {}
-    for eid in meta["ensembl_id"]:
-        seq = fetch_tss_window(eid, cache_dir, length=length)
-        if seq:
-            windows[eid] = seq
-    return windows
+def _load_windows(meta: pd.DataFrame) -> dict[str, str]:
+    return {eid: read_window(eid) for eid in meta["ensembl_id"]}
 
 
 def _write_feature_dataset(base: pd.DataFrame, features: dict[str, dict[str, np.ndarray]], name: str) -> None:
@@ -43,18 +43,16 @@ def _write_tss_kmer_dataset(base: pd.DataFrame, windows: dict[str, str]) -> None
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--template-dataset", default=str(DATA / "dataset.parquet"))
-    ap.add_argument("--window-cache", default=str(DATA / "enformer_windows"))
-    ap.add_argument("--feature-cache", default=str(DATA / "enformer_features"))
+    ap.add_argument("--template-dataset", default=str(META_PARQUET))
+    ap.add_argument("--feature-cache", default=str(DATA / "enformer_features_v2"))
     ap.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu", "mps"])
-    ap.add_argument("--length", type=int, default=ENFORMER_WINDOW_LENGTH)
     ap.add_argument("--center-bins", type=int, default=16)
     ap.add_argument("--skip-model", action="store_true", help="only fetch windows and build TSS 4-mer")
     args = ap.parse_args()
 
     base = pd.read_parquet(args.template_dataset)
     print(f"=== Enformer comparator: {len(base)} genes from {Path(args.template_dataset).name} ===")
-    windows = _load_windows(base, Path(args.window_cache), length=args.length)
+    windows = _load_windows(base)
     print(f"  TSS windows on disk: {len(windows)}")
     _write_tss_kmer_dataset(base, windows)
 

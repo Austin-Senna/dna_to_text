@@ -10,7 +10,11 @@ import transformers.pytorch_utils as _tf_pytorch_utils
 from transformers import AutoModel, AutoTokenizer
 from transformers.modeling_utils import ModuleUtilsMixin
 
-MODEL_NAME = "AIRI-Institute/gena-lm-bert-base-t2t"
+from data_loader.load_checks import check_loading_info
+from data_loader.model_registry import ENCODER_SPECS
+
+MODEL_NAME = ENCODER_SPECS["gena_lm"].model_name
+MODEL_REVISION = ENCODER_SPECS["gena_lm"].revision
 
 
 def _install_transformers_shims() -> None:
@@ -55,8 +59,11 @@ def load_model(device: str | None = None):
     if device is None:
         device = _auto_device()
     _install_transformers_shims()
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
-    model = AutoModel.from_pretrained(MODEL_NAME, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, revision=MODEL_REVISION,
+                                              trust_remote_code=True)
+    model, info = AutoModel.from_pretrained(MODEL_NAME, revision=MODEL_REVISION,
+                                            trust_remote_code=True, output_loading_info=True)
+    check_loading_info(info, what=f"{MODEL_NAME}@{MODEL_REVISION[:8]}")
     model = _select_backbone(model)
     # GENA-LM's custom modeling registers `token_type_ids` as a non-persistent
     # buffer; on some PyTorch builds it loads with uninitialised memory values
