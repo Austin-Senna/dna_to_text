@@ -84,7 +84,10 @@ uv run python scripts/train_probe.py --dataset data/dataset_dnabert2_meanG.parqu
 uv run python scripts/build_family5_table.py
 uv run python scripts/build_regression_table.py
 
-# Stage 4.1: map the CDS gene set to TSS-centered windows and matched TSS 4-mers.
+# Stage 4.1: canonical-TSS windows, the TSS split and matched TSS 4-mers
+# (downloads the Ensembl 115 files first; see docs/stage4-1-tss-windows.md).
+uv run python scripts/build_tss_windows.py
+uv run python scripts/make_tss_disjoint_split.py
 uv run python scripts/run_enformer_features.py --skip-model
 
 # Stage 4.2: run TSS-window NT-v2 and Enformer, then train context-ablation probes.
@@ -131,8 +134,8 @@ External large inputs:
 - GenePT v2 artifacts: Zenodo DOI `10.5281/zenodo.10833191`; unzip `GenePT_emebdding_v2.zip` into `GenePT_emebdding_v2/`.
 - HGNC complete gene set: downloaded by `src/data_loader/dataset_loader.py` from `https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt`.
 - Ensembl canonical CDS: fetched by `src/data_loader/sequence_fetcher.py` from Ensembl REST `/lookup/id/{gene_id}` and `/sequence/id/{transcript_id}?type=cds`.
-- Ensembl TSS windows: derived by `src/data_loader/enformer_windows.py` from Ensembl REST gene coordinates (`/lookup/id/{gene_id}`); each window is 196,608 bp centered on the strand-aware gene TSS and fetched from `/sequence/region/human/{region}`.
-- Encoder checkpoints: Hugging Face model IDs `zhihan1996/DNABERT-2-117M`, `InstaDeepAI/nucleotide-transformer-v2-100m-multi-species`, `AIRI-Institute/gena-lm-bert-base-t2t`, and `LongSafari/hyenadna-large-1m-seqlen-hf`.
+- Ensembl TSS windows: built by `scripts/build_tss_windows.py` from the Ensembl release 115 GTF, primary-assembly FASTA and cDNA FASTA (commands in `docs/stage4-1-tss-windows.md`); each window is 196,608 bp in gene orientation, centred on the 5' end of the gene's canonical transcript, and checked against the tracked manifest `data/tss_windows.tsv`.
+- Encoder checkpoints: Hugging Face model IDs `zhihan1996/DNABERT-2-117M`, `InstaDeepAI/nucleotide-transformer-v2-100m-multi-species`, `AIRI-Institute/gena-lm-bert-base-t2t`, `LongSafari/hyenadna-large-1m-seqlen-hf` and `EleutherAI/enformer-official-rough`, each loaded at the commit pinned in `src/data_loader/model_registry.py`.
 
 ## Testing
 

@@ -18,12 +18,15 @@ uv run python scripts/run_enformer_features.py --device auto
 # Probe fits refuse to run unless every BLAS/OpenMP pool is pinned to one thread.
 export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
 
-# All four self-supervised encoders on TSS windows (RTX 5060: HyenaDNA
-# ~80 min, DNABERT-2 ~110 min, GENA-LM ~70 min, NT-v2 already done).
+# All four self-supervised encoders on the canonical-TSS windows (Stage 4.1).
+# May timings on an RTX 5060: HyenaDNA ~80 min, DNABERT-2 ~110 min, GENA-LM ~70 min.
 for enc in nt_v2 dnabert2 gena_lm hyena_dna; do
   uv run python scripts/run_tss_multi_pool_extract.py --encoder "$enc" --device auto
-  uv run python scripts/run_tss_probes_for_encoder.py --encoder "$enc" --skip-existing
+  uv run python scripts/build_tss_pooling_datasets.py --encoder "$enc"
 done
+# Probe each pool in the encoder's TSS grid (model_registry.encoder_pools(enc, "TSS")):
+uv run python scripts/train_logistic_probe.py --dataset tss_nt_v2_meanmean --task family5 \
+  --splits data/splits_tss_disjoint.json
 
 # Enformer + TSS 4-mer baseline probes
 uv run python scripts/train_logistic_probe.py --dataset enformer_tss_4mer --task family5
@@ -44,10 +47,10 @@ uv run python scripts/bootstrap_test_uncertainty.py
 | `scripts/build_tss_pooling_datasets.py` | Aggregates TSS per-chunk reductions into probe-ready datasets. |
 | `scripts/train_logistic_probe.py` | Trains family5 probes for TSS-window feature sources. |
 | `scripts/train_probe.py` | Trains Ridge-to-GenePT probes for TSS-window feature sources. |
-| `src/data_loader/enformer_encoder.py` | Loads Enformer and extracts trunk/track summaries from TSS windows. |
-| `src/data_loader/enformer_windows.py` | Supplies the cached 196,608 bp TSS windows. |
-| `src/data_loader/multi_pool.py` | Shared chunked encoder extraction over long TSS windows. |
-| `src/data_loader/pooling_aggregator.py` | Builds TSS pooling variants such as `meanmean`, `meanD`, and `meanG`. |
+| `src/data_loader/enformer_encoder.py` | Loads Enformer at its pinned revision and extracts trunk/track summaries. `trunk_global` averages all 896 output bins, the central 114,688 bp of the window; `trunk_center` the central 16 bins (2,048 bp). |
+| `src/data_loader/enformer_windows.py` | Supplies the canonical-TSS windows through `read_window`, which checks each against the manifest (Stage 4.1). |
+| `src/data_loader/multi_pool.py` | Shared chunked encoder extraction over long TSS windows; caches in `data/tss_chunk_reductions_v2_<encoder>/` carry a meta record and are refused if built from other windows or another revision. |
+| `src/data_loader/pooling_aggregator.py` | Builds TSS pooling variants: `meanmean`, `maxmean`, `clsmean`, `meanD`, `meanG` (HyenaDNA has no `clsmean`), plus the E5 `centermean` template. |
 | `samples/stage4_2_tss_encoder_input.json` | Tiny example of context-ablation feature sources and commands. |
 | `samples/stage4_2_tss_encoder_output.json` | Tiny excerpt of the CDS-vs-TSS result table. |
 

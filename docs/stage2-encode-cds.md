@@ -52,7 +52,12 @@ uv run python scripts/build_pooling_datasets.py --encoder hyena_dna
 ## Outputs
 
 - `data/dataset_<encoder>_<pooling>.parquet` - probe-ready feature tables.
-- `data/chunk_reductions_<encoder>/` - ignored local per-gene reduction caches.
+- `data/chunk_reductions_v2_<encoder>/` - ignored local per-gene reduction caches, each with a meta record (encoder revision, chunking, boundary tokens, input sha256); a cache built differently is refused.
+
+HyenaDNA is run on DNA tokens only (no CLS/SEP): it was never trained with a
+CLS token, and as a causal model a CLS at position 0 reaches every position.
+It therefore has no `clsmean` or `specialmean` pools, and the CDS grid has 22
+encoder x pooling configs.
 
 Encoder extraction is the expensive stage. Use one GPU/MPS encoder process per
 device and rely on caches for interrupted reruns.
