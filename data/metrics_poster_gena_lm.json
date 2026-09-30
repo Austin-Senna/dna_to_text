@@ -1,0 +1,561 @@
+[
+  {
+    "model": "logistic_probe",
+    "feature_source": "gena_lm_meanmean",
+    "encoder": "gena_lm_meanmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.5429715465567124,
+        "converged": true
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5309199484167408,
+        "converged": true
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5426373194174458,
+        "converged": true
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5344040059688915,
+        "converged": true
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5340768430609313,
+        "converged": true
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5237033587281512,
+        "converged": true
+      }
+    ],
+    "test_macro_f1": 0.6918855979199342,
+    "test_kappa": 0.639935570753347,
+    "test_balanced_accuracy": 0.6912678545692376,
+    "test_accuracy": 0.7700205338809035,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7640449438202247,
+      "immune": 0.6521739130434783,
+      "ion": 0.5666666666666667,
+      "kinase": 0.6190476190476191,
+      "tf": 0.8544061302681992
+    },
+    "run_id": "poster_gena_fix_gena_lm_meanmean_family5",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  },
+  {
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_meanmean.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8880710005760193,
+        "r2": -0.31107982993125916,
+        "converged": true
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8881204724311829,
+        "r2": -0.31043142080307007,
+        "converged": true
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8886047601699829,
+        "r2": -0.304078072309494,
+        "converged": true
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8924006819725037,
+        "r2": -0.2547833025455475,
+        "converged": true
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9040834307670593,
+        "r2": -0.10857958346605301,
+        "converged": true
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9129813313484192,
+        "r2": -0.002368059242144227,
+        "converged": true
+      }
+    ],
+    "test_r2_macro": 0.03142869845032692,
+    "test_mean_cosine": 0.9160349369049072,
+    "test_median_cosine": 0.9153164029121399,
+    "run_id": "poster_gena_fix_dataset_gena_lm_meanmean.parquet",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  },
+  {
+    "model": "logistic_probe",
+    "feature_source": "gena_lm_specialmean",
+    "encoder": "gena_lm_specialmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.5398199500724591,
+        "converged": true
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5353008803645369,
+        "converged": true
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5299217852645273,
+        "converged": true
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5336997247255992,
+        "converged": true
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5467876074416698,
+        "converged": true
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5410748530143203,
+        "converged": true
+      }
+    ],
+    "test_macro_f1": 0.6140178334310782,
+    "test_kappa": 0.5609775217041959,
+    "test_balanced_accuracy": 0.6277462873699587,
+    "test_accuracy": 0.7166324435318275,
+    "test_per_class_accuracy": {
+      "gpcr": 0.6179775280898876,
+      "immune": 0.5217391304347826,
+      "ion": 0.6,
+      "kinase": 0.5714285714285714,
+      "tf": 0.8275862068965517
+    },
+    "run_id": "poster_gena_fix_gena_lm_specialmean_family5",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  },
+  {
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_specialmean.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8882074356079102,
+        "r2": -0.308633953332901,
+        "converged": true
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8882584571838379,
+        "r2": -0.3079669177532196,
+        "converged": true
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8887492418289185,
+        "r2": -0.3015494644641876,
+        "converged": true
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8925826549530029,
+        "r2": -0.25194284319877625,
+        "converged": true
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.9042458534240723,
+        "r2": -0.10646113008260727,
+        "converged": true
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9130271077156067,
+        "r2": -0.0018414966762065887,
+        "converged": true
+      }
+    ],
+    "test_r2_macro": 0.03180352970957756,
+    "test_mean_cosine": 0.9160630106925964,
+    "test_median_cosine": 0.9153965711593628,
+    "run_id": "poster_gena_fix_dataset_gena_lm_specialmean.parquet",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  },
+  {
+    "model": "logistic_probe",
+    "feature_source": "gena_lm_maxmean",
+    "encoder": "gena_lm_maxmean",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 1000.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.42323770852584347,
+        "converged": true
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.42029202415296546,
+        "converged": true
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.4195848003749788,
+        "converged": true
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.4181341611583605,
+        "converged": true
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.44498025197689783,
+        "converged": true
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.4455064833764853,
+        "converged": true
+      }
+    ],
+    "test_macro_f1": 0.48733401164495405,
+    "test_kappa": 0.42542245030849657,
+    "test_balanced_accuracy": 0.49107621416685987,
+    "test_accuracy": 0.6242299794661191,
+    "test_per_class_accuracy": {
+      "gpcr": 0.6629213483146067,
+      "immune": 0.21739130434782608,
+      "ion": 0.36666666666666664,
+      "kinase": 0.4880952380952381,
+      "tf": 0.7203065134099617
+    },
+    "run_id": "poster_gena_fix_gena_lm_maxmean_family5",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  },
+  {
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_maxmean.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8852654099464417,
+        "r2": -0.33208003640174866,
+        "converged": true
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8852658867835999,
+        "r2": -0.33207419514656067,
+        "converged": true
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8852707147598267,
+        "r2": -0.33201315999031067,
+        "converged": true
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8853189945220947,
+        "r2": -0.331403523683548,
+        "converged": true
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.8857929110527039,
+        "r2": -0.32542744278907776,
+        "converged": true
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.8897914886474609,
+        "r2": -0.2754347026348114,
+        "converged": true
+      }
+    ],
+    "test_r2_macro": -0.20552629232406616,
+    "test_mean_cosine": 0.895656943321228,
+    "test_median_cosine": 0.8960691094398499,
+    "run_id": "poster_gena_fix_dataset_gena_lm_maxmean.parquet",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  },
+  {
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_clsmean.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8874978423118591,
+        "r2": -0.31495633721351624,
+        "converged": true
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8875164985656738,
+        "r2": -0.3147147595882416,
+        "converged": true
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8877071738243103,
+        "r2": -0.31224191188812256,
+        "converged": true
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8894379138946533,
+        "r2": -0.2899000644683838,
+        "converged": true
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.8985165953636169,
+        "r2": -0.17543238401412964,
+        "converged": true
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.911065399646759,
+        "r2": -0.024493349716067314,
+        "converged": true
+      }
+    ],
+    "test_r2_macro": 0.006565660238265991,
+    "test_mean_cosine": 0.9138415455818176,
+    "test_median_cosine": 0.9128080010414124,
+    "run_id": "poster_gena_fix_dataset_gena_lm_clsmean.parquet",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  },
+  {
+    "model": "logistic_probe",
+    "feature_source": "gena_lm_meanD",
+    "encoder": "gena_lm_meanD",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 100.0,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.5245813281947862,
+        "converged": true
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5243320125065196,
+        "converged": true
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5289762807077878,
+        "converged": true
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5143942165664906,
+        "converged": true
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.5292543666003007,
+        "converged": true
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5242037229237029,
+        "converged": true
+      }
+    ],
+    "test_macro_f1": 0.6532215189711956,
+    "test_kappa": 0.6069488188976377,
+    "test_balanced_accuracy": 0.669657362330071,
+    "test_accuracy": 0.7474332648870636,
+    "test_per_class_accuracy": {
+      "gpcr": 0.6853932584269663,
+      "immune": 0.6956521739130435,
+      "ion": 0.5333333333333333,
+      "kinase": 0.5833333333333334,
+      "tf": 0.8505747126436781
+    },
+    "run_id": "poster_gena_fix_gena_lm_meanD_family5",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  },
+  {
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_meanD.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8587935566902161,
+        "r2": -0.7884302139282227,
+        "converged": true
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.843190610408783,
+        "r2": -1.0516895055770874,
+        "converged": true
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8700575232505798,
+        "r2": -0.5638946890830994,
+        "converged": true
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8749117255210876,
+        "r2": -0.4914325773715973,
+        "converged": true
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.8913701772689819,
+        "r2": -0.2664950489997864,
+        "converged": true
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.908146858215332,
+        "r2": -0.05922962352633476,
+        "converged": true
+      }
+    ],
+    "test_r2_macro": -0.01668749563395977,
+    "test_mean_cosine": 0.9119420647621155,
+    "test_median_cosine": 0.9117101430892944,
+    "run_id": "poster_gena_fix_dataset_gena_lm_meanD.parquet",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  },
+  {
+    "model": "logistic_probe",
+    "feature_source": "gena_lm_meanG",
+    "encoder": "gena_lm_meanG",
+    "task": "family5",
+    "shuffled_labels": false,
+    "C": 0.01,
+    "C_sweep": [
+      {
+        "C": 0.01,
+        "macro_f1": 0.5256766383895906,
+        "converged": true
+      },
+      {
+        "C": 0.1,
+        "macro_f1": 0.5240643733004459,
+        "converged": true
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.5123972195808275,
+        "converged": true
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.5168899813636656,
+        "converged": true
+      },
+      {
+        "C": 100.0,
+        "macro_f1": 0.516996041809976,
+        "converged": true
+      },
+      {
+        "C": 1000.0,
+        "macro_f1": 0.5153804533504206,
+        "converged": true
+      }
+    ],
+    "test_macro_f1": 0.6806111627973019,
+    "test_kappa": 0.6487420414532913,
+    "test_balanced_accuracy": 0.6938835451188263,
+    "test_accuracy": 0.7741273100616016,
+    "test_per_class_accuracy": {
+      "gpcr": 0.7078651685393258,
+      "immune": 0.6956521739130435,
+      "ion": 0.5333333333333333,
+      "kinase": 0.6666666666666666,
+      "tf": 0.8659003831417624
+    },
+    "run_id": "poster_gena_fix_gena_lm_meanG_family5",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  },
+  {
+    "model": "linear_probe",
+    "dataset": "dataset_gena_lm_meanG.parquet",
+    "alpha": 1000.0,
+    "select_by": "r2",
+    "alpha_sweep": [
+      {
+        "alpha": 0.01,
+        "mean_cosine": 0.8732330203056335,
+        "r2": -0.5099527835845947,
+        "converged": true
+      },
+      {
+        "alpha": 0.1,
+        "mean_cosine": 0.8729903101921082,
+        "r2": -0.5134809613227844,
+        "converged": true
+      },
+      {
+        "alpha": 1.0,
+        "mean_cosine": 0.8745011687278748,
+        "r2": -0.49278271198272705,
+        "converged": true
+      },
+      {
+        "alpha": 10.0,
+        "mean_cosine": 0.8780201077461243,
+        "r2": -0.4437945783138275,
+        "converged": true
+      },
+      {
+        "alpha": 100.0,
+        "mean_cosine": 0.8901323676109314,
+        "r2": -0.2820987403392792,
+        "converged": true
+      },
+      {
+        "alpha": 1000.0,
+        "mean_cosine": 0.9068391919136047,
+        "r2": -0.07478318363428116,
+        "converged": true
+      }
+    ],
+    "test_r2_macro": -0.030939459800720215,
+    "test_mean_cosine": 0.9107587933540344,
+    "test_median_cosine": 0.9109116792678833,
+    "run_id": "poster_gena_fix_dataset_gena_lm_meanG.parquet",
+    "note": "Sept 30 2026 rerun on trained-weight GENA-LM features (fix 7a0c6e1, A10G extraction) under the May protocol (tests/legacy_cell.py LEGACY: no scaler, float32, 6-point grid) with two changes: max_iter 2000 -> 20000 (the unscaled trained features converge slowly; a larger budget leaves converged fits unchanged) and 1 BLAS thread (the May runs used 12; on the 3 rules run both ways the pick and validation score matched and test F1 moved by up to 0.018). Mean-CLS family5 did not converge at any C (outlier CLS activations near 1.6e4) and has no record. data/splits.json; poster only."
+  }
+]

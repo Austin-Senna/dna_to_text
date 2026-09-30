@@ -17,7 +17,7 @@ uv run scripts/build_paper_tables.py     # LaTeX table fragments -> dna_to_text_
 | File | What it does |
 | --- | --- |
 | `scripts/build_result_figures.py` | Results figures: comparator macro-F1 / GenePT R^2 (3.1/3.2), encoder x pooling heatmap (3.3), CDS-vs-TSS substrate ablation (3.4), random-vs-homology split (3.5). |
-| `scripts/build_poster_figures.py` | Poster PDFs into `poster/figures/`, reusing the paper's metric accessors and grey/green/blue role palette. |
+| `scripts/build_poster_figures.py` | Poster PDFs into `poster/figures/`, reusing the paper's metric accessors and grey/green/blue role palette. GENA-LM's CDS cells come from `data/metrics_poster_gena_lm.json` (rerun after the weight-loading fix), and the TSS panel uses the disjoint split. |
 | `scripts/build_paper_tables.py` | LaTeX table-body fragments: best-cell classification/regression, substrate ablation, split comparison, and the appendix matrices. |
 | `data/metrics_homology.json` | Primary (homology-split) metric log consumed by both. |
 | `data/metrics.json`, `data/metrics_random_comparators.json` | Random-split values for the leakage / split-comparison artifacts. |

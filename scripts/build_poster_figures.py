@@ -2,10 +2,12 @@
 """Poster-styled figures (vector PDF) for the MINA URF symposium poster.
 
 Reuses the paper's metric accessors (scripts/build_result_figures.py) and the
-UMAP embedding computation (scripts/build_umap_compare.py) so every printed
-value matches the paper exactly, then re-renders larger, thicker, print-legible
-panels into poster/figures/ as PDF. The paper's own figure scripts are left
-untouched; only styling, colour, and output path/format differ here.
+UMAP embedding computation (scripts/build_umap_compare.py), then re-renders
+larger, thicker, print-legible panels into poster/figures/ as PDF. The paper's
+own figure scripts are left untouched. Two poster-only differences in values:
+GENA-LM's CDS cells come from data/metrics_poster_gena_lm.json (a rerun after
+the weight-loading fix, ledger G23), and the TSS panel reads the
+genomic-interval-disjoint split, as the paper's text does.
 
 Colour: the bar charts use the paper's role palette (grey composition, green
 DNA encoder, blue hatched protein-LM reference); the heatmap's red/green scale
@@ -17,6 +19,7 @@ Run: uv run scripts/build_poster_figures.py
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -39,10 +42,40 @@ from build_result_figures import (  # noqa: E402  (sys.path set just above)
 from build_umap_compare import (  # noqa: E402
     FAM_DISP, FAM_ORDER, _coords,
 )
-from headline_cells import CLS_BEST, CLS_BEST_TSS  # noqa: E402
-from linear_trainer.selection import select_by_val  # noqa: E402
+from headline_cells import CLS_BEST, CLS_BEST_TSS, best  # noqa: E402
+from linear_trainer.selection import select_by_val, select_pool  # noqa: E402
+from data_loader.model_registry import encoder_pools  # noqa: E402
 
 OUT = ROOT / "poster" / "figures"
+DATA = ROOT / "data"
+
+# GENA-LM's May features came from an untrained network (the loader left every
+# weight at its random init; ledger G23). Its CDS cells were rerun on Sept 30 on
+# the fixed features, under the same May protocol and split as every other bar
+# here (tests/legacy_cell.py; a control reproduced the May nt_v2_meanD records
+# exactly). The poster swaps those records in; the paper waits for the full recompute.
+GENA_FIX = json.loads((DATA / "metrics_poster_gena_lm.json").read_text())
+
+
+def _old_gena_cds(r: dict) -> bool:
+    """Every May GENA-LM CDS family5 or GenePT record (all untrained). A pooling rule
+    whose rerun did not converge must drop out, not fall back to its old record."""
+    if r.get("model") == "linear_probe":
+        return str(r.get("dataset", "")).startswith("dataset_gena_lm")
+    return r.get("task") == "family5" and str(r.get("feature_source", "")).startswith("gena_lm")
+
+
+M[:] = [r for r in M if not _old_gena_cds(r)] + GENA_FIX  # in place: the imported accessors read M
+CLS_BEST = {**CLS_BEST, "gena_lm": best(
+    {r["feature_source"]: r for r in M if r.get("task") == "family5" and not r.get("shuffled_labels")},
+    "gena_lm_")}
+
+# TSS panel: the paper reports TSS on the genomic-interval-disjoint split
+# (Aug 12 runs) and Enformer from its disjoint pooling runs. GENA-LM is left out
+# of it: its TSS features were untrained too and have not been rerun.
+TSS_DISJ = json.loads((DATA / "metrics_tss_disjoint.json").read_text())
+ENF_DISJ = json.loads((DATA / "metrics_enformer_pooling_disjoint.json").read_text())
+TSS_ENCODERS = [e for e in ENCODERS if e != "gena_lm"]
 
 plt.rcParams.update({
     "font.size": 17,
@@ -100,9 +133,10 @@ def _legend(ax, handles, loc):
               edgecolor="none")
 
 
-def _f1_where(fs):
-    return next(r["test_macro_f1"] for r in M
-                if r.get("task") == "family5" and r["feature_source"] == fs)
+def _f1_where(fs, recs=None):
+    return next(r["test_macro_f1"] for r in (M if recs is None else recs)
+                if r.get("task") == "family5" and r["feature_source"] == fs
+                and not r.get("shuffled_labels"))
 
 
 # ---------- figures ----------
@@ -176,10 +210,17 @@ def fig_pooling_heatmap():
 
     floor = _cell_cls(M, "kmer")
     vals = np.full((len(ENCODERS), len(POOLS)), np.nan)
+    na_text = {}
     for i, e in enumerate(ENCODERS):
         for j, p in enumerate(POOLS):
-            if not (e in NO_BOUNDARY_TOKEN and p in BOUNDARY_POOLS):
-                vals[i, j] = _cell_cls(M, f"{e}_{p}")
+            if e in NO_BOUNDARY_TOKEN and p in BOUNDARY_POOLS:
+                na_text[i, j] = "n/a"
+                continue
+            v = _cell_cls(M, f"{e}_{p}")
+            if v is None:
+                na_text[i, j] = "n.c."  # the rerun's fit did not converge (GENA-LM Mean-CLS)
+            else:
+                vals[i, j] = v
     norm = TwoSlopeNorm(vmin=min(float(np.nanmin(vals)), floor - 0.01), vcenter=floor,
                         vmax=max(float(np.nanmax(vals)), floor + 0.01))
     cmap = LinearSegmentedColormap.from_list("floor_rg", ["#b2182b", "#ffffff", "#1b7837"])
@@ -195,7 +236,7 @@ def fig_pooling_heatmap():
         for j in range(len(POOLS)):
             v = vals[i, j]
             if np.isnan(v):
-                ax.text(j, i, "n/a", ha="center", va="center", fontsize=19, color="#666")
+                ax.text(j, i, na_text[i, j], ha="center", va="center", fontsize=19, color="#666")
                 continue
             r, g, b, _ = cmap(norm(v))
             ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=23,
@@ -218,18 +259,24 @@ def fig_pooling_heatmap():
 
 
 def fig_substrate_collapse():
-    """CDS vs 196,608 bp TSS window: 5-way family macro-F1 (single panel)."""
-    cats = ["CDS 4-mer"] + [ENC_DISP[e] for e in ENCODERS] + ["Enformer"]
-    cols = [PC_COMP] + [PC_DNA] * 4 + [PC_ESM]
+    """CDS (homology split) vs 196,608 bp TSS window (disjoint split): 5-way family macro-F1."""
+    cats = ["CDS 4-mer"] + [ENC_DISP[e] for e in TSS_ENCODERS] + ["Enformer"]
+    cols = [PC_COMP] + [PC_DNA] * len(TSS_ENCODERS) + [PC_ESM]
     x = np.arange(len(cats))
     w = 0.38
 
-    # Enformer at whole-window pooling (trunk_global), like every other bar here.
-    # The paper figure uses trunk_center (central 2,048 bp, 0.401), a TSS readout.
-    enf_cls = next(r for r in ENFH if r.get("task") == "family5"
-                   and "trunk_global" in str(r.get("feature_source") or r.get("dataset")))
-    cds_f1 = [_f1_where("kmer")] + [_best_cls(M, e, False, "test_macro_f1") for e in ENCODERS] + [np.nan]
-    tss_f1 = [_f1_where("enformer_tss_4mer")] + [_best_cls(M, e, True, "test_macro_f1") for e in ENCODERS] + [enf_cls["test_macro_f1"]]
+    # Every TSS bar pools the whole window, picked on validation over the encoder's
+    # TSS pooling grid; Enformer at whole-window pooling (trunk_global).
+    tss_recs = {r["feature_source"]: r for r in TSS_DISJ
+                if r.get("task") == "family5" and not r.get("shuffled_labels")}
+    enf_cls = next(r for r in ENF_DISJ if r.get("task") == "family5"
+                   and r.get("feature_source") == "enformer_trunk_global")
+    tss_pick = {e: select_pool(tss_recs, [f"tss_{e}_{p}" for p in encoder_pools(e, "TSS")])
+                for e in TSS_ENCODERS}
+    cds_f1 = [_f1_where("kmer")] + [_best_cls(M, e, False, "test_macro_f1") for e in TSS_ENCODERS] + [np.nan]
+    tss_f1 = ([_f1_where("enformer_tss_4mer", TSS_DISJ)]
+              + [tss_recs[tss_pick[e]]["test_macro_f1"] for e in TSS_ENCODERS] + [enf_cls["test_macro_f1"]])
+    assert len(cols) == len(cats) == len(cds_f1) == len(tss_f1)
 
     fig, ax = plt.subplots(figsize=(8.6, 6.6))
     ax.bar(x - w / 2, cds_f1, w, color=cols, edgecolor="white", linewidth=1.5)
@@ -242,13 +289,13 @@ def fig_substrate_collapse():
     ax.set_xticks(x)
     ax.set_xticklabels(cats, rotation=20, ha="right")
     _legend(ax, [Patch(facecolor="#777", label="coding sequence (CDS)"),
-                 Patch(facecolor="#777", alpha=0.42, hatch="//", label="TSS regulatory window"),
+                 Patch(facecolor="#777", alpha=0.42, hatch="//", label="TSS regulatory window (disjoint split)"),
                  Patch(facecolor=PC_ESM, label="supervised comparator (Enformer)"), ch],
             "upper right")
     fig.tight_layout()
     fig.savefig(OUT / "substrate_collapse.pdf")
     plt.close(fig)
-    print("substrate F1 CDS:", [round(v, 3) for v in cds_f1], "TSS:", [round(v, 3) for v in tss_f1])
+    print("substrate F1 CDS:", [round(v, 3) for v in cds_f1], "TSS:", [round(v, 3) for v in tss_f1], "picks:", tss_pick)
 
 
 def fig_split_bars():
