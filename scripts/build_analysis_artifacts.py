@@ -876,9 +876,9 @@ def _write_manifest(
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "bundle": "paper",
         "inputs": {
-            "metrics": str(DATA / "metrics.json"),
-            "splits": str(DATA / "splits.json"),
-            "data_dir": str(DATA),
+            "metrics": str((DATA / "metrics.json").relative_to(REPO_ROOT)),
+            "splits": str((DATA / "splits.json").relative_to(REPO_ROOT)),
+            "data_dir": str(DATA.relative_to(REPO_ROOT)),
         },
         "tables": [str(path) for path in tables],
         "figures": [str(path) for path in figures],

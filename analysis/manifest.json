@@ -2,9 +2,9 @@
   "generated_at": "2026-05-25T22:00:02+00:00",
   "bundle": "paper",
   "inputs": {
-    "metrics": "/Users/austinsenna/Documents/projects/dna_to_text/data/metrics.json",
-    "splits": "/Users/austinsenna/Documents/projects/dna_to_text/data/splits.json",
-    "data_dir": "/Users/austinsenna/Documents/projects/dna_to_text/data"
+    "metrics": "data/metrics.json",
+    "splits": "data/splits.json",
+    "data_dir": "data"
   },
   "tables": [
     "analysis/tables/dataset_composition.csv",

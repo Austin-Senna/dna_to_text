@@ -1,8 +1,8 @@
 """The repo is public: tracked files must not carry local absolute paths (G22).
 
 Builders that stamp input paths into tracked outputs (split files, manifests)
-write them repo-relative. The two files below predate the guard and wait on a
-decision; the stale-entry check keeps the list honest once they are fixed.
+write them repo-relative. KNOWN lists any file allowed to carry one; the
+stale-entry check keeps it honest.
 """
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL_PATH = re.compile(r"/(home|Users)/[A-Za-z0-9_.-]+/")
-KNOWN = {"analysis/manifest.json", "docs/conference_resubmission_plan.md"}
+KNOWN: set[str] = set()
 
 
 def _tracked_text_files() -> list[str]:
