@@ -51,7 +51,7 @@ uv run python scripts/bootstrap_test_uncertainty.py
 | `scripts/train_probe.py` | Trains Ridge-to-GenePT probes for TSS-window feature sources. |
 | `src/data_loader/enformer_encoder.py` | Loads Enformer at its pinned revision and extracts trunk/track summaries. `trunk_global` averages all 896 output bins, the central 114,688 bp of the window; `trunk_center` the central 16 bins (2,048 bp). |
 | `src/data_loader/enformer_windows.py` | Supplies the canonical-TSS windows through `read_window`, which checks each against the manifest (Stage 4.1). |
-| `src/data_loader/multi_pool.py` | Shared chunked encoder extraction over long TSS windows; caches in `data/tss_chunk_reductions_v2_<encoder>/` carry a meta record and are refused if built from other windows or another revision. |
+| `src/data_loader/multi_pool.py` | Shared chunked encoder extraction over long TSS windows; caches in `data/tss_chunk_reductions_v2_<encoder>/` carry a meta record and are refused if built from other windows or another revision, or if they are unstamped or mix GPUs or torch builds (a cache made on another machine is accepted). |
 | `src/data_loader/pooling_aggregator.py` | Builds TSS pooling variants: `meanmean`, `maxmean`, `clsmean`, `meanD`, `meanG` (HyenaDNA has no `clsmean`), plus the E5 `centermean` template. |
 | `samples/stage4_2_tss_encoder_input.json` | Tiny example of context-ablation feature sources and commands. |
 | `samples/stage4_2_tss_encoder_output.json` | Tiny excerpt of the CDS-vs-TSS result table. |
@@ -77,6 +77,9 @@ macro-F1 band of 0.39--0.46, with mutually-overlapping 95% bootstrap CIs:
 | NT-v2 | meanmean | 0.447 [0.384, 0.507] | 0.117 [0.094, 0.137] |
 | DNABERT-2 | maxmean | 0.455 [0.394, 0.517] | 0.122 [0.100, 0.140] |
 | Enformer trunk | center | 0.545 | 0.142 |
+
+Note (Sept 29, 2026): the GENA-LM row came from a randomly initialised network (a loader bug, fixed in
+`7a0c6e1`), not the pretrained encoder. This table predates the camera-ready re-extraction, which replaces it.
 
 Every self-supervised encoder beats the TSS 4-mer baseline with
 non-overlapping CIs (encoders recover non-trivial regulatory-context

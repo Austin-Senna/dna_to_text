@@ -9,9 +9,10 @@ history. Active docs mirror the sample input/output stages in `../samples/`.
 - `stage2-encode-cds.md` - run CDS encoders and build pooling datasets.
 - `stage3-train-probes.md` - train family5 and Ridge-to-GenePT probes.
 - `stage4-1-tss-windows.md` - derive strand-aware TSS-centered windows.
-- `stage4-2-tss-encoders.md` - run TSS NT-v2 and Enformer context ablations.
+- `stage4-2-tss-encoders.md` - run the four DNA encoders and Enformer on TSS windows, plus the GPU extraction pilot tooling.
 - `stage5-bootstrap.md` - 1,000-run bootstrap confidence interval protocol.
 - `stage6-analysis-artifacts.md` - regenerate report tables and figures.
+- `stage7-paper-figures-tables.md` - render the manuscript figures and LaTeX table fragments.
 
 ## Submission Entry Points
 

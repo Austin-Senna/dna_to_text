@@ -66,7 +66,7 @@ These commands regenerate the analysis artifacts used to support the report. The
 - GenePT v2 artifacts: Zenodo DOI `10.5281/zenodo.10833191`; unzip `GenePT_emebdding_v2.zip` into `GenePT_emebdding_v2/`.
 - HGNC complete gene set: `https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt`.
 - Ensembl canonical CDS: Ensembl REST `/lookup/id/{gene_id}` and `/sequence/id/{transcript_id}?type=cds`.
-- Ensembl TSS windows: derived from Ensembl REST gene coordinates via `src/data_loader/enformer_windows.py`, then fetched from `/sequence/region/human/{region}` as 196,608 bp strand-aware TSS-centered windows.
+- Ensembl TSS windows: built by `scripts/build_tss_windows.py` from the Ensembl release 115 GTF, primary-assembly FASTA and cDNA FASTA; each window is 196,608 bp in gene orientation, centred on the 5' end of the gene's canonical transcript, and checked against the tracked manifest `data/tss_windows.tsv`.
 - DNABERT-2 checkpoint: `zhihan1996/DNABERT-2-117M`.
 - Nucleotide Transformer checkpoint: `InstaDeepAI/nucleotide-transformer-v2-100m-multi-species`.
 - GENA-LM checkpoint: `AIRI-Institute/gena-lm-bert-base-t2t`.

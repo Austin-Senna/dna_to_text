@@ -135,11 +135,11 @@ External large inputs:
 - HGNC complete gene set: downloaded by `src/data_loader/dataset_loader.py` from `https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt`.
 - Ensembl canonical CDS: fetched by `src/data_loader/sequence_fetcher.py` from Ensembl REST `/lookup/id/{gene_id}` and `/sequence/id/{transcript_id}?type=cds`.
 - Ensembl TSS windows: built by `scripts/build_tss_windows.py` from the Ensembl release 115 GTF, primary-assembly FASTA and cDNA FASTA (commands in `docs/stage4-1-tss-windows.md`); each window is 196,608 bp in gene orientation, centred on the 5' end of the gene's canonical transcript, and checked against the tracked manifest `data/tss_windows.tsv`.
-- Encoder checkpoints: Hugging Face model IDs `zhihan1996/DNABERT-2-117M`, `InstaDeepAI/nucleotide-transformer-v2-100m-multi-species`, `AIRI-Institute/gena-lm-bert-base-t2t`, `LongSafari/hyenadna-large-1m-seqlen-hf` and `EleutherAI/enformer-official-rough`, each loaded at the commit pinned in `src/data_loader/model_registry.py`.
+- Encoder checkpoints: Hugging Face model IDs `zhihan1996/DNABERT-2-117M`, `InstaDeepAI/nucleotide-transformer-v2-100m-multi-species`, `AIRI-Institute/gena-lm-bert-base-t2t`, `LongSafari/hyenadna-large-1m-seqlen-hf` and `EleutherAI/enformer-official-rough`, each loaded at the commit pinned in `src/data_loader/model_registry.py`; every loader checks each weight against the checkpoint file. ESM-2 (fair-esm `esm2_t30_150M_UR50D`, `esm2_t33_650M_UR50D`) is pinned by checkpoint sha256 in the same file.
 
 ## Testing
 
-pytest is a dev dependency (`uv sync` installs it); `tests/conftest.py` pins one thread.
+pytest is a dev dependency (`uv sync` installs it); `tests/conftest.py` pins one thread and hides every GPU (`CUDA_VISIBLE_DEVICES=""`), so the suite runs on CPU and never borrows a shared card.
 
 ```bash
 uv run pytest            # fast suite, a few seconds

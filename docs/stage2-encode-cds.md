@@ -31,6 +31,10 @@ uv run python scripts/build_pooling_datasets.py --encoder hyena_dna
 - GENA-LM: `AIRI-Institute/gena-lm-bert-base-t2t`
 - HyenaDNA: `LongSafari/hyenadna-large-1m-seqlen-hf`
 
+Every loader compares each loaded weight with the tensor in the checkpoint file. GENA-LM needs it: under
+transformers 5.5.4 its `from_pretrained` reported every weight loaded but left all of them at their random
+initialisation, so GENA-LM features extracted before commit `7a0c6e1` came from an untrained network.
+
 ## Relevant Files
 
 | File | What it does |
@@ -39,6 +43,9 @@ uv run python scripts/build_pooling_datasets.py --encoder hyena_dna
 | `scripts/run_nt_v2_encoder.py` | Legacy NT-v2 single-vector extraction entrypoint. |
 | `scripts/run_multi_pool_extract.py` | Extracts per-chunk reductions used to build pooling variants; `--cache-dir` writes elsewhere than the encoder's default (the AWS pilot). |
 | `scripts/build_pooling_datasets.py` | Aggregates cached reductions into probe-ready parquet datasets. |
+| `scripts/run_esm2.py` | Embeds full-length proteins with ESM-2 (`--size 150m` or `650m`), fp32; `--fp16` exists only to replay the May fp16 embeddings. The checkpoint must match its pinned sha256. |
+| `scripts/build_esm2_datasets.py` | Builds `data/dataset_esm2_<size>.parquet` from `data/esm2_<size>_embeddings_v2/`; refuses fp16, unpinned, unstamped or mixed-run embeddings. |
+| `scripts/aws/extract_box.sh`, `scripts/compare_extraction_caches.py` | GPU-box runner and cache checks for the CDS and TSS extractions (see Stage 4.2). |
 | `src/data_loader/model_registry.py` | Central registry of encoder names, cache names, dimensions, and loader modules. |
 | `src/data_loader/encoder_runner.py` | DNABERT-2 model loading and CDS embedding helpers. |
 | `src/data_loader/nt_v2_encoder.py` | NT-v2 model loading and embedding helpers. |
@@ -52,7 +59,7 @@ uv run python scripts/build_pooling_datasets.py --encoder hyena_dna
 ## Outputs
 
 - `data/dataset_<encoder>_<pooling>.parquet` - probe-ready feature tables.
-- `data/chunk_reductions_v2_<encoder>/` - ignored local per-gene reduction caches, each with a meta record (encoder revision, chunking, boundary tokens, device, GPU and torch build, input sha256); a cache built differently is refused, and the dataset builders refuse a cache that mixes GPUs or torch builds.
+- `data/chunk_reductions_v2_<encoder>/` - ignored local per-gene reduction caches, each with a meta record (encoder revision, chunking, boundary tokens, device, GPU and torch build, input sha256); a cache built differently is refused, and the dataset builders refuse a cache that mixes GPUs or torch builds, or lacks the runtime stamp.
 
 HyenaDNA is run on DNA tokens only (no CLS/SEP): it was never trained with a
 CLS token, and as a causal model a CLS at position 0 reaches every position.

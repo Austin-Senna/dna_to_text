@@ -9,8 +9,8 @@ sha256sum files for every input the old and the new clone will read (checked on
 the box before anything runs), and
 ``gena_cuda_genes.tsv``: the pilot genes whose May GENA-LM TSS cache was built
 on CUDA (910 of its 3,244 files were, in family order, before the run fell
-back to CPU). Only those gate GENA-LM TSS against the local GPU; the rest
-measure CPU vs GPU.
+back to CPU). Kept for reference only: the May GENA-LM caches came from an
+untrained network (see ``load_checks``), so nothing gates GENA-LM against them.
 
 ``compare A B`` reads two cache dirs in any format (old npz, npz with a meta
 record, ESM-2 ``.npy`` or ``.npz["emb"]``) and checks every gene and array:
