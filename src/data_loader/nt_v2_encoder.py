@@ -16,7 +16,7 @@ import transformers.pytorch_utils as _tf_pytorch_utils
 from transformers import AutoConfig, AutoModelForMaskedLM, AutoTokenizer, PreTrainedModel
 from transformers.models.esm.configuration_esm import EsmConfig
 
-from data_loader.load_checks import check_state_dict_load
+from data_loader.load_checks import check_state_dict_load, check_weights_match_checkpoint
 from data_loader.model_registry import ENCODER_SPECS
 
 MODEL_NAME = ENCODER_SPECS["nt_v2"].model_name
@@ -85,8 +85,9 @@ def load_model(device: str | None = None):
     state_dict = torch.load(
         snapshot_dir / "pytorch_model.bin", map_location="cpu", weights_only=True
     )
-    check_state_dict_load(masked_lm.load_state_dict(state_dict, strict=False),
-                          what=f"{MODEL_NAME}@{MODEL_REVISION[:8]}")
+    what = f"{MODEL_NAME}@{MODEL_REVISION[:8]}"
+    check_state_dict_load(masked_lm.load_state_dict(state_dict, strict=False), what=what)
+    check_weights_match_checkpoint(masked_lm, state_dict, what=what)
 
     model = masked_lm.esm if hasattr(masked_lm, "esm") else masked_lm.base_model
     model.to(device).eval()

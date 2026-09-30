@@ -11,6 +11,7 @@ from tqdm import tqdm
 from transformers import AutoConfig, AutoModelForMaskedLM, AutoTokenizer, BertConfig as HFBertConfig
 from transformers import dynamic_module_utils
 
+from data_loader.load_checks import check_weights_match_checkpoint
 from data_loader.model_registry import ENCODER_SPECS
 
 MODEL_NAME = ENCODER_SPECS["dnabert2"].model_name
@@ -70,6 +71,7 @@ def load_model(device: str | None = None):
     weights_path = snapshot_dir / "pytorch_model.bin"
     state_dict = torch.load(weights_path, map_location="cpu", weights_only=True)
     masked_lm.load_state_dict(state_dict)  # strict: a missing weight raises
+    check_weights_match_checkpoint(masked_lm, state_dict, what=f"{MODEL_NAME}@{MODEL_REVISION[:8]}")
     model = masked_lm.bert
 
     model.to(device).eval()

@@ -20,7 +20,9 @@
 #       then the old and new code on the pilot genes, the new code twice on the
 #       repeat genes, and the same-box checks: Leg B and the repeat, bit-exact.
 #       HyenaDNA's new inputs drop CLS/SEP by design, so it is checked for G3
-#       and measured against the old code instead.
+#       and measured against the old code instead. GENA-LM is measured too: the
+#       old code ran it at its random init (see load_checks), so only the
+#       repeat check gates it.
 #   extract_box.sh full OUT [--shutdown]
 #       Every production cache into its default *_v2 dir, each checked by census.
 #       --shutdown powers the box off when the script exits, pass, fail or
@@ -43,7 +45,7 @@ esac
 cd "$(dirname "$0")/../.."
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 ENCODERS=(dnabert2 nt_v2 gena_lm hyena_dna)
-BOUNDARY_ENCODERS=(dnabert2 nt_v2 gena_lm)  # HyenaDNA's new inputs differ by design
+LEG_B_ENCODERS=(dnabert2 nt_v2)  # HyenaDNA's inputs and GENA-LM's weights differ by design
 ESM_SIZES=(150m 650m)
 COMPARE=scripts/compare_extraction_caches.py
 
@@ -261,7 +263,7 @@ pilot() {
   for p in fp16 fp32; do
     compare "$out" "repeat_esm2_150m_$p" "$out/rep1_esm2_150m_$p" "$out/rep2_esm2_150m_$p" --exact
   done
-  for e in "${BOUNDARY_ENCODERS[@]}"; do
+  for e in "${LEG_B_ENCODERS[@]}"; do
     compare "$out" "legB_cds_$e" "$out/new_cds_$e" "$out/old_cds_$e" --exact
     compare "$out" "legB_tss_$e" "$out/new_tss_$e" "$out/old_tss_$e" --exact
   done
@@ -271,7 +273,12 @@ pilot() {
   done
   hyena_checks "$out" "$out/new_cds_hyena_dna" "$out/new_tss_hyena_dna"
 
-  # Measurements, not gates: HyenaDNA without CLS/SEP, and fp32 vs fp16 ESM-2.
+  # Measurements, not gates: HyenaDNA without CLS/SEP, GENA-LM with its trained weights,
+  # and fp32 vs fp16 ESM-2.
+  for x in cds tss; do
+    compare "$out" "measure_gena_${x}_new_vs_old" "$out/new_${x}_gena_lm" "$out/old_${x}_gena_lm" \
+      --max-rel-l2 0 --min-cos 1 --report-only
+  done
   for x in cds tss; do
     compare "$out" "measure_hyena_${x}_new_vs_old" "$out/new_${x}_hyena_dna" "$out/old_${x}_hyena_dna" \
       --keys mean,max --max-rel-l2 0 --min-cos 1 --report-only

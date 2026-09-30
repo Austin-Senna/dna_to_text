@@ -10,9 +10,10 @@ import warnings
 
 import torch
 from torch import nn
+from huggingface_hub import snapshot_download
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from data_loader.load_checks import check_loading_info
+from data_loader.load_checks import check_loading_info, check_weights_match_checkpoint, read_checkpoint
 from data_loader.model_registry import ENCODER_SPECS
 
 MODEL_NAME = ENCODER_SPECS["hyena_dna"].model_name
@@ -52,6 +53,10 @@ def load_model(device: str | None = None):
                                               trust_remote_code=True)
     model, info = AutoModelForCausalLM.from_pretrained(
         MODEL_NAME, revision=MODEL_REVISION, trust_remote_code=True, output_loading_info=True)
-    check_loading_info(info, what=f"{MODEL_NAME}@{MODEL_REVISION[:8]}")
+    what = f"{MODEL_NAME}@{MODEL_REVISION[:8]}"
+    check_loading_info(info, what=what)
+    # loading_info alone once passed a GENA-LM left at its random init (load_checks).
+    check_weights_match_checkpoint(
+        model, read_checkpoint(snapshot_download(MODEL_NAME, revision=MODEL_REVISION)), what=what)
     model.to(device).eval()
     return _HiddenStateWrapper(model).eval(), tokenizer, device

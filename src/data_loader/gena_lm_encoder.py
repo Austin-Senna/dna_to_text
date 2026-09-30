@@ -7,10 +7,12 @@ import numpy as np
 import torch
 from tqdm import tqdm
 import transformers.pytorch_utils as _tf_pytorch_utils
-from transformers import AutoModel, AutoTokenizer
+from huggingface_hub import snapshot_download
+from transformers import AutoConfig, AutoModel, AutoTokenizer
 from transformers.modeling_utils import ModuleUtilsMixin
 
-from data_loader.load_checks import check_loading_info
+from data_loader.load_checks import (check_state_dict_load, check_weights_match_checkpoint,
+                                     read_checkpoint)
 from data_loader.model_registry import ENCODER_SPECS
 
 MODEL_NAME = ENCODER_SPECS["gena_lm"].model_name
@@ -59,11 +61,19 @@ def load_model(device: str | None = None):
     if device is None:
         device = _auto_device()
     _install_transformers_shims()
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, revision=MODEL_REVISION,
-                                              trust_remote_code=True)
-    model, info = AutoModel.from_pretrained(MODEL_NAME, revision=MODEL_REVISION,
-                                            trust_remote_code=True, output_loading_info=True)
-    check_loading_info(info, what=f"{MODEL_NAME}@{MODEL_REVISION[:8]}")
+    what = f"{MODEL_NAME}@{MODEL_REVISION[:8]}"
+    snapshot_dir = Path(snapshot_download(MODEL_NAME, revision=MODEL_REVISION))
+    tokenizer = AutoTokenizer.from_pretrained(snapshot_dir, trust_remote_code=True)
+    # Not from_pretrained: under transformers 5.5.4 it reports every key loaded
+    # but leaves GENA-LM's remote-code parameters at their random init, a new
+    # draw per process (every GENA-LM feature before Sept 29 came from such a
+    # network). Build from the config and load the checkpoint ourselves, as for
+    # DNABERT-2 and NT-v2, then check each weight against the file.
+    config = AutoConfig.from_pretrained(snapshot_dir, trust_remote_code=True)
+    model = AutoModel.from_config(config, trust_remote_code=True)
+    checkpoint = read_checkpoint(snapshot_dir)
+    check_state_dict_load(model.load_state_dict(checkpoint, strict=False), what=what)
+    check_weights_match_checkpoint(model, checkpoint, what=what)
     model = _select_backbone(model)
     # GENA-LM's custom modeling registers `token_type_ids` as a non-persistent
     # buffer; on some PyTorch builds it loads with uninitialised memory values

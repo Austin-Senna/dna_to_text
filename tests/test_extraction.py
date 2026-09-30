@@ -320,15 +320,36 @@ def test_real_loaders_fill_every_weight_at_the_pinned_revision(monkeypatch):
 
     from data_loader.model_registry import ENCODER_SPECS
 
+    from data_loader.load_checks import read_checkpoint
+
     monkeypatch.setenv("HF_HUB_OFFLINE", "1")
     loaded = 0
     for spec in ENCODER_SPECS.values():
         if not _snapshot(spec):
             continue
-        import_module(spec.loader_module).load_model("cpu")  # LoadError if anything is missing
+        from huggingface_hub.constants import HF_HUB_CACHE
+
+        snap = (Path(HF_HUB_CACHE) / ("models--" + spec.model_name.replace("/", "--"))
+                / "snapshots" / spec.revision)
+        model = import_module(spec.loader_module).load_model("cpu")[0]
+        # Checked here against the file, independently of the loader's own guard: a clean
+        # loading_info once hid a GENA-LM whose every weight was its random init.
+        ckpt = read_checkpoint(snap)
+        params = dict(model.named_parameters())
+        assert params, spec.name
+        for name, p in params.items():
+            hits = [v for k, v in ckpt.items() if k == name or k.endswith("." + name)
+                    or name.endswith("." + k)]
+            assert len(hits) == 1 and torch_equal(p, hits[0]), f"{spec.name}: {name} is not its checkpoint tensor"
         loaded += 1
     if not loaded:
         pytest.skip("no encoder snapshots on this machine")
+
+
+def torch_equal(p, v):
+    import torch
+
+    return p.shape == v.shape and torch.equal(p.detach().cpu().to(v.dtype), v)
 
 
 def test_constant_check_ignores_zero_columns_and_one_large_constant_column():
@@ -678,3 +699,51 @@ def test_pinned_esm2_hashes_are_the_local_may_checkpoints():
             found += 1
     if not found:
         pytest.skip("no fair-esm checkpoints on this machine")
+
+
+# --- Loaded weights must be the checkpoint's (GENA-LM loaded none of them) ------
+
+class _Toy:
+    @staticmethod
+    def make():
+        import torch
+
+        torch.manual_seed(0)
+        body = torch.nn.Sequential(torch.nn.Linear(3, 4), torch.nn.LayerNorm(4))
+        ckpt = {f"bert.{k}": v.clone() for k, v in body.state_dict().items()}
+        ckpt["cls.head.weight"] = torch.ones(2, 2)  # a head the frozen encoder does not use
+        return body, ckpt
+
+
+def test_weights_matching_the_checkpoint_pass():
+    from data_loader.load_checks import check_weights_match_checkpoint
+
+    body, ckpt = _Toy.make()
+    check_weights_match_checkpoint(body, ckpt, what="toy")
+
+
+def test_a_weight_left_at_its_init_is_refused():
+    import torch
+
+    from data_loader.load_checks import LoadError, check_weights_match_checkpoint
+
+    body, ckpt = _Toy.make()
+    with torch.no_grad():
+        body[0].weight.normal_(0, 0.02)  # what GENA-LM looked like under transformers 5.5.4
+    with pytest.raises(LoadError, match="0.weight"):
+        check_weights_match_checkpoint(body, ckpt, what="toy")
+
+
+def test_a_weight_without_a_checkpoint_tensor_is_refused():
+    from data_loader.load_checks import LoadError, check_weights_match_checkpoint
+
+    body, ckpt = _Toy.make()
+    del ckpt["bert.1.bias"]
+    with pytest.raises(LoadError, match="no checkpoint tensor"):
+        check_weights_match_checkpoint(body, ckpt, what="toy")
+
+
+def test_every_loader_checks_its_weights_against_the_checkpoint():
+    src = ROOT / "src" / "data_loader"
+    for name in ("encoder_runner.py", "nt_v2_encoder.py", "gena_lm_encoder.py", "hyena_dna_encoder.py"):
+        assert "check_weights_match_checkpoint(" in (src / name).read_text(), name
