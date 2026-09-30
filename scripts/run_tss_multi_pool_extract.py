@@ -4,12 +4,16 @@ This is the TSS-context counterpart to ``scripts/run_multi_pool_extract.py``.
 It reuses the same per-chunk extraction machinery, but reads the 196,608 bp
 canonical-TSS windows (gene orientation, TSS at index 98,304) through
 ``enformer_windows.read_window``, which checks each against the manifest.
+``--gene-table`` restricts the run to that parquet's ``ensembl_id`` column
+(the AWS pilot); every listed gene must have a manifest window.
 """
 from __future__ import annotations
 
 import argparse
 from importlib import import_module
 from pathlib import Path
+
+import pandas as pd
 
 from data_loader.enformer_windows import load_manifest, read_window
 from data_loader.model_registry import get_encoder_spec, main_encoder_names
@@ -28,6 +32,8 @@ def main() -> None:
     ap.add_argument("--cache-dir", default=None)
     ap.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu", "mps"])
     ap.add_argument("--max-genes", type=int, default=None, help="pilot limit; omit for full corpus")
+    ap.add_argument("--gene-table", default=None,
+                    help="parquet whose ensembl_id column lists the genes to run (default: all)")
     args = ap.parse_args()
 
     spec, load_fn = _load_encoder(args.encoder)
@@ -35,7 +41,15 @@ def main() -> None:
     print(f"=== TSS {spec.display_name}: max_content_tokens={spec.max_content_tokens} stride={spec.stride} ===")
     print(f"  reduction cache: {cache_dir}")
 
-    genes = sorted(load_manifest().index)[:args.max_genes]
+    manifest = load_manifest()
+    genes = sorted(manifest.index)
+    if args.gene_table:
+        wanted = sorted(pd.read_parquet(args.gene_table, columns=["ensembl_id"])["ensembl_id"])
+        unknown = [g for g in wanted if g not in manifest.index]
+        if unknown:
+            raise KeyError(f"genes without a manifest window: {unknown[:5]}")
+        genes = wanted
+    genes = genes[:args.max_genes]
     print(f"  genes: {len(genes)}" + (" (pilot limit)" if args.max_genes else ""))
     windows = {eid: read_window(eid) for eid in genes}
 

@@ -42,8 +42,10 @@ uv run python scripts/bootstrap_test_uncertainty.py
 
 | File | What it does |
 | --- | --- |
-| `scripts/run_enformer_features.py` | Runs Enformer on cached TSS windows and writes trunk/track feature datasets. |
-| `scripts/run_tss_multi_pool_extract.py` | Runs DNA encoders over TSS windows and caches per-chunk reductions. |
+| `scripts/run_enformer_features.py` | Runs Enformer on cached TSS windows and writes trunk/track feature datasets; `--no-datasets` only fills the feature cache, `--from-cache` builds the datasets from a finished cache (e.g. one extracted on another machine) without the model. |
+| `scripts/run_tss_multi_pool_extract.py` | Runs DNA encoders over TSS windows and caches per-chunk reductions; `--gene-table` restricts the run to a parquet's genes. |
+| `scripts/aws/extract_box.sh` | Runs every GPU extraction (CDS, TSS, Enformer, ESM-2) on one CUDA box, in order, and records the GPU, driver and torch build; `pilot` first replays the pre-fix code on a few genes whose inputs did not change and checks that the new code reproduces it bit for bit (HyenaDNA excepted: it now runs without CLS/SEP, so it is checked for constant features instead). |
+| `scripts/compare_extraction_caches.py` | `pick` chooses the pilot genes; `compare` checks two caches gene by gene (bit-exact or against error thresholds); `census` checks that a finished cache holds exactly the manifest's genes, all stamped, finite and from a single run. |
 | `scripts/build_tss_pooling_datasets.py` | Aggregates TSS per-chunk reductions into probe-ready datasets. |
 | `scripts/train_logistic_probe.py` | Trains family5 probes for TSS-window feature sources. |
 | `scripts/train_probe.py` | Trains Ridge-to-GenePT probes for TSS-window feature sources. |

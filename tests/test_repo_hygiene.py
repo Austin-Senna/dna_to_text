@@ -49,3 +49,13 @@ def test_scripts_do_nothing_on_import():
                  if '__name__ == "__main__"' not in p.read_text()}
     assert unguarded - LIBRARY_SCRIPTS == set(), "scripts without a __main__ guard"
     assert LIBRARY_SCRIPTS <= {p.name for p in (ROOT / "scripts").glob("*.py")}
+
+
+def test_tests_cannot_see_a_gpu():
+    """conftest hides every GPU: the local card is shared, the clean-room box has none."""
+    import os
+
+    import torch
+
+    assert os.environ.get("CUDA_VISIBLE_DEVICES") == ""
+    assert not torch.cuda.is_available()

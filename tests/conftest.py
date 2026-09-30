@@ -1,7 +1,9 @@
-"""Pin every BLAS/OpenMP pool to one thread before numpy loads.
+"""Pin every BLAS/OpenMP pool to one thread before numpy loads; hide the GPUs.
 
 Thread count changes lbfgs results (measurements_2026-09.md §4), and the probe
-core asserts it, so the suite runs under the same pin as the recompute.
+core asserts it, so the suite runs under the same pin as the recompute. Tests
+never use a GPU: the local one is shared with other work, and the clean-room
+machine has none, so a test that initialises CUDA must fail, not borrow it.
 """
 import os
 import sys
@@ -9,6 +11,7 @@ from pathlib import Path
 
 for _var in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
     os.environ[_var] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 ROOT = Path(__file__).resolve().parents[1]
 # Inserted in reverse so src/ ends up first (moved to the front even when the

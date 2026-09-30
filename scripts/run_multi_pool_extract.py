@@ -1,7 +1,8 @@
 """Extract per-chunk reductions over each gene's CDS for one encoder.
 
 One forward pass per chunk; stores the per-chunk arrays per gene, with a meta
-record, in ``EncoderSpec.chunk_dir`` (``data/chunk_reductions_v2_{encoder}``).
+record, in ``EncoderSpec.chunk_dir`` (``data/chunk_reductions_v2_{encoder}``) or
+``--cache-dir``.
 A rerun reuses a gene only if its meta matches (same CDS, revision, chunking,
 boundary tokens; G19). Materialise the pooled datasets with
 `scripts/build_pooling_datasets.py`.
@@ -33,11 +34,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--encoder", required=True, choices=main_encoder_names())
     ap.add_argument("--gene-table", default=str(META_PARQUET))
+    ap.add_argument("--cache-dir", default=None, help="default: the encoder's chunk_dir")
     ap.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu", "mps"])
     args = ap.parse_args()
 
     spec, load_fn = _load_encoder(args.encoder)
-    cache_dir = spec.chunk_dir
+    cache_dir = Path(args.cache_dir) if args.cache_dir else spec.chunk_dir
     print(f"=== {spec.display_name}: max_content_tokens={spec.max_content_tokens} stride={spec.stride} ===")
     print(f"  cache dir: {cache_dir}")
 

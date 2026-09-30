@@ -12,7 +12,9 @@ forward pass gives every readout (``model_registry.ENFORMER_READOUTS``):
 - ``trunk_center``: the central ``center_bins`` (16 x 128 = 2,048 bp around
   the TSS), the E5 counterpart to TSS-Anchored.
 - ``tracks_center``: the human head over those central bins.
-Per-gene caches carry a meta record and are refused if built differently (G19).
+Per-gene caches carry a meta record and are refused if built differently (G19);
+``load_enformer_features`` reads a finished cache (possibly another machine's)
+without the model.
 """
 from __future__ import annotations
 
@@ -22,7 +24,8 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from data_loader.cache_meta import read_npz, sha256_text, write_npz
+from data_loader.cache_meta import (RUNTIME_KEYS, StaleCache, read_meta, read_npz, runtime_stamp,
+                                    sha256_text, write_npz)
 from data_loader.model_registry import ENFORMER_MODEL, ENFORMER_REVISION
 
 MODEL_NAME = ENFORMER_MODEL
@@ -103,9 +106,11 @@ def extract_features(
     }
 
 
-def enformer_meta(seq: str, center_bins: int, device: str) -> dict:
+def enformer_meta(seq: str, center_bins: int, device: str | None,
+                  runtime: dict | None = None) -> dict:
     return {"model": MODEL_NAME, "revision": ENFORMER_REVISION, "center_bins": int(center_bins),
-            "device": device.split(":")[0], "input_sha256": sha256_text(seq)}
+            "device": None if device is None else device.split(":")[0],
+            **(runtime or dict.fromkeys(RUNTIME_KEYS)), "input_sha256": sha256_text(seq)}
 
 
 def embed_all_enformer(
@@ -117,11 +122,12 @@ def embed_all_enformer(
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
     device = device or _auto_device()
+    runtime = runtime_stamp(device)
 
     out: dict[str, dict[str, np.ndarray]] = {}
     pending: list[tuple[str, str, dict]] = []
     for eid, seq in windows.items():
-        meta = enformer_meta(seq, center_bins, device)
+        meta = enformer_meta(seq, center_bins, device, runtime)
         cached = read_npz(cache_dir / f"{eid}.npz", meta)
         if cached is None:
             pending.append((eid, seq, meta))
@@ -136,4 +142,35 @@ def embed_all_enformer(
         features = extract_features(seq, model, device, center_bins=center_bins)
         write_npz(cache_dir / f"{eid}.npz", features, meta)
         out[eid] = features
+    return out
+
+
+def load_enformer_features(cache_dir: str | Path, windows: dict[str, str],
+                           center_bins: int = 16) -> dict[str, dict[str, np.ndarray]]:
+    """Every gene's cached features, each checked against its current window.
+
+    For building datasets from a finished cache, e.g. one extracted on AWS:
+    the device, card and torch build are not compared with this machine, but a
+    cache that mixes them is refused. Missing genes raise.
+    """
+    run_keys = ("device", *RUNTIME_KEYS)
+    out: dict[str, dict[str, np.ndarray]] = {}
+    missing: list[str] = []
+    runs: set = set()
+    for eid, seq in windows.items():
+        path = Path(cache_dir) / f"{eid}.npz"
+        cached = read_npz(path, enformer_meta(seq, center_bins, None), ignore=run_keys)
+        if cached is None:
+            missing.append(eid)
+            continue
+        out[eid] = cached
+        meta = read_meta(path)
+        if meta.get("device_name") is None:
+            raise StaleCache(f"{path} is unstamped: no record of the card or torch build it ran on")
+        runs.add(tuple(meta.get(k) for k in run_keys))
+    if missing:
+        raise RuntimeError(f"Enformer: no features in {cache_dir} for {len(missing)} genes: "
+                           f"{missing[:5]}{'...' if len(missing) > 5 else ''}")
+    if len(runs) > 1:
+        raise StaleCache(f"Enformer: features in {cache_dir} mix runs {sorted(runs, key=str)}")
     return out

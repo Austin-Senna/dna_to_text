@@ -37,7 +37,7 @@ uv run python scripts/build_pooling_datasets.py --encoder hyena_dna
 | --- | --- |
 | `scripts/run_encoder.py` | Legacy DNABERT-2 single-vector extraction entrypoint. |
 | `scripts/run_nt_v2_encoder.py` | Legacy NT-v2 single-vector extraction entrypoint. |
-| `scripts/run_multi_pool_extract.py` | Extracts per-chunk reductions used to build pooling variants. |
+| `scripts/run_multi_pool_extract.py` | Extracts per-chunk reductions used to build pooling variants; `--cache-dir` writes elsewhere than the encoder's default (the AWS pilot). |
 | `scripts/build_pooling_datasets.py` | Aggregates cached reductions into probe-ready parquet datasets. |
 | `src/data_loader/model_registry.py` | Central registry of encoder names, cache names, dimensions, and loader modules. |
 | `src/data_loader/encoder_runner.py` | DNABERT-2 model loading and CDS embedding helpers. |
@@ -52,7 +52,7 @@ uv run python scripts/build_pooling_datasets.py --encoder hyena_dna
 ## Outputs
 
 - `data/dataset_<encoder>_<pooling>.parquet` - probe-ready feature tables.
-- `data/chunk_reductions_v2_<encoder>/` - ignored local per-gene reduction caches, each with a meta record (encoder revision, chunking, boundary tokens, input sha256); a cache built differently is refused.
+- `data/chunk_reductions_v2_<encoder>/` - ignored local per-gene reduction caches, each with a meta record (encoder revision, chunking, boundary tokens, device, GPU and torch build, input sha256); a cache built differently is refused, and the dataset builders refuse a cache that mixes GPUs or torch builds.
 
 HyenaDNA is run on DNA tokens only (no CLS/SEP): it was never trained with a
 CLS token, and as a causal model a CLS at position 0 reaches every position.

@@ -21,6 +21,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from data_loader.cache_meta import StaleCache, read_meta, sha256_text  # noqa: E402
+from data_loader.model_registry import ESM2_CHECKPOINT_SHA256  # noqa: E402
 from data_loader.sequence_fetcher import fetch_cds  # noqa: E402
 from protein import translate_cds  # noqa: E402
 from splits.loader import resolve_dataset_path  # noqa: E402
@@ -28,7 +29,9 @@ from splits.loader import resolve_dataset_path  # noqa: E402
 DATA = REPO_ROOT / "data"
 DIMS = {"150m": 640, "650m": 1280}
 MODELS = {"150m": "esm2_t30_150M_UR50D", "650m": "esm2_t33_650M_UR50D"}
-RUN_KEYS = ("model", "fp16", "device", "max_residues", "translation")
+# One run: model and pinned checkpoint, precision, device, card and torch build.
+RUN_KEYS = ("model", "checkpoint_sha256", "fp16", "device", "device_name", "torch", "cuda",
+            "max_residues", "translation")
 
 
 def main() -> None:
@@ -60,14 +63,24 @@ def main() -> None:
         protein = translate_cds(fetch_cds(eid, args.seq_cache), mode="through")
         if rec is None or rec["protein_sha256"] != sha256_text(protein):
             raise StaleCache(f"{f}: embedding was not built from the current protein")
-        runs.add(tuple(rec[k] for k in RUN_KEYS))
+        if any(rec.get(k) is None for k in RUN_KEYS if k != "cuda"):
+            raise StaleCache(f"{f}: meta lacks {[k for k in RUN_KEYS if rec.get(k) is None]} "
+                             "(built before the checkpoint pin and runtime stamp)")
+        runs.add(tuple(rec.get(k) for k in RUN_KEYS))
         with np.load(f, allow_pickle=False) as data:
             xs.append(data["emb"].astype(np.float32))
     if missing:
         raise RuntimeError(f"{len(missing)} genes have no embedding in {emb_cache}: "
                          f"{missing[:10]}{' ...' if len(missing) > 10 else ''}")
     if len(runs) != 1 or next(iter(runs))[0] != MODELS[args.size]:
-        raise StaleCache(f"embeddings come from more than one run or the wrong model: {sorted(runs)}")
+        raise StaleCache(f"embeddings come from more than one run or the wrong model: "
+                         f"{sorted(runs, key=str)}")
+    run = dict(zip(RUN_KEYS, next(iter(runs))))
+    if run["checkpoint_sha256"] != ESM2_CHECKPOINT_SHA256[MODELS[args.size]]:
+        raise StaleCache(f"embeddings come from checkpoint {run['checkpoint_sha256']}, "
+                         "not the pinned one")
+    if run["fp16"]:
+        raise StaleCache("fp16 embeddings (the replay precision); production ESM-2 is fp32")
     base["x"] = xs
 
     dims = {int(v.shape[0]) for v in base["x"]}

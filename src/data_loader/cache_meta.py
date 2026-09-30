@@ -20,6 +20,30 @@ class StaleCache(RuntimeError):
     """A cache file was produced by different inputs, code or model."""
 
 
+# Where a file was computed. Extraction compares them like every other key, so a
+# run never resumes on another card or torch build; builders reading a cache
+# made on another machine skip them per file but refuse a cache that mixes them.
+RUNTIME_KEYS = ("device_name", "torch", "cuda")
+
+
+def runtime_stamp(device: str | None) -> dict:
+    """The card (or CPU architecture) and torch build ``device`` runs on."""
+    if device is None:
+        return dict.fromkeys(RUNTIME_KEYS)
+    import platform
+
+    import torch
+
+    kind = device.split(":")[0]
+    if kind == "cuda":
+        name = torch.cuda.get_device_name(torch.device(device))
+    elif kind == "cpu":
+        name = f"cpu-{platform.machine()}"
+    else:
+        name = kind
+    return {"device_name": name, "torch": torch.__version__, "cuda": torch.version.cuda}
+
+
 def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("ascii")).hexdigest()
 

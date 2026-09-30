@@ -15,7 +15,8 @@ without them (HyenaDNA) the model sees DNA tokens only, and only ``mean`` and
 ``max`` are stored (``special_mean`` would equal ``mean``, and there is no CLS).
 
 Output per gene: an .npz of (n_chunks, d) arrays plus a ``meta`` record
-(``cache_meta``); a file built from other inputs, code or model is refused.
+(``cache_meta``); a file built from other inputs, code, model, card or torch
+build is refused.
 """
 from __future__ import annotations
 
@@ -26,7 +27,8 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from data_loader.cache_meta import StaleCache, read_meta, read_npz, sha256_text, write_npz
+from data_loader.cache_meta import (RUNTIME_KEYS, StaleCache, read_meta, read_npz, runtime_stamp,
+                                    sha256_text, write_npz)
 
 REDUCTION_KEYS = ("mean", "special_mean", "max", "cls")
 
@@ -127,13 +129,15 @@ def _auto_device() -> str:
     return "cpu"
 
 
-def extraction_meta(spec, seq: str, device: str | None) -> dict:
+def extraction_meta(spec, seq: str, device: str | None, runtime: dict | None = None) -> dict:
     """What one gene's reductions depend on: the encoder, its revision and
-    chunking, the device type, and the exact input sequence (G19)."""
+    chunking, the device, the card and torch build (``runtime_stamp``), and the
+    exact input sequence (G19)."""
     return {"encoder": spec.name, "model": spec.model_name, "revision": spec.revision,
             "boundary_tokens": bool(spec.boundary_tokens),
             "max_content_tokens": int(spec.max_content_tokens), "stride": int(spec.stride),
             "device": None if device is None else device.split(":")[0],
+            **(runtime or dict.fromkeys(RUNTIME_KEYS)),
             "input_sha256": sha256_text(seq)}
 
 
@@ -161,11 +165,12 @@ def embed_all_multi_pool(
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
     device = device or _auto_device()  # resolved first: the device is part of the meta
+    runtime = runtime_stamp(device)
 
     out: dict[str, dict[str, np.ndarray]] = {}
     pending: list[tuple[str, str, dict]] = []
     for eid, seq in seqs.items():
-        meta = extraction_meta(spec, seq, device)
+        meta = extraction_meta(spec, seq, device, runtime)
         cached = read_npz(cache_dir / f"{eid}.npz", meta)
         if cached is None:
             pending.append((eid, seq, meta))
@@ -193,23 +198,27 @@ def load_reductions(cache_dir: str | Path, spec, seqs: dict[str, str]) -> dict[s
 
     Pool builders read through this, so a parquet can only be built from
     reductions of these exact sequences (windows from the manifest, CDS from
-    the sequence cache) and this encoder revision (G19), all from one device
-    type. Missing genes raise.
+    the sequence cache) and this encoder revision (G19), all from one device,
+    card and torch build, which may be another machine's. Missing genes raise.
     """
+    run_keys = ("device", *RUNTIME_KEYS)
     out: dict[str, dict[str, np.ndarray]] = {}
     missing: list[str] = []
     devices: set = set()
     for eid, seq in seqs.items():
         path = Path(cache_dir) / f"{eid}.npz"
-        cached = read_npz(path, extraction_meta(spec, seq, None), ignore=("device",))
+        cached = read_npz(path, extraction_meta(spec, seq, None), ignore=run_keys)
         if cached is None:
             missing.append(eid)
             continue
         out[eid] = cached
-        devices.add(read_meta(path)["device"])
+        meta = read_meta(path)
+        if meta.get("device_name") is None:
+            raise StaleCache(f"{path} is unstamped: no record of the card or torch build it ran on")
+        devices.add(tuple(meta.get(k) for k in run_keys))
     if missing:
         raise RuntimeError(f"{spec.name}: no reductions in {cache_dir} for {len(missing)} genes: "
                            f"{missing[:5]}{'...' if len(missing) > 5 else ''}")
     if len(devices) > 1:
-        raise StaleCache(f"{spec.name}: reductions in {cache_dir} mix devices {sorted(devices)}")
+        raise StaleCache(f"{spec.name}: reductions in {cache_dir} mix runs {sorted(devices, key=str)}")
     return out

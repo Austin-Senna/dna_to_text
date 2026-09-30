@@ -358,19 +358,23 @@ def test_cache_writes_are_atomic(tmp_path, monkeypatch):
     assert not (tmp_path / "ENSG1.npz").exists()  # the resume sees no file, not a torn one
 
 
-def test_reductions_from_another_device_are_refused_and_never_mixed(tmp_path):
-    from data_loader.cache_meta import StaleCache, write_npz
+def test_reductions_from_another_device_are_refused_and_never_mixed(tmp_path, monkeypatch):
+    from data_loader import multi_pool
+    from data_loader.cache_meta import StaleCache, runtime_stamp, write_npz
     from data_loader.multi_pool import embed_all_multi_pool, extraction_meta, load_reductions
 
     def load(device):
         return _CausalModel(), _Tok(), device
+
+    monkeypatch.setattr(multi_pool, "runtime_stamp",
+                        lambda device: GPU_A if device == "cuda" else runtime_stamp(device))
 
     seqs = {"ENSG1": "ACGTAC", "ENSG2": "ACGGTA"}
     embed_all_multi_pool({"ENSG1": seqs["ENSG1"]}, load, tmp_path, _spec(), device="cpu")
     with pytest.raises(StaleCache):  # a CPU pilot's file is not reused by the GPU run
         embed_all_multi_pool({"ENSG1": seqs["ENSG1"]}, load, tmp_path, _spec(), device="cuda")
     write_npz(tmp_path / "ENSG2.npz", {"mean": np.zeros((1, 2)), "max": np.zeros((1, 2))},
-              extraction_meta(_spec(), seqs["ENSG2"], "cuda"))
+              extraction_meta(_spec(), seqs["ENSG2"], "cuda", GPU_A))
     with pytest.raises(StaleCache):  # a builder refuses a cache that mixes devices
         load_reductions(tmp_path, _spec(), seqs)
     assert set(load_reductions(tmp_path, _spec(), {"ENSG1": seqs["ENSG1"]})) == {"ENSG1"}
@@ -411,10 +415,12 @@ def test_esm2_dataset_refuses_embeddings_of_another_protein_or_run(tmp_path):
         tmp_path / "template.parquet")
 
     def write(g, protein, device="cuda"):
-        write_npz(tmp_path / "emb" / f"{g}.npz", {"emb": np.ones(640, np.float32)},
-                  {"model": "esm2_t30_150M_UR50D", "fp16": True, "device": device,
-                   "max_residues": 1022, "translation": "through",
-                   "protein_sha256": sha256_text(protein)})
+        import run_esm2
+
+        meta = run_esm2.esm2_meta("esm2_t30_150M_UR50D", protein, fp16=False, device=device,
+                                  max_residues=1022, checkpoint_sha256=PINNED_150M, runtime=GPU_A)
+        assert meta["protein_sha256"] == sha256_text(protein)
+        write_npz(tmp_path / "emb" / f"{g}.npz", {"emb": np.ones(640, np.float32)}, meta)
 
     (tmp_path / "emb").mkdir()
     for g, s in cds.items():
@@ -431,5 +437,244 @@ def test_esm2_dataset_refuses_embeddings_of_another_protein_or_run(tmp_path):
     with pytest.raises(StaleCache):  # one gene from another device
         call_main(be, args)
     (tmp_path / "emb" / "ENSGX1.npz").unlink()
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError, match="no embedding"):
         call_main(be, args)
+
+
+# --- Phase 3: one GPU per cache, pinned ESM-2 weights, pilot subsets -----------
+
+GPU_A = {"device_name": "NVIDIA A10G", "torch": "2.11.0", "cuda": "13.0"}
+PINNED_150M = "881c7176cf198ef8dec26a3c375d40eb58d0c33df95c22562ca6cc6d3f812c62"
+GPU_B = {"device_name": "NVIDIA GeForce RTX 5060", "torch": "2.11.0", "cuda": "13.0"}
+
+
+def test_resume_on_another_gpu_raises(tmp_path, monkeypatch):
+    from data_loader import multi_pool
+    from data_loader.cache_meta import StaleCache
+
+    def load(device):
+        return _CausalModel(), _Tok(), device
+
+    seqs = {"ENSG1": "ACGTAC"}  # runs on CPU; the stamp stands in for two cards
+    monkeypatch.setattr(multi_pool, "runtime_stamp", lambda device: GPU_A)
+    multi_pool.embed_all_multi_pool(seqs, load, tmp_path, _spec(), device="cpu")
+    assert multi_pool.read_meta(tmp_path / "ENSG1.npz")["device_name"] == "NVIDIA A10G"
+    monkeypatch.setattr(multi_pool, "runtime_stamp", lambda device: GPU_B)
+    with pytest.raises(StaleCache):  # same device type, another card: never silently resumed
+        multi_pool.embed_all_multi_pool(seqs, load, tmp_path, _spec(), device="cpu")
+
+
+def test_builder_reads_a_cache_from_another_machine_but_never_a_mix_of_gpus(tmp_path):
+    from data_loader.cache_meta import StaleCache, write_npz
+    from data_loader.multi_pool import extraction_meta, load_reductions
+
+    seqs = {"ENSG1": "ACGTAC", "ENSG2": "ACGGTA"}
+    arrays = {"mean": np.ones((1, 2)), "max": np.ones((1, 2))}
+    for g, stamp in (("ENSG1", GPU_A), ("ENSG2", GPU_A)):
+        write_npz(tmp_path / f"{g}.npz", arrays, extraction_meta(_spec(), seqs[g], "cuda", stamp))
+    assert set(load_reductions(tmp_path, _spec(), seqs)) == {"ENSG1", "ENSG2"}
+    write_npz(tmp_path / "ENSG2.npz", arrays, extraction_meta(_spec(), seqs["ENSG2"], "cuda", GPU_B))
+    with pytest.raises(StaleCache):
+        load_reductions(tmp_path, _spec(), seqs)
+    write_npz(tmp_path / "ENSG2.npz", arrays, extraction_meta(_spec(), seqs["ENSG2"], "cuda",
+                                                              {**GPU_A, "torch": "2.12.0"}))
+    with pytest.raises(StaleCache):  # another torch build counts as another run
+        load_reductions(tmp_path, _spec(), seqs)
+    for g in seqs:  # one consistent run, but nothing says where it ran
+        write_npz(tmp_path / f"{g}.npz", arrays, extraction_meta(_spec(), seqs[g], "cuda"))
+    with pytest.raises(StaleCache, match="unstamped"):
+        load_reductions(tmp_path, _spec(), seqs)
+
+
+def test_enformer_features_load_from_a_cache_built_elsewhere_but_never_a_mix(tmp_path):
+    from data_loader import enformer_encoder as ee
+    from data_loader.cache_meta import StaleCache, write_npz
+
+    wins = {"ENSG1": "ACGT" * 8, "ENSG2": "ACGA" * 8}
+    feats = {"trunk_global": np.ones(3, np.float32), "trunk_center": np.zeros(3, np.float32),
+             "tracks_center": np.zeros(2, np.float32)}
+    for g in wins:
+        write_npz(tmp_path / f"{g}.npz", feats, ee.enformer_meta(wins[g], 16, "cuda", GPU_A))
+    assert set(ee.load_enformer_features(tmp_path, wins, center_bins=16)) == set(wins)
+    with pytest.raises(StaleCache):
+        ee.load_enformer_features(tmp_path, wins, center_bins=8)
+    with pytest.raises(StaleCache):
+        ee.load_enformer_features(tmp_path, {"ENSG1": "ACGG" * 8}, center_bins=16)
+    write_npz(tmp_path / "ENSG2.npz", feats, ee.enformer_meta(wins["ENSG2"], 16, "cuda", GPU_B))
+    with pytest.raises(StaleCache):
+        ee.load_enformer_features(tmp_path, wins, center_bins=16)
+    for g in wins:
+        write_npz(tmp_path / f"{g}.npz", feats, ee.enformer_meta(wins[g], 16, "cuda"))
+    with pytest.raises(StaleCache, match="unstamped"):
+        ee.load_enformer_features(tmp_path, wins, center_bins=16)
+    for g in wins:
+        write_npz(tmp_path / f"{g}.npz", feats, ee.enformer_meta(wins[g], 16, "cuda", GPU_A))
+    (tmp_path / "ENSG2.npz").unlink()
+    with pytest.raises(RuntimeError, match="no features"):
+        ee.load_enformer_features(tmp_path, wins, center_bins=16)
+
+
+def test_esm2_checkpoint_must_be_the_pinned_file(tmp_path):
+    import hashlib
+
+    import run_esm2
+    from data_loader.load_checks import LoadError
+    from data_loader.model_registry import ESM2_CHECKPOINT_SHA256
+
+    assert set(ESM2_CHECKPOINT_SHA256) == {name for name, _ in run_esm2.CHECKPOINTS.values()}
+    ckpt = tmp_path / "esm2_t30_150M_UR50D.pt"
+    ckpt.write_bytes(b"weights")
+    digest = hashlib.sha256(b"weights").hexdigest()
+    assert run_esm2.verify_checkpoint(ckpt, digest) == digest
+    with pytest.raises(LoadError):
+        run_esm2.verify_checkpoint(ckpt, ESM2_CHECKPOINT_SHA256["esm2_t30_150M_UR50D"])
+
+
+def test_esm2_runs_fp32_unless_asked():
+    import run_esm2
+
+    assert run_esm2.build_parser().parse_args(["--size", "150m"]).fp16 is False
+    assert run_esm2.build_parser().parse_args(["--size", "150m", "--fp16"]).fp16 is True
+
+
+def test_esm2_dataset_refuses_a_mix_of_gpus_or_an_unpinned_checkpoint(tmp_path):
+    import build_esm2_datasets as be
+    import run_esm2
+    from data_loader.cache_meta import StaleCache, write_npz
+    from protein import translate_cds
+    from synth import call_main
+
+    seqs = tmp_path / "seqs"
+    seqs.mkdir()
+    cds = {"ENSGX1": "ATGAAATAAAAATGA", "ENSGX2": "ATGCCCGGGTGA"}
+    for g, s in cds.items():
+        (seqs / f"{g}.fa").write_text(f">ENST_{g}.1\n{s}\n")
+    pd.DataFrame({"ensembl_id": list(cds), "symbol": ["A", "B"], "family": ["tf", "ion"],
+                  "summary": ["", ""], "y": [np.zeros(2, np.float32)] * 2}).to_parquet(
+        tmp_path / "template.parquet")
+    (tmp_path / "emb").mkdir()
+
+    def write(g, stamp=GPU_A, fp16=False, sha=PINNED_150M, **drop):
+        meta = run_esm2.esm2_meta("esm2_t30_150M_UR50D", translate_cds(cds[g], mode="through"),
+                                  fp16=fp16, device="cuda", max_residues=1022,
+                                  checkpoint_sha256=sha, runtime=stamp)
+        write_npz(tmp_path / "emb" / f"{g}.npz", {"emb": np.ones(640, np.float32)},
+                  {k: v for k, v in meta.items() if k not in drop})
+
+    for g in cds:
+        write(g)
+    args = ["--size", "150m", "--template", str(tmp_path / "template.parquet"),
+            "--emb-cache", str(tmp_path / "emb"), "--seq-cache", str(seqs),
+            "--out", str(tmp_path / "out.parquet")]
+    call_main(be, args)
+    write("ENSGX2", stamp=GPU_B)
+    with pytest.raises(StaleCache):
+        call_main(be, args)
+    for g in cds:  # one consistent run, but from before the checkpoint pin
+        write(g, checkpoint_sha256=None)
+    with pytest.raises(StaleCache, match="lacks"):
+        call_main(be, args)
+    for g in cds:
+        write(g, sha="c0ffee")  # another checkpoint file
+    with pytest.raises(StaleCache, match="pinned"):
+        call_main(be, args)
+    for g in cds:
+        write(g, fp16=True)  # the replay precision, not production
+    with pytest.raises(StaleCache, match="fp16"):
+        call_main(be, args)
+
+
+def test_tss_extraction_takes_a_gene_table(tmp_path, monkeypatch):
+    import run_tss_multi_pool_extract as rt
+    from synth import call_main
+
+    seen = {}
+    monkeypatch.setattr(rt, "load_manifest", lambda: pd.DataFrame(index=["ENSG1", "ENSG2", "ENSG3"]))
+    monkeypatch.setattr(rt, "read_window", lambda eid: "ACGT")
+    monkeypatch.setattr(rt, "embed_all_multi_pool",
+                        lambda windows, **kw: seen.update(genes=sorted(windows), **kw) or windows)
+    pd.DataFrame({"ensembl_id": ["ENSG3", "ENSG1"]}).to_parquet(tmp_path / "pilot.parquet")
+    call_main(rt, ["--encoder", "nt_v2", "--gene-table", str(tmp_path / "pilot.parquet"),
+                   "--cache-dir", str(tmp_path / "c")])
+    assert seen["genes"] == ["ENSG1", "ENSG3"] and seen["cache_dir"] == tmp_path / "c"
+    pd.DataFrame({"ensembl_id": ["ENSG9"]}).to_parquet(tmp_path / "bad.parquet")
+    with pytest.raises(KeyError):  # a pilot gene without a manifest window
+        call_main(rt, ["--encoder", "nt_v2", "--gene-table", str(tmp_path / "bad.parquet")])
+
+
+def test_cds_extraction_takes_a_cache_dir(tmp_path, monkeypatch):
+    import run_multi_pool_extract as rm
+    from synth import call_main
+
+    seen = {}
+    monkeypatch.setattr(rm, "fetch_cds", lambda eid, cache: "ATGAAATGA")
+    monkeypatch.setattr(rm, "embed_all_multi_pool",
+                        lambda seqs, **kw: seen.update(genes=sorted(seqs), **kw) or seqs)
+    pd.DataFrame({"ensembl_id": ["ENSG2", "ENSG1"]}).to_parquet(tmp_path / "pilot.parquet")
+    call_main(rm, ["--encoder", "dnabert2", "--gene-table", str(tmp_path / "pilot.parquet"),
+                   "--cache-dir", str(tmp_path / "c")])
+    assert seen["genes"] == ["ENSG1", "ENSG2"] and Path(seen["cache_dir"]) == tmp_path / "c"
+
+
+def test_enformer_script_extracts_without_datasets_and_builds_from_cache(tmp_path, monkeypatch):
+    import run_enformer_features as rf
+    from synth import call_main
+
+    calls = []
+    feats = {"trunk_global": np.ones(3, np.float32), "trunk_center": np.zeros(3, np.float32),
+             "tracks_center": np.zeros(2, np.float32)}
+    monkeypatch.setattr(rf, "DATA", tmp_path)
+    monkeypatch.setattr(rf, "read_window", lambda eid: "ACGT" * 4)
+    monkeypatch.setattr(rf, "embed_all_enformer",
+                        lambda windows, **kw: calls.append("extract") or {g: feats for g in windows})
+    monkeypatch.setattr(rf, "load_enformer_features",
+                        lambda cache_dir, windows, center_bins: calls.append("load")
+                        or {g: feats for g in windows})
+    pd.DataFrame({"ensembl_id": ["ENSG1", "ENSG2"], "y": [np.zeros(2)] * 2}).to_parquet(
+        tmp_path / "template.parquet")
+    base = ["--template-dataset", str(tmp_path / "template.parquet")]
+    call_main(rf, [*base, "--no-datasets"])
+    assert calls == ["extract"] and not list(tmp_path.glob("dataset_*.parquet"))
+    call_main(rf, [*base, "--from-cache"])
+    assert calls == ["extract", "load"]
+    assert {p.name for p in tmp_path.glob("dataset_*.parquet")} == {
+        "dataset_enformer_tss_4mer.parquet", "dataset_enformer_trunk_global.parquet",
+        "dataset_enformer_trunk_center.parquet", "dataset_enformer_tracks_center.parquet"}
+
+
+def test_esm2_main_stops_on_an_unpinned_checkpoint_before_embedding(tmp_path, monkeypatch):
+    import torch
+
+    import run_esm2
+    from data_loader.load_checks import LoadError
+    from synth import call_main
+
+    class _Alphabet:
+        def get_batch_converter(self):
+            raise AssertionError("embedding started before the checkpoint check")
+
+    monkeypatch.setattr(run_esm2.esm.pretrained, "esm2_t30_150M_UR50D",
+                        lambda: (torch.nn.Linear(1, 1), _Alphabet()))
+    ckpt = tmp_path / "esm2_t30_150M_UR50D.pt"
+    ckpt.write_bytes(b"not the pinned weights")
+    monkeypatch.setattr(run_esm2, "checkpoint_path", lambda name: ckpt)
+    pd.DataFrame({"ensembl_id": ["ENSGX1"]}).to_parquet(tmp_path / "t.parquet")
+    with pytest.raises(LoadError):
+        call_main(run_esm2, ["--size", "150m", "--template", str(tmp_path / "t.parquet"),
+                             "--out-cache", str(tmp_path / "out"), "--device", "cpu"])
+    assert not list((tmp_path / "out").glob("*"))
+
+
+@pytest.mark.slow
+def test_pinned_esm2_hashes_are_the_local_may_checkpoints():
+    import run_esm2
+    from data_loader.model_registry import ESM2_CHECKPOINT_SHA256
+
+    found = 0
+    for name, expected in ESM2_CHECKPOINT_SHA256.items():
+        path = run_esm2.checkpoint_path(name)
+        if path.exists():
+            assert run_esm2.verify_checkpoint(path, expected) == expected
+            found += 1
+    if not found:
+        pytest.skip("no fair-esm checkpoints on this machine")

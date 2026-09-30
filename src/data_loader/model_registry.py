@@ -112,6 +112,13 @@ ENFORMER_REVISION = "affe5713ae9017460706a44108289b13c5fee16c"
 # Enformer feature; the central 16 bins are the E5 counterpart to TSS-Anchored.
 ENFORMER_READOUTS = {"whole": "trunk_global", "e5_centre": "trunk_center"}
 
+# fair-esm has no revisions: it downloads a fixed file name, so ESM-2 weights are
+# pinned by the sha256 of the checkpoint that made the May embeddings (G20).
+ESM2_CHECKPOINT_SHA256 = {
+    "esm2_t30_150M_UR50D": "881c7176cf198ef8dec26a3c375d40eb58d0c33df95c22562ca6cc6d3f812c62",
+    "esm2_t33_650M_UR50D": "ea9d0522b335a8778dea6535a65301f10208dece28cd5865482b0b1fc446168c",
+}
+
 # The TSS whole-window grid never had specialmean (the TSS pool builder predates
 # it): 5 pools, 4 for HyenaDNA. centermean is a TSS-only E5 template, not a pool.
 TSS_EXCLUDED_POOLS = ("specialmean",)
