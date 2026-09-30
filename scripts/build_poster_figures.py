@@ -260,7 +260,7 @@ def fig_pooling_heatmap():
 
 def fig_substrate_collapse():
     """CDS (homology split) vs 196,608 bp TSS window (disjoint split): 5-way family macro-F1."""
-    cats = ["CDS 4-mer"] + [ENC_DISP[e] for e in TSS_ENCODERS] + ["Enformer"]
+    cats = ["4-mer"] + [ENC_DISP[e] for e in TSS_ENCODERS] + ["Enformer"]  # CDS and TSS 4-mer pair
     cols = [PC_COMP] + [PC_DNA] * len(TSS_ENCODERS) + [PC_ESM]
     x = np.arange(len(cats))
     w = 0.38
