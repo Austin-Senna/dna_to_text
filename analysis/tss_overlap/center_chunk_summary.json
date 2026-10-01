@@ -2,27 +2,27 @@
   {
     "encoder": "dnabert2",
     "n_genes": 3244,
-    "frac_center_contains_tss": 0.5237361282367448,
+    "frac_center_contains_tss": 0.4956843403205919,
     "frac_anchor_contains_tss": 1.0,
     "frac_any_containing_chunk": 1.0,
-    "frac_center_is_tss_chunk": 0.467940813810111,
-    "median_abs_delta_bp": 1227.25,
-    "median_signed_delta_bp": 1191.0,
+    "frac_center_is_tss_chunk": 0.44882860665844637,
+    "median_abs_delta_bp": 1285.0,
+    "median_signed_delta_bp": 1246.0,
     "iqr_abs_delta_bp": [
-      521.75,
-      1918.0
+      544.875,
+      1972.5
     ],
     "median_delta_chunks": 1.0,
     "median_abs_delta_chunks": 1.0,
     "median_n_chunks": 85.0,
     "n_chunks_range": [
-      80,
-      178
+      81,
+      201
     ],
-    "median_bp_per_token": 5.19247834354532,
+    "median_bp_per_token": 5.1917242116815325,
     "median_chunk_bp_span": [
-      1486,
-      2850
+      1517,
+      2849
     ],
     "median_seq_len": 196608.0
   },
@@ -43,8 +43,8 @@
     "median_abs_delta_chunks": 1.0,
     "median_n_chunks": 36.0,
     "n_chunks_range": [
-      35,
-      81
+      36,
+      93
     ],
     "median_bp_per_token": 6.0,
     "median_chunk_bp_span": [
@@ -56,15 +56,15 @@
   {
     "encoder": "gena_lm",
     "n_genes": 3244,
-    "frac_center_contains_tss": 0.5049321824907521,
+    "frac_center_contains_tss": 0.4528360049321825,
     "frac_anchor_contains_tss": 1.0,
     "frac_any_containing_chunk": 1.0,
-    "frac_center_is_tss_chunk": 0.4423551171393342,
-    "median_abs_delta_bp": 1617.25,
-    "median_signed_delta_bp": 1437.25,
+    "frac_center_is_tss_chunk": 0.3967324290998767,
+    "median_abs_delta_bp": 1757.25,
+    "median_signed_delta_bp": 1665.0,
     "iqr_abs_delta_bp": [
-      819.75,
-      2563.625
+      921.875,
+      2793.875
     ],
     "median_delta_chunks": 1.0,
     "median_abs_delta_chunks": 1.0,
@@ -73,20 +73,20 @@
       45,
       73
     ],
-    "median_bp_per_token": 6.601682269152286,
+    "median_bp_per_token": 6.599687836674695,
     "median_chunk_bp_span": [
-      1898,
-      4092
+      1894,
+      4086
     ],
     "median_seq_len": 196608.0
   },
   {
     "encoder": "hyena_dna",
     "n_genes": 3244,
-    "frac_center_contains_tss": 0.00030826140567200987,
+    "frac_center_contains_tss": 0.0,
     "frac_anchor_contains_tss": 1.0,
     "frac_any_containing_chunk": 1.0,
-    "frac_center_is_tss_chunk": 0.00030826140567200987,
+    "frac_center_is_tss_chunk": 0.0,
     "median_abs_delta_bp": 5632.0,
     "median_signed_delta_bp": 5632.0,
     "iqr_abs_delta_bp": [
@@ -97,7 +97,7 @@
     "median_abs_delta_chunks": 1.0,
     "median_n_chunks": 26.0,
     "n_chunks_range": [
-      19,
+      26,
       26
     ],
     "median_bp_per_token": 1.0,
