@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Poster-styled figures (vector PDF) for the MINA URF symposium poster.
 
-Reuses the paper's metric accessors (scripts/build_result_figures.py) and the
-UMAP embedding computation (scripts/build_umap_compare.py), then re-renders
+Reads the May records through the frozen accessors in
+scripts/poster_may_records.py (the paper's figures moved to the camera-ready
+records) and reuses the UMAP embedding computation
+(scripts/build_umap_compare.py), then re-renders
 larger, thicker, print-legible panels into poster/figures/ as PDF. The paper's
 own figure scripts are left untouched. Two poster-only differences in values:
 GENA-LM's CDS cells come from data/metrics_poster_gena_lm.json (a rerun after
@@ -34,7 +36,7 @@ from matplotlib.patches import Patch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from build_result_figures import (  # noqa: E402  (sys.path set just above)
+from poster_may_records import (  # noqa: E402  (sys.path set just above)
     BOUNDARY_POOLS, NO_BOUNDARY_TOKEN,
     CELLS, C_COMP, C_DNA, C_ESM, ENCODERS, ENC_DISP, ENFH, FLOOR, M, POOLS,
     _aa_best, _best_cls, _cell_cls, _cls_rec, _rand_f1, _reg_rec, f1_of, r2_of,

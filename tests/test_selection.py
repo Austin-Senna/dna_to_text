@@ -1,5 +1,7 @@
 import sys
 import unittest
+
+import pytest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -63,11 +65,57 @@ def test_tied_pools_pick_the_same_cell_in_any_record_order():
     assert forward == backward == "nt_v2_meanmean"
 
 
-def test_the_table_builder_ignores_a_decoy_pool(monkeypatch):
-    import build_paper_tables as bpt
-    monkeypatch.setitem(bpt.CLS, "tss_dnabert2_tssanchored", _cls("tss_dnabert2_tssanchored", 0.99))
-    pool, _ = bpt.cls_best_pool("dnabert2", "TSS")
-    assert pool != "tssanchored"
+def _by_source(arm="cds", val=None):
+    """One family5 record per candidate pool of every encoder, plus the k-mers."""
+    from data_loader.model_registry import encoder_pools
+    from linear_trainer import records as R
+    val = val or {}
+    prefix = "tss_" if arm == "tss" else ""
+    srcs = [f"{prefix}{e}_{p}" for e in R.ENCODERS for p in encoder_pools(e, arm.upper())]
+    srcs += list(R.NT_KMERS) + list(R.AA_KMERS)
+    return {s: _cls(s, val.get(s, 0.5 + 0.001 * i)) for i, s in enumerate(srcs)}
+
+
+DECOYS = ("tssanchored", "centermean", "chunk4mergc", "chunk6mer")
+
+
+@pytest.mark.parametrize("arm", ["cds", "tss"])
+def test_the_records_picks_ignore_decoy_pools(arm):
+    from linear_trainer import records as R
+    by = _by_source(arm)
+    prefix = "tss_" if arm == "tss" else ""
+    decoyed = {**by, **{f"{prefix}{e}_{d}": _cls(f"{prefix}{e}_{d}", 0.99)
+                        for e in R.ENCODERS for d in DECOYS}}
+    for enc in R.ENCODERS:
+        assert R.best_pool(decoyed, enc, arm) == R.best_pool(by, enc, arm)
+    assert R.best_encoder(decoyed, arm) == R.best_encoder(by, arm)
+
+
+def test_the_records_picks_do_not_depend_on_record_order():
+    from linear_trainer import records as R
+    by = _by_source(val={"nt_v2_meanD": 0.9, "nt_v2_meanmean": 0.9, "aa2": 0.8, "aa3": 0.8})
+    rev = dict(reversed(list(by.items())))
+    assert R.best_pool(by, "nt_v2", "cds") == R.best_pool(rev, "nt_v2", "cds")
+    assert R.best_aa(by) == R.best_aa(rev)
+    assert R.best_encoder(by, "cds") == R.best_encoder(rev, "cds")
+
+
+def test_the_records_picks_never_read_a_test_metric():
+    from linear_trainer import records as R
+    by = _by_source(val={"kmer": 0.6, "kmer6": 0.5, "aa1": 0.4, "aa2": 0.5, "aa3": 0.45})
+    flipped = {s: {**r, "test_macro_f1": 1.0 - r["C_sweep"][0]["macro_f1"]} for s, r in by.items()}
+    assert (R.best_nt_kmer(flipped), R.best_aa(flipped)) == (R.best_nt_kmer(by), R.best_aa(by)) == ("kmer", "aa2")
+    assert R.best_encoder(flipped, "cds") == R.best_encoder(by, "cds")
+
+
+@pytest.mark.parametrize("script", ["build_paper_tables.py", "build_result_figures.py",
+                                    "build_statistics.py", "build_umap_compare.py"])
+def test_the_builders_have_no_pick_of_their_own(script):
+    """Every pick in a builder goes through linear_trainer.records (G14), which
+    refuses a partial candidate set."""
+    src = (ROOT / "scripts" / script).read_text()
+    assert "select_pool" not in src and "val_score" not in src and "select_by_val" not in src
+    assert "sorted(" not in src or script == "build_statistics.py"   # stats sorts keys, not scores
 
 
 def _decoys():
@@ -81,27 +129,11 @@ def _decoys():
     return decoys
 
 
-def test_builder_accessors_ignore_decoy_pools():
-    import build_paper_tables as bpt
-    import build_result_figures as brf
-    m, decoyed = bpt.M, bpt.M + _decoys()
-    for enc in bpt.ENCODERS:
+def test_the_poster_accessors_ignore_decoy_pools():
+    import poster_may_records as brf      # the May accessors, frozen for the poster
+    m, decoyed = brf.M, brf.M + _decoys()
+    for enc in ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"):
         for tss in (False, True):
-            assert bpt._best_f1_family5(decoyed, enc, tss) == bpt._best_f1_family5(m, enc, tss)
             assert brf._best_cls(decoyed, enc, tss) == brf._best_cls(m, enc, tss)
             assert brf._best_reg_enc_ctx(decoyed, enc, tss) == brf._best_reg_enc_ctx(m, enc, tss)
-        assert bpt._reg_r2_tss(decoyed, enc) == bpt._reg_r2_tss(m, enc)
-        assert bpt._cls_f1(decoyed, enc) == bpt._cls_f1(m, enc)
-        assert bpt._reg_r2(decoyed, enc) == bpt._reg_r2(m, enc)
         assert brf._best_reg_enc(decoyed, enc) == brf._best_reg_enc(m, enc)
-
-
-def test_tables_and_headline_pick_the_same_pools():
-    import build_paper_tables as bpt
-    import headline_cells as hc
-    for enc in hc.ENCODERS:
-        assert f"{enc}_{bpt.cls_best_pool(enc)[0]}" == hc.CLS_BEST[enc]
-        assert f"{enc}_{bpt.reg_best_pool(enc)[0]}" == hc.REG_BEST[enc]
-        assert f"tss_{enc}_{bpt.cls_best_pool(enc, 'TSS')[0]}" == hc.CLS_BEST_TSS[enc]
-        assert f"tss_{enc}_{bpt.reg_best_pool(enc, 'TSS')[0]}" == hc.REG_BEST_TSS[enc]
-    assert (bpt.BEST_DNA_CLS, bpt.BEST_DNA_REG) == (hc.BEST_DNA_CLS, hc.BEST_DNA_REG)

@@ -4,7 +4,8 @@
 table, figure and statistic reads them through ``load``, which refuses:
 
 - records from more than one commit or protocol, in one file or across the
-  files a builder combines (``load_many``; G7, G12);
+  files a builder combines (``stamp_of``; G7, G12);
+- a record fitted on another version of its split file than the one on disk;
 - a key recorded twice;
 - a record whose purge differs from the policy for its split (G2): other
   rules, or masks derived from another pair table or window manifest, so a
@@ -49,9 +50,12 @@ def _purge_inputs() -> dict[str, str]:
     return {"pairs_sha256": _sha(PAIRS), "windows_sha256": _sha(WINDOWS)}
 
 
-def load(split: str, *, null: bool = False, root: Path = V2) -> dict[str, dict]:
-    """Records of one split file, keyed by cell key, after the G7/G2 checks."""
-    path = _path(split, null, root)
+def load(split: str, *, null: bool = False, root: Path | None = None) -> dict[str, dict]:
+    """Records of one split file, keyed by cell key, after the G7/G2 checks.
+
+    ``root`` defaults to ``V2``, looked up at call time.
+    """
+    path = _path(split, null, V2 if root is None else root)
     if not path.exists():
         raise MissingRecord(f"no records file {path.name}; run scripts/recompute_all.sh")
     recs = json.loads(path.read_text())
@@ -60,6 +64,7 @@ def load(split: str, *, null: bool = False, root: Path = V2) -> dict[str, dict]:
     if len(commits) != 1:
         raise MixedRecords(f"{path.name} mixes {len(commits)} commit/protocol stamps")
     inputs = _purge_inputs()
+    split_sha = _sha(REPO_ROOT / "data" / Path(split).name)
     for r in recs:
         if r["key"] in out:
             raise MixedRecords(f"{path.name}: {r['key']} recorded twice")
@@ -68,11 +73,50 @@ def load(split: str, *, null: bool = False, root: Path = V2) -> dict[str, dict]:
         want = list(rules_for(r["split"], r["arm"]))
         if r["purge"]["rules"] != want:
             raise MixedRecords(f"{r['key']}: purge rules {r['purge']['rules']}, policy {want}")
-        for k, v in inputs.items():
-            if k in r["purge"] and r["purge"][k] != v:
-                raise MixedRecords(f"{r['key']}: purge built from another {k.split('_')[0]} file")
+        purge_split = r["purge"].get("split_sha256", None if want else split_sha)
+        if split_sha != r["splits_sha256"] or split_sha != purge_split:
+            raise MixedRecords(f"{r['key']}: fitted on another version of {r['split']}")
+        needed = ({"pairs_sha256"} if any(x.startswith("protein@") for x in want) else set()) | \
+                 ({"windows_sha256"} if "window" in want else set())
+        for k in needed:
+            if r["purge"].get(k) != inputs[k]:
+                raise MixedRecords(f"{r['key']}: purge built from another (or no) {k.split('_')[0]} file")
         out[r["key"]] = r
     return out
+
+
+COMPLETE = "run_complete.json"
+
+
+class IncompleteRun(RuntimeError):
+    """No whole-manifest run (completeness and G1) vouches for these records."""
+
+
+def check_complete(stamp: dict, root: Path | None = None) -> dict:
+    """The marker an unsharded ``recompute_all.py --group all`` writes after every
+    cell has one record and G1 passed, for the same commit and protocol (G17, G1)."""
+    path = (V2 if root is None else root) / COMPLETE
+    if not path.exists():
+        raise IncompleteRun(f"no {COMPLETE}: finish with an unsharded recompute_all.py --group all")
+    marker = json.loads(path.read_text())
+    if (marker["git_sha"], marker["protocol_hash"]) != (stamp["git_sha"], stamp["protocol_hash"]):
+        raise IncompleteRun(f"{COMPLETE} vouches for another run ({marker['git_sha'][:7]})")
+    return marker
+
+
+def input_digests(root: Path | None = None) -> dict[str, str]:
+    """sha256 of every records file, so an output built from them can tell when one
+    was rewritten at the same commit (a rerun after re-extraction keeps the stamp)."""
+    root = V2 if root is None else root
+    return {p.name: _sha(p) for p in sorted(root.glob("metrics_*.json")) + sorted(root.glob("null_*.json"))}
+
+
+def check_inputs(built: dict, root: Path | None = None) -> None:
+    """Refuse an output (statistics.json, ridge_robust.json) whose input records changed."""
+    now = input_digests(root)
+    stale = sorted(k for k, v in built["inputs"].items() if now.get(k) != v)
+    if stale:
+        raise MixedRecords(f"built from older versions of {stale}; rebuild it")
 
 
 def stamp_of(*files: dict[str, dict]) -> dict:

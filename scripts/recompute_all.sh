@@ -8,7 +8,13 @@
 # run can resume). A rerun resumes cells already recorded at the same
 # commit; records from another commit are refused, never mixed.
 #
-# Run: scripts/recompute_all.sh [main|null|all]   (default: all)
+# Run: scripts/recompute_all.sh [main|null|all] [runner options]   (default: all)
+#
+# Parallel: launch N shards from one commit, e.g. `scripts/recompute_all.sh all
+# --shard 0/8` ... `--shard 7/8` (they share records files under a lock), then
+# finish with a plain `scripts/recompute_all.sh all`: it runs nothing new, checks
+# that every cell has exactly one record, runs G1, and writes
+# data/v2/run_complete.json, which build_statistics.py requires.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -26,6 +32,7 @@ if [ -n "${dirty}" ]; then
 fi
 
 group="${1:-all}"
-echo "recompute at $(git rev-parse HEAD), group ${group}, started $(date -u +%FT%TZ)"
-uv run --frozen scripts/recompute_all.py --group "${group}"
+shift || true
+echo "recompute at $(git rev-parse HEAD), group ${group} $*, started $(date -u +%FT%TZ)"
+uv run --frozen scripts/recompute_all.py --group "${group}" "$@"
 echo "finished $(date -u +%FT%TZ)"

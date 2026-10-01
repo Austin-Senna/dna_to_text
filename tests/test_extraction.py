@@ -90,16 +90,15 @@ def _cls(src, val):
             "C_sweep": [{"C": 1.0, "macro_f1": val}]}
 
 
-def test_a_hyena_clsmean_decoy_never_wins_a_pick(monkeypatch):
-    import build_paper_tables as bpt
+def test_a_hyena_clsmean_decoy_never_wins_a_pick():
     import headline_cells as hc
+    from data_loader.model_registry import encoder_pools
+    from linear_trainer import records as R
 
-    recs = {f"hyena_dna_{p}": _cls(f"hyena_dna_{p}", 0.4) for p in ("meanmean", "meanG")}
+    recs = {f"hyena_dna_{p}": _cls(f"hyena_dna_{p}", 0.4) for p in encoder_pools("hyena_dna")}
     recs["hyena_dna_clsmean"] = _cls("hyena_dna_clsmean", 0.99)
     assert hc.best(recs, "hyena_dna_") != "hyena_dna_clsmean"
-    for src, rec in recs.items():
-        monkeypatch.setitem(bpt.CLS, src, rec)
-    assert bpt.cls_best_pool("hyena_dna")[0] != "clsmean"
+    assert R.best_pool(recs, "hyena_dna", "cds") != "hyena_dna_clsmean"
 
 
 # --- G19: extraction caches know what built them ---------------------------------

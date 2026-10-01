@@ -41,7 +41,7 @@ def test_no_local_paths_in_tracked_files():
 # Library modules that other scripts import; everything else in scripts/ is a
 # command and must do nothing on import (Sept 29: importing the unguarded
 # run_tss_extract_capped.py started a GPU extraction).
-LIBRARY_SCRIPTS = {"headline_cells.py"}
+LIBRARY_SCRIPTS = {"headline_cells.py", "poster_may_records.py"}
 
 
 def test_scripts_do_nothing_on_import():

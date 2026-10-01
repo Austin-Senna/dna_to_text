@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
-"""Reframed Results figures from the metrics JSONs (no embedded titles --
+"""Results figures from the camera-ready records (data/v2; no embedded titles --
 the LaTeX caption is the title, per repo convention).
+
+Every cell is read through ``linear_trainer.records`` (one commit, the policy
+purge, G7/G2) and picked on validation only. Chance is the null band from
+``data/v2/statistics.json`` (200 label shuffles, G13), not a single shuffled run.
+A missing cell raises.
 
   comparator_f1.png / comparator_r2.png  -- composition, DNA encoders, ESM-2
         (comparator) on macro-F1 (sec 3.1) and GenePT R^2 (sec 3.2).
@@ -9,10 +14,12 @@ the LaTeX caption is the title, per repo convention).
         boxes on each encoder's validation-selected rule, n/a for boundary-token
         rules on HyenaDNA.
   tss_context.png  -- TSS arm in two panels, macro-F1 (left) and Ridge-to-GenePT
-        R^2 (right): per model, CDS vs TSS whole-window vs TSS-Anchored, Enformer
-        pooled to match, plus the anchored chunk's best composition baseline
-        (sec 3.4).
-  split_bars.png  -- random vs homology grouped bars per comparator (sec 3.5).
+        R^2 (right), all on the disjoint split so the CDS and TSS bars score the
+        same test genes: per model, CDS vs TSS whole-window vs TSS-Anchored,
+        Enformer pooled to match, plus the anchored chunk's best composition
+        baseline (sec 3.4).
+  split_bars.png  -- random vs homology grouped bars per comparator, each split
+        re-selected on its own validation set (sec 3.5).
 
 Run: uv run scripts/build_result_figures.py
 """
@@ -28,114 +35,62 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
 
-from data_loader.pool_names import POOL_DISPLAY
-from headline_cells import CLS_BEST
-from linear_trainer.selection import encoder_cells, select_by_val
+from linear_trainer import records as R
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA = ROOT / "data"
 OUT = ROOT / "dna_to_text_paper" / "paper" / "figures"
 
-M = json.loads((DATA / "metrics_homology.json").read_text())
-RAND = json.loads((DATA / "metrics.json").read_text())
-RANDC = json.loads((DATA / "metrics_random_comparators.json").read_text())
-ENFH = json.loads((DATA / "metrics_enformer_homology.json").read_text())
-ANCH = json.loads((DATA / "metrics_tss_anchored.json").read_text())
-COMP = json.loads((DATA / "metrics_tss_composition.json").read_text())
+HOM = DIS = RND = None   # CDS primary; TSS primary (CDS cells too, for pairing); leakage demo
+STATS: dict = {}
 
-ENCODERS = ["dnabert2", "nt_v2", "gena_lm", "hyena_dna"]
+
+def load_records() -> None:
+    """Read the records and statistics the figures use (set here, not on import)."""
+    global HOM, DIS, RND, STATS
+    HOM = R.load("splits.json")
+    DIS = R.load("splits_tss_disjoint.json")
+    RND = R.load("splits_random.json")
+    STATS = json.loads((R.V2 / "statistics.json").read_text())
+    R.check_inputs(STATS)
+    if STATS["stamp"] != R.stamp_of(HOM, DIS, RND):        # G7
+        raise R.MixedRecords("statistics.json was built from other records than the figures read")
+
+ENCODERS = list(R.ENCODERS)
 ENC_DISP = {"dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "gena_lm": "GENA-LM", "hyena_dna": "HyenaDNA"}
 POOLS = ["meanmean", "specialmean", "meanD", "meanG", "maxmean", "clsmean"]
-FLOOR = 0.224
+METRIC = {"family5": "test_macro_f1", "genept": "test_r2_macro"}
 
 C_COMP = "#9e9e9e"   # composition (grey)
 C_DNA = "#3a7d44"    # DNA encoders (green)
 C_ESM = "#2b5c8a"    # reference models: ESM-2, Enformer (blue, hatched)
 
 
-# ---------- accessors ----------
-def _best_cls(metrics, src, tss=False, metric="test_macro_f1"):
-    cells = []
-    for r in metrics:
-        if r.get("task") != "family5" or r.get("shuffled_labels"):
-            continue
-        fs = r["feature_source"]
-        is_tss = fs.startswith("tss_")
-        if is_tss != tss:
-            continue
-        core = fs[4:] if is_tss else fs
-        if core in encoder_cells(src):
-            cells.append(r)
-    return select_by_val(cells)[metric] if cells else None
+# ---------- accessors (validation picks only) ----------
+def pick(recs, arm, task, name):
+    """Source for a named comparator: an encoder (its best pool), the nucleotide or
+    amino-acid k-mer (k chosen on validation), or a literal source id."""
+    by = R.cells(recs, arm, task)
+    if name in ENCODERS:
+        return R.best_pool(by, name, arm)
+    if name == "nt_kmer":
+        return R.best_nt_kmer(by)
+    if name == "aa_best":
+        return R.best_aa(by)
+    return name
 
 
-def _cls_rec(metrics, src):
-    c = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
-         and r.get("feature_source") == src]
-    return c[0] if c else None
+def value(recs, arm, task, name):
+    return R.cells(recs, arm, task)[pick(recs, arm, task, name)][METRIC[task]]
 
 
-def _cell_cls(metrics, src):
-    r = _cls_rec(metrics, src)
-    return r["test_macro_f1"] if r else None
+def null_band(split, task, source):
+    return STATS["null_bands"][f"{split}/{task}/{source}"]["band95"]
 
 
-def _best_reg_enc(metrics, enc):
-    cells = [r for r in metrics if r.get("task") is None and r.get("model") == "linear_probe"
-             and not str(r.get("dataset", "")).startswith("dataset_tss_")
-             and str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "")
-             in encoder_cells(enc)]
-    return select_by_val(cells)["test_r2_macro"] if cells else None
-
-
-def _best_reg_enc_ctx(metrics, enc, tss=False):
-    """Best-pool Ridge R^2 for an encoder within a sequence context (CDS or TSS)."""
-    cells = []
-    for r in metrics:
-        if r.get("task") is not None or r.get("model") != "linear_probe":
-            continue
-        ds = str(r.get("dataset", ""))
-        if ds.startswith("dataset_tss_") != tss:
-            continue
-        core = ds.replace("dataset_tss_", "").replace("dataset_", "").replace(".parquet", "")
-        if core in encoder_cells(enc):
-            cells.append(r)
-    return select_by_val(cells)["test_r2_macro"] if cells else None
-
-
-def _reg_rec(metrics, src):
-    base = {"kmer_baseline_4": "kmer", "kmer_baseline_6": "kmer6", "codon_baseline": "codon",
-            "gc_baseline": "gc", "aa_baseline_1": "aa1", "aa_baseline_2": "aa2", "aa_baseline_3": "aa3"}
-    for r in metrics:
-        if r.get("task") is not None:
-            continue
-        ds = str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "")
-        if base.get(r.get("model", "")) == src or ds == src or r.get("feature_source") == src:
-            return r
-    return None
-
-
-def _cell_reg(metrics, src):
-    r = _reg_rec(metrics, src)
-    return r["test_r2_macro"] if r else None
-
-
-def f1_of(m, src):
-    return _best_cls(m, src) if src in ENCODERS else _cell_cls(m, src)
-
-
-def r2_of(m, src):
-    return _best_reg_enc(m, src) if src in ENCODERS else _cell_reg(m, src)
-
-
-def _rand_f1(src):
-    v = _cell_cls(RANDC, src)
-    return v if v is not None else f1_of(RAND, src)
-
-
-def _rand_r2(src):
-    v = _cell_reg(RANDC, src)
-    return v if v is not None else r2_of(RAND, src)
+def _shade_null(ax, band, label=True):
+    ax.axhspan(*band, color="#555", alpha=0.15, lw=0)
+    if label:
+        ax.text(0.1, band[1] + 0.008, f"chance band {band[0]:.2f}-{band[1]:.2f}", fontsize=7.5, color="#555")
 
 
 def _no_title(ax):
@@ -146,15 +101,17 @@ def _no_title(ax):
 
 
 # representative comparator cells (composition | DNA | ESM comparator)
-CELLS = [("CDS 4-mer", "kmer", C_COMP), ("Codon", "codon", C_COMP), ("AA comp.", "aa_best", C_COMP),
-         ("DNABERT-2", "dnabert2", C_DNA), ("NT-v2", "nt_v2", C_DNA),
-         ("GENA-LM", "gena_lm", C_DNA), ("HyenaDNA", "hyena_dna", C_DNA),
-         ("ESM-2 650M", "esm2_650m", C_ESM)]
+CELLS = [("nt_kmer", C_COMP), ("codon", C_COMP), ("aa_best", C_COMP),
+         ("dnabert2", C_DNA), ("nt_v2", C_DNA), ("gena_lm", C_DNA), ("hyena_dna", C_DNA),
+         ("esm2_650m", C_ESM)]
 
 
-def _aa_best(rec_fn, metric):
-    """AA-composition k chosen on validation, reported on test."""
-    return select_by_val(rec_fn(M, s) for s in ("aa1", "aa2", "aa3"))[metric]
+def _cell_label(name, src):
+    if name == "nt_kmer":
+        return "CDS 6-mer" if src == "kmer6" else "CDS 4-mer"
+    if name == "aa_best":
+        return f"AA {src[-1]}-mer"
+    return {"codon": "Codon", "esm2_650m": "ESM-2 650M"}.get(name, ENC_DISP.get(name, name))
 
 
 def _label_bars(ax, xs, vals, fmt="{:.2f}", fontsize=7, dy=0.01, rot=0):
@@ -170,19 +127,25 @@ def _label_bars(ax, xs, vals, fmt="{:.2f}", fontsize=7, dy=0.01, rot=0):
                 ha="center", va="bottom", fontsize=fontsize, color="#222", rotation=rot)
 
 
-def _comparator_panel(value_fn, aa_value, ylabel, ylim, floor, fname, fmt="{:.2f}"):
-    labels = [c[0] for c in CELLS]
-    colors = [c[2] for c in CELLS]
-    vals = [aa_value if c[1] == "aa_best" else value_fn(M, c[1]) for c in CELLS]
+def _fit_top(ylim, vals):
+    """Keep the nominal limits unless a bar would be clipped."""
+    return ylim[0], max(ylim[1], 1.12 * max(v for v in vals if np.isfinite(v)))
+
+
+def _comparator_panel(task, ylabel, ylim, fname, fmt="{:.2f}"):
+    srcs = [pick(HOM, "cds", task, n) for n, _ in CELLS]
+    labels = [_cell_label(n, src) for (n, _), src in zip(CELLS, srcs)]
+    colors = [c for _, c in CELLS]
+    vals = [value(HOM, "cds", task, n) for n, _ in CELLS]
+    ylim = _fit_top(ylim, vals)
     x = np.arange(len(CELLS))
     fig, ax = plt.subplots(figsize=(6.2, 4.2))
     ax.bar(x, vals, color=colors, edgecolor="white",
-           hatch=["//" if c[2] == C_ESM else "" for c in CELLS])
+           hatch=["//" if c == C_ESM else "" for c in colors])
     ax.set_ylim(*ylim)
     _label_bars(ax, x, vals, fmt=fmt, fontsize=7, dy=ylim[1] * 0.012)
-    if floor is not None:
-        ax.axhline(floor, color="#555", ls="--", lw=0.9)
-        ax.text(0.1, floor + 0.008, f"chance {floor:.3f}", fontsize=7.5, color="#555")
+    if task == "family5":
+        _shade_null(ax, null_band("splits.json", task, "kmer"))
     else:
         ax.axhline(0, color="#555", lw=0.8)
     _no_title(ax)
@@ -197,19 +160,19 @@ def _comparator_panel(value_fn, aa_value, ylabel, ylim, floor, fname, fmt="{:.2f
     fig.tight_layout()
     fig.savefig(OUT / fname, dpi=180, bbox_inches="tight")
     plt.close(fig)
-    print(fname, [round(v, 3) for v in vals])
+    print(fname, dict(zip(labels, [round(v, 3) for v in vals])))
 
 
 def fig_comparator_f1():
-    _comparator_panel(f1_of, _aa_best(_cls_rec, "test_macro_f1"), "5-way family macro-F1", (0, 1.0), FLOOR, "comparator_f1.png")
+    _comparator_panel("family5", "5-way family macro-F1", (0, 1.0), "comparator_f1.png")
 
 
 def fig_comparator_r2():
-    _comparator_panel(r2_of, _aa_best(_reg_rec, "test_r2_macro"), "Ridge-to-GenePT $R^2$", (0, 0.20), None, "comparator_r2.png", fmt="{:.3f}")
+    _comparator_panel("genept", "Ridge-to-GenePT $R^2$", (0, 0.20), "comparator_r2.png", fmt="{:.3f}")
 
 
 def fig_tss_context():
-    """TSS arm in one panel (homology split): per model, CDS | TSS whole-window | TSS-Anchored.
+    """TSS arm (disjoint split, both panels): per model, CDS | TSS whole-window | TSS-Anchored.
 
     Every TSS bar pools the same way across models: encoders at their best whole-window
     rule vs the chunk nearest the TSS; Enformer at its whole-window mean (``trunk_global``)
@@ -217,30 +180,36 @@ def fig_tss_context():
     because its chunk depends on the encoder. Diamonds: the validation-selected composition baseline
     (4-mer+GC or 6-mer) of each encoder's anchored chunk.
     """
-    enf = {r["feature_source"]: r["test_macro_f1"] for r in ENFH if r.get("task") == "family5"}
     cats = ["4-mer"] + [ENC_DISP[e] for e in ENCODERS] + ["Enformer"]
     hues = [C_COMP] + [C_DNA] * 4 + [C_ESM]
-    cds = [_cell_cls(M, "kmer")] + [_best_cls(M, e, False) for e in ENCODERS] + [np.nan]
-    whole = [_cell_cls(M, "enformer_tss_4mer")] + [_best_cls(M, e, True) for e in ENCODERS] \
-        + [enf["enformer_trunk_global"]]
-    anchored = [np.nan] + [_cell_cls(ANCH, f"tss_{e}_tssanchored") for e in ENCODERS] \
-        + [enf["enformer_trunk_center"]]
-    comp = [select_by_val(_cls_rec(COMP, f"tss_{e}_{v}") for v in ("chunk4mergc", "chunk6mer"))
-            ["test_macro_f1"] for e in ENCODERS]
 
-    enf_r2 = {Path(r["dataset"]).stem.replace("dataset_", ""): r["test_r2_macro"]
-              for r in ENFH if r.get("task") is None and r.get("dataset")}
-    cds_r2 = [_cell_reg(M, "kmer")] + [_best_reg_enc_ctx(M, e, False) for e in ENCODERS] + [np.nan]
-    whole_r2 = [_cell_reg(M, "enformer_tss_4mer")] + [_best_reg_enc_ctx(M, e, True) for e in ENCODERS] \
-        + [enf_r2["enformer_trunk_global"]]
-    # No TSS-Anchored regression probe was run for the encoders; only Enformer's centre readout.
-    anchored_r2 = [np.nan] * (1 + len(ENCODERS)) + [enf_r2["enformer_trunk_center"]]
+    def column(task):
+        cds_by, tss_by = R.cells(DIS, "cds", task), R.cells(DIS, "tss", task)
+        m = METRIC[task]
+        cds = [cds_by["kmer"][m]] + [cds_by[R.best_pool(cds_by, e, "cds")][m] for e in ENCODERS] + [np.nan]
+        whole = [tss_by["enformer_tss_4mer"][m]] + [tss_by[R.best_pool(tss_by, e, "tss")][m] for e in ENCODERS] \
+            + [tss_by["enformer_trunk_global"][m]]
+        anchored = [np.nan] + [tss_by[f"tss_{e}_tssanchored"][m] for e in ENCODERS] \
+            + [tss_by["enformer_trunk_center"][m]]
+        comp = [tss_by[R.pick(tss_by, [f"tss_{e}_chunk4mergc", f"tss_{e}_chunk6mer"])][m]
+                for e in ENCODERS]
+        return cds, whole, anchored, comp
+
+    cds, whole, anchored, comp = column("family5")
+    cds_r2, whole_r2, anchored_r2, comp_r2 = column("genept")
+    band = null_band("splits_tss_disjoint.json", "family5", "enformer_tss_4mer")
 
     x = np.arange(len(cats))
     w = 0.27
     fig, (axL, axR) = plt.subplots(1, 2, figsize=(13.0, 3.8))
+    # R^2 limits follow the data: TSS cells sit below zero, by an amount the records set.
+    r2_vals = [v for v in cds_r2 + whole_r2 + anchored_r2 + comp_r2 if np.isfinite(v)]
+    lo, hi = min(min(r2_vals), 0.0), max(max(r2_vals), 0.0)
+    pad = 0.2 * (hi - lo)
+    r2_lim = (lo - pad, hi + pad)
     panels = [(axL, cds, whole, anchored, "5-way family macro-F1", (0, 0.95), "{:.2f}", 0.008),
-              (axR, cds_r2, whole_r2, anchored_r2, "Ridge-to-GenePT $R^2$", (-0.03, 0.10), "{:.3f}", 0.002)]
+              (axR, cds_r2, whole_r2, anchored_r2, "Ridge-to-GenePT $R^2$", r2_lim, "{:.3f}",
+               0.015 * (r2_lim[1] - r2_lim[0]))]
     for ax, c, wv, an, ylabel, ylim, fmt, dy in panels:
         ax.bar(x - w, c, w, color=hues, edgecolor="white")
         ax.bar(x, wv, w, color=hues, alpha=0.4, hatch="//", edgecolor="white")
@@ -253,7 +222,8 @@ def fig_tss_context():
         ax.set_xticks(x)
         ax.set_xticklabels(cats, fontsize=9)
     axL.scatter(x[1:5] + w, comp, marker="D", s=22, color="#222", zorder=3)
-    axL.axhline(FLOOR, color="#555", ls="--", lw=0.9)
+    axR.scatter(x[1:5] + w, comp_r2, marker="D", s=22, color="#222", zorder=3)
+    _shade_null(axL, band, label=False)
     axR.axhline(0, color="#555", lw=0.8)
     fig.legend(handles=[Patch(facecolor="#777", label="CDS"),
                         Patch(facecolor="#777", alpha=0.4, hatch="//", label="TSS window, whole-window pooling"),
@@ -261,7 +231,7 @@ def fig_tss_context():
                               label="TSS-Anchored (Enformer: central 2,048 bp)"),
                         plt.Line2D([], [], marker="D", color="#222", ls="", markersize=5,
                                    label="best composition of the anchored chunk"),
-                        plt.Line2D([], [], color="#555", ls="--", lw=0.9, label=f"chance ({FLOOR:.3f})")],
+                        Patch(facecolor="#555", alpha=0.15, label=f"chance band ({band[0]:.2f}-{band[1]:.2f})")],
                fontsize=8.5, frameon=False, loc="upper center", ncol=5, bbox_to_anchor=(0.5, 1.06))
 
     fig.tight_layout()
@@ -270,25 +240,32 @@ def fig_tss_context():
     print("tss_context CDS:", [round(v, 3) for v in cds], "whole:", [round(v, 3) for v in whole],
           "anchored:", [round(v, 3) for v in anchored], "comp:", [round(v, 3) for v in comp])
     print("tss_context R2 CDS:", [round(v, 3) for v in cds_r2], "whole:", [round(v, 3) for v in whole_r2],
-          "Enformer centre:", round(anchored_r2[-1], 3))
+          "anchored:", [round(v, 3) for v in anchored_r2], "comp:", [round(v, 3) for v in comp_r2])
 
 
 def fig_split_bars():
     """Random vs homology split, side by side: macro-F1 (left), Ridge R^2 (right)."""
-    cells = [("CDS 4-mer", "kmer", C_COMP), ("AA 2-mer", "aa2", C_COMP), ("NT-v2", "nt_v2", C_DNA),
-             ("DNABERT-2", "dnabert2", C_DNA), ("ESM-2 650M", "esm2_650m", C_ESM)]
-    cols = [c for *_, c in cells]
-    labels = [c[0] for c in cells]
+    cells = [("nt_kmer", C_COMP), ("aa_best", C_COMP), ("nt_v2", C_DNA), ("dnabert2", C_DNA),
+             ("esm2_650m", C_ESM)]
+    cols = [c for _, c in cells]
+    # Each split and task picks its own k: name it only where all four picks agree.
+    generic = {"nt_kmer": "CDS k-mer", "aa_best": "AA k-mer"}
+    labels = []
+    for n, _ in cells:
+        picks = {pick(r, "cds", t, n) for r in (HOM, RND) for t in ("family5", "genept")}
+        labels.append(generic[n] if n in generic and len(picks) > 1 else _cell_label(n, picks.pop()))
     x = np.arange(len(cells))
     w = 0.38
-    f1_rand = [_rand_f1(s) for _, s, _ in cells]
-    f1_hom = [f1_of(M, s) for _, s, _ in cells]
-    r2_rand = [_rand_r2(s) for _, s, _ in cells]
-    r2_hom = [r2_of(M, s) for _, s, _ in cells]
+    # Each split re-selects its pools and k on its own validation set.
+    f1_rand = [value(RND, "cds", "family5", n) for n, _ in cells]
+    f1_hom = [value(HOM, "cds", "family5", n) for n, _ in cells]
+    r2_rand = [value(RND, "cds", "genept", n) for n, _ in cells]
+    r2_hom = [value(HOM, "cds", "genept", n) for n, _ in cells]
     fig, (axL, axR) = plt.subplots(1, 2, figsize=(11.0, 3.6))
 
     panels = [(axL, f1_rand, f1_hom, "5-way family macro-F1", (0, 1.0), "{:.2f}", 0.01),
-              (axR, r2_rand, r2_hom, "Ridge-to-GenePT $R^2$", (0, 0.4), "{:.3f}", 0.004)]
+              (axR, r2_rand, r2_hom, "Ridge-to-GenePT $R^2$", _fit_top((0, 0.4), r2_rand + r2_hom),
+               "{:.3f}", 0.004)]
     for ax, rand, hom, ylabel, ylim, fmt, dy in panels:
         ax.bar(x - w / 2, rand, w, color=cols, alpha=0.5, edgecolor="white")
         ax.bar(x + w / 2, hom, w, color=cols, edgecolor="white")
@@ -299,8 +276,7 @@ def fig_split_bars():
         _label_bars(ax, x + w / 2, hom, fmt=fmt, fontsize=7, dy=dy)
         ax.set_xticks(x)
         ax.set_xticklabels(labels, fontsize=8.5)
-    axL.axhline(FLOOR, color="#555", ls="--", lw=0.9)
-    axL.text(-0.45, FLOOR + 0.015, f"chance {FLOOR:.3f}", fontsize=7.5, color="#555")
+    _shade_null(axL, null_band("splits.json", "family5", "kmer"))
     fig.legend(handles=[Patch(facecolor="#777", alpha=0.5, label="random split"),
                         Patch(facecolor="#777", label="homology split")],
                fontsize=8.5, frameon=False, loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.04))
@@ -330,15 +306,14 @@ def fig_pooling_heatmap():
     from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
     from matplotlib.patches import Rectangle
 
-    floor = _cell_cls(M, "kmer")
+    by = R.cells(HOM, "cds", "family5")
+    floor = by["kmer"]["test_macro_f1"]
     vals = np.full((len(ENCODERS), len(POOLS)), np.nan)
     for i, enc in enumerate(ENCODERS):
         for j, pool in enumerate(POOLS):
             if enc in NO_BOUNDARY_TOKEN and pool in BOUNDARY_POOLS:
                 continue
-            v = _cell_cls(M, f"{enc}_{pool}")
-            if v is not None:
-                vals[i, j] = v
+            vals[i, j] = by[f"{enc}_{pool}"]["test_macro_f1"]
     vmin, vmax = float(np.nanmin(vals)), float(np.nanmax(vals))
     norm = TwoSlopeNorm(vmin=min(vmin, floor - 0.01), vcenter=floor, vmax=max(vmax, floor + 0.01))
     # Two hues only: lightness carries the distance from the floor (white = 4-mer).
@@ -367,7 +342,7 @@ def fig_pooling_heatmap():
             ax.text(j, i, f"{v:.3f}", ha="center", va="center", fontsize=8.5,
                     color="white" if dark else "black")
     for i, enc in enumerate(ENCODERS):
-        j = POOLS.index(CLS_BEST[enc].rsplit("_", 1)[1])
+        j = POOLS.index(R.best_pool(by, enc, "cds").rsplit("_", 1)[1])
         ax.add_patch(Rectangle((j - 0.5, i - 0.5), 1, 1, fill=False, edgecolor="black", lw=2))
     cbar = fig.colorbar(im, ax=ax, fraction=0.04, pad=0.03)
     cbar.set_label("macro-F1", fontsize=9)
@@ -378,10 +353,11 @@ def fig_pooling_heatmap():
     fig.tight_layout()
     fig.savefig(OUT / "pooling_heatmap_family5_column.png", dpi=180, bbox_inches="tight")
     plt.close(fig)
-    print("pooling_heatmap_family5_column.png  selected:", {e: CLS_BEST[e] for e in ENCODERS})
+    print("pooling_heatmap_family5_column.png  selected:", {e: R.best_pool(by, e, "cds") for e in ENCODERS})
 
 
 def main():
+    load_records()
     OUT.mkdir(parents=True, exist_ok=True)
     fig_comparator_f1()
     fig_comparator_r2()

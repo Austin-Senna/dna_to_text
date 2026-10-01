@@ -103,13 +103,46 @@ def test_cells_on_different_split_files_are_not_paired(tmp_path):
 def _null(n, **over):
     base = {"split": "splits.json", "task": "family5", "feature_source": "kmer",
             "shuffled_labels": True}
-    return [{**base, "label_seed": k, "test_macro_f1": 0.15 + k / 1000, **over} for k in range(n)]
+    return [{**base, "label_seed": k, "test_macro_f1": 0.15 + k / 1000, "converged": True,
+             "edge": False, **over} for k in range(n)]
 
 
 def test_the_null_band_is_the_central_95_percent():
     band = stats.null_band(_null(200), 200)
     assert band["band95"] == pytest.approx([np.percentile(0.15 + np.arange(200) / 1000, 2.5),
                                             np.percentile(0.15 + np.arange(200) / 1000, 97.5)])
+
+
+def test_the_null_band_counts_unconverged_refits_and_edges():
+    recs = _null(200)
+    for r in recs[:3]:
+        r["converged"] = False
+    recs[5]["edge"] = "nonconverged"
+    band = stats.null_band(recs, 200)
+    assert band["n_refit_nonconverged"] == 3
+    assert band["n_edge"] == {"plateau": 0, "limit": 0, "nonconverged": 1}
+
+
+def test_a_refit_that_does_not_converge_is_recorded_not_raised(tmp_path, monkeypatch):
+    """Decided Oct 1: the cell keeps a non-converged train+val refit and flags it."""
+    import linear_trainer.cell as cell_mod
+    from linear_trainer.fit import ConvergenceFailure
+    real_fit = cell_mod.fit
+    calls = []
+
+    def refit_never_converges(kind, X, y, hp, protocol, *, strict=True):
+        probe = real_fit(kind, X, y, hp, protocol, strict=False)
+        calls.append(strict)
+        probe.converged = False
+        if strict:
+            raise ConvergenceFailure("refit did not converge")
+        return probe
+
+    monkeypatch.setattr(cell_mod, "fit", refit_never_converges)
+    parquet, splits = write_dataset(tmp_path / "d", seed=0, permute_test_labels=False)
+    res = run_cell(parquet, "family5", splits, V2, pred_dir=tmp_path / "p")
+    assert calls == [False]
+    assert res["provenance"]["converged"] is False
 
 
 def test_a_null_band_must_be_complete_and_single_cell():
@@ -176,7 +209,9 @@ def _fake(key="splits.json/cds/family5/aa2", **over):
     base = {"key": key, "split": "splits.json", "arm": "cds", "task": "family5",
             "feature_source": key.rsplit("/", 1)[1], "shuffled_labels": False,
             "stamp": {"git_sha": "a" * 40}, "protocol_hash": "p",
-            "purge": {"rules": ["protein@0.40"], **R._purge_inputs()}}
+            "splits_sha256": R._sha(R.REPO_ROOT / "data" / "splits.json"),
+            "purge": {"rules": ["protein@0.40"], **R._purge_inputs(),
+                      "split_sha256": R._sha(R.REPO_ROOT / "data" / "splits.json")}}
     return {**base, **over}
 
 
@@ -192,8 +227,27 @@ def test_records_load_refuses_mixed_or_wrong_files(tmp_path):
     _write(f, [_fake(purge={"rules": []})])
     with pytest.raises(R.MixedRecords, match="policy"):
         R.load("splits.json", root=tmp_path)
-    _write(f, [_fake(purge={"rules": ["protein@0.40"], "pairs_sha256": "old"})])
+    _write(f, [_fake(purge={**_fake()["purge"], "pairs_sha256": "old"})])
     with pytest.raises(R.MixedRecords, match="pairs"):
+        R.load("splits.json", root=tmp_path)
+    _write(f, [_fake(purge={k: v for k, v in _fake()["purge"].items() if k != "pairs_sha256"})])
+    with pytest.raises(R.MixedRecords, match="pairs"):
+        R.load("splits.json", root=tmp_path)
+    _write(f, [_fake(splits_sha256="old")])
+    with pytest.raises(R.MixedRecords, match="another version"):
+        R.load("splits.json", root=tmp_path)
+    _write(f, [_fake(purge={**_fake()["purge"], "split_sha256": "old"})])
+    with pytest.raises(R.MixedRecords, match="another version"):
+        R.load("splits.json", root=tmp_path)
+    no_split = {k: v for k, v in _fake()["purge"].items() if k != "split_sha256"}
+    _write(f, [_fake(purge=no_split)])
+    with pytest.raises(R.MixedRecords, match="another version"):
+        R.load("splits.json", root=tmp_path)
+    _write(f, [_fake(), _fake("splits.json/cds/family5/aa3", protocol_hash="q")])
+    with pytest.raises(R.MixedRecords, match="mixes"):
+        R.load("splits.json", root=tmp_path)
+    _write(f, [_fake(split="splits_seed1.json")])
+    with pytest.raises(R.MixedRecords, match="names split"):
         R.load("splits.json", root=tmp_path)
     _write(f, [_fake()])
     assert list(R.load("splits.json", root=tmp_path)) == ["splits.json/cds/family5/aa2"]
@@ -210,3 +264,63 @@ def test_selection_refuses_a_partial_candidate_set():
         R.best_nt_kmer(by)
     by["kmer6"] = {"C_sweep": [{"C": 1.0, "macro_f1": 0.6, "converged": True}]}
     assert R.best_nt_kmer(by) == "kmer6"
+
+
+@pytest.mark.parametrize("edge,degenerate,converged,ok", [
+    (False, False, True, True), ("plateau", False, True, True), ("limit", False, True, False),
+    ("nonconverged", False, True, False), (False, True, True, False), (False, False, False, False)])
+def test_a_confirmatory_test_refuses_an_edge_or_degenerate_cell(edge, degenerate, converged, ok):
+    import build_statistics as bs
+    rec = {"key": "x", "edge": edge, "degenerate": degenerate, "converged": converged}
+    if ok:
+        bs.check_confirmatory_cell(rec)
+    else:
+        with pytest.raises(bs.UnsoundConfirmatoryCell):
+            bs.check_confirmatory_cell(rec)
+
+
+def test_the_confirmatory_family_refuses_an_unsound_cell(monkeypatch):
+    """confirmatory() itself runs the guard, on both sides of every test."""
+    import build_statistics as bs
+    from linear_trainer import records as R
+    monkeypatch.setattr(bs.stats, "paired_bootstrap", lambda a, b, n_iters: {"p_one_sided": 0.01})
+    monkeypatch.setattr(R, "best_encoder", lambda by, arm: "nt_v2_meanD")
+    monkeypatch.setattr(R, "best_nt_kmer", lambda by: "kmer")
+    monkeypatch.setattr(R, "best_aa", lambda by: "aa2")
+    monkeypatch.setattr(R, "best_pool", lambda by, e, arm: f"{'tss_' if arm == 'tss' else ''}{e}_meanD")
+
+    def recs(bad=None):
+        out = {}
+        for arm, src in [("cds", "nt_v2_meanD"), ("cds", "kmer"), ("cds", "aa2"),
+                         ("cds", "esm2_650m"), ("tss", "tss_nt_v2_meanD")]:
+            rec = {"key": src, "arm": arm, "task": "family5", "feature_source": src,
+                   "shuffled_labels": False, "edge": False, "degenerate": False, "converged": True}
+            if src == bad:
+                rec["edge"] = "limit"
+            out[src] = rec
+        return out
+
+    assert set(bs.confirmatory(recs(), recs(), 10)) == {
+        "T1 encoder > nucleotide k-mer", "T2 encoder > amino-acid k-mer",
+        "T3 ESM-2 650M > encoder", "T4 CDS > TSS (same encoder)"}
+    for bad in ("kmer", "esm2_650m"):
+        with pytest.raises(bs.UnsoundConfirmatoryCell):
+            bs.confirmatory(recs(bad), recs(), 10)
+    with pytest.raises(bs.UnsoundConfirmatoryCell):
+        bs.confirmatory(recs(), recs("tss_nt_v2_meanD"), 10)
+
+
+def test_a_disjoint_record_needs_its_window_manifest_hash(tmp_path):
+    from linear_trainer import records as R
+    name = "splits_tss_disjoint.json"
+    sha = R._sha(R.REPO_ROOT / "data" / name)
+    inputs = R._purge_inputs()
+    rec = _fake(f"{name}/cds/family5/aa2", split=name, splits_sha256=sha,
+                purge={"rules": ["protein@0.40", "window"], "split_sha256": sha,
+                       "pairs_sha256": inputs["pairs_sha256"]})
+    _write(tmp_path / "metrics_splits_tss_disjoint.json", [rec])
+    with pytest.raises(R.MixedRecords, match="windows"):
+        R.load(name, root=tmp_path)
+    rec["purge"]["windows_sha256"] = inputs["windows_sha256"]
+    _write(tmp_path / "metrics_splits_tss_disjoint.json", [rec])
+    assert list(R.load(name, root=tmp_path)) == [rec["key"]]

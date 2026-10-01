@@ -24,8 +24,8 @@ Run (normally via scripts/recompute_all.sh, which pins the threads):
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
-import sys
 import time
 import traceback
 from dataclasses import dataclass
@@ -37,6 +37,7 @@ from data_loader.model_registry import ENCODER_SPECS, encoder_pools
 from linear_trainer import sources
 from linear_trainer.cell import run_cell
 from linear_trainer.protocol import V2, stamp
+from linear_trainer.records import COMPLETE
 from splits.leaks import purge_for
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -135,8 +136,34 @@ class IncompleteRun(RuntimeError):
     """Manifest cells without exactly one record (G17)."""
 
 
+def shard(cells: list[Cell], spec: str) -> list[Cell]:
+    """Cells ``i, i+n, i+2n, ...`` for ``spec = "i/n"``; the n shards partition ``cells``."""
+    i, n = (int(x) for x in spec.split("/"))
+    if not 0 <= i < n:
+        raise ValueError(f"--shard {spec}: need 0 <= I < N")
+    return cells[i::n]
+
+
 def _load(path: Path) -> list[dict]:
     return json.loads(path.read_text()) if path.exists() else []
+
+
+def _append(out: Path, rec: dict) -> None:
+    """Append one record atomically, under an exclusive lock, so shards that
+    split one split file's cells (``--only``) can share its records file."""
+    with open(out.with_suffix(".lock"), "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        recs = _load(out)
+        if any(r["key"] == rec["key"] for r in recs):
+            raise RuntimeError(f"{rec['key']} is already recorded in {out.name}")
+        here = (rec["stamp"]["git_sha"], rec["protocol_hash"])
+        if recs and (recs[0]["stamp"]["git_sha"], recs[0]["protocol_hash"]) != here:   # G7
+            raise MixedRun(f"{out.name} holds records from another commit or protocol than "
+                           f"{rec['key']}; shards must run from one commit")
+        recs.append(rec)
+        tmp = out.with_suffix(".tmp")
+        tmp.write_text(json.dumps(recs, indent=2))
+        tmp.replace(out)
 
 
 def _check_same_run(out_dir: Path) -> None:
@@ -181,7 +208,7 @@ def run_one(cell: Cell, pred_root: Path) -> dict:
     }
 
 
-def black_box_g1(cells: list[Cell], pred_root: Path) -> None:
+def black_box_g1(cells: list[Cell], pred_root: Path) -> list[dict]:
     """Re-select with the test labels permuted: the pick must not move (G1)."""
     real_load = sources.load
 
@@ -191,6 +218,7 @@ def black_box_g1(cells: list[Cell], pred_root: Path) -> None:
             y = np.random.default_rng(0).permutation(y)
         return X, y, ids
 
+    checked = []
     for cell in cells:
         # Separate directories: the permuted run's targets differ by design, and the
         # shared GenePT targets file refuses different content for one split.
@@ -207,6 +235,23 @@ def black_box_g1(cells: list[Cell], pred_root: Path) -> None:
         if (base["hp"], base["sweep"]) != (perm["hp"], perm["sweep"]):
             raise RuntimeError(f"G1: {cell.key} selection moved when the test labels were permuted")
         print(f"  G1 ok: {cell.key} pick {base['hp']:g} unchanged under permuted test labels", flush=True)
+        checked.append({"key": cell.key, "hp": base["hp"]})
+    return checked
+
+
+def write_complete(out_dir: Path, cells: list[Cell], g1: list[dict]) -> None:
+    """The marker builders require (G17, G1): written only by an unsharded run over
+    the whole manifest, after every cell has exactly one record and G1 passed."""
+    recs = [r for out in sorted({c.out(out_dir) for c in cells}) for r in _load(out)]
+    stamps = {(r["stamp"]["git_sha"], r["protocol_hash"]) for r in recs}
+    if len(stamps) != 1:
+        raise MixedRun(f"the records span {len(stamps)} commit/protocol stamps")
+    (sha, proto), = stamps
+    payload = {"git_sha": sha, "protocol_hash": proto, "n_cells": len(cells), "g1": g1}
+    tmp = out_dir / (COMPLETE + ".tmp")
+    tmp.write_text(json.dumps(payload, indent=2) + "\n")
+    tmp.replace(out_dir / COMPLETE)
+    print(f"wrote {COMPLETE}: {len(cells)} cells, G1 on {len(g1)}")
 
 
 G1_CELLS = (Cell(CDS_PRIMARY, "cds", "family5", "kmer"),
@@ -219,6 +264,9 @@ def main() -> None:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--group", choices=["main", "null", "all"], default="main")
     ap.add_argument("--only", default=None, help="run only cells whose key contains this")
+    ap.add_argument("--shard", default=None, metavar="I/N",
+                    help="run every N-th cell from the I-th (0-based), after --only; shards "
+                         "share records files safely (locked appends)")
     ap.add_argument("--dry-run", action="store_true", help="print the manifest size and exit")
     ap.add_argument("--skip-g1", action="store_true", help="skip the G1 black-box check")
     ap.add_argument("--out-dir", type=Path, default=OUT_DIR,
@@ -236,6 +284,8 @@ def main() -> None:
     cells = manifest(args.group)
     if args.only:
         cells = [c for c in cells if args.only in c.key]
+    if args.shard:
+        cells = shard(cells, args.shard)
     if args.dry_run:
         by = {}
         for c in cells:
@@ -262,12 +312,7 @@ def main() -> None:
         except BaseException:
             traceback.print_exc()
             raise RuntimeError(f"cell failed: {cell.key}") from None
-        out = cell.out(out_dir)
-        recs = _load(out)
-        recs.append(rec)
-        tmp = out.with_suffix(".tmp")
-        tmp.write_text(json.dumps(recs, indent=2))
-        tmp.replace(out)
+        _append(cell.out(out_dir), rec)
         hp = rec.get("C", rec.get("alpha"))
         print(f"[{i}/{len(todo)}] {cell.key}: hp={hp:g} edge={rec['edge']} "
               f"({time.time() - t0:.1f}s, {(time.time() - t_start) / 3600:.2f} h)", flush=True)
@@ -283,8 +328,12 @@ def main() -> None:
                             f"{(missing + extra)[:5]}")
     print(f"all {len(cells)} cells recorded")
 
-    if not args.skip_g1 and args.group in ("main", "all") and not args.only:
+    if args.group == "all" and not (args.only or args.shard or args.skip_g1):
+        write_complete(out_dir, cells, black_box_g1(list(G1_CELLS), pred_root))
+    elif not args.skip_g1 and args.group == "main" and not (args.only or args.shard):
         black_box_g1(list(G1_CELLS), pred_root)
+    else:
+        print(f"no {COMPLETE}: only an unsharded --group all run writes it")
 
 
 if __name__ == "__main__":

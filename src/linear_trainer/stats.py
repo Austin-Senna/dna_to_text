@@ -234,8 +234,14 @@ def null_band(records: list[dict], n_expected: int) -> dict:
     key = _METRIC[_kind(records[0])]
     vals = np.array([r[key] for r in records])
     (split, task, source), = cells
+    others = {k: float(np.median([r[k] for r in records])) for k in ("test_kappa", "test_accuracy")
+              if all(k in r for r in records)}
     return {"split": split, "task": task, "source": source, "metric": key,
-            "band95": _ci(vals), "median": float(np.median(vals)), "n": len(vals)}
+            "band95": _ci(vals), "median": float(np.median(vals)), "n": len(vals),
+            "medians": others,
+            "n_refit_nonconverged": sum(not r["converged"] for r in records),
+            "n_edge": {e: sum(r["edge"] == e for r in records)
+                       for e in ("plateau", "limit", "nonconverged")}}
 
 
 def write_json(path: Path, payload: dict) -> None:

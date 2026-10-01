@@ -40,6 +40,24 @@ def _headline(recs: dict, task: str) -> dict[str, str]:
             **{f"best_{e}": R.best_pool(cds, e, "cds") for e in R.ENCODERS}}
 
 
+# A confirmatory cell whose pick sits at a search limit, stopped on a fit that
+# didn't converge, whose train+val refit didn't converge, or that predicts one
+# class fails the build. "plateau" (the next decade ties within plateau_eps) is
+# a stable pick and is reported, not refused.
+BAD_EDGES = ("limit", "nonconverged")
+
+
+class UnsoundConfirmatoryCell(RuntimeError):
+    """A confirmatory test would rest on an edge or degenerate pick."""
+
+
+def check_confirmatory_cell(rec: dict) -> None:
+    if rec["edge"] in BAD_EDGES or rec["degenerate"] or not rec["converged"]:
+        raise UnsoundConfirmatoryCell(f"{rec['key']}: edge={rec['edge']!r}, "
+                                      f"degenerate={rec['degenerate']!r}, "
+                                      f"refit converged={rec['converged']!r}")
+
+
 def confirmatory(cds_recs: dict, tss_recs: dict, n_iters: int) -> dict:
     cds = R.cells(cds_recs, "cds", "family5")
     h = _headline(cds_recs, "family5")
@@ -56,7 +74,12 @@ def confirmatory(cds_recs: dict, tss_recs: dict, n_iters: int) -> dict:
     enc_d = R.best_encoder(dcds, "cds")     # may differ from T1-T3's; the output names both
     tests["T4 CDS > TSS (same encoder)"] = (dcds[enc_d], dtss[R.best_pool(dtss, R.encoder_of(enc_d), "tss")])
 
+    for a, b in tests.values():
+        check_confirmatory_cell(a)
+        check_confirmatory_cell(b)
     out = {k: stats.paired_bootstrap(a, b, n_iters=n_iters) for k, (a, b) in tests.items()}
+    for k, (a, b) in tests.items():
+        out[k]["edges"] = [a["edge"], b["edge"]]
     # T1-T3 must use one encoder cell; T4 names its own (picked on the disjoint split).
     adj = stats.holm({k: v["p_one_sided"] for k, v in out.items()})
     for k in out:
@@ -86,7 +109,8 @@ def main() -> None:
     cds_recs, tss_recs = R.load(CDS), R.load(TSS)
     nulls = {split: R.load(split, null=True) for split in (CDS, TSS)}
     stamp = R.stamp_of(cds_recs, tss_recs, *nulls.values())          # G7 across every file used
-    result: dict = {"stamp": stamp, "n_iters": n, "seed": stats.SEED,
+    R.check_complete(stamp)                                           # G17, G1: one whole-manifest run
+    result: dict = {"stamp": stamp, "inputs": R.input_digests(), "n_iters": n, "seed": stats.SEED,
                     "confirmatory": confirmatory(cds_recs, tss_recs, n)}
 
     def ci(recs, arm, task, src):

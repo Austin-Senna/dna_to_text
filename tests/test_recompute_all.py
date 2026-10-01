@@ -147,3 +147,75 @@ def test_a_trial_never_writes_canonical_predictions(monkeypatch, tmp_path):
 def test_g1_runs_on_a_real_regression_cell(tmp_path):
     # The Oct 1 review: the permuted run's GenePT targets must not collide with the base run's.
     ra.black_box_g1([ra.Cell("splits.json", "cds", "genept", "aa3")], tmp_path)
+
+
+def _rec(key, sha="a" * 40, **over):
+    return {"key": key, "stamp": {"git_sha": sha}, "protocol_hash": "p", "pad": "x" * 20000, **over}
+
+
+def _append_many(out, start, n):
+    for k in range(start, start + n):
+        ra._append(out, _rec(f"k{k}"))
+
+
+def test_concurrent_appends_keep_every_record(tmp_path):
+    """Shards are separate processes sharing one records file: none may lose records."""
+    import multiprocessing as mp
+    out = tmp_path / "metrics_x.json"
+    ctx = mp.get_context("fork")
+    procs = [ctx.Process(target=_append_many, args=(out, 30 * i, 30)) for i in range(4)]
+    for p in procs:
+        p.start()
+    for p in procs:
+        p.join()
+    assert all(p.exitcode == 0 for p in procs)
+    assert sorted(r["key"] for r in json.loads(out.read_text())) == sorted(f"k{k}" for k in range(120))
+
+
+def test_a_key_is_never_appended_twice(tmp_path):
+    out = tmp_path / "metrics_x.json"
+    ra._append(out, _rec("a"))
+    with pytest.raises(RuntimeError, match="already recorded"):
+        ra._append(out, _rec("a"))
+
+
+def test_an_append_from_another_commit_is_refused(tmp_path):
+    out = tmp_path / "metrics_x.json"
+    ra._append(out, _rec("a"))
+    with pytest.raises(ra.MixedRun):
+        ra._append(out, _rec("b", sha="b" * 40))
+    with pytest.raises(ra.MixedRun):
+        ra._append(out, _rec("c", protocol_hash="q"))
+
+
+def test_shards_partition_the_manifest():
+    cells = ra.manifest("null")
+    parts = [ra.shard(cells, f"{i}/7") for i in range(7)]
+    keys = [c.key for part in parts for c in part]
+    assert sorted(keys) == sorted(c.key for c in cells) and len(set(keys)) == len(keys)
+    with pytest.raises(ValueError):
+        ra.shard(cells, "7/7")
+
+
+def test_only_a_whole_manifest_run_vouches_for_the_records(tmp_path):
+    from linear_trainer import records as R
+    stamp = {"git_sha": "a" * 40, "protocol_hash": "p"}
+    with pytest.raises(R.IncompleteRun, match="no run_complete"):
+        R.check_complete(stamp, root=tmp_path)
+    cells = [ra.Cell("splits.json", "cds", "family5", "kmer")]
+    ra._append(cells[0].out(tmp_path), _rec(cells[0].key))
+    ra.write_complete(tmp_path, cells, [{"key": cells[0].key, "hp": 1.0}])
+    assert R.check_complete(stamp, root=tmp_path)["n_cells"] == 1
+    with pytest.raises(R.IncompleteRun, match="another run"):
+        R.check_complete({**stamp, "git_sha": "b" * 40}, root=tmp_path)
+
+
+def test_an_output_built_from_rewritten_records_is_refused(tmp_path):
+    from linear_trainer import records as R
+    f = tmp_path / "metrics_splits.json"
+    f.write_text("[1]")
+    built = {"inputs": R.input_digests(tmp_path)}
+    R.check_inputs(built, root=tmp_path)
+    f.write_text("[2]")
+    with pytest.raises(R.MixedRecords, match="metrics_splits.json"):
+        R.check_inputs(built, root=tmp_path)

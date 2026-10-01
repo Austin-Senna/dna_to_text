@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import uuid
 from pathlib import Path
 
 import numpy as np
@@ -46,9 +48,10 @@ def arrays_sha256(arrays: dict[str, np.ndarray]) -> str:
 
 def _save(path: Path, arrays: dict[str, np.ndarray]) -> str:
     """Write atomically: a run killed mid-write must not leave a truncated file
-    that a resumed run then trips over."""
+    that a resumed run then trips over. The temporary name is per writer, so
+    shards that store the same content-addressed file at once never share it."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + ".partial.npz")
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.{uuid.uuid4().hex[:8]}.partial.npz")
     np.savez(tmp, **arrays)
     tmp.replace(path)
     return arrays_sha256(arrays)
@@ -221,7 +224,11 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
     else:
         sel = select(kind, X_tr, y_tr, X_va, y_va, protocol, select_by=select_by)
     stack = np.vstack if kind == "ridge" else np.concatenate
-    probe = fit(kind, np.vstack([X_tr, X_va]), stack([y_tr, y_va]), sel.hp, protocol)
+    # The pick converged on train; its train+val refit may not (shuffled labels at
+    # high C). Decided Oct 1: keep the refit and record ``converged`` (False here);
+    # a confirmatory cell with a non-converged refit fails the statistics build,
+    # and null bands count them.
+    probe = fit(kind, np.vstack([X_tr, X_va]), stack([y_tr, y_va]), sel.hp, protocol, strict=False)
     if probe_out is not None and kind == "ridge":
         probe.save(probe_out)
 
