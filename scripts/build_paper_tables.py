@@ -104,6 +104,9 @@ SPECS = {
     "s_tss_anchored": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
                            width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrcr@{}",
                            header=r"Model & Whole window & TSS-Anchored [95\% CI] & Chunk comp."),
+    "s_d5_sensitivity": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.4}\selectfont",
+                             width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lcr@{}",
+                             header=r"Comparison & $\Delta$ [95\% CI] & $p$"),
     "s_ridge_robust": dict(setup=r"\setlength{\tabcolsep}{3pt}",
                            width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
                            header=r"Method & Macro-$R^2$ & Pooled-$R^2$ & Retr.@5 & Med.\ rank"),
@@ -589,19 +592,22 @@ def build_tss_anchored():
 # Paired differences: the four confirmatory tests (Holm-adjusted p) and the
 # exploratory comparisons (one-sided p, unadjusted).
 # ===================================================================
+def _diff_line(disp, d, p):
+    lo, hi = d["delta_ci95"]
+    return f"\\quad {disp} & {sgn(d['delta_point'],3)} [{sgn(lo,3)}, {sgn(hi,3)}] & {p:.3f} \\\\"
+
+
+def _key_label(key):
+    src = key.rsplit("/", 1)[1]
+    if src in dict(COMPOSITION) or src in NT_DISPLAY:
+        return dict(COMPOSITION)[src]
+    if src.startswith("esm2_"):
+        return "ESM-2 " + src.split("_")[1].upper()
+    return src_label(src.removeprefix("tss_")) + (" (TSS)" if src.startswith("tss_") else "")
+
+
 def build_paired_diff():
-    def line(disp, d, p):
-        lo, hi = d["delta_ci95"]
-        return f"\\quad {disp} & {sgn(d['delta_point'],3)} [{sgn(lo,3)}, {sgn(hi,3)}] & {p:.3f} \\\\"
-
-    def name(key):
-        src = key.rsplit("/", 1)[1]
-        if src in dict(COMPOSITION) or src in NT_DISPLAY:
-            return dict(COMPOSITION)[src]
-        if src.startswith("esm2_"):
-            return "ESM-2 " + src.split("_")[1].upper()
-        return src_label(src.removeprefix("tss_")) + (" (TSS)" if src.startswith("tss_") else "")
-
+    line, name = _diff_line, _key_label
     conf = STATS["confirmatory"]
     out = [r"\multicolumn{3}{@{}l}{\textbf{Confirmatory, macro-F1 (Holm-adjusted $p$)}}\\"]
     for k, d in conf.items():
@@ -614,6 +620,35 @@ def build_paired_diff():
               "esm2_650m > encoder"):
         d = ex[f"{CDS} genept: {k}"]
         out.append(line(f"{name(d['a'])} $-$ {name(d['b'])}", d, d["p_one_sided"]))
+    return "\n".join(out)
+
+
+# ===================================================================
+# D5: Ends + Mean at matched regularisation, and the headline tests with each
+# disclosed defect masked from scoring. Exploratory, unadjusted p.
+# ===================================================================
+def build_d5_sensitivity():
+    out = [r"\multicolumn{3}{@{}l}{\textbf{Ends + Mean $-$ Mean $\times 3$ (Mean at $3\times C$), macro-F1 "
+           r"(one-sided $p$, unadjusted)}}\\"]
+    p3 = STATS["pooling_3x"]
+    for e in ENCODERS:
+        d = p3[f"family5/{e}"]["Ends+Mean > Mean x3 (3x C)"]
+        out.append(_diff_line(ENC_DISPLAY[e], d, d["p_one_sided"]))
+    for name, title, metric in (("label_noise", "noisy TF labels (non-C2H2 zinc-finger groups only", "macro-F1"),
+                                ("template", "templated GenePT summaries (shared text", "GenePT $R^2$")):
+        tests = STATS["sensitivity"][name]["tests"]
+        if any("n_excluded" not in d for d in tests.values()):
+            raise ValueError(f"{name}: a masked test excluded no genes; the mask is empty")
+        cds = {d["n_excluded"] for k, d in tests.items() if not k.startswith("T4")}
+        dis = {d["n_excluded"] for k, d in tests.items() if k.startswith("T4")}
+        if len(cds) != 1 or len(dis) > 1:
+            raise ValueError(f"{name}: the masked tests exclude different numbers of genes: {cds}, {dis}")
+        n = f"{cds.pop()} test genes removed" + (f", {dis.pop()} on the disjoint split" if dis else "")
+        out.append(r"\midrule")
+        out.append(rf"\multicolumn{{3}}{{@{{}}l}}{{\textbf{{Without {title}; {n}), {metric} (one-sided $p$, unadjusted)}}}}\\")
+        for k, d in tests.items():
+            where = " (disjoint split)" if k.startswith("T4") else ""
+            out.append(_diff_line(f"{_key_label(d['a'])} $-$ {_key_label(d['b'])}{where}", d, d["p_one_sided"]))
     return "\n".join(out)
 
 
@@ -648,6 +683,7 @@ def main():
     write("s_paired_diff", build_paired_diff())
     write("s_ridge_robust", build_ridge_robust())
     write("s_tss_anchored", build_tss_anchored())
+    write("s_d5_sensitivity", build_d5_sensitivity())
     print("\nAll fragments written to", OUT)
 
 

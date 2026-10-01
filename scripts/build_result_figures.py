@@ -3,12 +3,15 @@
 the LaTeX caption is the title, per repo convention).
 
 Every cell is read through ``linear_trainer.records`` (one commit, the policy
-purge, G7/G2) and picked on validation only. Chance is the null band from
-``data/v2/statistics.json`` (200 label shuffles, G13), not a single shuffled run.
+purge, G7/G2) and picked on validation only. The shuffled-label reference is a
+null band from ``data/v2/statistics.json`` (200 label shuffles of one named probe,
+G13), not a single shuffled run.
 A missing cell raises.
 
   comparator_f1.png / comparator_r2.png  -- composition, DNA encoders, ESM-2
         (comparator) on macro-F1 (sec 3.1) and GenePT R^2 (sec 3.2).
+  comparator_f1_bands.png  -- the macro-F1 panel with the ESM-2 650M null band
+        drawn beside the 4-mer's (a candidate: the band depends on the model).
   pooling_heatmap_family5_column.png  -- encoder x pooling macro-F1 heatmap
         (sec 3.3), colour centred on the CDS 4-mer floor (red below, green above),
         boxes on each encoder's validation-selected rule, n/a for boundary-token
@@ -87,10 +90,13 @@ def null_band(split, task, source):
     return STATS["null_bands"][f"{split}/{task}/{source}"]["band95"]
 
 
-def _shade_null(ax, band, label=True):
-    ax.axhspan(*band, color="#555", alpha=0.15, lw=0)
+# The band is the shuffled-label range of one probe (the 4-mer unless named), not
+# chance for every model: ESM-2 650M's band sits higher (decided Oct 1: name it).
+def _shade_null(ax, band, label=True, name="4-mer", color="#555"):
+    ax.axhspan(*band, color=color, alpha=0.15, lw=0)
     if label:
-        ax.text(0.1, band[1] + 0.008, f"chance band {band[0]:.2f}-{band[1]:.2f}", fontsize=7.5, color="#555")
+        ax.text(0.1, band[1] + 0.008, f"{name} shuffled-label band {band[0]:.2f}-{band[1]:.2f}",
+                fontsize=7.5, color=color)
 
 
 def _no_title(ax):
@@ -132,7 +138,7 @@ def _fit_top(ylim, vals):
     return ylim[0], max(ylim[1], 1.12 * max(v for v in vals if np.isfinite(v)))
 
 
-def _comparator_panel(task, ylabel, ylim, fname, fmt="{:.2f}"):
+def _comparator_panel(task, ylabel, ylim, fname, fmt="{:.2f}", esm_band=False):
     srcs = [pick(HOM, "cds", task, n) for n, _ in CELLS]
     labels = [_cell_label(n, src) for (n, _), src in zip(CELLS, srcs)]
     colors = [c for _, c in CELLS]
@@ -144,8 +150,18 @@ def _comparator_panel(task, ylabel, ylim, fname, fmt="{:.2f}"):
            hatch=["//" if c == C_ESM else "" for c in colors])
     ax.set_ylim(*ylim)
     _label_bars(ax, x, vals, fmt=fmt, fontsize=7, dy=ylim[1] * 0.012)
+    bands = []
     if task == "family5":
-        _shade_null(ax, null_band("splits.json", task, "kmer"))
+        kmer = null_band("splits.json", task, "kmer")
+        _shade_null(ax, kmer, label=not esm_band)
+        if esm_band:   # both bands in the legend; ESM-2's as a range beside its bar
+            esm = null_band("splits.json", task, "esm2_650m")
+            ax.errorbar([x[-1] + 0.5], [(esm[0] + esm[1]) / 2], yerr=[[(esm[1] - esm[0]) / 2]],
+                        fmt="none", ecolor=C_ESM, elinewidth=2, capsize=4, zorder=4)
+            bands = [Patch(facecolor="#555", alpha=0.15,
+                           label=f"4-mer shuffled-label band ({kmer[0]:.2f}-{kmer[1]:.2f})"),
+                     plt.Line2D([], [], color=C_ESM, lw=2, marker="_", markersize=8,
+                                label=f"ESM-2 650M shuffled-label band ({esm[0]:.2f}-{esm[1]:.2f})")]
     else:
         ax.axhline(0, color="#555", lw=0.8)
     _no_title(ax)
@@ -155,8 +171,11 @@ def _comparator_panel(task, ylabel, ylim, fname, fmt="{:.2f}"):
     ax.set_ylim(*ylim)
     ax.legend(handles=[Patch(facecolor=C_COMP, label="composition"),
                        Patch(facecolor=C_DNA, label="DNA encoder"),
-                       Patch(facecolor=C_ESM, hatch="//", label="ESM-2 650M (upper bound)")],
-              fontsize=8, loc="upper left", frameon=False)
+                       Patch(facecolor=C_ESM, hatch="//", label="ESM-2 650M (upper bound)"), *bands],
+              fontsize=8, frameon=False,
+              # with the bands the legend is too tall for the space above the bars
+              **({"loc": "upper center", "bbox_to_anchor": (0.5, -0.22), "ncol": 2} if bands
+                 else {"loc": "upper left"}))
     fig.tight_layout()
     fig.savefig(OUT / fname, dpi=180, bbox_inches="tight")
     plt.close(fig)
@@ -165,6 +184,7 @@ def _comparator_panel(task, ylabel, ylim, fname, fmt="{:.2f}"):
 
 def fig_comparator_f1():
     _comparator_panel("family5", "5-way family macro-F1", (0, 1.0), "comparator_f1.png")
+    _comparator_panel("family5", "5-way family macro-F1", (0, 1.0), "comparator_f1_bands.png", esm_band=True)
 
 
 def fig_comparator_r2():
@@ -231,7 +251,7 @@ def fig_tss_context():
                               label="TSS-Anchored (Enformer: central 2,048 bp)"),
                         plt.Line2D([], [], marker="D", color="#222", ls="", markersize=5,
                                    label="best composition of the anchored chunk"),
-                        Patch(facecolor="#555", alpha=0.15, label=f"chance band ({band[0]:.2f}-{band[1]:.2f})")],
+                        Patch(facecolor="#555", alpha=0.15, label=f"TSS 4-mer shuffled-label band ({band[0]:.2f}-{band[1]:.2f})")],
                fontsize=8.5, frameon=False, loc="upper center", ncol=5, bbox_to_anchor=(0.5, 1.06))
 
     fig.tight_layout()
@@ -276,7 +296,7 @@ def fig_split_bars():
         _label_bars(ax, x + w / 2, hom, fmt=fmt, fontsize=7, dy=dy)
         ax.set_xticks(x)
         ax.set_xticklabels(labels, fontsize=8.5)
-    _shade_null(axL, null_band("splits.json", "family5", "kmer"))
+    _shade_null(axL, null_band("splits.json", "family5", "kmer"), name="homology-split 4-mer")
     fig.legend(handles=[Patch(facecolor="#777", alpha=0.5, label="random split"),
                         Patch(facecolor="#777", label="homology split")],
                fontsize=8.5, frameon=False, loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.04))
