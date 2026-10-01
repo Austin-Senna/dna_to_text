@@ -64,6 +64,40 @@ def _stamp(path: Path) -> dict:
     return {"path": shown, "sha256": _sha256(path)}
 
 
+def build(manifest: Path, clusters: Path, families: Path, splits: Path, seed: int,
+          out_name: str) -> tuple[dict, dict, dict]:
+    """Build the split payload for one seed. Returns (payload, leak stats, parts)."""
+    universe = json.loads(splits.read_text())
+    genes = sorted(g for s in ("train", "val", "test") for g in universe[s])
+    fams = pd.read_parquet(families, columns=["ensembl_id", STRATIFY_COL])
+    fams = fams[fams["ensembl_id"].isin(genes)].drop_duplicates("ensembl_id")
+    if len(fams) != len(genes):
+        raise KeyError(f"{len(genes) - len(fams)} universe genes have no family in {families}")
+    spans = window_spans(manifest)
+    protein_map = parse_cluster_tsv(clusters)
+
+    parts, stats = build_tss_disjoint(fams, spans, protein_map, seed=seed)
+    stats.update(window_length_bp=ENFORMER_WINDOW_LENGTH, protein_min_seq_id=0.40,
+                 protein_coverage=0.80)
+    payload = {
+        "train": parts["train"], "val": parts["val"], "test": parts["test"],
+        "seed": seed, "stratify": STRATIFY_COL, "method": "homology_cluster",
+        "fracs": list(DEFAULT_FRACS), "cluster_stats": stats,
+        "family_proportions": parts["family_proportions"],
+        "inputs": {"window_manifest": _stamp(manifest),
+                   "cluster_tsv": _stamp(clusters),
+                   "gene_universe": _stamp(splits),
+                   "families": _labels_stamp(families, fams)},
+    }
+
+    leak = {splits.name: window_leak_stats(universe, spans),
+            out_name: window_leak_stats(payload, spans)}
+    if leak[out_name]["cross_split_pairs"]:
+        raise ResidualOverlap(f"{leak[out_name]['cross_split_pairs']} cross-split "
+                              "window overlaps remain")
+    return payload, leak, parts
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -82,33 +116,9 @@ def main() -> None:
         raise ValueError(f"seed {args.seed} is not the primary split: pass --out and --leak-out")
 
     universe = json.loads(args.splits.read_text())
-    genes = sorted(g for s in ("train", "val", "test") for g in universe[s])
-    fams = pd.read_parquet(args.families, columns=["ensembl_id", STRATIFY_COL])
-    fams = fams[fams["ensembl_id"].isin(genes)].drop_duplicates("ensembl_id")
-    if len(fams) != len(genes):
-        raise KeyError(f"{len(genes) - len(fams)} universe genes have no family in {args.families}")
-    spans = window_spans(args.manifest)
-    protein_map = parse_cluster_tsv(args.clusters)
-
-    parts, stats = build_tss_disjoint(fams, spans, protein_map, seed=args.seed)
-    stats.update(window_length_bp=ENFORMER_WINDOW_LENGTH, protein_min_seq_id=0.40,
-                 protein_coverage=0.80)
-    payload = {
-        "train": parts["train"], "val": parts["val"], "test": parts["test"],
-        "seed": args.seed, "stratify": STRATIFY_COL, "method": "homology_cluster",
-        "fracs": list(DEFAULT_FRACS), "cluster_stats": stats,
-        "family_proportions": parts["family_proportions"],
-        "inputs": {"window_manifest": _stamp(args.manifest),
-                   "cluster_tsv": _stamp(args.clusters),
-                   "gene_universe": _stamp(args.splits),
-                   "families": _labels_stamp(args.families, fams)},
-    }
-
-    leak = {args.splits.name: window_leak_stats(universe, spans),
-            args.out.name: window_leak_stats(payload, spans)}
-    if leak[args.out.name]["cross_split_pairs"]:
-        raise ResidualOverlap(f"{leak[args.out.name]['cross_split_pairs']} cross-split "
-                              "window overlaps remain")
+    payload, leak, parts = build(args.manifest, args.clusters, args.families, args.splits,
+                                 args.seed, args.out.name)
+    stats = payload["cluster_stats"]
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, indent=2) + "\n")

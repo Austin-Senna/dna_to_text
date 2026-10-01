@@ -55,6 +55,10 @@ def main():
     ap.add_argument("--workdir", default=str(DATA / "cluster_work"))
     ap.add_argument("--skip-random", action="store_true")
     args = ap.parse_args()
+    if args.seed != SEED:
+        # The outputs are the frozen primary files; seeds live in their own files (G15).
+        raise ValueError(f"seed {args.seed} would overwrite the primary splits; "
+                         "seed splits come from scripts/make_seed_splits.py")
 
     dataset_path = resolve_dataset_path(
         Path(args.dataset) if args.dataset else None
