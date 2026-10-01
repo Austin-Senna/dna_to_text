@@ -34,8 +34,9 @@ uv run python scripts/train_probe.py --dataset data/dataset_enformer_tss_4mer.pa
 uv run python scripts/train_logistic_probe.py --dataset enformer_trunk_global --task family5
 uv run python scripts/train_probe.py --dataset data/dataset_enformer_trunk_center.parquet --probe-out data/probe_enformer_trunk_center.npz
 
-# Refresh bootstrap CIs over the CDS and TSS headline cells (rescores stored predictions)
-uv run python scripts/bootstrap_test_uncertainty.py
+# Camera-ready: every CDS and TSS cell, then the intervals (rescores stored predictions)
+scripts/recompute_all.sh all
+uv run python scripts/build_statistics.py
 ```
 
 ## Relevant Files

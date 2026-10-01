@@ -21,6 +21,7 @@ gunzip -k data/annotation/Homo_sapiens.GRCh38.dna.primary_assembly.115.fa.gz
 
 uv run python scripts/build_tss_windows.py           # windows + data/tss_windows.tsv
 uv run python scripts/make_tss_disjoint_split.py     # data/splits_tss_disjoint.json
+uv run python scripts/make_seed_splits.py            # + data/splits_tss_disjoint_seed{1,7,123}.json
 uv run python scripts/run_enformer_features.py --skip-model   # matched TSS 4-mer table
 ```
 
@@ -34,7 +35,7 @@ uv run python scripts/run_enformer_features.py --skip-model   # matched TSS 4-me
 | `data/tss_windows.meta.json` | Release, window length and the sha256 of each Ensembl input file. |
 | `data/tss_windows_e115/` | Ignored window cache, one FASTA per gene. |
 | `scripts/make_tss_disjoint_split.py` | Builds the TSS-primary split, disjoint on windows and protein clusters. |
-| `src/splits/tss_disjoint.py`, `src/splits/window_leak.py` | Split assignment and the cross-split window-overlap statistics. |
+| `src/splits/tss_disjoint.py`, `src/splits/window_leak.py` | Split assignment (`combined_groups`: the window-and-protein groups the split and the cluster bootstrap both use) and the cross-split window-overlap statistics. |
 | `analysis/tss_overlap/window_leak.json` | Cross-split window overlap for the homology split and the disjoint split. |
 | `scripts/run_enformer_features.py` | Writes matched TSS 4-mer features (and, without `--skip-model`, Enformer features). |
 | `data/dataset_enformer_tss_4mer.parquet` | Probe-ready TSS-window 4-mer feature table. |
