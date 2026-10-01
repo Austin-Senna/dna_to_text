@@ -44,6 +44,9 @@ for _encoder in ENCODERS:
     # TSS-anchored chunk pooling (E5). Not an aggregate() variant: it picks the
     # TSS-centred chunk per gene from external window info.
     DATASET_PATHS[f"tss_{_encoder}_tssanchored"] = DATA / f"dataset_tss_{_encoder}_tssanchored.parquet"
+    # Composition of the same anchored chunk (E5 baseline; build_tss_composition_baseline.py).
+    for _variant in ("chunk4mergc", "chunk6mer"):
+        DATASET_PATHS[f"tss_{_encoder}_{_variant}"] = DATA / f"dataset_tss_{_encoder}_{_variant}.parquet"
 del _encoder, _variant
 
 # On-the-fly compositional feature sources, computed from the cached CDS.
@@ -59,8 +62,12 @@ SYNTHETIC_FEATURIZERS = {
 
 
 def _pick_meta_parquet() -> Path:
-    """Any encoder parquet supplies the shared {ensembl_id, family, y} metadata."""
-    for key in ("dnabert2", "dnabert2_meanmean", "gena_lm_meanmean"):
+    """Any encoder parquet supplies the shared {ensembl_id, family, y} metadata.
+
+    Tracked parquets first, so every machine reads the same file: the gitignored
+    ``data/dataset.parquet`` (the "dnabert2" alias) is a last resort.
+    """
+    for key in ("dnabert2_meanmean", "gena_lm_meanmean", "dnabert2"):
         p = DATASET_PATHS.get(key)
         if p is not None and Path(p).exists():
             return Path(p)

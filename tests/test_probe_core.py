@@ -14,7 +14,7 @@ from synth import call_main, read_records, redirect_splits, sha256_file, write_d
 
 REPO = Path(__file__).resolve().parents[1]
 RECORD_KEYS = {"stamp", "protocol", "protocol_hash", "splits_file", "splits_sha256", "grid",
-               "edge", "n_iter", "converged", "pred_file", "pred_sha256"}
+               "edge", "n_iter", "converged", "pred_file", "pred_sha256", "features", "purge"}
 STAMP_KEYS = {"git_sha", "git_dirty", "threads", "machine", "versions"}
 
 

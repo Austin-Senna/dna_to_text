@@ -17,8 +17,6 @@ PATTERN = re.compile(r"\bLogisticRegression(CV)?\(|\bRidge(CV)?\(|\bSGD(Classifi
                      r"|from sklearn\.(linear_model|svm) import|import sklearn\.(linear_model|svm)")
 SCANNED = ("scripts", "src", "analysis")
 ALLOWLIST = {
-    "scripts/per_dim_r2.py": "1D: rescore stored predictions",
-    "scripts/ridge_robust_metrics.py": "1D: rescore stored predictions",
     "scripts/probe_enformer_homology.py": "1D: Enformer cells through run_cell",
     "scripts/build_full_table.py": "1F: off-path, delete (needs approval)",
     "scripts/compute_kappa.py": "1F: off-path, delete (needs approval)",

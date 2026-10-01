@@ -83,12 +83,13 @@ def assert_threads(protocol: Protocol) -> None:
             f"OPENBLAS_NUM_THREADS={n} OMP_NUM_THREADS={n} MKL_NUM_THREADS={n} before Python starts.")
 
 
-def _git(*args: str) -> str:
+def _git(*args: str) -> str | None:
+    """Git output, or None when git fails (no repository, "dubious ownership")."""
     try:
         return subprocess.run(["git", "-C", str(REPO_ROOT), *args], capture_output=True,
                               text=True, check=True).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
-        return ""
+        return None
 
 
 @lru_cache(maxsize=1)
@@ -107,7 +108,8 @@ def _static_stamp() -> dict:
         "git_sha": _git("rev-parse", "HEAD") or None,
         # Code only, untracked modules included; metrics files appended during a
         # run are not code and must not mark it dirty.
-        "git_dirty": bool(_git("status", "--porcelain", "--", *CODE_PATHS)),
+        # A tree git can't read counts as dirty: unknown is not clean.
+        "git_dirty": (status := _git("status", "--porcelain", "--", *CODE_PATHS)) is None or bool(status),
         "machine": {"arch": platform.machine(), "system": platform.system(), "cpu": cpu},
         "versions": {"python": sys.version.split()[0], "numpy": numpy.__version__,
                      "scipy": scipy.__version__, "sklearn": sklearn.__version__},

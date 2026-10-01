@@ -45,8 +45,12 @@ def arrays_sha256(arrays: dict[str, np.ndarray]) -> str:
 
 
 def _save(path: Path, arrays: dict[str, np.ndarray]) -> str:
+    """Write atomically: a run killed mid-write must not leave a truncated file
+    that a resumed run then trips over."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    np.savez(path, **arrays)
+    tmp = path.with_name(path.name + ".partial.npz")
+    np.savez(tmp, **arrays)
+    tmp.replace(path)
     return arrays_sha256(arrays)
 
 
@@ -118,6 +122,19 @@ def scored_predictions(rec: dict) -> dict[str, np.ndarray]:
     if int((~keep).sum()) != len(masked):
         raise RuntimeError(f"{rec.get('run_id', '?')}: purged genes missing from the stored predictions")
     return {k: v[keep] for k, v in arrays.items()}
+
+
+def _features_stamp(source: str | Path) -> dict:
+    """What the features were read from, hashed (G7): a parquet, or a featuriser
+    over the pinned CDS manifest."""
+    parquet = sources._parquet_for(source)
+    if parquet is not None:
+        return {"path": _rel(parquet), "sha256": sources.sha256_file(parquet)}
+    manifest = sources.DATA / "cds_manifest.tsv"
+    # The ids, family labels and GenePT targets come from the metadata parquet.
+    return {"featurizer": str(source), "cds_manifest": _rel(manifest),
+            "cds_manifest_sha256": sources.sha256_file(manifest),
+            "meta": _rel(sources.META_PARQUET), "meta_sha256": sources.sha256_file(sources.META_PARQUET)}
 
 
 def _default_purge(split_file: Path, source: str | Path):
@@ -252,6 +269,7 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
 
     provenance = {
         "stamp": stamp(),
+        "features": _features_stamp(source),
         "protocol": protocol.name,
         "protocol_hash": protocol.hash,
         "splits_file": _rel(split_file),

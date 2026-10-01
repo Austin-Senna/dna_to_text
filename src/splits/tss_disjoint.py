@@ -42,6 +42,31 @@ class _UnionFind:
             self.parent[ra] = rb
 
 
+def combined_groups(genes: list[str], spans: dict[str, Span], protein_map: dict[str, str]
+                    ) -> tuple[dict[str, str], list[tuple[str, str, int]]]:
+    """Gene -> group (named by its smallest gene ID), joining overlapping windows
+    and shared protein clusters. Also returns the window-overlap edges.
+
+    The cluster bootstrap resamples these groups on the disjoint splits.
+    """
+    genes = sorted(genes)
+    edges = overlap_pairs({g: spans[g] for g in genes})
+    uf = _UnionFind(genes)
+    for a, b, _ in edges:
+        uf.union(a, b)
+    # Join members by their representative's label, so a cluster stays whole
+    # even when its representative is outside this gene set.
+    gene_set = set(genes)
+    first_of_rep: dict[str, str] = {}
+    for member, rep in protein_map.items():
+        if member in gene_set:
+            uf.union(member, first_of_rep.setdefault(rep, member))
+    members: dict[str, list[str]] = defaultdict(list)
+    for g in genes:
+        members[uf.find(g)].append(g)
+    return {g: min(ms) for ms in members.values() for g in ms}, edges
+
+
 def build_tss_disjoint(families: pd.DataFrame, spans: dict[str, Span],
                        protein_map: dict[str, str], seed: int = SEED,
                        fracs: tuple[float, float, float] = DEFAULT_FRACS) -> tuple[dict, dict]:
@@ -61,21 +86,10 @@ def build_tss_disjoint(families: pd.DataFrame, spans: dict[str, Span],
         if missing:
             raise KeyError(f"{len(missing)} genes have no {what}: {missing[:5]}")
 
-    edges = overlap_pairs({g: spans[g] for g in genes})
-    uf = _UnionFind(genes)
-    for a, b, _ in edges:
-        uf.union(a, b)
-    # Join members by their representative's label, so a cluster stays whole
-    # even when its representative is outside this gene set.
-    gene_set = set(genes)
-    first_of_rep: dict[str, str] = {}
-    for member, rep in protein_map.items():
-        if member in gene_set:
-            uf.union(member, first_of_rep.setdefault(rep, member))
+    group_of, edges = combined_groups(genes, spans, protein_map)
     members: dict[str, list[str]] = defaultdict(list)
-    for g in genes:
-        members[uf.find(g)].append(g)
-    group_of = {g: min(ms) for ms in members.values() for g in ms}
+    for g, grp in group_of.items():
+        members[grp].append(g)
     df["cluster_id"] = df["ensembl_id"].map(group_of)
 
     parts = build_cluster_splits(df, seed=seed, fracs=fracs)

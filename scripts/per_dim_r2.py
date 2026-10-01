@@ -1,13 +1,13 @@
 """Per-dimension R² distribution for GenePT regression probes (A·20).
 
-For each headline regression cell, loads the saved Ridge probe weights
-from data/probe_*.npz, predicts on the held-out test split, and
-computes per-output-dim R² across the 1,536 GenePT dimensions. Outputs:
+For each headline regression cell, rescores the cell's stored test
+predictions (the camera-ready records in data/v2; nothing is refitted, G16)
+and computes per-output-dim R² across the 1,536 GenePT dimensions. Outputs:
 
-  - data/per_dim_r2.json   (rank-ordered per-dim R² per cell, summary stats)
+  - data/v2/per_dim_r2.json   (rank-ordered per-dim R² per cell, summary stats)
   - analysis/figures/per_dim_r2_distribution.png   (histogram + cumulative)
 
-``--plot-only`` redraws the figure from the saved JSON without refitting.
+``--plot-only`` redraws the figure from the saved JSON.
 
 Goal: distinguish "modest macro-R² because a few dims are very well
 predicted (e.g., text-length proxies) and the rest are flat" from
@@ -21,40 +21,31 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-from sklearn.linear_model import Ridge
+from sklearn.metrics import r2_score
 
 from data_loader.pool_names import display_label
-from linear_trainer.selection import MissingRecord, legacy_alpha
-from headline_cells import REG_BEST, REG_BEST_TSS
-from splits import load_split
+from linear_trainer import records as R
+from linear_trainer.cell import scored_predictions
 
 REPO = Path(__file__).resolve().parents[1]
 DATA = REPO / "data"
 ANALYSIS_FIG = REPO / "analysis" / "figures"
-OUT_JSON = DATA / "per_dim_r2.json"
+OUT_JSON = R.V2 / "per_dim_r2.json"
 OUT_PNG = ANALYSIS_FIG / "per_dim_r2_distribution.png"
 
-# Homology-split headline regression cells: (label, dataset_parquet). The Ridge
-# probe is re-fit on the homology train+val (alpha read from
-# metrics_homology.json), not loaded from the random-split npz caches.
-# Each encoder at its validation-selected pool (headline_cells).
 _ENC_DISPLAY = {"dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "hyena_dna": "HyenaDNA", "gena_lm": "GENA-LM"}
-CELLS = [(f"CDS {d} {REG_BEST[e].rsplit('_', 1)[1]}", f"dataset_{REG_BEST[e]}.parquet")
-         for e, d in _ENC_DISPLAY.items()]
-CELLS.append((f"TSS DNABERT-2 {REG_BEST_TSS['dnabert2'].rsplit('_', 1)[1]}",
-              f"dataset_{REG_BEST_TSS['dnabert2']}.parquet"))
-
-_METRICS_HOMOLOGY = json.loads((DATA / "metrics_homology.json").read_text())
 
 
-def _alpha_for(dataset_name: str) -> float:
-    """Recorded validation-selected alpha (the latest record, as in headline_cells)."""
-    runs = [r for r in _METRICS_HOMOLOGY
-            if r.get("model") == "linear_probe" and r.get("dataset") == dataset_name]
-    if not runs:
-        raise MissingRecord(f"no linear_probe record for {dataset_name} in metrics_homology.json")
-    return legacy_alpha(runs[-1])
+def cells() -> list[tuple[str, dict]]:
+    """(label, record): each encoder's validation-selected CDS pool on the CDS
+    primary split, and DNABERT-2's TSS pick on the TSS primary split."""
+    cds = R.cells(R.load("splits.json"), "cds", "genept")
+    tss = R.cells(R.load("splits_tss_disjoint.json"), "tss", "genept")
+    out = [(f"CDS {d} {R.best_pool(cds, e, 'cds').rsplit('_', 1)[1]}", cds[R.best_pool(cds, e, "cds")])
+           for e, d in _ENC_DISPLAY.items()]
+    t = R.best_pool(tss, "dnabert2", "tss")
+    out.append((f"TSS DNABERT-2 {t.rsplit('_', 1)[1]}", tss[t]))
+    return out
 
 
 def per_dim_r2(Y_true: np.ndarray, Y_pred: np.ndarray) -> np.ndarray:
@@ -67,19 +58,14 @@ def per_dim_r2(Y_true: np.ndarray, Y_pred: np.ndarray) -> np.ndarray:
 def compute() -> dict[str, dict]:
     results: dict[str, dict] = {}
 
-    for label, dataset_name in CELLS:
-        dataset_path = DATA / dataset_name
-        if not dataset_path.exists():
-            print(f"  SKIP {label}: missing {dataset_path.name}")
-            continue
-
+    for label, rec in cells():
         print(f"=== {label} ===")
-        alpha = _alpha_for(dataset_name)
-        X_tr, Y_tr, _ = load_split("train", dataset_path=dataset_path)
-        X_va, Y_va, _ = load_split("val", dataset_path=dataset_path)
-        X_te, Y_te, _ = load_split("test", dataset_path=dataset_path)
-        model = Ridge(alpha=alpha).fit(np.vstack([X_tr, X_va]), np.vstack([Y_tr, Y_va]))
-        Y_pred = model.predict(X_te)
+        arrays = scored_predictions(rec)
+        Y_te, Y_pred = arrays["y_true"], arrays["pred"]
+        alpha = rec["alpha"]
+        # G8: the rescored predictions must give the recorded value exactly.
+        if (got := float(r2_score(Y_te, Y_pred, multioutput="uniform_average"))) != rec["test_r2_macro"]:
+            raise RuntimeError(f"{rec['key']}: rescored R^2 {got!r} != recorded {rec['test_r2_macro']!r}")
         r2 = per_dim_r2(Y_te, Y_pred)
 
         r2_sorted = np.sort(r2)[::-1]
@@ -100,7 +86,7 @@ def compute() -> dict[str, dict]:
         print(f"  dims to reach 50% of summed R² = {cum50} / {len(r2)}")
 
         results[label] = {
-            "dataset": dataset_name,
+            "key": rec["key"],
             "alpha": alpha,
             "n_dims": int(len(r2)),
             "macro_r2": macro_r2,
@@ -161,7 +147,7 @@ def plot(results: dict[str, dict]) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--plot-only", action="store_true",
-                    help=f"redraw from {OUT_JSON.name} without refitting the probes")
+                    help=f"redraw from {OUT_JSON.name}")
     args = ap.parse_args()
     plot(json.loads(OUT_JSON.read_text()) if args.plot_only else compute())
 

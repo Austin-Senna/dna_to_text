@@ -30,6 +30,9 @@ ALLOWLIST = {
     # Read a split file; write something else.
     "scripts/check_split_reproduction.py": "writes a scratch split under its tempdir and the cluster TSV",
     "scripts/build_protein_pairs.py": "writes data/leaks/ only",
+    "scripts/recompute_all.py": "writes data/v2/ records; passes split files by path",
+    "scripts/per_dim_r2.py": "writes data/v2/per_dim_r2.json and its figure",
+    "scripts/ridge_robust_metrics.py": "writes data/v2/ridge_robust.json",
     "scripts/build_tss_windows.py": "writes the window manifest and its meta",
     "scripts/build_headline_ci.py": "writes table fragments",
     "scripts/build_analysis_artifacts.py": "writes analysis artifacts",

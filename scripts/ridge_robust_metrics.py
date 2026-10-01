@@ -2,13 +2,15 @@
 
 Reviewer 2 noted macro-averaged per-dimension R^2 is coordinate-dependent (equal weight
 to all 1,536 GenePT dims) and might miss shared structure spread across dim-combinations.
-For each cell this refits Ridge at the recorded alpha on train+val (same recipe as
-per_dim_r2.py), predicts on held-out test, and reports three views:
+For each cell this rescores the cell's stored test predictions (the camera-ready
+records in data/v2; nothing is refitted, G16) and reports three views:
   - macro_r2   : uniform_average per-dim R^2 (the reported headline)
   - pooled_r2  : variance_weighted = 1 - sum(SS_res)/sum(SS_tot)   (rotation-robust)
   - retrieval  : cosine nearest-neighbour retrieval of the true gene in GenePT space
                  (top1/top5/top10, median rank) -- coordinate-free and combination-aware.
-Writes data/ridge_robust.json (consumed by build_paper_tables.build_ridge_robust).
+The control row is a label-shuffled run of the 4-mer (the first shuffle of the
+GenePT null band), rescored the same way.
+Writes data/v2/ridge_robust.json (consumed by build_paper_tables.build_ridge_robust).
 
 Run: uv run scripts/ridge_robust_metrics.py
 """
@@ -19,44 +21,33 @@ import json
 from pathlib import Path
 
 import numpy as np
-from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score
 
-from linear_trainer.selection import MissingRecord, legacy_alpha
-from headline_cells import BEST_DNA_REG, ENCODERS, REG_BEST, REG_BEST_TSS, REG_RECS
+from linear_trainer import records as R
+from linear_trainer.cell import scored_predictions
 from linear_trainer.selection import val_score
-from splits import load_split
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DATA = REPO_ROOT / "data"
 
 ENC_DISPLAY = {"dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "gena_lm": "GENA-LM", "hyena_dna": "HyenaDNA"}
+CDS = "splits.json"
+TSS = "splits_tss_disjoint.json"
 
 
-def _cells() -> list[tuple[str, str]]:
-    """(display label, dataset parquet): ESM-2 upper bound, then each DNA encoder at its
+def cells() -> list[tuple[str, dict]]:
+    """(display label, record): ESM-2 upper bound, then each DNA encoder at its
     validation-selected pool ordered best to weakest on validation, then TSS."""
-    order = sorted(ENCODERS, key=lambda e: -val_score(REG_RECS[REG_BEST[e]]))
-    rows = [("ESM-2 650M (upper bound)", "dataset_esm2_650m.parquet"),
-            ("ESM-2 150M", "dataset_esm2_150m.parquet")]
+    cds = R.cells(R.load(CDS), "cds", "genept")
+    tss = R.cells(R.load(TSS), "tss", "genept")
+    best = {e: R.best_pool(cds, e, "cds") for e in ENC_DISPLAY}
+    order = sorted(ENC_DISPLAY, key=lambda e: -val_score(cds[best[e]]))
+    rows = [("ESM-2 650M (upper bound)", cds["esm2_650m"]), ("ESM-2 150M", cds["esm2_150m"])]
     for i, e in enumerate(order):
         tag = " (best DNA)" if i == 0 else " (weakest)" if i == len(order) - 1 else ""
-        pool = REG_BEST[e].rsplit("_", 1)[1]
-        rows.append((f"{ENC_DISPLAY[e]} {pool}{tag}", f"dataset_{REG_BEST[e]}.parquet"))
-    tss = REG_BEST_TSS["dnabert2"]
-    rows.append((f"TSS DNABERT-2 {tss.rsplit('_', 1)[1]}", f"dataset_{tss}.parquet"))
+        rows.append((f"{ENC_DISPLAY[e]} {best[e].rsplit('_', 1)[1]}{tag}", cds[best[e]]))
+    t = R.best_pool(tss, "dnabert2", "tss")
+    rows.append((f"TSS DNABERT-2 {t.rsplit('_', 1)[1]}", tss[t]))
+    null = R.load(CDS, null=True)
+    rows.append(("SHUFFLED-LABEL control (4-mer)", null[f"{CDS}/cds/genept/kmer/shuf0"]))
     return rows
-
-
-CELLS = _cells()
-
-
-def alpha_for(ds: str, metrics: list[dict]) -> float:
-    """Recorded validation-selected Ridge alpha (the latest record, as in headline_cells)."""
-    runs = [r for r in metrics if r.get("model") == "linear_probe" and r.get("dataset") == ds]
-    if not runs:
-        raise MissingRecord(f"no linear_probe record for {ds}")
-    return legacy_alpha(runs[-1])
 
 
 def pooled_r2(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -85,43 +76,24 @@ def retrieval(y_pred: np.ndarray, y_true: np.ndarray) -> dict:
     }
 
 
-def run_cell(label: str, ds: str, metrics: list[dict], shuffle: bool = False) -> dict | None:
-    path = DATA / ds
-    if not path.exists():
-        return None
-    alpha = alpha_for(ds, metrics)
-    x_tr, y_tr, _ = load_split("train", dataset_path=path)
-    x_va, y_va, _ = load_split("val", dataset_path=path)
-    x_te, y_te, _ = load_split("test", dataset_path=path)
-    x_fit, y_fit = np.vstack([x_tr, x_va]), np.vstack([y_tr, y_va])
-    if shuffle:
-        rng = np.random.default_rng(0)
-        y_fit = y_fit[rng.permutation(len(y_fit))]
-    model = Ridge(alpha=alpha).fit(x_fit, y_fit)
-    y_pred = model.predict(x_te)
-    out = {
-        "label": label,
-        "dataset": ds,
-        "alpha": alpha,
-        "macro_r2": float(r2_score(y_te, y_pred, multioutput="uniform_average")),
-        "pooled_r2": float(pooled_r2(y_te, y_pred)),
-    }
+def rescore(label: str, rec: dict) -> dict:
+    arrays = scored_predictions(rec)
+    y_te, y_pred = arrays["y_true"], arrays["pred"]
+    macro = float(r2_score(y_te, y_pred, multioutput="uniform_average"))
+    if macro != rec["test_r2_macro"]:
+        raise RuntimeError(f"{rec['key']}: rescored R^2 {macro!r} != recorded {rec['test_r2_macro']!r}")
+    out = {"label": label, "key": rec["key"], "alpha": rec["alpha"],
+           "macro_r2": macro, "pooled_r2": float(pooled_r2(y_te, y_pred))}
     out.update(retrieval(y_pred, y_te))
     return out
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", type=Path, default=DATA / "ridge_robust.json")
+    ap.add_argument("--out", type=Path, default=R.V2 / "ridge_robust.json")
     args = ap.parse_args()
 
-    metrics = json.loads((DATA / "metrics_homology.json").read_text())
-    rows = [r for label, ds in CELLS if (r := run_cell(label, ds, metrics))]
-    ctrl = run_cell("SHUFFLED-TARGET control", f"dataset_{BEST_DNA_REG}.parquet",
-                    metrics, shuffle=True)
-    if ctrl:
-        rows.append(ctrl)
-
+    rows = [rescore(label, rec) for label, rec in cells()]
     hdr = (f'{"cell":28s} {"macroR2":>8s} {"pooledR2":>8s} '
            f'{"top1%":>7s} {"top5%":>7s} {"top10%":>7s} {"medRank":>8s}')
     print(hdr)
