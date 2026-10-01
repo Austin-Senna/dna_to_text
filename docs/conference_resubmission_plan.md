@@ -1,5 +1,7 @@
 # Conference resubmission plan & status
 
+> **Superseded (Oct 2026).** This May plan is kept as history. The scripts it runs were retired: every probe cell runs through `scripts/recompute_all.sh`, and the statistics come from `scripts/build_statistics.py` (see `README.md`).
+
 Branch: `revision/tss-and-gene-scope`
 Started: 2026-05-15
 Origin: post-submission reviewer feedback on the COMS W4761 submitted version (`origin/main` HEAD `7e32954`, submodule pointer `73a53bf`). Resubmission target is a real conference, not the class.

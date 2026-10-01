@@ -14,7 +14,8 @@ import matplotlib
 matplotlib.use("Agg")
 
 
-from linear_trainer.selection import encoder_cells, select_by_val
+from data_loader.model_registry import encoder_pools
+from linear_trainer.selection import encoder_cells, select_by_val, select_pool
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -37,6 +38,29 @@ C_ESM = "#2b5c8a"    # reference models: ESM-2, Enformer (blue, hatched)
 
 
 # ---------- accessors ----------
+def best(recs: dict[str, dict], prefix: str, pools=None) -> str:
+    """Validation-selected source among ``prefix + pool`` for the named pools.
+
+    The candidates are named explicitly, not matched by prefix, so E5 cells
+    (``tssanchored``, ``centermean``) never join the pick (ledger G14). By
+    default the pools are the encoder's own CDS or TSS grid, read from the
+    prefix (``"hyena_dna_"``, ``"tss_nt_v2_"``).
+    """
+    if pools is None:
+        tss = prefix.startswith("tss_")
+        pools = encoder_pools(prefix[4 if tss else 0:-1], "TSS" if tss else "CDS")
+    return select_pool(recs, [prefix + p for p in pools])
+
+
+# Each encoder's validation-selected family5 pool in the May records (moved
+# from headline_cells.py, Oct 1). Computed before build_poster_figures swaps
+# GENA-LM's CDS cells into M; it re-picks gena_lm itself.
+CLS_RECS = {r["feature_source"]: r for r in M
+            if r.get("task") == "family5" and not r.get("shuffled_labels")}
+CLS_BEST = {e: best(CLS_RECS, e + "_") for e in ENCODERS}
+CLS_BEST_TSS = {e: best(CLS_RECS, f"tss_{e}_") for e in ENCODERS}
+
+
 def _best_cls(metrics, src, tss=False, metric="test_macro_f1"):
     cells = []
     for r in metrics:

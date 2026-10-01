@@ -2,9 +2,8 @@
 
 The May runners swapped a variant into ``data/splits.json`` and restored it in
 ``finally``; a crash between the two left the wrong split in place for every
-later run. Runners now pass the split file's path. The SWAP entries in the
-allowlist are the scripts still to retire, with the phase that retires them;
-none may remain at the Phase 1 exit gate.
+later run. Runners now pass the split file's path; the last swapping runners
+were retired in Phase 1F, so every allowlist entry is a builder or a reader.
 """
 from __future__ import annotations
 
@@ -35,22 +34,9 @@ ALLOWLIST = {
     "scripts/ridge_robust_metrics.py": "writes data/v2/ridge_robust.json",
     "scripts/build_paper_tables.py": "writes LaTeX fragments into the paper submodule",
     "scripts/build_tss_windows.py": "writes the window manifest and its meta",
-    "scripts/build_headline_ci.py": "writes table fragments",
-    "scripts/build_analysis_artifacts.py": "writes analysis artifacts",
-    "scripts/probe_enformer_homology.py": "writes its metrics file (1F: replaced by recompute_all)",
     "src/cluster/mmseqs_cluster.py": "writes the clustering FASTA",
     "analysis/demo/cross_modal.py": "demo outputs",
     "analysis/demo/zero_shot.py": "demo outputs",
-    # Swap a variant into data/splits.json and restore it: to retire.
-    "scripts/bootstrap_tss_anchored.py": "SWAP; 1D4: thin caller of linear_trainer.stats",
-    "scripts/paired_tss_anchored.py": "SWAP; 1D4: thin caller of linear_trainer.stats",
-    "scripts/probe_enformer_pooling.py": "SWAP; 1F: replaced by recompute_all",
-    "scripts/probe_homology70.py": "SWAP; 1F: replaced by recompute_all",
-    "scripts/probe_random_comparators.py": "SWAP; 1F: replaced by recompute_all",
-    "scripts/probe_tss_anchored.py": "SWAP; 1F: replaced by recompute_all",
-    "scripts/probe_tss_composition.py": "SWAP; 1F: replaced by recompute_all",
-    "scripts/probe_tss_disjoint.py": "SWAP; 1F: replaced by recompute_all",
-    "scripts/seed_sensitivity.py": "SWAP; 1F: replaced by make_seed_splits + recompute_all",
 }
 
 

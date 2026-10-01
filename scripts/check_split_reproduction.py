@@ -3,8 +3,8 @@
 Clusters the corpus into a scratch directory (``data/splits.json`` is never
 touched), re-assigns clusters to partitions at the canonical seed, and compares
 gene membership with the committed split. Different MMseqs2 builds can cluster
-differently, so run this before any script that re-clusters
-(``seed_sensitivity.py``) and record the printed version with the results.
+differently, so run this before re-clustering (``make_splits.py``) and record
+the printed version with the results.
 
 Run: uv run scripts/check_split_reproduction.py [--mmseqs PATH] [--id 0.4]
 """

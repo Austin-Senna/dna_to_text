@@ -40,11 +40,11 @@ from poster_may_records import (  # noqa: E402  (sys.path set just above)
     BOUNDARY_POOLS, NO_BOUNDARY_TOKEN,
     CELLS, C_COMP, C_DNA, C_ESM, ENCODERS, ENC_DISP, ENFH, FLOOR, M, POOLS,
     _aa_best, _best_cls, _cell_cls, _cls_rec, _rand_f1, _reg_rec, f1_of, r2_of,
+    CLS_BEST, CLS_BEST_TSS, best,
 )
 from build_umap_compare import (  # noqa: E402
     FAM_DISP, FAM_ORDER, _coords,
 )
-from headline_cells import CLS_BEST, CLS_BEST_TSS, best  # noqa: E402
 from linear_trainer.selection import select_by_val, select_pool  # noqa: E402
 from data_loader.model_registry import encoder_pools  # noqa: E402
 

@@ -1,9 +1,11 @@
 {
-  "description": "Inputs consumed by scripts/bootstrap_test_uncertainty.py for the 1000-run test-set confidence intervals.",
+  "description": "Inputs consumed by scripts/build_statistics.py for the cluster-bootstrap intervals, paired tests and null bands.",
   "stage": "5",
   "n_iters": 1000,
   "seed": 42,
-  "records": "data/metrics_homology.json (headline cells chosen on validation by scripts/headline_cells.py)",
-  "stored_predictions": "outputs/predictions/<metrics stem>/<cell>__<task>__<sha>.npz (each record's pred_file, verified against pred_sha256)",
+  "records": "data/v2/metrics_<split stem>.json and data/v2/null_<split stem>.json, written by scripts/recompute_all.sh (headline cells picked on validation by linear_trainer.records)",
+  "run_marker": "data/v2/run_complete.json (one whole-manifest run, one commit and protocol)",
+  "stored_predictions": "outputs/predictions/v2/<split stem>/<cell>__<task>[__shufN]__<sha12>.npz (each record's pred_file, verified against pred_sha256), plus targets__<sha16>.npz for GenePT targets",
+  "resampling_groups": "data/clusters/homology_id40.tsv (CDS on homology-type splits); window-and-protein groups from splits.tss_disjoint (TSS cells and disjoint splits)",
   "documentation": "docs/stage5-bootstrap.md"
 }

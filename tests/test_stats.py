@@ -100,6 +100,31 @@ def test_cells_on_different_split_files_are_not_paired(tmp_path):
         stats.paired_bootstrap(a, b, _singletons(a), n_iters=5)
 
 
+@pytest.mark.parametrize("task,field", [("family5", "pred_file"), ("genept", "pred_file"),
+                                        ("genept", "targets_file")])
+def test_a_tampered_prediction_or_target_file_is_refused(tmp_path, task, field):
+    rec = _rec(tmp_path, task)
+    path = rec[field] if Path(rec[field]).is_absolute() else Path(__file__).resolve().parents[1] / rec[field]
+    arrays = dict(np.load(path, allow_pickle=False))
+    key = "pred" if field == "pred_file" else "y_true"
+    arrays[key] = arrays[key][::-1].copy()
+    np.savez(path, **arrays)
+    with pytest.raises(RuntimeError, match="sha256"):
+        stats.cluster_bootstrap(rec, n_iters=5, groups={})
+
+
+def test_the_bootstraps_never_fit(tmp_path, monkeypatch):
+    from sklearn.linear_model import LogisticRegression, Ridge
+    a, b = _rec(tmp_path, name="a"), _rec(tmp_path, name="b", permute=True)
+
+    def refuse(self, *args, **kw):
+        raise AssertionError("a bootstrap refitted a probe")
+    monkeypatch.setattr(LogisticRegression, "fit", refuse)
+    monkeypatch.setattr(Ridge, "fit", refuse)
+    stats.cluster_bootstrap(a, _singletons(a), n_iters=5)
+    stats.paired_bootstrap(a, b, _singletons(a), n_iters=5)
+
+
 def _null(n, **over):
     base = {"split": "splits.json", "task": "family5", "feature_source": "kmer",
             "shuffled_labels": True}

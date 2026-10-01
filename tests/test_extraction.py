@@ -91,7 +91,7 @@ def _cls(src, val):
 
 
 def test_a_hyena_clsmean_decoy_never_wins_a_pick():
-    import headline_cells as hc
+    import poster_may_records as hc      # the May picks, frozen for the poster
     from data_loader.model_registry import encoder_pools
     from linear_trainer import records as R
 

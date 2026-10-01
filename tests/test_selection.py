@@ -50,7 +50,7 @@ def _cls(src, val):
 
 
 def test_a_decoy_pool_never_joins_the_headline_pick():
-    import headline_cells as hc
+    import poster_may_records as hc      # the May picks, frozen for the poster
     recs = {"tss_dnabert2_meanmean": _cls("tss_dnabert2_meanmean", 0.5),
             "tss_dnabert2_tssanchored": _cls("tss_dnabert2_tssanchored", 0.9),
             "tss_dnabert2_centermean": _cls("tss_dnabert2_centermean", 0.8)}
@@ -58,7 +58,7 @@ def test_a_decoy_pool_never_joins_the_headline_pick():
 
 
 def test_tied_pools_pick_the_same_cell_in_any_record_order():
-    import headline_cells as hc
+    import poster_may_records as hc      # the May picks, frozen for the poster
     a, b = _cls("nt_v2_meanD", 0.6), _cls("nt_v2_meanmean", 0.6)
     forward = hc.best({"nt_v2_meanD": a, "nt_v2_meanmean": b}, "nt_v2_")
     backward = hc.best({"nt_v2_meanmean": b, "nt_v2_meanD": a}, "nt_v2_")

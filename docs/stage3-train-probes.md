@@ -1,7 +1,7 @@
 # Stage 3: Train Probes and Baselines
 
 Stage 3 freezes the train/validation/test split, trains family-classification
-and Ridge-to-GenePT probes, and builds the main metric tables.
+and Ridge-to-GenePT probes. The paper's tables are built in Stage 7.
 
 ## Sample Files
 
@@ -18,8 +18,6 @@ export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
 uv run python scripts/make_splits.py
 uv run python scripts/train_logistic_probe.py --dataset nt_v2_meanD --task family5
 uv run python scripts/train_probe.py --dataset data/dataset_dnabert2_meanG.parquet
-uv run python scripts/build_family5_table.py
-uv run python scripts/build_regression_table.py
 ```
 
 Additional encoder/pooling cells use the same probe scripts with different
@@ -57,8 +55,6 @@ runs every cell and null band into `data/v2/` (see the repository README).
 | `scripts/train_probe.py` | Trains Ridge probes from DNA features into GenePT text embeddings. |
 | `scripts/train_baseline.py` | Runs 4-mer Ridge baseline cells. |
 | `scripts/train_anti_baseline.py` | Runs shuffled-GenePT anti-baseline cells for leakage checks. |
-| `scripts/build_family5_table.py` | Builds the main family-classification summary table. |
-| `scripts/build_regression_table.py` | Builds the main Ridge-to-GenePT summary table. |
 | `src/splits/make_splits.py` | Split construction helpers used by the split CLI. |
 | `src/splits/loader.py` | Loads split-specific `X`, `Y`, and metadata arrays from feature tables. |
 | `src/linear_trainer/protocol.py` | The probe protocol (`V2`), the thread-pin assert and the provenance stamp. |
@@ -82,8 +78,6 @@ runs every cell and null band into `data/v2/` (see the repository README).
 - `data/metrics.json` - appended probe and baseline metrics (per-cell CLI runs).
 - `data/confusion_5way_*.json` - family-classification confusion summaries from the May 2026 runs. Probe runs now write them only for unshuffled family5 cells, and only into the directory given by `--confusion-dir` (pass `--confusion-dir data` to refresh these).
 - `outputs/predictions/<metrics stem>/*.npz` - each cell's stored test predictions (content-addressed names), which the bootstraps rescore; `--pred-dir` overrides the location (gitignored).
-- `analysis/tables/main_family5.md` - best family5 cell per encoder.
-- `analysis/tables/main_regression.md` - best Ridge-to-GenePT cell per encoder.
 
 ## Headline Results
 

@@ -326,6 +326,8 @@ Re-frozen at 5000: `metrics_tss_anchored{,_disjoint}.json`,
 
 # Scripts & reproduction
 
+Retired Oct 1 2026: `run_e5.sh` and the probe, bootstrap and paired scripts in steps 4 and 6-8 are gone. The feature builders (steps 2, 3, 5) remain; the probe cells run in `scripts/recompute_all.sh` and the statistics in `scripts/build_statistics.py`. The table below records the August chain.
+
 The full E5 chain and the artifacts it produces. Run order is `scripts/run_e5.sh` (steps 2–8; CPU-only,
 no GPU). Step 1 is the GPU-gated upstream extraction and is a prerequisite, not part of the driver.
 The chain never writes tracked `data/metrics.json` (mixed-provenance trap) — it writes its own JSONs.

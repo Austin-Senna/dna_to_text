@@ -62,8 +62,7 @@ uv run python scripts/build_statistics.py
 - `data/dataset_tss_nt_v2_*.parquet` - TSS-window NT-v2 pooling datasets.
 - `data/dataset_enformer_trunk_global.parquet` - Enformer trunk family5 feature table.
 - `data/dataset_enformer_trunk_center.parquet` - Enformer trunk regression feature table.
-- `analysis/tables/context_ablation.md` - CDS vs TSS context comparison.
-- `analysis/figures/context_ablation_cds_tss_enformer.png` - report figure.
+- The CDS vs TSS comparison is built in Stage 7 (`cds_tss.tex`, `tss_context.png`) from the `data/v2/` records. `analysis/tables/context_ablation.md` and `analysis/figures/context_ablation_cds_tss_enformer.png` are retired Stage 6 outputs (May protocol, no generator).
 
 ## Result Summary
 

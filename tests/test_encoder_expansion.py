@@ -197,17 +197,6 @@ class FeatureTests(unittest.TestCase):
         self.assertAlmostEqual(float(features.sum()), 1.0)
 
 
-class RegressionTableTests(unittest.TestCase):
-    def test_regression_table_dataset_names_match_probe_outputs(self):
-        from scripts.build_regression_table import _dataset_name
-
-        self.assertIsNone(_dataset_name("kmer"))
-        self.assertEqual(_dataset_name("dnabert2"), "dataset.parquet")
-        self.assertEqual(_dataset_name("nt_v2"), "dataset_nt_v2.parquet")
-        self.assertEqual(_dataset_name("gena_lm_meanD"), "dataset_gena_lm_meanD.parquet")
-        self.assertEqual(_dataset_name("hyena_dna_meanG"), "dataset_hyena_dna_meanG.parquet")
-
-
 if __name__ == "__main__":
     unittest.main()
 

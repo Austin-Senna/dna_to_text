@@ -37,16 +37,11 @@ These files are small, reviewer-readable examples for each stage of the project 
 - Full commands: `scripts/run_enformer_features.py`, `scripts/run_tss_multi_pool_extract.py`, `scripts/build_tss_pooling_datasets.py`, `scripts/train_logistic_probe.py`, and `scripts/train_probe.py`
 - Details: `docs/stage4-2-tss-encoders.md`
 
-## Stage 5: Bootstrap Test-Set Confidence Intervals
+## Stage 5: Test-Set Uncertainty and Confirmatory Tests
 
 - Input: `stage5_bootstrap_input.json`
 - Output: `stage5_bootstrap_output.json`
-- Full command: `uv run python scripts/bootstrap_test_uncertainty.py`
+- Full command: `uv run python scripts/build_statistics.py`
 - Details: `docs/stage5-bootstrap.md`
 
-## Stage 6: Build Report Analysis Artifacts
-
-- Input: `stage6_artifact_input.json`
-- Output: `stage6_artifact_output.json`
-- Full command: `uv run python scripts/build_analysis_artifacts.py --overwrite`
-- Details: `docs/stage6-analysis-artifacts.md`
+Stage 6 (report analysis artifacts) is retired; it has no sample.
