@@ -11,9 +11,12 @@ resamples them.
   reflects the number of independent units, not the number of genes. Groups
   are 40% protein clusters for CDS cells on the homology-type splits, and
   window-and-protein groups for every TSS cell and for any cell on a disjoint
-  split (``group_of``). Resampling is unstratified, so the intervals also carry
-  class-mix variance the stratified split design does not have: they are
-  conservative. The metric is computed exactly as the cell's (``fit.score``).
+  split, each joined with every Rule-A protein pair (MMseqs2 links members to
+  a representative only, so two genes of different clusters can still be a
+  pair), and for GenePT cells with the genes that share a summary template,
+  whose targets are near-copies (``group_of``; G24). Resampling is
+  unstratified, so the intervals also carry class-mix variance the stratified
+  split design does not have: they are conservative. The metric is computed exactly as the cell's (``fit.score``).
   A resample that misses a family changes what macro-F1 averages over; the
   count is reported, and more than ``MAX_SHORT_CLASS`` of resamples raises.
 - **Paired bootstrap.** Two cells on the same split file (same purge) are
@@ -28,6 +31,12 @@ resamples them.
 - **Null band.** The 2.5-97.5% range of a metric over label-shuffled runs of
   one cell, each with its full selection loop. It replaces the single shuffled
   run once used as "chance" (G13).
+- **Per-cell chance.** The metric of a cell's own stored predictions against
+  permuted test labels: chance for that predictor's output mix, since macro-F1
+  under no signal depends on which classes a probe predicts (Rule 3).
+- **Within-family R^2.** GenePT R^2 after subtracting each family's mean target
+  (from the fit rows) from truth and prediction: what a probe explains beyond
+  the family, which the GenePT text partly names through the gene symbol.
 """
 from __future__ import annotations
 
@@ -46,7 +55,7 @@ DATA = REPO_ROOT / "data"
 PROTEIN_CLUSTERS = DATA / "clusters" / "homology_id40.tsv"
 N_ITERS = 1000
 SEED = 42
-# Pre-registered (Oct 1): above this share of resamples missing a family, the
+# Fixed Oct 1, before the canonical run: above this share of resamples missing a family, the
 # macro-F1 interval is not reported.
 MAX_SHORT_CLASS = 0.01
 
@@ -110,18 +119,63 @@ def _disjoint_groups() -> dict[str, str]:
     return group_of
 
 
-def group_of(split_name: str, arm: str) -> dict[str, str]:
-    """Gene -> resampling unit for one cell.
+def _join(base: dict[str, str], *links: list[tuple[str, str]]) -> dict[str, str]:
+    """Connected components of ``base`` groups plus extra gene-gene links, over
+    every gene in ``base``; each component is named by its smallest gene ID."""
+    parent = {g: g for g in base}
+
+    def find(x: str) -> str:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a: str, b: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[max(ra, rb)] = min(ra, rb)
+
+    first: dict[str, str] = {}
+    for g in sorted(base):
+        union(g, first.setdefault(base[g], g))
+    for pairs in links:
+        for a, b in pairs:
+            if a in parent and b in parent:
+                union(a, b)
+    return {g: find(g) for g in base}
+
+
+@lru_cache(maxsize=None)
+def _rule_a_pairs() -> tuple[tuple[str, str], ...]:
+    from splits.leaks import PAIR_MIN_ID, read_protein_pairs
+    return tuple(read_protein_pairs(PAIR_MIN_ID))
+
+
+@lru_cache(maxsize=None)
+def _template_pairs() -> tuple[tuple[str, str], ...]:
+    from data_loader import label_audit
+    gt, _, _ = label_audit.load_inputs()
+    return tuple((ids[0], g) for ids in label_audit.shared_summary_groups(gt).values() for g in ids[1:])
+
+
+@lru_cache(maxsize=None)
+def _groups(disjoint: bool, templates: bool) -> dict[str, str]:
+    base = _disjoint_groups() if disjoint else _protein_groups()
+    return _join(base, list(_rule_a_pairs()), list(_template_pairs()) if templates else [])
+
+
+def group_of(split_name: str, arm: str, task: str = "family5") -> dict[str, str]:
+    """Gene -> resampling unit for one cell (G24).
 
     Window-and-protein groups for TSS cells (window overlap is a property of the
     genes, whatever the split) and for every cell on a disjoint split (the units
-    that split was built from); 40% protein clusters otherwise.
+    that split was built from); 40% protein clusters otherwise. Either is joined
+    with every Rule-A pair and, for GenePT, with the shared-summary groups.
     """
     if arm not in ("cds", "tss"):
         raise ValueError(f"arm must be 'cds' or 'tss', got {arm!r}")
-    if arm == "tss" or Path(split_name).name.startswith("splits_tss_disjoint"):
-        return _disjoint_groups()
-    return _protein_groups()
+    disjoint = arm == "tss" or Path(split_name).name.startswith("splits_tss_disjoint")
+    return _groups(disjoint, task == "genept")
 
 
 def _group_index(ids: np.ndarray, groups: dict[str, str]) -> list[np.ndarray]:
@@ -168,7 +222,7 @@ def cluster_bootstrap(rec: dict, groups: dict[str, str] | None = None,
     full = _scored(rec)
     arrays = _drop(full, exclude)
     kind = _kind(rec)
-    groups = groups if groups is not None else group_of(rec["split"], rec["arm"])
+    groups = groups if groups is not None else group_of(rec["split"], rec["arm"], rec["task"])
     units = _group_index(arrays["ids"], groups)
     y, pred = arrays["y_true"], arrays["pred"]
     idxs = list(_resamples(units, n_iters, seed))
@@ -222,7 +276,7 @@ def paired_bootstrap(rec_a: dict, rec_b: dict, groups: dict[str, str] | None = N
         y, pa, pb = y[keep], pa[keep], pb[keep]
     if groups is None:   # the coarser grouping when the two cells' arms differ
         arm = "tss" if "tss" in (rec_a["arm"], rec_b["arm"]) else "cds"
-        groups = group_of(rec_a["split"], arm)
+        groups = group_of(rec_a["split"], arm, rec_a["task"])
     units = _group_index(a["ids"], groups)
     idxs = list(_resamples(units, n_iters, seed))
     d = np.array([_metric(kind, y[idx], pa[idx]) - _metric(kind, y[idx], pb[idx]) for idx in idxs])
@@ -239,6 +293,42 @@ def paired_bootstrap(rec_a: dict, rec_b: dict, groups: dict[str, str] | None = N
     if exclude:
         out["n_excluded"] = int(n_full - len(y))
     return out
+
+
+def permutation_chance(rec: dict, n_iters: int = N_ITERS, seed: int = SEED) -> dict:
+    """The cell's metric with its scored test labels (targets) permuted, its
+    predictions fixed: median and central 95%."""
+    arrays = _scored(rec)
+    kind = _kind(rec)
+    y, pred = arrays["y_true"], arrays["pred"]
+    rng = np.random.default_rng(seed)
+    vals = np.array([_metric(kind, y[rng.permutation(len(y))], pred) for _ in range(n_iters)])
+    point = rec[_METRIC[kind]]
+    return {"key": rec.get("key"), "metric": _METRIC[kind], "point": point,
+            "chance_median": float(np.median(vals)), "chance95": _ci(vals),
+            "p_above_chance": float((1 + np.sum(vals >= point)) / (n_iters + 1)),
+            "n_test": int(len(y)), "n_iters": n_iters, "seed": seed}
+
+
+def within_family_r2(rec: dict, family: dict[str, str], means: dict[str, np.ndarray],
+                     groups: dict[str, str] | None = None, n_iters: int = N_ITERS,
+                     seed: int = SEED) -> dict:
+    """GenePT R^2 with each gene's family mean target (``means``, from the fit
+    rows) subtracted from both its target and its prediction, with a cluster-
+    bootstrap interval."""
+    if _kind(rec) != "ridge":
+        raise ValueError(f"{rec.get('key')}: within-family R^2 is for GenePT cells")
+    arrays = _scored(rec)
+    off = np.stack([means[family[g]] for g in arrays["ids"].tolist()])
+    y, pred = arrays["y_true"] - off, arrays["pred"] - off
+    groups = groups if groups is not None else group_of(rec["split"], rec["arm"], rec["task"])
+    units = _group_index(arrays["ids"], groups)
+    vals = np.array([_metric("ridge", y[idx], pred[idx]) for idx in _resamples(units, n_iters, seed)])
+    point = _metric("ridge", y, pred)
+    ci = _ci(vals)
+    return {"key": rec.get("key"), "metric": "within_family_r2", "point": point, "ci95": ci,
+            "point_in_ci": bool(ci[0] <= point <= ci[1]), "r2_macro": rec["test_r2_macro"],
+            "n_test": int(len(y)), "n_groups": len(units), "n_iters": n_iters, "seed": seed}
 
 
 # --- multiplicity and chance ----------------------------------------------------

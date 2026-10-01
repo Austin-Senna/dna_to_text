@@ -69,6 +69,18 @@ SYNTHETIC_FEATURIZERS = {
 }
 
 
+def _with_length(fn):
+    return lambda s: np.append(fn(s), np.float32(np.log1p(len(s))))
+
+
+# Composition plus log1p(CDS length), a control (Rule 3, W1): the k-mer vectors are
+# L1-normalised, but the encoders see length through their chunking, so
+# "encoder > composition" could be length. Never a k-mer pick candidate.
+LENGTH_CONTROLS = ("kmer_len", "kmer6_len", "aa1_len", "aa2_len", "aa3_len")
+SYNTHETIC_FEATURIZERS.update({c: _with_length(SYNTHETIC_FEATURIZERS[c.removesuffix("_len")])
+                              for c in LENGTH_CONTROLS})
+
+
 def _pick_meta_parquet() -> Path:
     """Any encoder parquet supplies the shared {ensembl_id, family, y} metadata.
 

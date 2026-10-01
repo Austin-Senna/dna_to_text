@@ -82,7 +82,7 @@ SPECS = {
                     header=r"Source & F1 & $\Delta$F1 & $\kappa$ & $R^2$ & $\Delta R^2$"),
     "split_comparison": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7.5}{9}\selectfont",
                              width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr|rrr@{}",
-                             header=r"Source & F1 (rand) & F1 (hom) & $\Delta$F1 & $R^2$ (rand) & $R^2$ (hom) & $\Delta R^2$"),
+                             header=r"Source & F1 (rand) & F1 (prim.) & $\Delta$F1 & $R^2$ (rand) & $R^2$ (prim.) & $\Delta R^2$"),
     "s_seed_sensitivity": dict(setup="", width=r"0.9\columnwidth",
                                cols=r"@{\extracolsep{\fill}}lrr@{}",
                                header=r"Cell & Macro-F1 (4 splits) & GenePT $R^2$ (4 splits)"),
@@ -107,6 +107,9 @@ SPECS = {
     "s_d5_sensitivity": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.4}\selectfont",
                              width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lcr@{}",
                              header=r"Comparison & $\Delta$ [95\% CI] & $p$"),
+    "s_split_population": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
+                               width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrrr@{}",
+                               header=r"Partition & Genes & Singleton & Median & In $\geq$10 & ORs / GPCRs"),
     "s_ridge_robust": dict(setup=r"\setlength{\tabcolsep}{3pt}",
                            width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
                            header=r"Method & Macro-$R^2$ & Pooled-$R^2$ & Retr.@5 & Med.\ rank"),
@@ -348,6 +351,12 @@ def _nt_label() -> str:
     return "CDS k-mer (" + ", ".join(f"{n} {t[0].upper()}{k[v]}" for (n, t), v in picks.items()) + ")"
 
 
+def primary(arm: str) -> Split:
+    """The arm's primary split: homology for CDS, disjoint for TSS. On the homology
+    split TSS windows overlap across partitions, unmasked by design (G25)."""
+    return {"cds": HOM, "tss": DIS}[arm]
+
+
 def build_split_comparison():
     def trip(rv, hv):
         return f"{f(rv,3)} & {f(hv,3)} & {sgn(hv-rv,3)}"
@@ -359,17 +368,17 @@ def build_split_comparison():
         for src in block:
             name = _nt_label() if src == "nt" else CMP_DISPLAY[src]
             out.append(f"\\quad {name} & "
-                       f"{trip(_value(RND, 'cds', 'family5', src), _value(HOM, 'cds', 'family5', src))} & "
-                       f"{trip(_value(RND, 'cds', 'genept', src), _value(HOM, 'cds', 'genept', src))} \\\\")
+                       f"{trip(_value(RND, 'cds', 'family5', src), _value(primary('cds'), 'cds', 'family5', src))} & "
+                       f"{trip(_value(RND, 'cds', 'genept', src), _value(primary('cds'), 'cds', 'genept', src))} \\\\")
     out.append(r"\midrule")
-    out.append(r"\multicolumn{7}{@{}l}{\textbf{TSS window (196{,}608\,bp)}}\\")
+    out.append(r"\multicolumn{7}{@{}l}{\textbf{TSS window (196{,}608\,bp; primary = genomic-interval-disjoint split)}}\\")
     for src, name in [(TSS_4MER, "TSS 4-mer"), *((e, ENC_DISPLAY[e]) for e in ENCODERS),
                       (ENF_WHOLE, "Enformer (whole window)")]:
         if src == ENCODERS[0] or src == ENF_WHOLE:
             out.append(r"\midrule")
         out.append(f"\\quad {name} & "
-                   f"{trip(_value(RND, 'tss', 'family5', src), _value(HOM, 'tss', 'family5', src))} & "
-                   f"{trip(_value(RND, 'tss', 'genept', src), _value(HOM, 'tss', 'genept', src))} \\\\")
+                   f"{trip(_value(RND, 'tss', 'family5', src), _value(primary('tss'), 'tss', 'family5', src))} & "
+                   f"{trip(_value(RND, 'tss', 'genept', src), _value(primary('tss'), 'tss', 'genept', src))} \\\\")
     return "\n".join(out)
 
 
@@ -562,10 +571,21 @@ def build_tss_disjoint():
 
 # ===================================================================
 # E5: TSS-Anchored vs whole-window pooling, both splits. The anchored cell
-# carries its cluster-bootstrap CI (bold when its lower bound clears the
-# whole-window value); the last column is the validation-selected composition
+# carries its cluster-bootstrap CI, bold when the paired anchored - whole-window
+# interval excludes 0 (caption: "Bold: the paired difference's 95% CI excludes
+# 0"); the last column is the validation-selected composition
 # (4-mer+GC or 6-mer) of the same anchored chunk.
 # ===================================================================
+def _beats(split_name: str, label: str, a: dict, b: dict) -> bool:
+    """Bold a cell only when the paired test's interval for A - B excludes 0
+    (G26); one cell's interval against the other's point ignores B's noise."""
+    d = STATS["exploratory"][f"{split_name} family5: {label}"]
+    if (d["a"], d["b"]) != (a["key"], b["key"]):
+        raise R.MixedRecords(f"{label}: the paired test compares {d['a']} and {d['b']}, "
+                             f"the table shows {a['key']} and {b['key']}")
+    return d["delta_ci95"][0] > 0
+
+
 def build_tss_anchored():
     out = []
     for split, name, title in ((HOM, CDS, "Homology-aware split"),
@@ -575,16 +595,19 @@ def build_tss_anchored():
         out.append(r"\multicolumn{4}{@{}l}{\textbf{" + title + r"}}\\")
         by = split.cells("tss", "family5")
         for enc in ENCODERS:
-            whole = split.best(enc, "tss", "family5")[F1]
+            whole_rec = split.best(enc, "tss", "family5")
+            whole = whole_rec[F1]
             c = interval(name, "family5", f"tss_{enc}_tssanchored")
             comp = by[R.pick(by, [f"tss_{enc}_chunk4mergc", f"tss_{enc}_chunk6mer"])][F1]
             txt = f"{f(c['point'],3)} {_ci(c['ci95'])}"
-            out.append(f"{ENC_DISPLAY[enc]} & {f(whole,3)} & {bold(txt) if c['ci95'][0] > whole else txt} "
+            win = _beats(name, f"{enc} anchored > whole-window", by[f"tss_{enc}_tssanchored"], whole_rec)
+            out.append(f"{ENC_DISPLAY[enc]} & {f(whole,3)} & {bold(txt) if win else txt} "
                        f"& {f(comp,3)} \\\\")
-        g = split.cell("tss", "family5", ENF_WHOLE)[F1]
+        g_rec = split.cell("tss", "family5", ENF_WHOLE)
         c = interval(name, "family5", ENF_CENTRE)
         txt = f"{f(c['point'],3)} {_ci(c['ci95'])}"
-        out.append(f"Enformer & {f(g,3)} & {bold(txt) if c['ci95'][0] > g else txt} & --- \\\\")
+        win = _beats(name, "Enformer centre > whole", by[ENF_CENTRE], g_rec)
+        out.append(f"Enformer & {f(g_rec[F1],3)} & {bold(txt) if win else txt} & --- \\\\")
     return "\n".join(out)
 
 
@@ -599,6 +622,8 @@ def _diff_line(disp, d, p):
 
 def _key_label(key):
     src = key.rsplit("/", 1)[1]
+    if src.endswith("_len"):          # Rule 3 control: composition + CDS length
+        return _key_label(key.removesuffix("_len")) + " + length"
     if src in dict(COMPOSITION) or src in NT_DISPLAY:
         return dict(COMPOSITION)[src]
     if src.startswith("esm2_"):
@@ -634,11 +659,20 @@ def build_d5_sensitivity():
     for e in ENCODERS:
         d = p3[f"family5/{e}"]["Ends+Mean > Mean x3 (3x C)"]
         out.append(_diff_line(ENC_DISPLAY[e], d, d["p_one_sided"]))
+    out.append(r"\midrule")
+    out.append(r"\multicolumn{3}{@{}l}{\textbf{Encoder $-$ composition with log CDS length, macro-F1 "
+               r"(one-sided $p$, unadjusted)}}\\")
+    for k in ("nt_kmer+len", "aa_kmer+len"):
+        d = STATS["exploratory"][f"{CDS} family5: encoder > {k}"]
+        out.append(_diff_line(f"{_key_label(d['a'])} $-$ {_key_label(d['b'])}", d, d["p_one_sided"]))
     for name, title, metric in (("label_noise", "noisy TF labels (non-C2H2 zinc-finger groups only", "macro-F1"),
+                                ("label_noise_kinase", "kinase-labelled genes that are not protein kinases "
+                                 "(HGNC kinase groups of scaffolds, subunits or small-molecule kinases",
+                                 "macro-F1"),
                                 ("template", "templated GenePT summaries (shared text", "GenePT $R^2$")):
         tests = STATS["sensitivity"][name]["tests"]
-        if any("n_excluded" not in d for d in tests.values()):
-            raise ValueError(f"{name}: a masked test excluded no genes; the mask is empty")
+        if any(d.get("n_excluded", 0) == 0 for d in tests.values()):
+            raise ValueError(f"{name}: a masked test excluded no scored genes; the mask is empty there")
         cds = {d["n_excluded"] for k, d in tests.items() if not k.startswith("T4")}
         dis = {d["n_excluded"] for k, d in tests.items() if k.startswith("T4")}
         if len(cds) != 1 or len(dis) > 1:
@@ -649,6 +683,30 @@ def build_d5_sensitivity():
         for k, d in tests.items():
             where = " (disjoint split)" if k.startswith("T4") else ""
             out.append(_diff_line(f"{_key_label(d['a'])} $-$ {_key_label(d['b'])}{where}", d, d["p_one_sided"]))
+    return "\n".join(out)
+
+
+# ===================================================================
+# Who the test sets are (Rule 3): cluster-size profile and olfactory receptors
+# per partition, from data/v2/counts.json (scripts/build_counts.py).
+# ===================================================================
+def build_split_population():
+    counts = json.loads((R.V2 / "counts.json").read_text())
+    for name in (CDS, TSS):                       # built from the split files on disk now
+        if counts["inputs"][name] != R._sha(R.REPO_ROOT / "data" / name):
+            raise R.MixedRecords(f"counts.json was built from another {name}; rerun scripts/build_counts.py")
+    pop = counts["split_population"]
+    out = []
+    for name, title in ((CDS, "Homology-aware split (CDS primary)"),
+                        (TSS, "Genomic-interval-disjoint split (TSS primary)")):
+        if out:
+            out.append(r"\midrule")
+        out.append(r"\multicolumn{6}{@{}l}{\textbf{" + title + r"}}\\")
+        for part in ("train", "val", "test"):
+            r = pop[name][part]
+            out.append(f"\\quad {part.capitalize()} & {r['n']:,} & {r['singleton_share']*100:.0f}\\% "
+                       f"& {r['median_cluster_size']:.0f} & {r['share_in_clusters_ge10']*100:.0f}\\% "
+                       f"& {r['olfactory']} / {r['gpcr']} \\\\".replace(",", "{,}"))
     return "\n".join(out)
 
 
@@ -684,6 +742,7 @@ def main():
     write("s_ridge_robust", build_ridge_robust())
     write("s_tss_anchored", build_tss_anchored())
     write("s_d5_sensitivity", build_d5_sensitivity())
+    write("s_split_population", build_split_population())
     print("\nAll fragments written to", OUT)
 
 

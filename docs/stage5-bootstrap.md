@@ -13,12 +13,19 @@ band from a committed tree. It reads the records in `data/v2/` through
 
 - `data/v2/run_complete.json` says one whole-manifest run wrote them, at one
   commit and protocol;
+- `data/v2/reproduction.json` says the independent reimplementation
+  (`scripts/reproduce_headline.py`) matched these exact records files. It refits
+  the ten headline cells from the raw features and split files without importing
+  the pipeline, re-derives the purge, the picks and the resampling groups, and
+  runs its own bootstrap; T1-T4 must then agree with it (same cells, point and
+  groups; interval and p within Monte Carlo tolerance);
 - every records file is from the same commit and protocol;
 - each split file on disk matches the hash its records carry.
 
 The sensitivity block also reads the Stage 1 gene table and HGNC groups
 (`data/gene_table.parquet`, `data/hgnc/hgnc_complete_set.tsv`; not tracked), and
-stops if the noisy-TF mask hits a scored gene whose stored label is not TF.
+stops if the noisy-TF (noisy-kinase) mask hits a scored gene whose stored label
+is not TF (kinase).
 
 The stored predictions live in `outputs/predictions/v2/` (not tracked); each
 record names its file and hash.
@@ -33,7 +40,8 @@ Sample input and output shapes are tracked in
 | --- | --- |
 | `scripts/build_statistics.py` | Picks the headline cells on validation, runs the intervals, the confirmatory and exploratory paired tests and the null bands, writes `data/v2/statistics.json`. |
 | `src/linear_trainer/stats.py` | Cluster bootstrap, paired bootstrap, Holm adjustment and null bands over stored predictions. |
-| `src/data_loader/label_audit.py` | The sensitivity subsets as rules: noisy TF labels and templated GenePT summaries. |
+| `src/data_loader/label_audit.py` | The sensitivity subsets as rules: noisy TF labels, kinase-labelled genes that are not protein kinases, and templated GenePT summaries. |
+| `scripts/reproduce_headline.py` | The independent reimplementation (Rule 3): numpy, pandas and scikit-learn only, no repo imports; writes `data/v2/reproduction.json`, which `build_statistics.py` requires. `scripts/recompute_all.sh all` runs it at the end of an unsharded pass. |
 | `scripts/build_counts.py` | Single-chunk shares per encoder and the subsets' sizes, each with its denominator; writes `data/v2/counts.json`. |
 | `src/linear_trainer/records.py` | Loads and checks the `data/v2/` records; the validation-only picks (`best_pool`, `best_encoder`, `best_nt_kmer`, `best_aa`). |
 | `data/v2/statistics.json` | The output (generated, not tracked). |
@@ -53,8 +61,10 @@ For every cell it reports:
    take the 2.5th and 97.5th percentiles as the 95% interval. Genes that
    share sequence are not independent, so the groups are 40% protein clusters
    for CDS cells on the homology-type splits, and window-and-protein groups
-   for every TSS cell and every cell on a disjoint split. Resampling is not
-   stratified by family, so the intervals are conservative.
+   for every TSS cell and every cell on a disjoint split, each joined with
+   every Rule-A protein pair (two genes of different clusters can still be a
+   pair) and, for GenePT cells, with the genes that share a summary template.
+   Resampling is not stratified by family, so the intervals are conservative.
 
 **Paired tests** resample both cells of a comparison with the same groups on
 the same scored genes. They report the difference A - B, its 95% interval
@@ -71,7 +81,8 @@ Each side other than ESM-2 650M (a fixed model) is the validation-selected cell.
 | T4 | best encoder on CDS vs the same encoder on TSS | TSS primary (disjoint) |
 
 A confirmatory cell whose pick sits at a search limit, whose fit or train+val
-refit did not converge, or that predicts a single class stops the build.
+refit did not converge, that predicts a single class, or that scores fewer than
+15 test genes of some family after the purge stops the build.
 Every other paired test is exploratory and unadjusted.
 
 **Null bands** replace a single shuffled-label run as "chance": the 2.5-97.5%
@@ -85,6 +96,10 @@ sets are rules in `src/data_loader/label_audit.py`:
 
 - `label_noise`: T1-T4 and the family5 headline intervals without the TF-labelled
   genes that are TFs only through a non-C2H2 zinc-finger group (387 genes).
+- `label_noise_kinase`: the same without the kinase-labelled genes that are not
+  protein kinases (150 genes): every kinase-named HGNC group they belong to holds
+  scaffolds, phosphatases, activators, regulatory subunits or complex partners
+  (92 genes), or kinases of small molecules (58 genes).
 - `template`: the GenePT comparisons (best encoder vs the nucleotide and amino-acid
   k-mers, ESM-2 650M vs the best encoder) and their intervals without the genes
   whose summary text is shared with another gene (901 genes; the largest group is
@@ -97,6 +112,21 @@ encoder and task on the CDS primary, Ends + Mean against `<encoder>_meanmean3`
 (Mean copied three times, which equals Mean at 3x C and equals Ends + Mean for
 single-chunk genes) and against Mean on its own grid. Family5 rows also report
 the share of scored test genes on which Ends + Mean and the control agree.
+
+**From the Rule 3 audit** (exploratory, unadjusted):
+
+- `exploratory` also tests the best encoder against composition plus log CDS
+  length (`<k-mer>_len` sources, k chosen on validation among them): the
+  k-mer vectors are L1-normalised, while the encoders see length through their
+  chunking.
+- `chance`: for every interval cell, its stored predictions scored against
+  permuted test labels (1,000 permutations): the chance level for that
+  predictor's own output mix, and `p_above_chance`.
+- `within_family`: GenePT R^2 on the CDS primary with each family's mean target
+  (from train + val) subtracted from target and prediction, with its interval.
+  The GenePT text names the gene symbol, which often names the family.
+- `seed_replication`: T1-T3 rerun on each re-seeded CDS split. The seeds re-deal
+  only the small clusters (the largest stay in train at every seed).
 
 The gene counts the text states (single-chunk shares with their denominators,
 and the two subsets' sizes) come from `scripts/build_counts.py`, which writes
@@ -159,7 +189,19 @@ Optional flags:
       "tests": {"T1 encoder > nucleotide k-mer": {"delta_point": 0.0, "n_excluded": 0, "...": "..."}},
       "intervals": {"splits.json/family5/<source>": {"point": 0.0, "n_excluded": 0, "...": "..."}}
     },
+    "label_noise_kinase": {"task": "family5", "n_genes": 150, "tests": {}, "intervals": {}},
     "template": {"task": "genept", "n_genes": 901, "tests": {}, "intervals": {}}
+  },
+  "chance": {
+    "splits.json/family5/<source>": {
+      "point": 0.0, "chance_median": 0.0, "chance95": [0.0, 0.0], "p_above_chance": 0.0
+    }
+  },
+  "within_family": {
+    "splits.json/genept/<source>": {"point": 0.0, "ci95": [0.0, 0.0], "r2_macro": 0.0, "n_groups": 0}
+  },
+  "seed_replication": {
+    "splits_seed1.json": {"T1 encoder > nucleotide k-mer": {"delta_point": 0.0, "...": "..."}}
   },
   "pooling_3x": {
     "family5/<encoder>": {

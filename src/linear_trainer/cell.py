@@ -263,6 +263,9 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
     stored = scored_predictions(prov)
     metrics = score(kind, stored["y_true"], stored["pred"])
     metrics["n_test_scored"] = int(len(stored["ids"]))
+    if kind == "logistic":   # G28: the purge thins families unevenly; macro-F1 weighs each equally
+        classes, counts = np.unique(stored["y_true"], return_counts=True)
+        metrics["n_test_scored_by_class"] = {str(c): int(n) for c, n in zip(classes, counts)}
     if purge.rules:
         metrics["unpurged"] = score(kind, full["y_true"], full["pred"])
     # G3: a probe that predicts one class (or one vector) for every test gene

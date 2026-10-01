@@ -32,6 +32,20 @@ def test_noisy_tf_rule_refuses_a_tf_without_hgnc_groups():
         L.noisy_tf_genes(gt, _hgnc([("E9", "Zinc fingers FYVE-type")]))
 
 
+def test_noisy_kinase_rule():
+    gt = _table([("E1", "A", "kinase", ""), ("E2", "B", "kinase", ""), ("E3", "C", "kinase", ""),
+                 ("E4", "D", "kinase", ""), ("E5", "PHKG1", "kinase", ""), ("E6", "F", "kinase", ""),
+                 ("E7", "G", "tf", "")])
+    hg = _hgnc([("E1", "Receptor tyrosine kinases"),                                # a protein kinase
+                ("E2", "A-kinase anchoring proteins"),                              # not a kinase
+                ("E3", "Diacylglycerol kinases|C1 domain containing"),             # a lipid kinase
+                ("E4", "Protein kinase A subunits|Protein kinase A family"),       # catalytic: kept
+                ("E5", "Phosphorylase kinase subunits"),                            # catalytic subunit: kept
+                ("E6", "MOB kinase activators|Adenylate kinases"),                 # either: not a kinase wins
+                ("E7", "A-kinase anchoring proteins")])                             # not labelled kinase
+    assert L.noisy_kinase_genes(gt, hg) == {"not_kinase": {"E2", "E6"}, "small_molecule": {"E3"}}
+
+
 def test_summary_body_strips_the_symbol_and_provenance():
     a = "Gene Symbol OR1A1 Olfactory receptors interact with odorants. [provided by RefSeq, Jul 2008]"
     b = "Gene Symbol OR2B6 Olfactory receptors interact with odorants. [provided by RefSeq, Jul 2008]"
@@ -54,6 +68,13 @@ def test_shared_summary_groups():
 def test_the_real_counts():
     gt, hg, _ = L.load_inputs()
     assert len(L.noisy_tf_genes(gt, hg)) == 387
+    kin = L.noisy_kinase_genes(gt, hg)
+    assert (len(kin["not_kinase"]), len(kin["small_molecule"])) == (92, 58)
+    # Every listed group still exists under that name among the kinase-labelled genes.
+    labelled = hg[hg["ensembl_id"].isin(gt.loc[gt["family"] == "kinase", "ensembl_id"])]
+    seen = {x for text in labelled["gene_group"].fillna("") for x in text.split("|")}
+    assert (L.NOT_KINASE_GROUPS | L.SMALL_MOLECULE_KINASE_GROUPS) <= seen
+    assert {"PHKG1", "PHKG2"} <= set(gt.loc[gt["family"] == "kinase", "symbol"])
     groups = L.shared_summary_groups(gt)
     sizes = [len(v) for v in groups.values()]
     assert (len(L.templated_genes(gt)), len(groups), sizes[0], len(groups[""])) == (901, 66, 347, 104)

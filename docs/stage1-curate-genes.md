@@ -22,7 +22,7 @@ uv run python scripts/prepare_data.py
 | --- | --- |
 | `scripts/prepare_data.py` | CLI entrypoint for building the curated gene table and fetching CDS sequences. |
 | `src/data_loader/dataset_loader.py` | Loads GenePT and HGNC, defines family regex rules, joins symbols, and assigns each gene to one family. |
-| `src/data_loader/label_audit.py` | The disclosed label and target defects as rules: TF labels that come only from non-C2H2 zinc-finger groups, and genes whose GenePT summary text is shared with another gene (masked in the Stage 5 sensitivity tests). |
+| `src/data_loader/label_audit.py` | The disclosed label and target defects as rules: TF labels that come only from non-C2H2 zinc-finger groups, kinase labels that come only from HGNC kinase groups holding no protein kinase, and genes whose GenePT summary text is shared with another gene (masked in the Stage 5 sensitivity tests). |
 | `src/data_loader/sequence_fetcher.py` | Fetches and caches canonical CDS FASTA from Ensembl REST. |
 | `src/data_loader/pipeline.md` | Older detailed note on the HGNC/GenePT/Ensembl join and cache layout. |
 | `samples/stage1_curated_genes_input.csv` | Tiny example of starting gene/family requests. |

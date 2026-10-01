@@ -45,13 +45,14 @@ Report-supporting reproduction:
 # Every probe cell and null band (Stages 3-5) from a committed, clean tree: records in
 # data/v2/, stored test predictions in outputs/predictions/v2/. Resumable. To run in
 # parallel, launch `scripts/recompute_all.sh all --shard I/N` for I = 0..N-1 first; the
-# plain run below then only checks completeness, runs the G1 check and writes
-# data/v2/run_complete.json.
+# plain run below then only checks completeness, runs the G1 check, writes
+# data/v2/run_complete.json, and runs the independent reimplementation of the headline
+# cells (scripts/reproduce_headline.py -> data/v2/reproduction.json).
 scripts/recompute_all.sh all
 
 # Cluster-bootstrap intervals, paired tests, null bands and the sensitivity subsets ->
 # data/v2/statistics.json, the rescored Ridge metrics (no refits), and the gene counts
-# the paper states (single-chunk shares, noisy labels, templated summaries).
+# the paper states (single-chunk shares, noisy TF and kinase labels, templated summaries).
 uv run python scripts/build_statistics.py
 uv run python scripts/ridge_robust_metrics.py
 uv run python scripts/build_counts.py     # also needs the CDS chunk caches from Stage 2 extraction

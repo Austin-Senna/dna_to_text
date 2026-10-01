@@ -5,6 +5,7 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 import recompute_all as ra
@@ -15,7 +16,7 @@ DATA = Path(__file__).resolve().parents[1] / "data"
 
 # Pinned so a cell can't silently drop out of the canonical run. Changing the
 # manifest means changing these numbers in the same commit, on purpose.
-MAIN_CELLS = 754
+MAIN_CELLS = 764
 NULL_CELLS = 1000
 
 
@@ -42,6 +43,19 @@ def test_the_controls_run_on_the_cds_primary_only():
     assert sorted((c.task, c.source) for c in controls) == sorted(
         (t, f"{e}_meanmean3") for t in ra.TASKS for e in ra.ENCODERS)
     assert {(c.split, c.arm) for c in controls} == {(ra.CDS_PRIMARY, "cds")}
+    length = [c for c in ra.manifest("main") if c.source in sources.LENGTH_CONTROLS]
+    assert sorted((c.task, c.source) for c in length) == sorted(
+        (t, s) for t in ra.TASKS for s in sources.LENGTH_CONTROLS)
+    assert {(c.split, c.arm) for c in length} == {(ra.CDS_PRIMARY, "cds")}
+
+
+def test_a_length_control_is_its_composition_plus_log_length():
+    seq = "ATGGCTAAAGGTTGA" * 7
+    for c in sources.LENGTH_CONTROLS:
+        base = sources.SYNTHETIC_FEATURIZERS[c.removesuffix("_len")](seq)
+        x = sources.SYNTHETIC_FEATURIZERS[c](seq)
+        assert x.dtype == np.float32 and np.array_equal(x[:-1], base)
+        assert x[-1] == np.float32(np.log1p(len(seq)))
 
 
 def test_every_cell_names_a_split_file_with_a_purge_rule():
@@ -82,8 +96,8 @@ def test_a_cell_without_its_record_fails_the_run(monkeypatch, tmp_path):
     monkeypatch.setattr(ra, "run_one", lambda cell, pred_root: {"key": "something else",
                                                                "stamp": {"git_sha": "x"}, "C": 1.0,
                                                                "edge": False, "protocol_hash": "y"})
-    with pytest.raises(ra.IncompleteRun):
-        _run(monkeypatch, ["--only", "splits.json/cds/family5/aa2", "--out-dir", str(tmp_path)])
+    with pytest.raises(ra.IncompleteRun):     # codon: a key no other cell's key contains
+        _run(monkeypatch, ["--only", "splits.json/cds/family5/codon", "--out-dir", str(tmp_path)])
 
 
 def test_records_from_another_commit_are_refused(monkeypatch, tmp_path):
@@ -100,17 +114,17 @@ def test_the_canonical_directory_needs_a_clean_tree(monkeypatch):
 
 
 def test_a_trial_run_writes_one_purged_record(monkeypatch, tmp_path):
-    _run(monkeypatch, ["--only", "splits.json/cds/family5/aa2", "--out-dir", str(tmp_path / "v2"),
+    _run(monkeypatch, ["--only", "splits.json/cds/family5/codon", "--out-dir", str(tmp_path / "v2"),
                        "--pred-root", str(tmp_path / "pred")])
     (rec,) = json.loads((tmp_path / "v2" / "metrics_splits.json").read_text())
-    assert rec["key"] == "splits.json/cds/family5/aa2"
+    assert rec["key"] == "splits.json/cds/family5/codon"
     assert rec["C"] == rec["C_sweep"][0]["C"] or "C_sweep" in rec       # legacy key names
     from linear_trainer.selection import val_score
     assert val_score(rec) == max(r["macro_f1"] for r in rec["C_sweep"] if r["converged"])
     assert rec["purge"]["rules"] == ["protein@0.40"] and rec["n_test_scored"] == 487 - 28
-    assert rec["features"]["featurizer"] == "aa2"
+    assert rec["features"]["featurizer"] == "codon"
     # A second run resumes: nothing new is written.
-    _run(monkeypatch, ["--only", "splits.json/cds/family5/aa2", "--out-dir", str(tmp_path / "v2"),
+    _run(monkeypatch, ["--only", "splits.json/cds/family5/codon", "--out-dir", str(tmp_path / "v2"),
                        "--pred-root", str(tmp_path / "pred")])
     assert len(json.loads((tmp_path / "v2" / "metrics_splits.json").read_text())) == 1
 

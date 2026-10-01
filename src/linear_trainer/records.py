@@ -29,6 +29,9 @@ V2 = REPO_ROOT / "data" / "v2"
 ENCODERS = tuple(ENCODER_SPECS)
 AA_KMERS = ("aa1", "aa2", "aa3")
 NT_KMERS = ("kmer", "kmer6")
+# Composition plus CDS length (Rule 3 control): k is selected on validation within it.
+AA_KMERS_LEN = tuple(f"{k}_len" for k in AA_KMERS)
+NT_KMERS_LEN = tuple(f"{k}_len" for k in NT_KMERS)
 
 
 class MixedRecords(RuntimeError):
@@ -119,6 +122,36 @@ def check_inputs(built: dict, root: Path | None = None) -> None:
         raise MixedRecords(f"built from older versions of {stale}; rebuild it")
 
 
+REPRODUCED = "reproduction.json"
+MIN_REPRO_BOOT = 1000
+
+
+class NotReproduced(RuntimeError):
+    """The independent reimplementation has not matched these records (Rule 3)."""
+
+
+def check_reproduced(root: Path | None = None) -> dict:
+    """The verdict ``scripts/reproduce_headline.py`` writes after refitting the
+    headline cells without the pipeline's code: it must pass, and for exactly the
+    records files on disk now (a rerun at the same commit rewrites them)."""
+    root = V2 if root is None else root
+    path = root / REPRODUCED
+    if not path.exists():
+        raise NotReproduced(f"no {REPRODUCED}: run scripts/reproduce_headline.py")
+    verdict = json.loads(path.read_text())
+    if verdict.get("ok") is not True:
+        raise NotReproduced(f"{REPRODUCED} records failures: {verdict.get('failures')}")
+    if verdict.get("inputs") != input_digests(root):
+        raise NotReproduced(f"{REPRODUCED} checked other versions of the records files; rerun it")
+    # A partial check (--cells, a short bootstrap) can pass; it does not vouch.
+    expected = set(verdict.get("cells_expected", [])) | set(range(1, 11))
+    missing = sorted(expected - set(verdict.get("cells_run", [])))
+    if missing or verdict.get("n_boot", 0) < MIN_REPRO_BOOT:
+        raise NotReproduced(f"{REPRODUCED} is partial: cells not refitted {missing}, "
+                            f"{verdict.get('n_boot')} bootstrap resamples (need {MIN_REPRO_BOOT})")
+    return verdict
+
+
 def stamp_of(*files: dict[str, dict]) -> dict:
     """The one (commit, protocol) every given records file shares (G7)."""
     stamps = {(r["stamp"]["git_sha"], r["protocol_hash"]) for recs in files for r in recs.values()}
@@ -162,6 +195,16 @@ def encoder_of(source: str) -> str:
 def best_aa(by_source: dict[str, dict]) -> str:
     """The validation-selected amino-acid k-mer (k selected on validation, G6)."""
     return pick(by_source, list(AA_KMERS))
+
+
+def best_aa_len(by_source: dict[str, dict]) -> str:
+    """The validation-selected amino-acid k-mer with CDS length."""
+    return pick(by_source, list(AA_KMERS_LEN))
+
+
+def best_nt_kmer_len(by_source: dict[str, dict]) -> str:
+    """The validation-selected nucleotide k-mer with CDS length."""
+    return pick(by_source, list(NT_KMERS_LEN))
 
 
 def best_nt_kmer(by_source: dict[str, dict]) -> str:

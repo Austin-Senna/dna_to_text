@@ -12,7 +12,7 @@ extraction or probes. Every pick is made on validation scores only.
 # after scripts/recompute_all.sh all (see the repository README)
 uv run scripts/build_statistics.py       # intervals, paired tests, null bands -> data/v2/statistics.json
 uv run scripts/ridge_robust_metrics.py   # rotation-invariant Ridge metrics -> data/v2/ridge_robust.json
-uv run scripts/build_counts.py           # single-chunk shares, noisy labels, templated summaries -> data/v2/counts.json
+uv run scripts/build_counts.py           # single-chunk shares, noisy TF and kinase labels, templated summaries -> data/v2/counts.json
 uv run scripts/build_result_figures.py   # Results figures -> dna_to_text_paper/paper/figures/
 uv run scripts/build_umap_compare.py     # UMAP figures -> dna_to_text_paper/paper/figures/
 uv run scripts/build_paper_tables.py     # LaTeX table fragments -> dna_to_text_paper/paper/tables/
@@ -25,9 +25,9 @@ uv run scripts/build_paper_tables.py     # LaTeX table fragments -> dna_to_text_
 | `scripts/build_result_figures.py` | Results figures: comparator macro-F1 / GenePT R^2 (3.1/3.2), encoder x pooling heatmap (3.3), CDS-vs-TSS substrate ablation (3.4), random-vs-homology split (3.5). `comparator_f1_bands.png` is a candidate macro-F1 panel that draws the ESM-2 650M shuffled-label band beside the 4-mer's. |
 | `scripts/build_umap_compare.py` | UMAP of the validation-selected NT-v2 CDS and TSS features beside ESM-2. |
 | `scripts/build_statistics.py` | Cluster-bootstrap intervals, paired tests (Holm over the four confirmatory tests), null bands; requires `data/v2/run_complete.json`. |
-| `scripts/build_counts.py` | The gene counts the text states, each with its denominator: single-chunk share per encoder (from the v2 chunk caches), noisy TF labels and templated GenePT summaries (`src/data_loader/label_audit.py`). |
+| `scripts/build_counts.py` | The gene counts the text states, each with its denominator: single-chunk share per encoder (from the v2 chunk caches), noisy TF and kinase labels and templated GenePT summaries (`src/data_loader/label_audit.py`). |
 | `scripts/ridge_robust_metrics.py` | Rescores stored GenePT predictions: pooled R^2 and retrieval; control row = the 200-shuffle null band. |
-| `scripts/build_paper_tables.py` | LaTeX table-body fragments: best-cell classification/regression, substrate ablation, split comparison, seed sensitivity, intervals, paired differences, the D5 sensitivity table (`s_d5_sensitivity.tex`: Ends + Mean against Mean at 3x C, and the headline tests without noisy TF labels or templated GenePT targets), and the appendix matrices. |
+| `scripts/build_paper_tables.py` | LaTeX table-body fragments: best-cell classification/regression, substrate ablation, split comparison, seed sensitivity, intervals, paired differences, the D5 sensitivity table (`s_d5_sensitivity.tex`: Ends + Mean against Mean at 3x C, the best encoder against composition plus CDS length, and the headline tests without noisy TF labels, without non-protein-kinase kinase labels, or without templated GenePT targets), the test-population profile (`s_split_population.tex`, from `data/v2/counts.json`: per partition, singleton share, median 40% cluster size, share in clusters of 10 or more, olfactory receptors among GPCRs), and the appendix matrices. |
 | `scripts/build_poster_figures.py` | Poster PDFs into `poster/figures/` from the frozen May accessors in `scripts/poster_may_records.py` (not for the paper). GENA-LM's CDS cells come from `data/metrics_poster_gena_lm.json` (rerun after the weight-loading fix), and the TSS panel uses the disjoint split. |
 
 ## Inputs

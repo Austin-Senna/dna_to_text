@@ -44,10 +44,15 @@ One control source is derived at load time rather than read from its own parquet
 StandardScaler and an L2 penalty it is exactly Mean at 3x C (Ridge: alpha / 3), and it
 equals Ends + Mean for every single-chunk gene, so Ends + Mean against it isolates the
 chunk-position effect. It runs on the CDS primary split only and is never a pool
-candidate.
+candidate. The `<k-mer>_len` sources (`sources.LENGTH_CONTROLS`) are another control on
+the CDS primary only: a composition vector plus log1p(CDS length), since the k-mer
+vectors are L1-normalised while the encoders see length through their chunking. They
+are never a k-mer pick.
 
 The camera-ready run is one manifest, not per-cell commands: `scripts/recompute_all.sh all`
-runs every cell and null band into `data/v2/` (see the repository README).
+runs every cell and null band into `data/v2/` (see the repository README), then
+`scripts/reproduce_headline.py` refits the headline cells independently and checks them
+against the records (docs/stage5-bootstrap.md).
 
 ## Relevant Files
 

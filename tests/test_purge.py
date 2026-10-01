@@ -92,6 +92,8 @@ def test_purged_test_genes_are_not_scored(tmp_path):
     assert res["metrics"]["test_macro_f1"] == score("logistic", kept["y_true"], kept["pred"])["test_macro_f1"]
     assert res["metrics"]["unpurged"] == score("logistic", full["y_true"], full["pred"])
     assert res["metrics"]["n_test_scored"] == len(s["test"]) - 9
+    by_class = dict(zip(*np.unique(kept["y_true"], return_counts=True)))         # G28
+    assert res["metrics"]["n_test_scored_by_class"] == {str(c): int(n) for c, n in by_class.items()}
     assert rec["purge"]["test_masked"] == sorted(purge.test)
 
 

@@ -231,12 +231,11 @@ def test_a_null_band_must_be_complete_and_single_cell():
 def test_groups_follow_the_split_and_the_arm():
     split = json.loads((DATA / "splits_tss_disjoint.json").read_text())
     genes = {g for s in ("train", "val", "test") for g in split[s]}
-    prot = stats.group_of("splits.json", "cds")
-    disj = stats.group_of("splits_tss_disjoint.json", "cds")
+    assert stats.group_of("splits.json", "tss") is stats.group_of("splits_tss_disjoint.json", "cds")
+    assert stats.group_of("splits_tss_disjoint_seed7.json", "cds") is stats.group_of("splits.json", "tss")
+    assert stats.group_of("splits.json", "cds") is not stats.group_of("splits.json", "tss")
+    prot, disj = stats._protein_groups(), stats._disjoint_groups()       # the bases, before G24's joins
     assert genes <= prot.keys() and genes <= disj.keys()
-    assert stats.group_of("splits.json", "tss") is disj                 # TSS cells: windows count anywhere
-    assert stats.group_of("splits_tss_disjoint_seed7.json", "cds") is disj
-    assert prot is not disj
     # The disjoint groups are the split's own units: each lies inside one partition...
     where = {g: s for s in ("train", "val", "test") for g in split[s]}
     members: dict[str, set[str]] = {}
@@ -339,12 +338,19 @@ def test_selection_refuses_a_partial_candidate_set():
     assert R.best_nt_kmer(by) == "kmer6"
 
 
-@pytest.mark.parametrize("edge,degenerate,converged,ok", [
-    (False, False, True, True), ("plateau", False, True, True), ("limit", False, True, False),
-    ("nonconverged", False, True, False), (False, True, True, False), (False, False, False, False)])
-def test_a_confirmatory_test_refuses_an_edge_or_degenerate_cell(edge, degenerate, converged, ok):
+FAMILIES = {"gpcr": 82, "immune": 22, "ion": 27, "kinase": 83, "tf": 245}
+
+
+@pytest.mark.parametrize("edge,degenerate,converged,by_class,ok", [
+    (False, False, True, FAMILIES, True), ("plateau", False, True, FAMILIES, True),
+    ("limit", False, True, FAMILIES, False), ("nonconverged", False, True, FAMILIES, False),
+    (False, True, True, FAMILIES, False), (False, False, False, FAMILIES, False),
+    (False, False, True, {**FAMILIES, "immune": 14}, False),             # G28: a thinned family
+    (False, False, True, {k: v for k, v in FAMILIES.items() if k != "ion"}, False)])
+def test_a_confirmatory_test_refuses_an_edge_or_degenerate_cell(edge, degenerate, converged, by_class, ok):
     import build_statistics as bs
-    rec = {"key": "x", "edge": edge, "degenerate": degenerate, "converged": converged}
+    rec = {"key": "x", "edge": edge, "degenerate": degenerate, "converged": converged,
+           "n_test_scored_by_class": by_class}
     if ok:
         bs.check_confirmatory_cell(rec)
     else:
@@ -367,7 +373,8 @@ def test_the_confirmatory_family_refuses_an_unsound_cell(monkeypatch):
         for arm, src in [("cds", "nt_v2_meanD"), ("cds", "kmer"), ("cds", "aa2"),
                          ("cds", "esm2_650m"), ("tss", "tss_nt_v2_meanD")]:
             rec = {"key": src, "arm": arm, "task": "family5", "feature_source": src,
-                   "shuffled_labels": False, "edge": False, "degenerate": False, "converged": True}
+                   "shuffled_labels": False, "edge": False, "degenerate": False, "converged": True,
+                   "n_test_scored_by_class": FAMILIES}
             if src == bad:
                 rec["edge"] = "limit"
             out[src] = rec
@@ -397,3 +404,112 @@ def test_a_disjoint_record_needs_its_window_manifest_hash(tmp_path):
     rec["purge"]["windows_sha256"] = inputs["windows_sha256"]
     _write(tmp_path / "metrics_splits_tss_disjoint.json", [rec])
     assert list(R.load(name, root=tmp_path)) == [rec["key"]]
+
+
+def test_statistics_need_a_passing_reproduction_of_the_current_records(tmp_path):
+    """Rule 3: no reproduction, a failed one, or one of other records files is refused."""
+    from linear_trainer import records as R
+    _write(tmp_path / "metrics_splits.json", [{"k": 1}])
+    verdict = {"ok": True, "inputs": R.input_digests(tmp_path), "failures": [],
+               "cells_run": list(range(1, 14)), "cells_expected": list(range(1, 14)), "n_boot": 2000}
+    with pytest.raises(R.NotReproduced, match="no reproduction"):
+        R.check_reproduced(tmp_path)
+    for bad, match in [({"ok": False, "failures": ["cell 1: pred"]}, "failures"),
+                       ({"inputs": {}}, "other versions"),
+                       ({"cells_run": [5]}, "partial"),                      # --cells 5 passes, vouches for nothing
+                       ({"cells_run": list(range(1, 11))}, "partial"),       # the edge-branch cells skipped
+                       ({"n_boot": 200}, "partial")]:
+        _write(tmp_path / R.REPRODUCED, {**verdict, **bad})
+        with pytest.raises(R.NotReproduced, match=match):
+            R.check_reproduced(tmp_path)
+    _write(tmp_path / R.REPRODUCED, verdict)
+    assert R.check_reproduced(tmp_path)["ok"]
+    _write(tmp_path / "null_splits.json", [{"k": 2}])     # a records file added since
+    with pytest.raises(R.NotReproduced, match="other versions"):
+        R.check_reproduced(tmp_path)
+
+
+@pytest.mark.parametrize("field,value", [(None, None), ("b", "splits.json/cds/family5/kmer"),
+                                         ("delta_point", 0.0500001), ("n_groups", 425),
+                                         ("delta_ci95", [0.01, 0.12]), ("p_one_sided", 0.11)])
+def test_the_confirmatory_tests_must_agree_with_the_reproduction(field, value):
+    import build_statistics as bs
+    from linear_trainer import records as R
+    ours = {"a": "splits.json/cds/family5/nt_v2_meanG", "b": "splits.json/cds/family5/kmer6",
+            "delta_point": 0.05, "n_test": 459, "n_groups": 426, "delta_ci95": [-0.02, 0.12],
+            "p_one_sided": 0.07}
+    theirs = {**ours, "delta_ci95": [-0.015, 0.125], "p_one_sided": 0.08}   # Monte Carlo noise
+    if field is None:
+        bs.check_reproduction({"T1 encoder > nucleotide k-mer": ours}, {"T1": theirs})
+        with pytest.raises(R.NotReproduced, match="no result"):
+            bs.check_reproduction({"T2 encoder > amino-acid k-mer": ours}, {"T1": theirs})
+        return
+    with pytest.raises(R.NotReproduced, match=field):
+        bs.check_reproduction({"T1 encoder > nucleotide k-mer": ours}, {"T1": {**theirs, field: value}})
+
+
+@pytest.mark.parametrize("split,arm", [("splits.json", "cds"), ("splits_tss_disjoint.json", "cds"),
+                                       ("splits.json", "tss")])
+def test_no_dependency_spans_two_resampling_units(split, arm):
+    """G24: a Rule-A pair always shares a unit (MMseqs2 clusters alone split some),
+    and for GenePT so do genes with one summary template; family5 units ignore
+    templates."""
+    from data_loader import label_audit
+    from splits.leaks import PAIR_MIN_ID, read_protein_pairs
+    gt, _, _ = label_audit.load_inputs()
+    templates = [ids for ids in label_audit.shared_summary_groups(gt).values()]
+    f5, gp = stats.group_of(split, arm, "family5"), stats.group_of(split, arm, "genept")
+    pairs = read_protein_pairs(PAIR_MIN_ID)
+    for groups in (f5, gp):
+        assert all(groups[a] == groups[b] for a, b in pairs if a in groups and b in groups)
+    assert all(len({gp[g] for g in ids}) == 1 for ids in templates)
+    assert any(len({f5[g] for g in ids}) > 1 for ids in templates)
+    # Every unit is a union of whole base groups.
+    base = stats._disjoint_groups() if stats.group_of(split, arm) is stats._groups(True, False) \
+        else stats._protein_groups()
+    assert all(len({gp[g] for g in base if base[g] == c}) == 1 for c in set(base.values()))
+
+
+def test_the_unit_check_fails_without_the_joins(monkeypatch):
+    """The guard above must be able to fail: the bare protein clusters split a Rule-A pair."""
+    from splits.leaks import PAIR_MIN_ID, read_protein_pairs
+    base = stats._protein_groups()
+    pairs = read_protein_pairs(PAIR_MIN_ID)
+    assert not all(base[a] == base[b] for a, b in pairs if a in base and b in base)
+
+
+def _fake_scored(monkeypatch, ids, y, pred):
+    monkeypatch.setattr(stats, "_scored", lambda rec: {"ids": np.asarray(ids), "y_true": y, "pred": pred})
+
+
+def test_within_family_r2_credits_only_signal_beyond_the_family(monkeypatch):
+    rng = np.random.default_rng(0)
+    fam = np.repeat(["a", "b", "c"], 40)
+    means = {f: rng.normal(size=6) * 5 for f in "abc"}
+    off = np.stack([means[f] for f in fam])
+    resid = rng.normal(size=(120, 6))
+    ids = [f"g{i}" for i in range(120)]
+    family = dict(zip(ids, fam))
+    rec = {"key": "x", "task": "genept", "split": "toy.json", "arm": "cds", "test_r2_macro": 0.9}
+    groups = {g: g for g in ids}
+    _fake_scored(monkeypatch, ids, off + resid, off)            # the family mean, nothing more
+    only_family = stats.within_family_r2(rec, family, means, groups, n_iters=20)
+    _fake_scored(monkeypatch, ids, off + resid, off + resid)    # the within-family signal too
+    full = stats.within_family_r2(rec, family, means, groups, n_iters=20)
+    assert only_family["point"] <= 0 < full["point"] == pytest.approx(1.0)
+    from sklearn.metrics import r2_score
+    assert r2_score(off + resid, off) > 0.5                     # plain R^2 rewards the family alone
+
+
+def test_per_cell_chance_separates_signal_from_a_class_mix(monkeypatch):
+    rng = np.random.default_rng(1)
+    y = rng.choice(np.array(["gpcr", "ion", "kinase", "tf", "immune"]), size=300, p=[.2, .1, .15, .5, .05])
+    rec = {"key": "x", "task": "family5", "split": "toy.json", "arm": "cds"}
+    ids = [f"g{i}" for i in range(300)]
+    from sklearn.metrics import f1_score
+    for pred, informative in ((y.copy(), True), (rng.permutation(y), False)):
+        _fake_scored(monkeypatch, ids, y, pred)
+        rec["test_macro_f1"] = float(f1_score(y, pred, average="macro"))
+        out = stats.permutation_chance(rec, n_iters=200)
+        assert (out["p_above_chance"] < 0.01) is informative
+        assert (out["chance95"][0] <= out["point"] <= out["chance95"][1]) is not informative

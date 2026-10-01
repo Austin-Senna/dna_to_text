@@ -102,8 +102,9 @@ class Cell:
 
 
 def control_sources() -> list[str]:
-    """Derived controls, on the CDS primary only: the triplicated Mean (3x C)."""
-    return sorted(sources.DERIVED)
+    """Controls, on the CDS primary only: the triplicated Mean (3x C) and
+    composition plus CDS length (Rule 3)."""
+    return sorted(sources.DERIVED) + list(sources.LENGTH_CONTROLS)
 
 
 def main_cells() -> list[Cell]:
