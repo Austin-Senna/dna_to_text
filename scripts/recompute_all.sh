@@ -13,8 +13,10 @@
 # Parallel: launch N shards from one commit, e.g. `scripts/recompute_all.sh all
 # --shard 0/8` ... `--shard 7/8` (they share records files under a lock), then
 # finish with a plain `scripts/recompute_all.sh all`: it runs nothing new, checks
-# that every cell has exactly one record, runs G1, and writes
-# data/v2/run_complete.json, which build_statistics.py requires.
+# that every cell has exactly one record, runs G1, writes
+# data/v2/run_complete.json, and runs the independent reimplementation
+# (scripts/reproduce_headline.py -> data/v2/reproduction.json). build_statistics.py
+# requires both.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

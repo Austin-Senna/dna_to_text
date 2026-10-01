@@ -42,7 +42,7 @@ Sample input and output shapes are tracked in
 | `src/linear_trainer/stats.py` | Cluster bootstrap, paired bootstrap, Holm adjustment and null bands over stored predictions. |
 | `src/data_loader/label_audit.py` | The sensitivity subsets as rules: noisy TF labels, kinase-labelled genes that are not protein kinases, and templated GenePT summaries. |
 | `scripts/reproduce_headline.py` | The independent reimplementation (Rule 3): numpy, pandas and scikit-learn only, no repo imports; writes `data/v2/reproduction.json`, which `build_statistics.py` requires. `scripts/recompute_all.sh all` runs it at the end of an unsharded pass. |
-| `scripts/build_counts.py` | Single-chunk shares per encoder and the subsets' sizes, each with its denominator; writes `data/v2/counts.json`. |
+| `scripts/build_counts.py` | Single-chunk shares per encoder, the subsets' sizes (each with its denominator) and the per-partition test-population profile; writes `data/v2/counts.json` (`build_paper_tables.py` reads the profile for `s_split_population.tex`). |
 | `src/linear_trainer/records.py` | Loads and checks the `data/v2/` records; the validation-only picks (`best_pool`, `best_encoder`, `best_nt_kmer`, `best_aa`). |
 | `data/v2/statistics.json` | The output (generated, not tracked). |
 | `outputs/predictions/v2/<split stem>/` | Stored test predictions, one content-addressed `.npz` per record (not tracked). |
@@ -129,8 +129,11 @@ the share of scored test genes on which Ends + Mean and the control agree.
   only the small clusters (the largest stay in train at every seed).
 
 The gene counts the text states (single-chunk shares with their denominators,
-and the two subsets' sizes) come from `scripts/build_counts.py`, which writes
-`data/v2/counts.json`.
+the three subsets' sizes, and the per-partition test-population profile) come
+from `scripts/build_counts.py`, which writes `data/v2/counts.json`.
+
+Every family5 record also carries `n_test_scored_by_class`, the scored test genes
+per family after the purge; the confirmatory floor of 15 reads it.
 
 ## What it is not
 
