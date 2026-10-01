@@ -84,7 +84,7 @@ def _run(monkeypatch, argv):
 
 
 def test_a_failing_cell_fails_the_run(monkeypatch, tmp_path):
-    def boom(cell, pred_root):
+    def boom(cell, pred_root, protocol):
         raise SystemExit(0)                      # the May runners counted this as success (G17)
 
     monkeypatch.setattr(ra, "run_one", boom)
@@ -93,9 +93,9 @@ def test_a_failing_cell_fails_the_run(monkeypatch, tmp_path):
 
 
 def test_a_cell_without_its_record_fails_the_run(monkeypatch, tmp_path):
-    monkeypatch.setattr(ra, "run_one", lambda cell, pred_root: {"key": "something else",
-                                                               "stamp": {"git_sha": "x"}, "C": 1.0,
-                                                               "edge": False, "protocol_hash": "y"})
+    monkeypatch.setattr(ra, "run_one", lambda cell, pred_root, protocol: {"key": "something else",
+                                                                         "stamp": {"git_sha": "x"}, "C": 1.0,
+                                                                         "edge": False, "protocol_hash": "y"})
     with pytest.raises(ra.IncompleteRun):     # codon: a key no other cell's key contains
         _run(monkeypatch, ["--only", "splits.json/cds/family5/codon", "--out-dir", str(tmp_path)])
 
@@ -158,6 +158,40 @@ def test_a_tree_git_cannot_read_is_refused(monkeypatch, tmp_path):
     monkeypatch.setattr(ra, "stamp", lambda: {"git_sha": None, "git_dirty": True})
     with pytest.raises(ra.DirtyTree):
         _run(monkeypatch, ["--only", "splits.json/cds/family5/aa2", "--out-dir", str(tmp_path)])
+
+
+def test_threads_is_a_trial_only_option(monkeypatch):
+    """Canonical records are fitted at the protocol's one thread, never another count."""
+    with pytest.raises(SystemExit) as exc:
+        _run(monkeypatch, ["--only", "splits.json/cds/family5/aa2", "--threads", "6"])
+    assert exc.value.code == 2
+
+
+def test_a_trial_fits_at_the_threads_it_asks_for(monkeypatch, tmp_path):
+    from linear_trainer.protocol import V2
+    seen = []
+
+    def capture(cell, pred_root, protocol):
+        seen.append(protocol)
+        raise SystemExit(0)
+
+    monkeypatch.setattr(ra, "run_one", capture)
+    with pytest.raises(RuntimeError, match="cell failed"):
+        _run(monkeypatch, ["--only", "splits.json/cds/family5/codon", "--out-dir", str(tmp_path),
+                           "--threads", "6"])
+    (p,) = seen
+    assert p.threads == 6 and p.hash != V2.hash
+    assert {**p.as_dict(), "threads": 1} == V2.as_dict()                    # nothing else changes
+
+
+def test_a_trial_at_other_threads_never_resumes_one_thread_records(monkeypatch, tmp_path):
+    from linear_trainer.protocol import V2
+    here = ra.stamp()["git_sha"]
+    (tmp_path / "metrics_splits.json").write_text(json.dumps(
+        [{"key": "k", "feature_source": "aa2", "stamp": {"git_sha": here}, "protocol_hash": V2.hash}]))
+    with pytest.raises(ra.MixedRun):
+        _run(monkeypatch, ["--only", "splits.json/cds/family5/aa2", "--out-dir", str(tmp_path),
+                           "--threads", "6"])
 
 
 def test_a_trial_never_writes_canonical_predictions(monkeypatch, tmp_path):

@@ -20,6 +20,10 @@ Guards:
 
 Run (normally via scripts/recompute_all.sh, which pins the threads):
   uv run scripts/recompute_all.py [--group main|null|all] [--only SUBSTR] [--dry-run]
+
+A trial may fit at another thread count (``--threads N``, the Phase 4
+determinism check) with every BLAS/OpenMP pool set to N before Python starts;
+the canonical directory takes only the protocol's one thread.
 """
 from __future__ import annotations
 
@@ -28,7 +32,7 @@ import fcntl
 import json
 import time
 import traceback
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -36,7 +40,7 @@ import numpy as np
 from data_loader.model_registry import ENCODER_SPECS, encoder_pools
 from linear_trainer import sources
 from linear_trainer.cell import run_cell
-from linear_trainer.protocol import V2, stamp
+from linear_trainer.protocol import V2, Protocol, stamp
 from linear_trainer.records import COMPLETE
 from splits.leaks import purge_for
 
@@ -173,7 +177,7 @@ def _append(out: Path, rec: dict) -> None:
         tmp.replace(out)
 
 
-def _check_same_run(out_dir: Path) -> None:
+def _check_same_run(out_dir: Path, protocol: Protocol = V2) -> None:
     """Every records file in out_dir must come from this commit, this protocol and
     the feature files on disk now, whichever group this invocation runs (G7)."""
     from linear_trainer.cell import _features_stamp
@@ -184,7 +188,7 @@ def _check_same_run(out_dir: Path) -> None:
     current: dict[str, dict] = {}
     for path in sorted(out_dir.glob("metrics_*.json")) + sorted(out_dir.glob("null_*.json")):
         for r in _load(path):
-            if r["stamp"]["git_sha"] != here or r["protocol_hash"] != V2.hash:
+            if r["stamp"]["git_sha"] != here or r["protocol_hash"] != protocol.hash:
                 raise MixedRun(f"{path.name} has records from {str(r['stamp']['git_sha'])[:7]} "
                                f"(protocol {r['protocol_hash'][:8]}); this run is {here[:7]}. "
                                "Move the old files aside to start fresh.")
@@ -196,10 +200,10 @@ def _check_same_run(out_dir: Path) -> None:
                                f"{src} has now; move the old files aside to start fresh")
 
 
-def run_one(cell: Cell, pred_root: Path) -> dict:
+def run_one(cell: Cell, pred_root: Path, protocol: Protocol) -> dict:
     split_path = DATA / cell.split
     purge = purge_for(split_path, cell.arm)
-    res = run_cell(cell.source, cell.task, split_path, V2,
+    res = run_cell(cell.source, cell.task, split_path, protocol,
                    pred_dir=pred_root / Path(cell.split).stem,
                    label_seed=cell.label_seed, purge=purge)
     return {
@@ -215,7 +219,7 @@ def run_one(cell: Cell, pred_root: Path) -> dict:
     }
 
 
-def black_box_g1(cells: list[Cell], pred_root: Path) -> list[dict]:
+def black_box_g1(cells: list[Cell], pred_root: Path, protocol: Protocol = V2) -> list[dict]:
     """Re-select with the test labels permuted: the pick must not move (G1)."""
     real_load = sources.load
 
@@ -229,12 +233,12 @@ def black_box_g1(cells: list[Cell], pred_root: Path) -> list[dict]:
     for cell in cells:
         # Separate directories: the permuted run's targets differ by design, and the
         # shared GenePT targets file refuses different content for one split.
-        base = run_cell(cell.source, cell.task, DATA / cell.split, V2,
+        base = run_cell(cell.source, cell.task, DATA / cell.split, protocol,
                         pred_dir=pred_root / "g1_check" / "base",
                         purge=purge_for(DATA / cell.split, cell.arm))
         sources.load = permuted
         try:
-            perm = run_cell(cell.source, cell.task, DATA / cell.split, V2,
+            perm = run_cell(cell.source, cell.task, DATA / cell.split, protocol,
                             pred_dir=pred_root / "g1_check" / "permuted",
                             purge=purge_for(DATA / cell.split, cell.arm))
         finally:
@@ -281,9 +285,14 @@ def main() -> None:
     ap.add_argument("--pred-root", type=Path, default=None,
                     help="predictions directory (default outputs/predictions/v2 for the canonical "
                          "run, <out-dir>/predictions for a trial)")
+    ap.add_argument("--threads", type=int, default=None, metavar="N",
+                    help="trial only: fit at N threads (set OPENBLAS/OMP/MKL_NUM_THREADS=N too)")
     args = ap.parse_args()
     out_dir = args.out_dir
     canonical = out_dir.resolve() == OUT_DIR.resolve()
+    if args.threads is not None and canonical:
+        ap.error("--threads is for trial runs; data/v2 is fitted at the protocol's one thread")
+    protocol = V2 if args.threads is None else replace(V2, threads=args.threads)
     pred_root = args.pred_root or (PRED_ROOT if canonical else out_dir / "predictions")
     if not canonical and pred_root.resolve() == PRED_ROOT.resolve():
         raise DirtyTree("a trial run must not write into the canonical predictions directory")
@@ -305,7 +314,7 @@ def main() -> None:
     if canonical and stamp()["git_dirty"]:
         raise DirtyTree("data/v2 is written only from a clean, committed tree; use --out-dir for a trial")
     out_dir.mkdir(parents=True, exist_ok=True)
-    _check_same_run(out_dir)
+    _check_same_run(out_dir, protocol)
     done = {out: {r["key"] for r in _load(out)} for out in {c.out(out_dir) for c in cells}}
 
     todo = [c for c in cells if c.key not in done[c.out(out_dir)]]
@@ -315,7 +324,7 @@ def main() -> None:
     for i, cell in enumerate(todo, 1):
         t0 = time.time()
         try:
-            rec = run_one(cell, pred_root)
+            rec = run_one(cell, pred_root, protocol)
         except BaseException:
             traceback.print_exc()
             raise RuntimeError(f"cell failed: {cell.key}") from None
@@ -336,9 +345,9 @@ def main() -> None:
     print(f"all {len(cells)} cells recorded")
 
     if args.group == "all" and not (args.only or args.shard or args.skip_g1):
-        write_complete(out_dir, cells, black_box_g1(list(G1_CELLS), pred_root))
+        write_complete(out_dir, cells, black_box_g1(list(G1_CELLS), pred_root, protocol))
     elif not args.skip_g1 and args.group == "main" and not (args.only or args.shard):
-        black_box_g1(list(G1_CELLS), pred_root)
+        black_box_g1(list(G1_CELLS), pred_root, protocol)
     else:
         print(f"no {COMPLETE}: only an unsharded --group all run writes it")
 
