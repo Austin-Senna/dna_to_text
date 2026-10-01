@@ -27,6 +27,8 @@ LEGACY = replace(V2, name="legacy-2026-05", scale=False, dtype="float32", base_g
                  tol=None, max_iter=2000, threads=None)
 
 if __name__ == "__main__":
-    res = run_cell(sys.argv[1], "family5", REPO / "data" / "splits.json", LEGACY,
+    # A registry key, or a path to a parquet (the May features read from git).
+    source = Path(sys.argv[1]) if sys.argv[1].endswith(".parquet") else sys.argv[1]
+    res = run_cell(source, "family5", REPO / "data" / "splits.json", LEGACY,
                    pred_dir=Path(tempfile.mkdtemp()))
     print(json.dumps({"hp": res["hp"], "sweep": res["sweep"], "metrics": res["metrics"]}))
