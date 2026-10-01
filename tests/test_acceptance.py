@@ -96,7 +96,11 @@ V2_TARGETS = [
 def test_v2_reproduces_the_sept25_preview(source, task, pick, target, metric, tmp_path):
     from linear_trainer.cell import run_cell
     from linear_trainer.protocol import V2
-    res = run_cell(source, task, SPLITS, V2, pred_dir=tmp_path)
+    from splits.leaks import Purge
+    # The Sept 25 preview predates the evaluation purge (G2); purged values are
+    # checked through the runner, not here.
+    unpurged = Purge(rules=(), stamp={"reason": "reproduces the Sept 25 preview, which predates G2"})
+    res = run_cell(source, task, SPLITS, V2, pred_dir=tmp_path, purge=unpurged)
     print(f"{source} {task}: pick={res['hp']:g} edge={res['edge']} "
           f"{metric}={res['metrics'][metric]:.6f} (target {target})")
     assert res["hp"] == pytest.approx(pick)

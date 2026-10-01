@@ -101,6 +101,46 @@ def load_predictions(rec: dict) -> dict[str, np.ndarray]:
     return arrays
 
 
+def scored_predictions(rec: dict) -> dict[str, np.ndarray]:
+    """Stored test predictions minus the record's purged genes (G2).
+
+    The record's metrics are computed on exactly these rows; bootstraps and
+    downstream analyses rescore them, never the full stored set.
+    """
+    if "purge" not in rec:
+        raise RuntimeError(f"{rec.get('run_id', rec.get('key', '?'))}: no purge field; a record from "
+                           "before G2 cannot be rescored as if nothing were masked")
+    arrays = load_predictions(rec)
+    masked = set(rec["purge"]["test_masked"])
+    if not masked:
+        return arrays
+    keep = ~np.isin(arrays["ids"], sorted(masked))
+    if int((~keep).sum()) != len(masked):
+        raise RuntimeError(f"{rec.get('run_id', '?')}: purged genes missing from the stored predictions")
+    return {k: v[keep] for k, v in arrays.items()}
+
+
+def _default_purge(split_file: Path, source: str | Path):
+    """The policy purge for a cell (``splits.leaks.rules_for``). A split file
+    outside data/ (a test fixture) is recorded as unpurged with the reason."""
+    from splits import leaks
+
+    if not Path(split_file).resolve().is_relative_to(sources.DATA.resolve()):
+        return leaks.Purge(rules=(), stamp={"reason": "split file outside data/"})
+    return leaks.purge_for(split_file, leaks.arm_of(source))
+
+
+def _check_purge(purge, splits_sha: str, name: str, ids: np.ndarray) -> None:
+    if not purge.rules:
+        return
+    if purge.stamp.get("split_sha256") != splits_sha:
+        raise RuntimeError("the purge was derived from a different split file than this cell reads")
+    masked = purge.val if name == "val" else purge.test
+    stray = masked - set(ids.tolist())
+    if stray:
+        raise RuntimeError(f"{len(stray)} purged {name} genes are not in the {name} split")
+
+
 def _assert_disjoint(*id_sets: np.ndarray) -> None:
     seen: set[str] = set()
     for ids in id_sets:
@@ -123,12 +163,20 @@ def _assert_classes(task: str, name: str, y: np.ndarray) -> None:
 
 def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protocol, *,
              pred_dir: Path, label_seed: int | None = None, select_by: str = "r2",
-             confusion_dir: Path | None = None, probe_out: Path | None = None) -> dict:
+             confusion_dir: Path | None = None, probe_out: Path | None = None,
+             purge=None) -> dict:
     """Run one cell. Returns the pick (``hp``, ``sweep``, ``edge``), test ``metrics``
     and the ``provenance`` fields every record carries.
 
     ``label_seed`` permutes the train and val targets (the shuffled-label
     controls); test targets are never permuted.
+
+    ``purge`` (a ``splits.leaks.Purge`` for this cell's split file) masks its
+    val genes from selection and its test genes from scoring (G2). Training,
+    the refit and the stored predictions are unchanged; the record also keeps
+    the unpurged test metrics for the disclosure. Left as None, the policy
+    purge for the split file and the source's arm is applied, so no cell can
+    run unpurged by omission; every record carries its ``purge`` field.
     """
     assert_threads(protocol)
     kind = "ridge" if task == "genept" else "logistic"
@@ -145,7 +193,16 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
         rng = np.random.default_rng(label_seed)
         y_tr, y_va = rng.permutation(y_tr), rng.permutation(y_va)
 
-    sel = select(kind, X_tr, y_tr, X_va, y_va, protocol, select_by=select_by)
+    if purge is None:
+        purge = _default_purge(split_file, source)
+    _check_purge(purge, splits_sha, "val", ids_va)
+    if purge.rules:
+        keep_va = ~np.isin(ids_va, sorted(purge.val))
+        if kind == "logistic":
+            _assert_classes(task, "purged val", y_va[keep_va])
+        sel = select(kind, X_tr, y_tr, X_va[keep_va], y_va[keep_va], protocol, select_by=select_by)
+    else:
+        sel = select(kind, X_tr, y_tr, X_va, y_va, protocol, select_by=select_by)
     stack = np.vstack if kind == "ridge" else np.concatenate
     probe = fit(kind, np.vstack([X_tr, X_va]), stack([y_tr, y_va]), sel.hp, protocol)
     if probe_out is not None and kind == "ridge":
@@ -156,8 +213,10 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
     if sources.sha256_file(split_file) != splits_sha:
         raise RuntimeError(f"{split_file} changed while the cell was running")
     _assert_disjoint(ids_tr, ids_va, ids_te)
+    _check_purge(purge, splits_sha, "test", ids_te)
     if kind == "logistic":
         _assert_classes(task, "test", y_te)
+        _assert_classes(task, "purged test", y_te[~np.isin(ids_te, sorted(purge.test))])
     pred = probe.predict(X_te)
 
     name = sources.cell_name(source) + f"__{task}" + ("" if label_seed is None else f"__shuf{label_seed}")
@@ -171,8 +230,13 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
         prov = {"targets_file": _rel(tfile), "targets_sha256": tsha}
     pred_file, pred_sha = _save_predictions(Path(pred_dir), name, arrays)
     prov = {"pred_file": _rel(pred_file), "pred_sha256": pred_sha, **prov}
-    stored = load_predictions(prov)
+    prov["purge"] = purge.record()
+    full = load_predictions(prov)
+    stored = scored_predictions(prov)
     metrics = score(kind, stored["y_true"], stored["pred"])
+    metrics["n_test_scored"] = int(len(stored["ids"]))
+    if purge.rules:
+        metrics["unpurged"] = score(kind, full["y_true"], full["pred"])
     # G3: a probe that predicts one class (or one vector) for every test gene
     # scores at the majority level whatever its features; 1E refuses such a
     # confirmatory cell.

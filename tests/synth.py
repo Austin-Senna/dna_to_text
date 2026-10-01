@@ -83,6 +83,12 @@ def redirect_splits(monkeypatch, splits_file: Path, log: list | None = None) -> 
         return LoggedSplits(data, log) if log is not None else data
 
     monkeypatch.setattr(loader, "_load_splits_file", _read)
+    # The policy purge reads the real split file named by the cell; the redirected
+    # toy split has other genes, so the cell runs unpurged and says why.
+    import linear_trainer.cell as cell
+    from splits.leaks import Purge
+    monkeypatch.setattr(cell, "_default_purge",
+                        lambda *_: Purge(rules=(), stamp={"reason": "test: redirected split"}))
 
 
 def sha256_file(path: Path) -> str:

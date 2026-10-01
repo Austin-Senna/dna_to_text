@@ -20,6 +20,10 @@ sys.path.insert(0, str(REPO / "src"))
 
 from linear_trainer.cell import run_cell  # noqa: E402
 from linear_trainer.protocol import V2  # noqa: E402
+from splits.leaks import Purge  # noqa: E402
+
+# The May records predate the evaluation purge (G2).
+UNPURGED = Purge(rules=(), stamp={"reason": "reproduces the May records, which predate G2"})
 
 GRID = (1e-2, 1e-1, 1.0, 10.0, 100.0, 1000.0)
 LEGACY = replace(V2, name="legacy-2026-05", scale=False, dtype="float32", base_grid=GRID,
@@ -30,5 +34,5 @@ if __name__ == "__main__":
     # A registry key, or a path to a parquet (the May features read from git).
     source = Path(sys.argv[1]) if sys.argv[1].endswith(".parquet") else sys.argv[1]
     res = run_cell(source, "family5", REPO / "data" / "splits.json", LEGACY,
-                   pred_dir=Path(tempfile.mkdtemp()))
+                   pred_dir=Path(tempfile.mkdtemp()), purge=UNPURGED)
     print(json.dumps({"hp": res["hp"], "sweep": res["sweep"], "metrics": res["metrics"]}))
