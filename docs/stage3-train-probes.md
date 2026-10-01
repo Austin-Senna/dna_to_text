@@ -39,6 +39,13 @@ genes with one in train or validation (Rule A on the pair table
 from selection and scoring; training is never masked. The record carries a `purge`
 field and the unpurged test metrics for disclosure.
 
+One control source is derived at load time rather than read from its own parquet:
+`<encoder>_meanmean3` is the Mean pool copied three times (`sources.DERIVED`). Under
+StandardScaler and an L2 penalty it is exactly Mean at 3x C (Ridge: alpha / 3), and it
+equals Ends + Mean for every single-chunk gene, so Ends + Mean against it isolates the
+chunk-position effect. It runs on the CDS primary split only and is never a pool
+candidate.
+
 The camera-ready run is one manifest, not per-cell commands: `scripts/recompute_all.sh all`
 runs every cell and null band into `data/v2/` (see the repository README).
 

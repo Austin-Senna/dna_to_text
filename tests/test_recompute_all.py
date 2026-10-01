@@ -15,7 +15,7 @@ DATA = Path(__file__).resolve().parents[1] / "data"
 
 # Pinned so a cell can't silently drop out of the canonical run. Changing the
 # manifest means changing these numbers in the same commit, on purpose.
-MAIN_CELLS = 746
+MAIN_CELLS = 754
 NULL_CELLS = 1000
 
 
@@ -37,6 +37,13 @@ def test_every_primary_split_has_the_full_grids():
         assert f"splits_random.json/tss/family5/{src}" in keys
 
 
+def test_the_controls_run_on_the_cds_primary_only():
+    controls = [c for c in ra.manifest("main") if c.source in sources.DERIVED]
+    assert sorted((c.task, c.source) for c in controls) == sorted(
+        (t, f"{e}_meanmean3") for t in ra.TASKS for e in ra.ENCODERS)
+    assert {(c.split, c.arm) for c in controls} == {(ra.CDS_PRIMARY, "cds")}
+
+
 def test_every_cell_names_a_split_file_with_a_purge_rule():
     for cell in ra.manifest("all"):
         assert (DATA / cell.split).exists(), cell.split
@@ -45,13 +52,15 @@ def test_every_cell_names_a_split_file_with_a_purge_rule():
 
 def test_every_source_is_registered():
     for cell in ra.manifest("all"):
-        assert cell.source in sources.SYNTHETIC_FEATURIZERS or cell.source in sources.DATASET_PATHS, cell.key
+        assert (cell.source in sources.SYNTHETIC_FEATURIZERS or cell.source in sources.DATASET_PATHS
+                or cell.source in sources.DERIVED), cell.key
 
 
 @pytest.mark.slow
 def test_every_parquet_the_manifest_reads_is_on_disk():
-    missing = sorted({str(sources.DATASET_PATHS[c.source]) for c in ra.manifest("all")
-                      if c.source in sources.DATASET_PATHS and not Path(sources.DATASET_PATHS[c.source]).exists()})
+    paths = {sources._parquet_for(c.source) for c in ra.manifest("all")
+             if c.source not in sources.SYNTHETIC_FEATURIZERS}
+    missing = sorted(str(p) for p in paths if not p.exists())
     assert not missing, missing
 
 

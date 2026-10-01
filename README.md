@@ -49,10 +49,12 @@ Report-supporting reproduction:
 # data/v2/run_complete.json.
 scripts/recompute_all.sh all
 
-# Cluster-bootstrap intervals, paired tests and null bands -> data/v2/statistics.json,
-# and the rescored Ridge metrics (no refits).
+# Cluster-bootstrap intervals, paired tests, null bands and the sensitivity subsets ->
+# data/v2/statistics.json, the rescored Ridge metrics (no refits), and the gene counts
+# the paper states (single-chunk shares, noisy labels, templated summaries).
 uv run python scripts/build_statistics.py
 uv run python scripts/ridge_robust_metrics.py
+uv run python scripts/build_counts.py     # also needs the CDS chunk caches from Stage 2 extraction
 uv run python scripts/per_dim_r2.py
 
 # Stage 7: regenerate the manuscript figures and LaTeX table fragments (see docs/stage7-paper-figures-tables.md).
@@ -102,6 +104,7 @@ uv run python scripts/build_tss_pooling_datasets.py --encoder nt_v2
 # Stages 3-5: every probe cell, then the cluster-bootstrap statistics (docs/stage5-bootstrap.md).
 scripts/recompute_all.sh all
 uv run python scripts/build_statistics.py
+uv run python scripts/build_counts.py
 
 # Stage 7: regenerate the manuscript figures and LaTeX table fragments.
 uv run python scripts/build_result_figures.py

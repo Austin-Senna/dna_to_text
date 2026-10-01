@@ -101,8 +101,14 @@ class Cell:
         return out_dir / (f"null_{stem}.json" if self.label_seed is not None else f"metrics_{stem}.json")
 
 
+def control_sources() -> list[str]:
+    """Derived controls, on the CDS primary only: the triplicated Mean (3x C)."""
+    return sorted(sources.DERIVED)
+
+
 def main_cells() -> list[Cell]:
     cells = [Cell(s, "cds", t, src) for s in CDS_SPLITS for t in TASKS for src in cds_sources()]
+    cells += [Cell(CDS_PRIMARY, "cds", t, src) for t in TASKS for src in control_sources()]
     for s in TSS_SPLITS_FULL:
         cells += [Cell(s, "tss", t, src) for t in TASKS for src in tss_sources() + e5_sources()]
     for s in TSS_SPLITS_GRID:

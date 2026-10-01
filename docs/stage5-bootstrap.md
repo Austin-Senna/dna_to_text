@@ -16,6 +16,10 @@ band from a committed tree. It reads the records in `data/v2/` through
 - every records file is from the same commit and protocol;
 - each split file on disk matches the hash its records carry.
 
+The sensitivity block also reads the Stage 1 gene table and HGNC groups
+(`data/gene_table.parquet`, `data/hgnc/hgnc_complete_set.tsv`; not tracked), and
+stops if the noisy-TF mask hits a scored gene whose stored label is not TF.
+
 The stored predictions live in `outputs/predictions/v2/` (not tracked); each
 record names its file and hash.
 
@@ -29,6 +33,8 @@ Sample input and output shapes are tracked in
 | --- | --- |
 | `scripts/build_statistics.py` | Picks the headline cells on validation, runs the intervals, the confirmatory and exploratory paired tests and the null bands, writes `data/v2/statistics.json`. |
 | `src/linear_trainer/stats.py` | Cluster bootstrap, paired bootstrap, Holm adjustment and null bands over stored predictions. |
+| `src/data_loader/label_audit.py` | The sensitivity subsets as rules: noisy TF labels and templated GenePT summaries. |
+| `scripts/build_counts.py` | Single-chunk shares per encoder and the subsets' sizes, each with its denominator; writes `data/v2/counts.json`. |
 | `src/linear_trainer/records.py` | Loads and checks the `data/v2/` records; the validation-only picks (`best_pool`, `best_encoder`, `best_nt_kmer`, `best_aa`). |
 | `data/v2/statistics.json` | The output (generated, not tracked). |
 | `outputs/predictions/v2/<split stem>/` | Stored test predictions, one content-addressed `.npz` per record (not tracked). |
@@ -72,6 +78,29 @@ Every other paired test is exploratory and unadjusted.
 range over 200 label-shuffled runs of one cell, each with its full selection
 loop. They cover the 4-mer on each primary split and task (the TSS 4-mer on the
 TSS primary), plus ESM-2 650M on family5 on the CDS primary.
+
+**Sensitivity subsets** (exploratory) rerun tests with one disclosed defect
+masked from scoring, on the stored predictions (nothing is refitted). The gene
+sets are rules in `src/data_loader/label_audit.py`:
+
+- `label_noise`: T1-T4 and the family5 headline intervals without the TF-labelled
+  genes that are TFs only through a non-C2H2 zinc-finger group (387 genes).
+- `template`: the GenePT comparisons (best encoder vs the nucleotide and amino-acid
+  k-mers, ESM-2 650M vs the best encoder) and their intervals without the genes
+  whose summary text is shared with another gene (901 genes; the largest group is
+  347 olfactory receptors).
+
+Each reports `n_excluded`, the number of scored test genes the mask removed.
+
+**Pooling at matched regularisation** (`pooling_3x`, exploratory): for each
+encoder and task on the CDS primary, Ends + Mean against `<encoder>_meanmean3`
+(Mean copied three times, which equals Mean at 3x C and equals Ends + Mean for
+single-chunk genes) and against Mean on its own grid. Family5 rows also report
+the share of scored test genes on which Ends + Mean and the control agree.
+
+The gene counts the text states (single-chunk shares with their denominators,
+and the two subsets' sizes) come from `scripts/build_counts.py`, which writes
+`data/v2/counts.json`.
 
 ## What it is not
 
@@ -121,6 +150,24 @@ Optional flags:
     "splits.json/family5/kmer": {
       "median": 0.0, "band95": [0.0, 0.0], "n": 200,
       "n_refit_nonconverged": 0, "n_edge": {"plateau": 0, "limit": 0, "nonconverged": 0}
+    }
+  },
+  "sensitivity": {
+    "inputs": {"gene_table": "<sha256>", "hgnc": "<sha256>"},
+    "label_noise": {
+      "task": "family5", "n_genes": 387,
+      "tests": {"T1 encoder > nucleotide k-mer": {"delta_point": 0.0, "n_excluded": 0, "...": "..."}},
+      "intervals": {"splits.json/family5/<source>": {"point": 0.0, "n_excluded": 0, "...": "..."}}
+    },
+    "template": {"task": "genept", "n_genes": 901, "tests": {}, "intervals": {}}
+  },
+  "pooling_3x": {
+    "family5/<encoder>": {
+      "Ends+Mean > Mean x3 (3x C)": {"delta_point": 0.0, "delta_ci95": [0.0, 0.0], "...": "..."},
+      "Ends+Mean > Mean": {"delta_point": 0.0, "...": "..."},
+      "picks": {"meanD": 0.0, "meanmean": 0.0, "meanmean3": 0.0},
+      "edges": {"meanD": null, "meanmean": null, "meanmean3": null},
+      "agreement_with_mean_x3": 0.0
     }
   }
 }

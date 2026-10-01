@@ -125,6 +125,54 @@ def test_the_bootstraps_never_fit(tmp_path, monkeypatch):
     stats.paired_bootstrap(a, b, _singletons(a), n_iters=5)
 
 
+@pytest.mark.parametrize("task", ["family5", "genept"])
+def test_an_excluded_subset_is_dropped_from_scoring(tmp_path, task):
+    from linear_trainer.cell import load_predictions
+    from linear_trainer.fit import score
+    rec = _rec(tmp_path, task)
+    a = load_predictions(rec)
+    drop = frozenset(a["ids"][::4].tolist())
+    keep = ~np.isin(a["ids"], sorted(drop))
+    key = stats._METRIC[stats._KIND[task]]
+    out = stats.cluster_bootstrap(rec, _singletons(rec), n_iters=20, exclude=drop)
+    assert out["point"] == score(stats._KIND[task], a["y_true"][keep], a["pred"][keep])[key]
+    assert (out["n_test"], out["n_excluded"]) == (int(keep.sum()), len(drop))
+    assert out["n_groups"] == int(keep.sum())
+    # No exclusion: today's output, the record's own value, and no n_excluded field.
+    plain = stats.cluster_bootstrap(rec, _singletons(rec), n_iters=20)
+    assert plain == stats.cluster_bootstrap(rec, _singletons(rec), n_iters=20, exclude=frozenset())
+    assert plain["point"] == rec[key] and "n_excluded" not in plain
+
+
+def test_a_paired_exclusion_drops_the_same_genes_from_both_sides(tmp_path, monkeypatch):
+    from linear_trainer.cell import load_predictions
+    from linear_trainer.fit import score
+    a, b = _rec(tmp_path, name="a"), _rec(tmp_path, name="b", permute=True)
+    # b's rows come back in another gene order, so a mask built on one side's
+    # order and applied to the other's would hit the wrong genes.
+    scored = stats._scored
+    def shuffled(rec):
+        arrays = scored(rec)
+        if rec is not b:
+            return arrays
+        perm = np.random.default_rng(1).permutation(len(arrays["ids"]))
+        return {k: v[perm] for k, v in arrays.items()}
+    monkeypatch.setattr(stats, "_scored", shuffled)
+    ids = load_predictions(a)["ids"]
+    drop = frozenset(ids[1::3].tolist())
+    out = stats.paired_bootstrap(a, b, _singletons(a), n_iters=20, exclude=drop)
+    def f1(rec):
+        p = load_predictions(rec)
+        keep = ~np.isin(p["ids"], sorted(drop))
+        return score("logistic", p["y_true"][keep], p["pred"][keep])["test_macro_f1"]
+    assert out["delta_point"] == pytest.approx(f1(a) - f1(b), abs=1e-12)
+    assert (out["n_test"], out["n_excluded"]) == (len(ids) - len(drop), len(drop))
+    # The exclusion never excuses cells that score different genes.
+    b["purge"] = {**b["purge"], "test_masked": [ids[0]]}
+    with pytest.raises(ValueError, match="different test genes"):
+        stats.paired_bootstrap(a, b, _singletons(a), n_iters=5, exclude=drop)
+
+
 def _null(n, **over):
     base = {"split": "splits.json", "task": "family5", "feature_source": "kmer",
             "shuffled_labels": True}

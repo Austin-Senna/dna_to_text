@@ -132,7 +132,11 @@ def _features_stamp(source: str | Path) -> dict:
     over the pinned CDS manifest."""
     parquet = sources._parquet_for(source)
     if parquet is not None:
-        return {"path": _rel(parquet), "sha256": sources.sha256_file(parquet)}
+        out = {"path": _rel(parquet), "sha256": sources.sha256_file(parquet)}
+        if not isinstance(source, Path) and source in sources.DERIVED:
+            base, copies = sources.DERIVED[source]
+            out.update(derived_from=base, transform=f"hstack x{copies}")
+        return out
     manifest = sources.DATA / "cds_manifest.tsv"
     # The ids, family labels and GenePT targets come from the metadata parquet.
     return {"featurizer": str(source), "cds_manifest": _rel(manifest),

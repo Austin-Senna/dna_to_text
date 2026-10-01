@@ -49,6 +49,14 @@ for _encoder in ENCODERS:
         DATASET_PATHS[f"tss_{_encoder}_{_variant}"] = DATA / f"dataset_tss_{_encoder}_{_variant}.parquet"
 del _encoder, _variant
 
+# Controls derived from a registered source at load time; never a pool in the
+# registry, so never a selection candidate. ``<enc>_meanmean3`` is Mean copied
+# three times: under StandardScaler and an L2 penalty it is exactly Mean at 3x C
+# (Ridge: alpha / 3), so on the standard grid it is Mean on a 3x-shifted grid.
+# Ends + Mean (meanD) equals it for single-chunk genes; the pair isolates the
+# chunk-position effect (D5, the 3x C test).
+DERIVED: dict[str, tuple[str, int]] = {f"{e}_meanmean3": (f"{e}_meanmean", 3) for e in ENCODERS}
+
 # On-the-fly compositional feature sources, computed from the cached CDS.
 SYNTHETIC_FEATURIZERS = {
     "kmer": lambda s: featurize_kmer(s, 4),
@@ -84,6 +92,8 @@ def cell_name(source: str | Path) -> str:
 def _parquet_for(source: str | Path) -> Path | None:
     if isinstance(source, Path):
         return source
+    if source in DERIVED:
+        return _parquet_for(DERIVED[source][0])
     if source in DATASET_PATHS:
         return Path(DATASET_PATHS[source])
     if source in SYNTHETIC_FEATURIZERS:
@@ -146,6 +156,10 @@ def load(source: str | Path, task: str, split: str, splits_path: Path
     """
     if task not in TASKS:
         raise ValueError(f"unknown task: {task!r}")
+    if not isinstance(source, Path) and source in DERIVED:
+        base, copies = DERIVED[source]
+        X, y, ids = load(base, task, split, splits_path)
+        return np.hstack([X] * copies), y, ids
     parquet = _parquet_for(source)
     meta_parquet = parquet if parquet is not None else META_PARQUET
     if task in BINARY_TASKS:

@@ -83,6 +83,16 @@ def _scored(rec: dict) -> dict[str, np.ndarray]:
     return arrays
 
 
+def _drop(arrays: dict[str, np.ndarray], exclude: frozenset[str]) -> dict[str, np.ndarray]:
+    """A sensitivity mask on top of the purge (D5: noisy labels, templated
+    targets). Applied after the point check, so the record still has to match
+    its full scored set first."""
+    if not exclude:
+        return arrays
+    keep = ~np.isin(arrays["ids"], sorted(exclude))
+    return {k: v[keep] for k, v in arrays.items()}
+
+
 # --- groups --------------------------------------------------------------------
 
 @lru_cache(maxsize=None)
@@ -148,9 +158,15 @@ def _short_class(kind: str, y: np.ndarray, idxs: list[np.ndarray], what: str) ->
 # --- bootstraps -----------------------------------------------------------------
 
 def cluster_bootstrap(rec: dict, groups: dict[str, str] | None = None,
-                      n_iters: int = N_ITERS, seed: int = SEED) -> dict:
-    """95% cluster-bootstrap interval for one record's test metric."""
-    arrays = _scored(rec)
+                      n_iters: int = N_ITERS, seed: int = SEED,
+                      exclude: frozenset[str] = frozenset()) -> dict:
+    """95% cluster-bootstrap interval for one record's test metric.
+
+    ``exclude`` drops those genes from scoring (a sensitivity subset); the point
+    is then the metric on the genes left, not the record's value.
+    """
+    full = _scored(rec)
+    arrays = _drop(full, exclude)
     kind = _kind(rec)
     groups = groups if groups is not None else group_of(rec["split"], rec["arm"])
     units = _group_index(arrays["ids"], groups)
@@ -158,20 +174,28 @@ def cluster_bootstrap(rec: dict, groups: dict[str, str] | None = None,
     idxs = list(_resamples(units, n_iters, seed))
     vals = np.array([_metric(kind, y[idx], pred[idx]) for idx in idxs])
     ci = _ci(vals)
-    point = rec[_METRIC[kind]]
+    point = rec[_METRIC[kind]] if not exclude else _metric(kind, y, pred)
     out = {"key": rec.get("key"), "metric": _METRIC[kind], "point": point, "ci95": ci,
            "point_in_ci": bool(ci[0] <= point <= ci[1]),
            "n_test": int(len(y)), "n_groups": len(units), "n_iters": n_iters, "seed": seed,
            "n_short_class": _short_class(kind, y, idxs, str(rec.get("key")))}
+    if exclude:
+        out["n_excluded"] = int(len(full["ids"]) - len(y))
     if kind == "logistic":
         kap = np.array([float(cohen_kappa_score(y[idx], pred[idx])) for idx in idxs])
-        out.update(kappa_point=rec["test_kappa"], kappa_ci95=_ci(kap))
+        kappa = rec["test_kappa"] if not exclude else float(cohen_kappa_score(y, pred))
+        out.update(kappa_point=kappa, kappa_ci95=_ci(kap))
     return out
 
 
 def paired_bootstrap(rec_a: dict, rec_b: dict, groups: dict[str, str] | None = None,
-                     n_iters: int = N_ITERS, seed: int = SEED) -> dict:
-    """Difference A - B on the same scored test genes, resampled together."""
+                     n_iters: int = N_ITERS, seed: int = SEED,
+                     exclude: frozenset[str] = frozenset()) -> dict:
+    """Difference A - B on the same scored test genes, resampled together.
+
+    ``exclude`` drops those genes from both sides (a sensitivity subset); the
+    point is then the difference on the genes left.
+    """
     if rec_a["task"] != rec_b["task"]:
         raise ValueError("paired cells must share a task")
     if rec_a["splits_sha256"] != rec_b["splits_sha256"]:
@@ -191,21 +215,30 @@ def paired_bootstrap(rec_a: dict, rec_b: dict, groups: dict[str, str] | None = N
         raise ValueError("paired regression targets differ")
     pa, pb = a["pred"], b["pred"][order]
     kind = _kind(rec_a)
+    n_full = len(y)
+    if exclude:
+        keep = ~np.isin(a["ids"], sorted(exclude))
+        a = {k: v[keep] for k, v in a.items()}
+        y, pa, pb = y[keep], pa[keep], pb[keep]
     if groups is None:   # the coarser grouping when the two cells' arms differ
         arm = "tss" if "tss" in (rec_a["arm"], rec_b["arm"]) else "cds"
         groups = group_of(rec_a["split"], arm)
     units = _group_index(a["ids"], groups)
     idxs = list(_resamples(units, n_iters, seed))
     d = np.array([_metric(kind, y[idx], pa[idx]) - _metric(kind, y[idx], pb[idx]) for idx in idxs])
-    point = rec_a[_METRIC[kind]] - rec_b[_METRIC[kind]]
+    point = (rec_a[_METRIC[kind]] - rec_b[_METRIC[kind]] if not exclude
+             else _metric(kind, y, pa) - _metric(kind, y, pb))
     ci = _ci(d)
-    return {"metric": _METRIC[kind], "a": rec_a.get("key"), "b": rec_b.get("key"),
+    out = {"metric": _METRIC[kind], "a": rec_a.get("key"), "b": rec_b.get("key"),
             "delta_point": float(point), "delta_ci95": ci,
             "point_in_ci": bool(ci[0] <= point <= ci[1]),
             "p_a_gt_b": float(np.mean(d > 0)),
             "p_one_sided": float((1 + np.sum(d <= 0)) / (n_iters + 1)),
             "n_test": int(len(y)), "n_groups": len(units), "n_iters": n_iters, "seed": seed,
             "n_short_class": _short_class(kind, y, idxs, f"{rec_a.get('key')} vs {rec_b.get('key')}")}
+    if exclude:
+        out["n_excluded"] = int(n_full - len(y))
+    return out
 
 
 # --- multiplicity and chance ----------------------------------------------------

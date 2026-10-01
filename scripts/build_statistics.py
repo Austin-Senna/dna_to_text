@@ -15,7 +15,14 @@ each side the validation-selected cell, one-sided for A > B:
 
 T1-T3 run on the CDS primary split (``splits.json``); T4 on the TSS primary
 (``splits_tss_disjoint.json``), where the CDS cells also run, so both sides
-score the same test genes. Everything else is exploratory and unadjusted.
+score the same test genes. Everything else is exploratory and unadjusted,
+including two D5 blocks:
+
+  sensitivity  T1-T4 with the noisy TF labels excluded from scoring, and the
+               GenePT comparisons with the templated-summary genes excluded
+               (data_loader.label_audit); masks on stored predictions, no refit
+  pooling_3x   Ends + Mean against Mean copied three times (= Mean at 3x C, the
+               ``<enc>_meanmean3`` control) and against Mean on its own grid
 
 Run: uv run scripts/build_statistics.py [--n-iters 1000]
 """
@@ -24,8 +31,12 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+import numpy as np
+
+from data_loader import label_audit
 from linear_trainer import records as R
 from linear_trainer import stats
+from linear_trainer.cell import scored_predictions
 
 CDS = "splits.json"
 TSS = "splits_tss_disjoint.json"
@@ -58,7 +69,7 @@ def check_confirmatory_cell(rec: dict) -> None:
                                       f"refit converged={rec['converged']!r}")
 
 
-def confirmatory(cds_recs: dict, tss_recs: dict, n_iters: int) -> dict:
+def confirmatory_pairs(cds_recs: dict, tss_recs: dict) -> dict[str, tuple[dict, dict]]:
     cds = R.cells(cds_recs, "cds", "family5")
     h = _headline(cds_recs, "family5")
     enc = h["best_encoder"]
@@ -73,7 +84,11 @@ def confirmatory(cds_recs: dict, tss_recs: dict, n_iters: int) -> dict:
     dtss = R.cells(tss_recs, "tss", "family5")
     enc_d = R.best_encoder(dcds, "cds")     # may differ from T1-T3's; the output names both
     tests["T4 CDS > TSS (same encoder)"] = (dcds[enc_d], dtss[R.best_pool(dtss, R.encoder_of(enc_d), "tss")])
+    return tests
 
+
+def confirmatory(cds_recs: dict, tss_recs: dict, n_iters: int) -> dict:
+    tests = confirmatory_pairs(cds_recs, tss_recs)
     for a, b in tests.values():
         check_confirmatory_cell(a)
         check_confirmatory_cell(b)
@@ -98,6 +113,78 @@ def exploratory_pairs(recs: dict, arm_pairs: list[tuple[str, str, str, str]], n_
     return out
 
 
+def _genept_pairs(recs: dict) -> dict[str, tuple[dict, dict]]:
+    cds = R.cells(recs, "cds", "genept")
+    h = _headline(recs, "genept")
+    enc = h["best_encoder"]
+    return {"genept: encoder > nt_kmer": (cds[enc], cds[h["nt_kmer"]]),
+            "genept: encoder > aa_kmer": (cds[enc], cds[h["aa_kmer"]]),
+            "genept: esm2_650m > encoder": (cds["esm2_650m"], cds[enc])}
+
+
+def _check_noisy_labels(recs: list[dict], noisy: frozenset[str]) -> None:
+    """The mask is built from the Stage 1 gene table, not from the records: every
+    masked gene a record scores must carry the TF label in its stored predictions,
+    or the gene table has drifted from the parquets the records were fitted on."""
+    for rec in recs:
+        arrays = scored_predictions(rec)
+        hit = np.isin(arrays["ids"], sorted(noisy))
+        wrong = sorted(set(arrays["y_true"][hit].tolist()) - {"tf"})
+        if wrong:
+            raise R.MixedRecords(f"{rec['key']}: noisy-TF mask hits genes labelled {wrong}")
+
+
+def sensitivity(cds_recs: dict, tss_recs: dict, n_iters: int) -> dict:
+    """The headline tests with each disclosed defect masked from scoring (D5)."""
+    gene_table, hgnc, inputs = label_audit.load_inputs()
+    noisy = label_audit.noisy_tf_genes(gene_table, hgnc)
+    pairs = confirmatory_pairs(cds_recs, tss_recs)
+    _check_noisy_labels([r for ab in pairs.values() for r in ab], noisy)
+    masks = {"label_noise": ("family5", noisy, pairs),
+             "template": ("genept", label_audit.templated_genes(gene_table), _genept_pairs(cds_recs))}
+    out: dict = {"inputs": inputs}
+    for name, (task, genes, pairs) in masks.items():
+        h = _headline(cds_recs, task)
+        cds = R.cells(cds_recs, "cds", task)
+        heads = sorted({h["best_encoder"], h["nt_kmer"], h["aa_kmer"], h["esm2"]})
+        out[name] = {
+            "task": task, "n_genes": len(genes),
+            "tests": {k: stats.paired_bootstrap(a, b, n_iters=n_iters, exclude=genes)
+                      for k, (a, b) in pairs.items()},
+            "intervals": {f"{CDS}/{task}/{src}": stats.cluster_bootstrap(cds[src], n_iters=n_iters,
+                                                                         exclude=genes)
+                          for src in heads},
+        }
+    return out
+
+
+def pooling_3x(cds_recs: dict, n_iters: int) -> dict:
+    """Ends + Mean (meanD) against the budget-matched Mean (D5, the 3x C test).
+
+    ``<enc>_meanmean3`` is Mean on a 3x-shifted grid, and equals Ends + Mean for
+    single-chunk genes, so the first pair isolates chunk position; the second is
+    the comparison the pooling table shows. Exploratory, CDS primary."""
+    out: dict = {}
+    for task in ("family5", "genept"):
+        cds = R.cells(cds_recs, "cds", task)
+        hp = "C" if task == "family5" else "alpha"
+        for e in R.ENCODERS:
+            ends, mean, mean3 = (cds[f"{e}_{p}"] for p in ("meanD", "meanmean", "meanmean3"))
+            row = {"Ends+Mean > Mean x3 (3x C)": stats.paired_bootstrap(ends, mean3, n_iters=n_iters),
+                   "Ends+Mean > Mean": stats.paired_bootstrap(ends, mean, n_iters=n_iters),
+                   "picks": {"meanD": ends[hp], "meanmean": mean[hp], "meanmean3": mean3[hp]},
+                   "edges": {"meanD": ends["edge"], "meanmean": mean["edge"], "meanmean3": mean3["edge"]}}
+            if task == "family5":   # the share of scored test genes on which the two agree
+                a, b = scored_predictions(ends), scored_predictions(mean3)
+                pos = {g: i for i, g in enumerate(b["ids"].tolist())}
+                if set(pos) != set(a["ids"].tolist()):
+                    raise ValueError(f"{e}: meanD and meanmean3 score different test genes")
+                order = np.array([pos[g] for g in a["ids"].tolist()])
+                row["agreement_with_mean_x3"] = float(np.mean(a["pred"] == b["pred"][order]))
+            out[f"{task}/{e}"] = row
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -110,6 +197,12 @@ def main() -> None:
     nulls = {split: R.load(split, null=True) for split in (CDS, TSS)}
     stamp = R.stamp_of(cds_recs, tss_recs, *nulls.values())          # G7 across every file used
     R.check_complete(stamp)                                           # G17, G1: one whole-manifest run
+    controls = [f"{e}_meanmean3" for e in R.ENCODERS]                 # D5: added after the 746-cell runs
+    missing = [f"{t}/{c}" for t in ("family5", "genept") for c in controls
+               if c not in R.cells(cds_recs, "cds", t)]
+    if missing:
+        raise R.MissingRecord(f"no record for the 3x C controls {missing}; these records predate "
+                              "them, so rerun the whole manifest")
     result: dict = {"stamp": stamp, "inputs": R.input_digests(), "n_iters": n, "seed": stats.SEED,
                     "confirmatory": confirmatory(cds_recs, tss_recs, n)}
 
@@ -169,6 +262,8 @@ def main() -> None:
                                R.pick(tss, [f"tss_{e}_chunk4mergc", f"tss_{e}_chunk6mer"]))]
             expl.update({f"{split} {k}": v for k, v in exploratory_pairs(recs, tss_pairs, n).items()})
     result["exploratory"] = expl
+    result["sensitivity"] = sensitivity(cds_recs, tss_recs, n)
+    result["pooling_3x"] = pooling_3x(cds_recs, n)
 
     # Null bands (G13).
     bands = {}

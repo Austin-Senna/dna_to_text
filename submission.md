@@ -43,6 +43,7 @@ Run every probe cell, then the intervals and tests, then the report figures and 
 ```bash
 scripts/recompute_all.sh all
 uv run python scripts/build_statistics.py
+uv run python scripts/build_counts.py
 uv run python scripts/build_result_figures.py
 uv run python scripts/build_paper_tables.py
 ```
