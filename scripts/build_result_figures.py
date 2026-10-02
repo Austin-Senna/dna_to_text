@@ -11,7 +11,8 @@ A missing cell raises.
   comparator_f1.png / comparator_r2.png  -- composition, DNA encoders, ESM-2
         (comparator) on macro-F1 (sec 3.1) and GenePT R^2 (sec 3.2).
   comparator_f1_bands.png  -- the macro-F1 panel with the ESM-2 650M null band
-        drawn beside the 4-mer's (a candidate: the band depends on the model).
+        drawn beside the 4-mer's; the paper's Figure 2 (Hayden, Oct 2: the band
+        depends on the model, so both are shown).
   pooling_heatmap_family5_column.png  -- encoder x pooling macro-F1 heatmap
         (sec 3.3), colour centred on the CDS 4-mer floor (red below, green above),
         boxes on each encoder's validation-selected rule, n/a for boundary-token
