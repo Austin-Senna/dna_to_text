@@ -840,23 +840,20 @@ def build_paired_diff():
 # disclosed defect masked from scoring. Exploratory, unadjusted p.
 # ===================================================================
 def build_d5_sensitivity():
-    out = [r"\multicolumn{3}{@{}l}{\textbf{Ends + Mean $-$ Mean $\times 3$ (Mean at $3\times C$), macro-F1 "
-           r"(one-sided $p$, unadjusted)}}\\"]
+    # Headers stay short (one line at the table width); the caption says every p is one-sided, unadjusted.
+    out = [r"\multicolumn{3}{@{}l}{\textbf{Ends + Mean $-$ Mean $\times 3$ at $3\times C$, macro-F1}}\\"]
     p3 = STATS["pooling_3x"]
     for e in ENCODERS:
         d = p3[f"family5/{e}"]["Ends+Mean > Mean x3 (3x C)"]
         out.append(_diff_line(ENC_DISPLAY[e], d, d["p_one_sided"]))
     out.append(r"\midrule")
-    out.append(r"\multicolumn{3}{@{}l}{\textbf{Encoder $-$ composition with log CDS length, macro-F1 "
-               r"(one-sided $p$, unadjusted)}}\\")
+    out.append(r"\multicolumn{3}{@{}l}{\textbf{Encoder $-$ composition with log CDS length, macro-F1}}\\")
     for k in ("nt_kmer+len", "aa_kmer+len"):
         d = STATS["exploratory"][f"{CDS} family5: encoder > {k}"]
         out.append(_diff_line(f"{_key_label(d['a'])} $-$ {_key_label(d['b'])}", d, d["p_one_sided"]))
-    for name, title, metric in (("label_noise", "noisy TF labels (non-C2H2 zinc-finger groups only", "macro-F1"),
-                                ("label_noise_kinase", "kinase-labelled genes that are not protein kinases "
-                                 "(HGNC kinase groups of scaffolds, subunits or small-molecule kinases",
-                                 "macro-F1"),
-                                ("template", "templated GenePT summaries (shared text", "GenePT $R^2$")):
+    for name, title, metric in (("label_noise", "noisy TF labels", "macro-F1"),
+                                ("label_noise_kinase", "non-protein-kinase labels", "macro-F1"),
+                                ("template", "templated summaries", "GenePT $R^2$")):
         tests = STATS["sensitivity"][name]["tests"]
         if any(d.get("n_excluded", 0) == 0 for d in tests.values()):
             raise ValueError(f"{name}: a masked test excluded no scored genes; the mask is empty there")
@@ -864,9 +861,9 @@ def build_d5_sensitivity():
         dis = {d["n_excluded"] for k, d in tests.items() if k.startswith("T4")}
         if len(cds) != 1 or len(dis) > 1:
             raise ValueError(f"{name}: the masked tests exclude different numbers of genes: {cds}, {dis}")
-        n = f"{cds.pop()} test genes removed" + (f", {dis.pop()} on the disjoint split" if dis else "")
+        n = f"{cds.pop()} test genes" + (f", {dis.pop()} disjoint" if dis else "")
         out.append(r"\midrule")
-        out.append(rf"\multicolumn{{3}}{{@{{}}l}}{{\textbf{{Without {title}; {n}), {metric} (one-sided $p$, unadjusted)}}}}\\")
+        out.append(rf"\multicolumn{{3}}{{@{{}}l}}{{\textbf{{Without {title} ({n}), {metric}}}}}\\")
         for k, d in tests.items():
             where = " (disjoint split)" if k.startswith("T4") else ""
             out.append(_diff_line(f"{_key_label(d['a'])} $-$ {_key_label(d['b'])}{where}", d, d["p_one_sided"]))

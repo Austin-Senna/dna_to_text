@@ -149,3 +149,25 @@ def test_counts_and_statistics_share_their_label_inputs(monkeypatch, tmp_path):
     monkeypatch.setattr(bn, "COUNTS", p)
     with pytest.raises(R.MixedRecords, match="hgnc"):
         bn.build()
+
+
+def test_the_margin_kept_under_homology_control_is_derived_from_its_keys(numbers):
+    """Share of NT-v2's above-chance margin kept on the primary split, chance being
+    the primary split's shuffled-label median (the random split has no null band)."""
+    def v(k):
+        return float(numbers[k].replace(bt.MARK, "").replace(r"\ensuremath{-}", "-"))
+    for arm, null in (("cds", "null.hom.f5.kmer.median"), ("tss", "null.dis.f5.enformer-tss-4mer.median")):
+        want = (v(f"{arm}.f5.enc.nt-v2") - v(null)) / (v(f"rand.{arm}.f5.enc.nt-v2") - v(null)) * 100
+        assert abs(float(numbers[f"leak.{arm}.nt-v2.kept-pct"].replace(bt.MARK, "")) - want) < 1.0
+
+
+def test_ridge_robust_rows_and_retrieval_chance_have_keys(numbers):
+    rr = json.loads((R.V2 / "ridge_robust.json").read_text())
+    esm = next(r for r in rr["rows"] if r["key"].endswith("/esm2_650m"))
+    assert numbers["rr.esm2-650m.top5-pct"] == f"{esm['top5'] * 100:.1f}"
+    assert numbers["rr.chance-top5-pct"] == f"{esm['chance_top5'] * 100:.1f}"
+
+
+def test_a_bare_result_decimal_in_the_prose_is_reported():
+    texts = {"a.tex": r"scores 0.693 here, \val{t1.delta} there, width=0.62\textwidth, 2.5--97.5\%"}
+    assert bn.bare_decimals(texts) == [("a.tex", "0.693")]

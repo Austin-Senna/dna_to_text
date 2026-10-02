@@ -17,6 +17,11 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
         genes each mask removes: excluded, excluded-dis on the disjoint split)
   ``.p`` is always the unadjusted one-sided p; only ``.p-holm`` is adjusted.
   ci.*, null.*.{median,band}, chance.*.median   intervals, null bands, per-cell chance
+  leak.<arm>.nt-v2.kept-pct              NT-v2's above-chance margin kept on the primary
+        split, relative to the random split; chance is the primary split's
+        shuffled-label median (the random split has no null band)
+  rr.<source>.{macro,pooled,top5-pct,median-rank}, rr.chance-top5-pct, rr.n-test   ridge_robust.json
+  pool.<enc>.spread, pool.between-encoders.spread   CDS family5 macro-F1 ranges
   n.*, purge.*, pop.*, tss-overlap.*, single-chunk.*, selsens.*   counts; tss-overlap
         is the homology split's cross-partition window overlap over its test
         partition, and tss-overlap.scored.* over the test genes left after the purge
@@ -244,10 +249,44 @@ def _selection_sensitivity(out: Keys) -> None:
     out["selsens.builder-picks"] = count(sens["summary"]["builder_picks"])
 
 
+def _derived(out: Keys) -> None:
+    """Quantities the prose states that combine records and statistics."""
+    nulls = {"cds": bt.band(bt.CDS, "family5", "kmer")["median"],
+             "tss": bt.band(bt.TSS, "family5", bt.TSS_4MER)["median"]}
+    for arm, chance in nulls.items():
+        prim, rand = bt.primary(arm).best("nt_v2", arm, "family5")[bt.F1], bt.RND.best("nt_v2", arm, "family5")[bt.F1]
+        out[f"leak.{arm}.nt-v2.kept-pct"] = f"{(prim - chance) / (rand - chance) * 100:.0f}"
+    rr = json.loads((R.V2 / "ridge_robust.json").read_text())
+    R.check_inputs(rr)
+    if rr["stamp"] != bt.STATS["stamp"]:
+        raise R.MixedRecords("ridge_robust.json was rescored from other records")
+    chance = {f"{r['chance_top5'] * 100:.1f}" for r in rr["rows"] if r["key"].startswith(bt.CDS)}
+    if len(chance) != 1:
+        raise ValueError(f"the CDS rows of ridge_robust.json disagree on retrieval chance: {chance}")
+    out["rr.chance-top5-pct"] = chance.pop()
+    n_test = {r["n_test"] for r in rr["rows"] if r["key"].startswith(bt.CDS)}
+    if len(n_test) != 1:
+        raise ValueError(f"the CDS rows of ridge_robust.json score different test sets: {n_test}")
+    out["rr.n-test"] = count(n_test.pop())
+    # Pooling spread: each encoder's range over its CDS rules, against the range across encoders at their picks.
+    by = bt.HOM.cells("cds", "family5")
+    for enc in bt.ENCODERS:
+        vals = [by[f"{enc}_{p}"][bt.F1] for p in bt.encoder_pools(enc, "CDS")]
+        out[f"pool.{slug(enc)}.spread"] = bt.f(max(vals) - min(vals), 3)
+    picks = [bt.HOM.best(e, "cds", "family5")[bt.F1] for e in bt.ENCODERS]
+    out["pool.between-encoders.spread"] = bt.f(max(picks) - min(picks), 3)
+    for r in rr["rows"]:
+        if r["key"].startswith(f"{bt.CDS}/cds/genept/"):
+            k = f"rr.{slug(r['key'].rsplit('/', 1)[1])}"
+            out[f"{k}.macro"], out[f"{k}.pooled"] = bt.f(r["macro_r2"], 3), bt.f(r["pooled_r2"], 3)
+            out[f"{k}.top5-pct"], out[f"{k}.median-rank"] = f"{r['top5'] * 100:.1f}", f"{r['median_rank']:.0f}"
+
+
 def collect() -> Keys:
     out = Keys()
     _records(out)
     _statistics(out)
+    _derived(out)
     _counts(out)
     _selection_sensitivity(out)
     return out
@@ -292,6 +331,9 @@ def _strip_comments(text: str) -> str:
     return re.sub(r"(?<!\\)((?:\\\\)*)%.*", r"\1", text)
 
 
+PROSE = {f"{n}.tex" for n in ("abstract", "introduction", "methods", "results", "conclusion", "appendix")}
+
+
 def paper_sources() -> dict[str, str]:
     return {p.name: _strip_comments(p.read_text()) for p in sorted(PAPER.glob("*.tex")) if p != OUT}
 
@@ -305,6 +347,23 @@ def pending(texts: dict[str, str]) -> list[tuple[str, str]]:
             for v in re.findall(r"\\pending\{([^}]*)\}", t)]
 
 
+# Decimals in the prose that are not results: layout, model sizes, tool flags,
+# fixed facts. Anything else must come through \val (G: no hand-transcribed number).
+NOT_RESULTS = re.compile(r"width=\d|\d\\(column|text)width|\d\{\\,\}M|--min-seq-id|min_dist=|GRCh38\.|"
+                         r"\$\\geq\$\d|2\.5--97\.5|99\.9\\%|\d kb| -c \d")
+
+
+def bare_decimals(texts: dict[str, str]) -> list[tuple[str, str]]:
+    out = []
+    for name, t in texts.items():
+        t = re.sub(r"\\(val|pending)\{[^}]*\}", "", t)
+        for m in re.finditer(r"\d+\.\d+", t):
+            around = t[max(0, m.start() - 15):m.end() + 15]
+            if not NOT_RESULTS.search(around):
+                out.append((name, m.group()))
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true", help="fail while a \\pending{} or undefined \\val{} remains")
@@ -313,11 +372,14 @@ def main() -> None:
     OUT.write_text(render(numbers))
     texts = paper_sources()
     missing, left = undefined(texts, set(numbers)), pending(texts)
+    bare = bare_decimals({k: v for k, v in texts.items() if k in PROSE})
     print(f"wrote {OUT.name}: {len(numbers)} keys, {sum(bt.MARK in v for v in numbers.values())} marked; "
-          f"{len(left)} \\pending sites left, {len(missing)} undefined \\val")
+          f"{len(left)} \\pending sites left, {len(bare)} bare decimals, {len(missing)} undefined \\val")
     for name, k in missing:
         print(f"  undefined: {name}: \\val{{{k}}}")
-    if missing or (args.check and left):
+    for name, v in bare if args.check else ():
+        print(f"  bare decimal: {name}: {v}")
+    if missing or (args.check and (left or bare)):
         sys.exit(1)
 
 
