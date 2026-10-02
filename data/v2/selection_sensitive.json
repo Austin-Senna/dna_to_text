@@ -1,0 +1,4101 @@
+{
+  "sources": {
+    "threads": {
+      "a": "a55568c49ad53f9a16924cd1d27ed955983a3d15",
+      "b": "9db07bb7fa2ca4368a5d577d4833973f4cab03bd"
+    },
+    "kernel": {
+      "a": "a55568c49ad53f9a16924cd1d27ed955983a3d15",
+      "b": "f4f4302a49f43e1e2199d8c7b771836556a37415"
+    }
+  },
+  "summary": {
+    "cells": 167,
+    "pick_changed": 68,
+    "both_perturbations": 80,
+    "builder_picks": 3
+  },
+  "builder_picks": {
+    "threads": [
+      {
+        "pick": "splits_seed1.json/cds/family5 best encoder",
+        "a": "gena_lm_meanG",
+        "b": "nt_v2_meanD"
+      },
+      {
+        "pick": "splits_seed1.json/cds/family5 nt_v2 pool",
+        "a": "nt_v2_meanG",
+        "b": "nt_v2_meanD"
+      }
+    ],
+    "kernel": [
+      {
+        "pick": "splits_seed1.json/cds/family5 best encoder",
+        "a": "gena_lm_meanG",
+        "b": "nt_v2_meanG"
+      }
+    ]
+  },
+  "cells": [
+    {
+      "key": "splits.json/cds/family5/dnabert2_clsmean",
+      "d": 768,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": -0.0004214139491008906
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": 0.0002801034377467593
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0004214139491008906
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_150m",
+      "d": 640,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.005501238329010505
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.005501238329010505
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.005501238329010505
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf1",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.002175657521312546
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.002175657521312546
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf113",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf122",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf134",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          0.1
+        ],
+        "d_test_f1": 0.01028451118892168
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.00017029623520495307
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.01028451118892168
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf147",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.00021266833994548762
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.009055075299095189
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.009055075299095189
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf149",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.0008281573498964967
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0008281573498964967
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf157",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.012572486142301609
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.012572486142301609
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf164",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          1.0
+        ],
+        "d_test_f1": 0.023890965492300242
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.023890965492300242
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf171",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.0006486905165319357
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0006486905165319357
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf172",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.00150725788602471
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.0008119426024613685
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.00150725788602471
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf178",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1.0,
+          1.0
+        ],
+        "d_test_f1": -0.0023647457665998406
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1.0,
+          1.0
+        ],
+        "d_test_f1": -0.0023647457665998406
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0023647457665998406
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf180",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 4.412963843411499e-05
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": 4.412963843411499e-05
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf181",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.005068464482153839
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.005068464482153839
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf182",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": -0.002383476788290484
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.002383476788290484
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf183",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": -0.0044856867145304236
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0044856867145304236
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf185",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 5.747625486376973e-05
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 5.747625486376973e-05
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf187",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": -0.010045398713750986
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": -0.010045398713750986
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.010045398713750986
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf188",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.02116697635922349
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.02116697635922349
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.02116697635922349
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf23",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.0001553213578827095
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.0001553213578827095
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0001553213578827095
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf27",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          0.1,
+          100.0
+        ],
+        "d_test_f1": 0.02990838401577453
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          0.1,
+          100.0
+        ],
+        "d_test_f1": 0.02990838401577453
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.02990838401577453
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf36",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1.0,
+          100.0
+        ],
+        "d_test_f1": 0.0010509111938795113
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1.0,
+          100.0
+        ],
+        "d_test_f1": 0.0010509111938795113
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0010509111938795113
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf37",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf39",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.0002938373706574404
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.0002938373706574404
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0002938373706574404
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf48",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.0022515444885444214
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.0014068806838686554
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0022515444885444214
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf5",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf50",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.0009809858616382228
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0009809858616382228
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf54",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          0.1
+        ],
+        "d_test_f1": 0.0216434178452882
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          0.1
+        ],
+        "d_test_f1": 0.0216434178452882
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0216434178452882
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf6",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf63",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 4.289665817125421e-05
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": 4.289665817125421e-05
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf69",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          1.0
+        ],
+        "d_test_f1": -0.01666323596404834
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.01666323596404834
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf79",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.0011799711907633514
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0011799711907633514
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf83",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.002036815623171623
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.002036815623171623
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.002036815623171623
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf86",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          0.1,
+          100.0
+        ],
+        "d_test_f1": 0.011551143031997363
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.011551143031997363
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf90",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": -0.00021232735518450507
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.00021232735518450507
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf91",
+      "d": 1280,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          1.0
+        ],
+        "d_test_f1": -0.0018480889519951471
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          1.0
+        ],
+        "d_test_f1": -0.0018480889519951471
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0018480889519951471
+    },
+    {
+      "key": "splits.json/cds/family5/gena_lm_meanmean",
+      "d": 768,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": 0.005029961273076422
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": 0.003010066856220739
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.005029961273076422
+    },
+    {
+      "key": "splits.json/cds/family5/gena_lm_meanmean3",
+      "d": 2304,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          1000.0
+        ],
+        "d_test_f1": -0.00564687634664518
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          1000.0
+        ],
+        "d_test_f1": 0.002308732494032739
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.00564687634664518
+    },
+    {
+      "key": "splits.json/cds/family5/hyena_dna_meanG",
+      "d": 1024,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          1.0,
+          1.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/cds/family5/kmer/shuf102",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1.0,
+          1.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1.0,
+          1.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/cds/family5/kmer/shuf109",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": -0.00020217631135152625
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.00020217631135152625
+    },
+    {
+      "key": "splits.json/cds/family5/kmer/shuf125",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/cds/family5/kmer/shuf195",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": 0.0010545215738877733
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0010545215738877733
+    },
+    {
+      "key": "splits.json/cds/family5/kmer/shuf67",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1000.0,
+          1.0
+        ],
+        "d_test_f1": -0.004793897967350053
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1000.0,
+          1.0
+        ],
+        "d_test_f1": -0.004793897967350053
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.004793897967350053
+    },
+    {
+      "key": "splits.json/cds/family5/kmer/shuf71",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/cds/family5/kmer/shuf84",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/cds/family5/nt_v2_meanmean",
+      "d": 512,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1.0
+        ],
+        "d_test_f1": 0.027010684465263335
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1.0
+        ],
+        "d_test_f1": 0.027010684465263335
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.027010684465263335
+    },
+    {
+      "key": "splits.json/tss/family5/tss_dnabert2_clsmean",
+      "d": 768,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.01,
+          100.0
+        ],
+        "d_test_f1": 0.01792817477192782
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.01,
+          100.0
+        ],
+        "d_test_f1": 0.017978895069008682
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.017978895069008682
+    },
+    {
+      "key": "splits.json/tss/family5/tss_dnabert2_maxmean",
+      "d": 768,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": 0.004927553396526285
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": 0.005576610636358115
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.005576610636358115
+    },
+    {
+      "key": "splits.json/tss/family5/tss_gena_lm_maxmean",
+      "d": 768,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          100.0
+        ],
+        "d_test_f1": 0.0037015327440996226
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0037015327440996226
+    },
+    {
+      "key": "splits.json/tss/family5/tss_hyena_dna_tssanchored",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits.json/tss/family5/tss_nt_v2_meanD",
+      "d": 1536,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.1,
+          10000.0
+        ],
+        "d_test_f1": 0.00014753128015465578
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.00014753128015465578
+    },
+    {
+      "key": "splits.json/tss/family5/tss_nt_v2_meanG",
+      "d": 2048,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.0006940728703184185
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.008450127116428674
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.008450127116428674
+    },
+    {
+      "key": "splits_random.json/cds/genept/gc",
+      "d": 3,
+      "n_train": 2270,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions"
+        ],
+        "hp": [
+          0.0001,
+          0.0001
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_random.json/tss/family5/enformer_trunk_center",
+      "d": 3072,
+      "n_train": 2270,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": -0.00282143497344034
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          0.1
+        ],
+        "d_test_f1": 0.004207637787773555
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.004207637787773555
+    },
+    {
+      "key": "splits_random.json/tss/family5/tss_dnabert2_meanD",
+      "d": 2304,
+      "n_train": 2270,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.01,
+          1000.0
+        ],
+        "d_test_f1": -0.04130019730585971
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.01,
+          1000.0
+        ],
+        "d_test_f1": -0.04130019730585971
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.04130019730585971
+    },
+    {
+      "key": "splits_random.json/tss/family5/tss_dnabert2_meanG",
+      "d": 3072,
+      "n_train": 2270,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": -0.008282479294371037
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": -0.004326896210613995
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.008282479294371037
+    },
+    {
+      "key": "splits_random.json/tss/family5/tss_gena_lm_clsmean",
+      "d": 768,
+      "n_train": 2270,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": -0.008090344769869529
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": -0.0012347253747385656
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.008090344769869529
+    },
+    {
+      "key": "splits_seed1.json/cds/family5/codon",
+      "d": 64,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          1.0
+        ],
+        "d_test_f1": -0.00416848662644187
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.00416848662644187
+    },
+    {
+      "key": "splits_seed1.json/cds/family5/dnabert2_meanD",
+      "d": 2304,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.1,
+          1.0
+        ],
+        "d_test_f1": -0.026055239334498936
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.1,
+          1.0
+        ],
+        "d_test_f1": -0.026055239334498936
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.026055239334498936
+    },
+    {
+      "key": "splits_seed1.json/cds/family5/nt_v2_meanD",
+      "d": 1536,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.0011311427320107592
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.0011311427320107592
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0011311427320107592
+    },
+    {
+      "key": "splits_seed1.json/cds/family5/nt_v2_meanG",
+      "d": 2048,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          0.1
+        ],
+        "d_test_f1": 0.04235038531471724
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": -0.001797888170983697
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.04235038531471724
+    },
+    {
+      "key": "splits_seed123.json/cds/family5/codon",
+      "d": 64,
+      "n_train": 2270,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.1,
+          10000.0
+        ],
+        "d_test_f1": -0.0015213426342544079
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0015213426342544079
+    },
+    {
+      "key": "splits_seed123.json/cds/family5/hyena_dna_meanmean",
+      "d": 256,
+      "n_train": 2270,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1.0,
+          1.0
+        ],
+        "d_test_f1": -0.004584666436620588
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.004584666436620588
+    },
+    {
+      "key": "splits_seed7.json/cds/family5/esm2_150m",
+      "d": 640,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": -0.0016355252126002418
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0016355252126002418
+    },
+    {
+      "key": "splits_tss_disjoint.json/cds/family5/codon",
+      "d": 64,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": -0.0030938675078527877
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": -0.0012432811564887514
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0030938675078527877
+    },
+    {
+      "key": "splits_tss_disjoint.json/cds/family5/dnabert2_clsmean",
+      "d": 768,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": 0.007389023627446756
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": -0.0025162150282252993
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.007389023627446756
+    },
+    {
+      "key": "splits_tss_disjoint.json/cds/family5/dnabert2_meanG",
+      "d": 3072,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.1,
+          100.0
+        ],
+        "d_test_f1": -0.00915647302535072
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.00915647302535072
+    },
+    {
+      "key": "splits_tss_disjoint.json/cds/family5/esm2_150m",
+      "d": 640,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": -0.0014922063475056868
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": -0.0014922063475056868
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0014922063475056868
+    },
+    {
+      "key": "splits_tss_disjoint.json/cds/family5/gc",
+      "d": 3,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000000.0,
+          1000000.0
+        ],
+        "d_test_f1": -0.01734659174921674
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.01734659174921674
+    },
+    {
+      "key": "splits_tss_disjoint.json/cds/family5/gena_lm_clsmean",
+      "d": 768,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1.0,
+          1.0
+        ],
+        "d_test_f1": 0.0018713426321039783
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1.0,
+          1.0
+        ],
+        "d_test_f1": 0.0018713426321039783
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0018713426321039783
+    },
+    {
+      "key": "splits_tss_disjoint.json/cds/family5/gena_lm_meanD",
+      "d": 2304,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": -0.0031836182746450836
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": -0.0011006159887096967
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0031836182746450836
+    },
+    {
+      "key": "splits_tss_disjoint.json/cds/family5/gena_lm_meanG",
+      "d": 3072,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": -0.0018008611034248112
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.0005025313739723813
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0018008611034248112
+    },
+    {
+      "key": "splits_tss_disjoint.json/cds/family5/nt_v2_clsmean",
+      "d": 512,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.1,
+          1.0
+        ],
+        "d_test_f1": 0.01532971496139135
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.01532971496139135
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf1",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": 0.0010885232493454688
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0010885232493454688
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf10",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": -0.0007924489661656209
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": -0.0007924489661656209
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0007924489661656209
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf100",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "edge"
+        ],
+        "hp": [
+          1.0,
+          1000.0
+        ],
+        "d_test_f1": -0.00048033975161562714
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.00048033975161562714
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf102",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          1000.0
+        ],
+        "d_test_f1": -0.004549609415705952
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.004549609415705952
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf106",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf108",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf112",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf113",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf114",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf115",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          1000.0
+        ],
+        "d_test_f1": -0.0036494183045907014
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": 0.00027990788554169144
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0036494183045907014
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf117",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf120",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1000.0,
+          10.0
+        ],
+        "d_test_f1": -0.003985186732415574
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          1000.0,
+          100.0
+        ],
+        "d_test_f1": -0.004097956434405026
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.004097956434405026
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf121",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf123",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf125",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          1000.0
+        ],
+        "d_test_f1": 0.003223064940691661
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.003223064940691661
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf128",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf129",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1000.0,
+          1.0
+        ],
+        "d_test_f1": 0.003582483769776018
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1000.0,
+          1.0
+        ],
+        "d_test_f1": 0.003582483769776018
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.003582483769776018
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf132",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf14",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf142",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf143",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf144",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf145",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1000.0,
+          10.0
+        ],
+        "d_test_f1": 0.0070131115195133376
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1000.0,
+          10.0
+        ],
+        "d_test_f1": 0.0070131115195133376
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0070131115195133376
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf149",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf150",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf151",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf152",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          1000.0,
+          100.0
+        ],
+        "d_test_f1": -0.0006259780907668377
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          1000.0,
+          100.0
+        ],
+        "d_test_f1": -0.0006259780907668377
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0006259780907668377
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf159",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf16",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": 0.003363575687780257
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.003363575687780257
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf160",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf164",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf166",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.004139423086529398
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.004139423086529398
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.004139423086529398
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf168",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": -0.0014403540793424263
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": -0.0014403540793424263
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0014403540793424263
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf170",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "pick"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf171",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf172",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf173",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.0040550550491465776
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0040550550491465776
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf178",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "edge"
+        ],
+        "hp": [
+          0.1,
+          100.0
+        ],
+        "d_test_f1": 0.039545596132366606
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "edge"
+        ],
+        "hp": [
+          0.1,
+          100.0
+        ],
+        "d_test_f1": 0.039545596132366606
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.039545596132366606
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf180",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.010103056394059007
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.010103056394059007
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf182",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          1000.0
+        ],
+        "d_test_f1": 0.0027108052126505466
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0027108052126505466
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf183",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf189",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf190",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf191",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf194",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          1000.0
+        ],
+        "d_test_f1": -0.001065859968052446
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.001065859968052446
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf195",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.003474611191703031
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10.0,
+          100.0
+        ],
+        "d_test_f1": 0.003474611191703031
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.003474611191703031
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf198",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf199",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf21",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          1000.0
+        ],
+        "d_test_f1": 0.0039176761187888764
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0039176761187888764
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf26",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf27",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": 0.0008680349890385353
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0008680349890385353
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf29",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf30",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": 0.00047202595633172306
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.00047202595633172306
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf31",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1000.0,
+          1.0
+        ],
+        "d_test_f1": -0.00438682992161199
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          1000.0,
+          1.0
+        ],
+        "d_test_f1": -0.00438682992161199
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.00438682992161199
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf32",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf33",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": 0.00042546948356805836
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.00042546948356805836
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf34",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf35",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf36",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf41",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf45",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": -0.002719091295662862
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": -0.002719091295662862
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.002719091295662862
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf49",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf51",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf57",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          1000.0
+        ],
+        "d_test_f1": -0.0008611061161037936
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0008611061161037936
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf58",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf61",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf63",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf66",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf71",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics",
+          "converged",
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          1000.0
+        ],
+        "d_test_f1": -0.0005108183291272217
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0005108183291272217
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf73",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf74",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf76",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf78",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf80",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf81",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": 0.00044308008790558406
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.00044308008790558406
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf85",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "converged"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf92",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": 0.00040865085258590117
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.00040865085258590117
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf93",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": -0.0024760597628398773
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.0024760597628398773
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf94",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf95",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick"
+        ],
+        "hp": [
+          100.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf96",
+      "d": 256,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "kernel": {
+        "what": [
+          "edge"
+        ],
+        "hp": [
+          10.0,
+          10.0
+        ],
+        "d_test_f1": null
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": null
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_chunk6mer",
+      "d": 4096,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.004648083178543261
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100.0,
+          100.0
+        ],
+        "d_test_f1": 0.00011527796292348791
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.004648083178543261
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_clsmean",
+      "d": 768,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": -7.811027754867084e-05
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": -0.00974278284222524
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.00974278284222524
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_meanG",
+      "d": 3072,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": -0.000530979702571599
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": 0.0025592464605344867
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0025592464605344867
+    },
+    {
+      "key": "splits_tss_disjoint_seed1.json/tss/family5/enformer_trunk_center",
+      "d": 3072,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": -0.004209525635425482
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": -0.012796327106292527
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.012796327106292527
+    },
+    {
+      "key": "splits_tss_disjoint_seed1.json/tss/family5/tss_nt_v2_meanD",
+      "d": 1536,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": -0.005274933305938173
+      },
+      "kernel": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          100.0
+        ],
+        "d_test_f1": -0.0037635731496059865
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.005274933305938173
+    },
+    {
+      "key": "splits_tss_disjoint_seed123.json/tss/family5/enformer_trunk_center",
+      "d": 3072,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.1,
+          100.0
+        ],
+        "d_test_f1": -0.004988265226529731
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.004988265226529731
+    },
+    {
+      "key": "splits_tss_disjoint_seed123.json/tss/family5/tss_dnabert2_meanG",
+      "d": 3072,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          100000.0,
+          10000.0
+        ],
+        "d_test_f1": -0.011876733125987471
+      },
+      "kernel": null,
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.011876733125987471
+    },
+    {
+      "key": "splits_tss_disjoint_seed123.json/tss/family5/tss_hyena_dna_maxmean",
+      "d": 256,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.1,
+          0.1
+        ],
+        "d_test_f1": -0.002513555685313723
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.002513555685313723
+    },
+    {
+      "key": "splits_tss_disjoint_seed7.json/tss/family5/enformer_trunk_center",
+      "d": 3072,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "pick",
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          0.01
+        ],
+        "d_test_f1": -0.0011139763346655895
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          10000.0,
+          10000.0
+        ],
+        "d_test_f1": -0.006280494240769652
+      },
+      "pick_changed": true,
+      "max_abs_d_test_f1": 0.006280494240769652
+    },
+    {
+      "key": "splits_tss_disjoint_seed7.json/tss/family5/tss_dnabert2_meanD",
+      "d": 2304,
+      "n_train": 2271,
+      "threads": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": -0.0009049842623580218
+      },
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          1000.0,
+          1000.0
+        ],
+        "d_test_f1": -0.0009134426447132693
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.0009134426447132693
+    },
+    {
+      "key": "splits_tss_disjoint_seed7.json/tss/family5/tss_gena_lm_meanD",
+      "d": 2304,
+      "n_train": 2271,
+      "threads": null,
+      "kernel": {
+        "what": [
+          "predictions",
+          "metrics"
+        ],
+        "hp": [
+          0.001,
+          0.001
+        ],
+        "d_test_f1": -0.011315222319526419
+      },
+      "pick_changed": false,
+      "max_abs_d_test_f1": 0.011315222319526419
+    }
+  ]
+}
