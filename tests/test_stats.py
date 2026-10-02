@@ -278,9 +278,10 @@ def _write(path, recs):
 
 def _fake(key="splits.json/cds/family5/aa2", **over):
     from linear_trainer import records as R
+    from linear_trainer.protocol import V2
     base = {"key": key, "split": "splits.json", "arm": "cds", "task": "family5",
             "feature_source": key.rsplit("/", 1)[1], "shuffled_labels": False,
-            "stamp": {"git_sha": "a" * 40}, "protocol_hash": "p",
+            "stamp": {"git_sha": "a" * 40}, "protocol_hash": V2.hash,
             "splits_sha256": R._sha(R.REPO_ROOT / "data" / "splits.json"),
             "purge": {"rules": ["protein@0.40"], **R._purge_inputs(),
                       "split_sha256": R._sha(R.REPO_ROOT / "data" / "splits.json")}}
@@ -320,6 +321,12 @@ def test_records_load_refuses_mixed_or_wrong_files(tmp_path):
         R.load("splits.json", root=tmp_path)
     _write(f, [_fake(split="splits_seed1.json")])
     with pytest.raises(R.MixedRecords, match="names split"):
+        R.load("splits.json", root=tmp_path)
+    # A trial fitted at another thread count (recompute_all --threads) never reaches a builder.
+    from dataclasses import replace
+    from linear_trainer.protocol import V2
+    _write(f, [_fake(protocol_hash=replace(V2, threads=6).hash)])
+    with pytest.raises(R.MixedRecords, match="protocol"):
         R.load("splits.json", root=tmp_path)
     _write(f, [_fake()])
     assert list(R.load("splits.json", root=tmp_path)) == ["splits.json/cds/family5/aa2"]

@@ -7,6 +7,8 @@ table, figure and statistic reads them through ``load``, which refuses:
   files a builder combines (``stamp_of``; G7, G12);
 - a record fitted on another version of its split file than the one on disk;
 - a key recorded twice;
+- records fitted under another protocol than ``protocol.V2`` (a trial at
+  another thread count, ``recompute_all.py --threads``);
 - a record whose purge differs from the policy for its split (G2): other
   rules, or masks derived from another pair table or window manifest, so a
   cell run without its purge can't reach a table.
@@ -21,6 +23,7 @@ import json
 from pathlib import Path
 
 from data_loader.model_registry import ENCODER_SPECS, encoder_pools
+from linear_trainer.protocol import V2 as V2_PROTOCOL
 from linear_trainer.selection import MissingRecord, select_pool
 from splits.leaks import rules_for
 
@@ -66,6 +69,10 @@ def load(split: str, *, null: bool = False, root: Path | None = None) -> dict[st
     commits = {(r["stamp"]["git_sha"], r["protocol_hash"]) for r in recs}
     if len(commits) != 1:
         raise MixedRecords(f"{path.name} mixes {len(commits)} commit/protocol stamps")
+    (_, proto), = commits
+    if proto != V2_PROTOCOL.hash:   # a trial at another thread count (recompute_all --threads)
+        raise MixedRecords(f"{path.name}: fitted under protocol {proto[:8]}, not "
+                           f"{V2_PROTOCOL.name} ({V2_PROTOCOL.hash[:8]})")
     inputs = _purge_inputs()
     split_sha = _sha(REPO_ROOT / "data" / Path(split).name)
     for r in recs:

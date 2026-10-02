@@ -76,6 +76,14 @@ def _kmer(recs: list[dict]) -> dict:
 @pytest.mark.skipif(not (RECORDS / "metrics_splits.json").exists(), reason="no records to check")
 @pytest.mark.parametrize("tamper", ["none", "prediction", "val_score"])
 def test_a_tampered_record_fails_the_reproduction(tmp_path, tamper):
+    # Sweep points reproduce bit for bit only on the BLAS kernel that fitted them
+    # (measurements §8a: c6a records refitted on this laptop differ at non-picked C),
+    # and there a nudged sweep point can't be told from kernel drift. Point
+    # REPRODUCE_RECORDS at records fitted on this machine (e.g. the Phase 5 run).
+    from linear_trainer.protocol import stamp
+    fitted_on = _kmer(json.loads((RECORDS / "metrics_splits.json").read_text()))["stamp"]["machine"]["cpu"]
+    if fitted_on != stamp()["machine"]["cpu"]:
+        pytest.skip(f"records fitted on {fitted_on}, not this CPU; set REPRODUCE_RECORDS")
     records = _copy(tmp_path)
     path = records / "metrics_splits.json"
     recs = json.loads(path.read_text())
