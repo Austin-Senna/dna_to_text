@@ -31,7 +31,7 @@ refitted at 6 threads or on another BLAS kernel carries a dagger (`\sens{}`, def
 | File | What it does |
 | --- | --- |
 | `scripts/build_result_figures.py` | Results figures: comparator macro-F1 / GenePT R^2 (3.1/3.2), encoder x pooling heatmap (3.3), CDS-vs-TSS substrate ablation (3.4), random-vs-homology split (3.5). `comparator_f1_bands.png` (the 4-mer and ESM-2 650M shuffled-label bands) is the paper's Figure 2. |
-| `scripts/build_umap_compare.py` | UMAP of the validation-selected NT-v2 CDS and TSS features beside ESM-2. |
+| `scripts/build_umap_compare.py` | UMAP of the validation-selected NT-v2 CDS and TSS features (Appendix Figure A1). |
 | `scripts/build_statistics.py` | Cluster-bootstrap intervals, paired tests (Holm over the four confirmatory tests), null bands; requires `data/v2/run_complete.json` and a complete, passing `data/v2/reproduction.json` for the same records, and cross-checks T1-T4 against it. |
 | `scripts/build_counts.py` | The gene counts the text states, each with its denominator: single-chunk share per encoder (from the v2 chunk caches), noisy TF and kinase labels and templated GenePT summaries (`src/data_loader/label_audit.py`). |
 | `scripts/ridge_robust_metrics.py` | Rescores stored GenePT predictions: pooled R^2 and retrieval; control row = the 200-shuffle null band. |
