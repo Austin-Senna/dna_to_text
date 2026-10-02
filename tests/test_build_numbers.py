@@ -84,13 +84,29 @@ def test_an_undefined_or_pending_site_is_reported():
     assert bn.pending(texts) == [("a.tex", "0.224")]
 
 
-def test_the_window_overlap_must_match_the_windows_the_records_used(monkeypatch, tmp_path):
-    leak = json.loads((R.REPO_ROOT / "analysis" / "tss_overlap" / "window_leak.json").read_text())
-    p = tmp_path / "window_leak.json"
-    p.write_text(json.dumps({**leak, "window_manifest_sha256": "0" * 64}))
-    monkeypatch.setattr(bn, "WINDOW_LEAK", p)
-    with pytest.raises(R.MixedRecords, match="window_leak.json was measured"):
+def test_the_window_overlap_is_computed_on_the_windows_the_records_used(monkeypatch, tmp_path):
+    """Computed at build time from the current split and manifest (no stale file);
+    a manifest other than the one the records' window purge read is refused."""
+    p = tmp_path / "tss_windows.tsv"
+    lines = bn.MANIFEST.read_text().splitlines(keepends=True)
+    p.write_text("".join(lines[:-1]))
+    monkeypatch.setattr(bn, "MANIFEST", p)
+    with pytest.raises(R.MixedRecords, match="window manifest"):
         bn.build()
+
+
+def test_the_scored_overlap_counts_only_the_genes_left_after_the_purge(numbers):
+    """Table A13 states the overlap on the test genes its homology-split F1 scores
+    (Hayden, Oct 2): the partition minus the evaluation purge."""
+    from data_loader.enformer_windows import window_spans
+    from splits.window_leak import window_leak_stats
+    split = json.loads((R.REPO_ROOT / "data" / bt.CDS).read_text())
+    rec = next(r for r in R.load(bt.CDS).values() if r["arm"] == "tss")
+    scored = {**split, "test": [g for g in split["test"] if g not in set(rec["purge"]["test_masked"])]}
+    want = window_leak_stats(scored, window_spans(bn.MANIFEST))
+    assert numbers["tss-overlap.scored.n-test"] == str(len(split["test"]) - len(rec["purge"]["test_masked"]))
+    assert numbers["tss-overlap.scored.test"] == str(want["test_overlapping_trainval"])
+    assert int(numbers["tss-overlap.scored.test"]) < int(numbers["tss-overlap.test"])
 
 
 def test_the_tex_file_defines_every_key(numbers):

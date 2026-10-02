@@ -17,7 +17,9 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
         genes each mask removes: excluded, excluded-dis on the disjoint split)
   ``.p`` is always the unadjusted one-sided p; only ``.p-holm`` is adjusted.
   ci.*, null.*.{median,band}, chance.*.median   intervals, null bands, per-cell chance
-  n.*, purge.*, pop.*, tss-overlap.*, single-chunk.*, selsens.*   counts
+  n.*, purge.*, pop.*, tss-overlap.*, single-chunk.*, selsens.*   counts; tss-overlap
+        is the homology split's cross-partition window overlap over its test
+        partition, and tss-overlap.scored.* over the test genes left after the purge
 
 Values are replayed through both protocol perturbations as the tables are
 (``build_paper_tables.load_records``); a number whose digits move carries
@@ -34,12 +36,13 @@ import re
 import sys
 
 import build_paper_tables as bt
+from data_loader.enformer_windows import MANIFEST, window_spans
 from data_loader.pool_names import POOL_DISPLAY
 from linear_trainer import records as R
+from splits.window_leak import window_leak_stats
 
 PAPER = bt.ROOT / "dna_to_text_paper" / "paper"
 OUT = PAPER / "numbers.tex"
-WINDOW_LEAK = R.REPO_ROOT / "analysis" / "tss_overlap" / "window_leak.json"
 COUNTS = R.V2 / "counts.json"
 KEY = re.compile(r"[a-z0-9]+(?:[.-][a-z0-9]+)*")
 SPLITS = {"hom": bt.CDS, "dis": bt.TSS, "rand": bt.RAND}
@@ -202,13 +205,29 @@ def _counts(out: Keys) -> None:
             raise R.MixedRecords(f"{split.name}/{arm}: {len(purges)} different purges")
         purge = json.loads(purges.pop())
         out[f"purge.{sk}.test"], out[f"purge.{sk}.val"] = count(len(purge["test_masked"])), count(len(purge["val_masked"]))
-    leak_all = json.loads(WINDOW_LEAK.read_text())
-    if leak_all["window_manifest_sha256"] != R._sha(R.REPO_ROOT / "data" / "tss_windows.tsv"):
-        raise R.MixedRecords("window_leak.json was measured on other TSS windows than data/tss_windows.tsv")
-    leak = leak_all[bt.CDS]
-    out["tss-overlap.test"], out["tss-overlap.n-test"] = count(leak["test_overlapping_trainval"]), count(leak["n_test"])
-    out["tss-overlap.pct"] = f"{leak['frac_test_overlapping_trainval'] * 100:.1f}"
-    out["tss-overlap.pairs"] = count(leak["cross_split_pairs"])
+    _window_overlap(out)
+
+
+def _window_overlap(out: Keys) -> None:
+    """TSS-window overlap across the homology split's partitions, computed here from
+    the current split and window manifest (window_leak.json, the split builder's
+    record, carries no split digest). The manifest must be the one the records'
+    window purge read."""
+    windows = {r["purge"]["windows_sha256"] for r in bt.DIS.recs.values() if "windows_sha256" in r["purge"]}
+    if windows != {R._sha(MANIFEST)}:
+        raise R.MixedRecords(f"the window manifest {MANIFEST.name} is not the one the records' window purge read")
+    split = json.loads((R.REPO_ROOT / "data" / bt.CDS).read_text())
+    spans = window_spans(MANIFEST)
+    masked = {json.dumps(sorted(r["purge"]["test_masked"])) for r in bt.HOM.recs.values() if r["arm"] == "tss"}
+    if len(masked) != 1:
+        raise R.MixedRecords(f"{bt.CDS}/tss: {len(masked)} different purges")
+    purged = set(json.loads(masked.pop()))
+    scored = {**split, "test": [g for g in split["test"] if g not in purged]}
+    for key, part in (("tss-overlap", split), ("tss-overlap.scored", scored)):
+        leak = window_leak_stats(part, spans)
+        out[f"{key}.test"], out[f"{key}.n-test"] = count(leak["test_overlapping_trainval"]), count(leak["n_test"])
+        out[f"{key}.pct"] = f"{leak['frac_test_overlapping_trainval'] * 100:.1f}"
+        out[f"{key}.pairs"] = count(leak["cross_split_pairs"])
 
 
 def _selection_sensitivity(out: Keys) -> None:
