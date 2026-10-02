@@ -38,6 +38,8 @@ uv run scripts/build_paper_tables.py     # LaTeX table fragments -> dna_to_text_
 - `data/v2/counts.json` - from `scripts/build_counts.py`; `build_paper_tables.py` reads its test-population profile and refuses one built from other split files.
 - `data/v2/statistics.json`, `data/v2/ridge_robust.json` - each stamped with the records it was built from; the builders refuse a stale one.
 - Stored test predictions in `outputs/predictions/v2/` (not tracked).
+- `data/gene_table.parquet` and `data/hgnc/` (not tracked) - the Stage 1 gene table and HGNC groups, read by `build_statistics.py` and `build_counts.py`.
+- `data/v2/selection_sensitive.json` - from `scripts/build_selection_sensitive.py` over `data/v2/determinism_t6.json` (the main and null groups refitted at 6 threads) and `data/v2/determinism_kernel.json` (the clean room on another OpenBLAS kernel), both `scripts/diff_records.py` reports: the cells whose pick or scores move under either perturbation, for marking in the tables.
 
 ## Outputs
 

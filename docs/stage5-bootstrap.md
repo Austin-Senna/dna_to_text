@@ -19,7 +19,8 @@ band from a committed tree. It reads the records in `data/v2/` through
   the pipeline, re-derives the purge, the picks and the resampling groups, and
   runs its own bootstrap; T1-T4 must then agree with it (same cells, point and
   groups; interval and p within Monte Carlo tolerance);
-- every records file is from the same commit and protocol;
+- every records file is from the same commit and protocol, and that protocol is
+  `protocol.V2` (a trial fitted at another thread count is refused);
 - each split file on disk matches the hash its records carry.
 
 The sensitivity block also reads the Stage 1 gene table and HGNC groups
@@ -44,7 +45,7 @@ Sample input and output shapes are tracked in
 | `scripts/reproduce_headline.py` | The independent reimplementation (Rule 3): numpy, pandas and scikit-learn only, no repo imports; writes `data/v2/reproduction.json`, which `build_statistics.py` requires. `scripts/recompute_all.sh all` runs it at the end of an unsharded pass. |
 | `scripts/build_counts.py` | Single-chunk shares per encoder, the subsets' sizes (each with its denominator) and the per-partition test-population profile; writes `data/v2/counts.json` (`build_paper_tables.py` reads the profile for `s_split_population.tex`). |
 | `src/linear_trainer/records.py` | Loads and checks the `data/v2/` records; the validation-only picks (`best_pool`, `best_encoder`, `best_nt_kmer`, `best_aa`). |
-| `data/v2/statistics.json` | The output (generated, not tracked). |
+| `data/v2/statistics.json` | The output (committed with the canonical records). |
 | `outputs/predictions/v2/<split stem>/` | Stored test predictions, one content-addressed `.npz` per record (not tracked). |
 
 ## What it does
