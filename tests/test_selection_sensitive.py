@@ -23,12 +23,16 @@ def test_the_union_keeps_each_perturbation_apart():
     kernel = _diff([_cell("s/cds/family5/a", ["predictions", "metrics"], -0.01),
                     _cell("s/cds/genept/gc", ["predictions"])],
                    picks=[{"pick": "s/cds/family5 best encoder", "a": "x", "b": "y"}])
-    out = bs.build(threads, kernel)
+    out = bs.build(threads, kernel, {"metrics_s.json": "abc"})
     by = {c["key"]: c for c in out["cells"]}
+    assert out["inputs"] == {"metrics_s.json": "abc"}     # the records the deltas were taken against
     assert set(by) == {"s/cds/family5/a", "s/cds/family5/b", "s/cds/genept/gc"}
     a = by["s/cds/family5/a"]
     assert a["threads"]["what"] == ["pick", "predictions", "metrics"] and a["kernel"]["what"] == ["predictions", "metrics"]
     assert a["pick_changed"] and a["max_abs_d_test_f1"] == 0.03
+    # Every metric delta is kept: the tables mark kappa and accuracy, not only F1.
+    assert a["threads"]["metric_deltas"] == {"test_macro_f1": 0.03} and a["threads"]["hp"] == [1.0, 100.0]
+    assert by["s/cds/family5/b"]["threads"]["metric_deltas"] == {}
     assert by["s/cds/family5/b"]["kernel"] is None and not by["s/cds/family5/b"]["pick_changed"]
     assert by["s/cds/genept/gc"]["threads"] is None and by["s/cds/genept/gc"]["max_abs_d_test_f1"] is None
     assert out["builder_picks"] == {"threads": [], "kernel": kernel["picks"]}
@@ -37,5 +41,5 @@ def test_the_union_keeps_each_perturbation_apart():
 
 
 def test_a_cell_that_differs_nowhere_is_not_listed():
-    out = bs.build(_diff([]), _diff([]))
+    out = bs.build(_diff([]), _diff([]), {})
     assert out["cells"] == [] and out["summary"]["cells"] == 0

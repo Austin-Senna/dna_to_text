@@ -15,15 +15,26 @@ bands; ``scripts/build_statistics.py``). Primary splits: the 40% homology split
 for CDS, the genomic-interval-disjoint split for TSS. Every pick (pool, C or
 alpha, nucleotide and amino-acid k, the best encoder) is made on validation
 scores only; test metrics are reported, never ranked. A missing cell raises.
+
+Selection sensitivity (Phase 6; decided Oct 2: accept and disclose). Every
+fragment is built three times: from the canonical records, then with each
+perturbation in ``data/v2/selection_sensitive.json`` (6 threads, another OpenBLAS
+kernel) replayed onto them, as its metric deltas, its C or alpha, its builder-pick
+flips, and the statistics points that are functions of those records. A printed
+number whose text differs in either replay carries ``\\sens{}``. Bootstrap
+brackets and p-values come from the canonical predictions and are not replayed.
 """
 from __future__ import annotations
 
+import copy
 import json
+import re
 from pathlib import Path
 
 from data_loader.model_registry import encoder_pools
 from data_loader.pool_names import POOL_DISPLAY, display_label
 from linear_trainer import records as R
+from linear_trainer import stats
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "dna_to_text_paper" / "paper" / "tables"
@@ -38,6 +49,9 @@ COMPOSITION = [("kmer", "CDS 4-mer"), ("kmer6", "CDS 6-mer"), ("codon", "Codon")
 TSS_4MER = "enformer_tss_4mer"
 ENF_WHOLE, ENF_CENTRE = "enformer_trunk_global", "enformer_trunk_center"
 F1, K, ACC, R2, COS = "test_macro_f1", "test_kappa", "test_accuracy", "test_r2_macro", "test_mean_cosine"
+SENS = R.V2 / "selection_sensitive.json"
+PERTURBATIONS = ("threads", "kernel")
+MARK = r"\sens{}"                       # defined in the paper's header.tex
 
 
 # ---------- formatting ----------
@@ -116,33 +130,178 @@ SPECS = {
 }
 
 
-def write(key: str, body: str):
-    OUT.mkdir(parents=True, exist_ok=True)
+def tabular(key: str, body: str) -> str:
     s = SPECS[key]
-    block = (
+    return (
         "{" + s["setup"] + r"\begin{tabular*}{" + s["width"] + "}{" + s["cols"] + r"}\toprule" + "\n"
         + s["header"] + r" \\\midrule" + "\n"
         + body.rstrip() + "\n"
         + r"\botrule" + "\n"
         + r"\end{tabular*}}" + "\n"
     )
-    (OUT / f"{key}.tex").write_text(block)
-    print(f"wrote {key}.tex ({block.count(chr(10))} lines)")
 
 
-def write_raw(key, body):
-    OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / f"{key}.tex").write_text(body.rstrip() + "\n")
-    print(f"wrote {key}.tex (full longtable)")
+# ---------- selection-sensitivity marks ----------
+NUM = re.compile(r"[+-]?\d+\.\d+")
+
+
+class StructureChanged(RuntimeError):
+    """A replay changed a fragment outside its numbers (a label, a row)."""
+
+
+class NotReplayable(RuntimeError):
+    """A statistics point touches a moved cell but is not a function of its record."""
+
+
+def mark_unstable(canon: str, variants: list[str]) -> str:
+    """``canon`` with MARK after every number whose text differs in some variant."""
+    parts, nums = NUM.split(canon), NUM.findall(canon)
+    moved = [False] * len(nums)
+    for v in variants:
+        if NUM.split(v) != parts:
+            pairs = zip(canon.splitlines(), v.splitlines())
+            line = next((a for a, b in pairs if NUM.sub("#", a) != NUM.sub("#", b)), "(the line count)")
+            raise StructureChanged(f"a replay changes more than numbers: {line!r}")
+        moved = [m or a != b for m, a, b in zip(moved, nums, NUM.findall(v))]
+    out = [parts[0]]
+    for n, m, p in zip(nums, moved, parts[1:]):
+        out += [n + MARK if m else n, p]
+    return "".join(out)
+
+
+def _hp_field(rec: dict) -> str:
+    return "C" if rec["task"] == "family5" else "alpha"
+
+
+def perturb_records(recs: dict[str, dict], sides: dict[str, dict]) -> dict[str, dict]:
+    """``recs`` with one perturbation's moved cells replayed (copies; the input is untouched)."""
+    out = dict(recs)
+    for key in sides.keys() & recs.keys():
+        side, r = sides[key], copy.deepcopy(recs[key])
+        if r[_hp_field(r)] != side["hp"][0]:
+            raise R.MixedRecords(f"{key}: the sensitivity list was built against {_hp_field(r)}="
+                                 f"{side['hp'][0]}, the records have {r[_hp_field(r)]}")
+        r[_hp_field(r)] = side["hp"][1]
+        for m, d in side["metric_deltas"].items():
+            if d is None:
+                raise NotReplayable(f"{key}: {m} exists in one run only")
+            if m.startswith("unpurged."):
+                r["unpurged"][m.removeprefix("unpurged.")] += d
+            else:
+                r[m] += d
+        out[key] = r
+    return out
+
+
+# A builder-pick name as scripts/diff_records.py::_picks writes it.
+PICK_NAME = re.compile(r"(?P<split>[^/ ]+)/(cds|tss)/(family5|genept) (best encoder|nt k-mer|aa k-mer|"
+                       r"nt k-mer\+len|aa k-mer\+len|(dnabert2|nt_v2|gena_lm|hyena_dna) "
+                       r"(pool|anchored-chunk composition))")
+
+
+def check_replayable(sens: dict, perturbation: str, loaded: set[str], ridge: dict) -> None:
+    """Refuse a replay the tables would carry only in part (review of Oct 2):
+    a moved cell in no loaded records file, a pick name the builder never asks
+    for, a flipped pick on a primary split (statistics.json fixes its compared
+    pairs, so they cannot follow it), or a moved cell behind ridge_robust.json."""
+    for c in sens["cells"]:
+        if c[perturbation] and c["key"] not in loaded:
+            raise NotReplayable(f"{c['key']}: moved under {perturbation} but in no records file loaded here")
+    for d in sens["builder_picks"][perturbation]:
+        m = PICK_NAME.fullmatch(d["pick"])
+        if not m:
+            raise NotReplayable(f"{d['pick']!r} is not a pick name the tables ask for")
+        if m["split"] in (CDS, TSS):
+            raise NotReplayable(f"{d['pick']}: a primary-split pick behind statistics.json flipped; "
+                                "its paired tests compare the canonical pick")
+    moved = {c["key"] for c in sens["cells"] if c[perturbation]}
+    if hit := moved & {r["key"] for r in ridge["rows"]}:
+        raise NotReplayable(f"{hit}: moved, and ridge_robust.json is not replayed")
+
+
+def _metric(rec: dict) -> str:
+    return F1 if rec["task"] == "family5" else R2
+
+
+def perturb_stats(stats_: dict, before: dict[str, dict], after: dict[str, dict]) -> dict:
+    """``stats_`` with every point that is a function of a moved record replayed:
+    interval points (and kappa) and paired-difference points. Null bands are
+    rebuilt separately; an entry on a moved cell that is not a - b (or the
+    record's own value) raises."""
+    moved = {k for k in after if after[k] is not before.get(k)}
+    out = copy.deepcopy(stats_)
+
+    def check(have, want, what):
+        if abs(have - want) > 1e-9:
+            raise NotReplayable(f"{what}: {have} is not a function of the records ({want})")
+
+    def visit(node, path):
+        if isinstance(node, list):
+            for i, v in enumerate(node):
+                visit(v, f"{path}[{i}]")
+            return
+        if not isinstance(node, dict):
+            return
+        if node.get("key") in moved and "point" in node:
+            b, a = before[node["key"]], after[node["key"]]
+            m = node.get("metric", _metric(b))
+            check(node["point"], b[m], path)
+            node["point"] = a[m]
+            if "kappa_point" in node:
+                check(node["kappa_point"], b[K], path)
+                node["kappa_point"] = a[K]
+        if "delta_point" in node and isinstance(node.get("a"), str) and {node["a"], node["b"]} & moved:
+            m = node.get("metric", _metric(before[node["a"]]))
+            check(node["delta_point"], before[node["a"]][m] - before[node["b"]][m], path)
+            node["delta_point"] = after[node["a"]][m] - after[node["b"]][m]
+        for k, v in node.items():
+            if path or k != "null_bands":
+                visit(v, f"{path}/{k}")
+
+    visit(out, "")
+    return out
+
+
+def perturbed_bands(bands: dict, split: str, null: dict[str, dict], sides: dict[str, dict]) -> dict:
+    """The split's null bands rebuilt from its replayed null records, for every
+    cell with a moved shuffle; each rebuilt cell must first reproduce its stored band."""
+    pert = perturb_records(null, sides)
+    by: dict[tuple, list[str]] = {}
+    for k, r in null.items():
+        by.setdefault((r["task"], r["feature_source"]), []).append(k)
+    out = {}
+    for (task, src), keys in by.items():
+        name = f"{split}/{task}/{src}"
+        if not set(keys) & sides.keys():
+            continue
+        n = bands[name]["n"]
+        if stats.null_band([null[k] for k in keys], n) != bands[name]:
+            raise NotReplayable(f"{name}: the stored null band does not rebuild from its records")
+        out[name] = stats.null_band([pert[k] for k in keys], n)
+    return out
 
 
 # ---------- records ----------
 class Split:
-    """The records of one split file, by arm and task."""
+    """The records of one split file, by arm and task. ``sides`` replays one
+    perturbation's moved cells; ``picks`` maps a builder-pick name (as
+    ``scripts/diff_records.py`` names it) to its (canonical, perturbed) value."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, sides: dict[str, dict] | None = None,
+                 picks: dict[str, tuple[str, str]] | None = None):
         self.name = name
-        self.recs = R.load(name)
+        self.canon = R.load(name)
+        self.recs = perturb_records(self.canon, sides or {})
+        self.picks = picks or {}
+
+    def _pick(self, name: str, got: str) -> str:
+        flip = self.picks.get(f"{self.name}/{name}")
+        if flip is None:
+            return got
+        if got != flip[0]:
+            raise R.MixedRecords(f"{self.name}/{name}: the sensitivity list flips {flip[0]}, "
+                                 f"the records pick {got}")
+        return flip[1]
 
     def cells(self, arm: str, task: str) -> dict[str, dict]:
         return R.cells(self.recs, arm, task)
@@ -154,19 +313,23 @@ class Split:
         return by[src]
 
     def best_pool(self, enc: str, arm: str, task: str) -> str:
-        return R.best_pool(self.cells(arm, task), enc, arm)
+        return self._pick(f"{arm}/{task} {enc} pool", R.best_pool(self.cells(arm, task), enc, arm))
 
     def best(self, enc: str, arm: str, task: str) -> dict:
         return self.cell(arm, task, self.best_pool(enc, arm, task))
 
     def nt(self, task: str) -> str:
-        return R.best_nt_kmer(self.cells("cds", task))
+        return self._pick(f"cds/{task} nt k-mer", R.best_nt_kmer(self.cells("cds", task)))
 
     def aa(self, task: str) -> str:
-        return R.best_aa(self.cells("cds", task))
+        return self._pick(f"cds/{task} aa k-mer", R.best_aa(self.cells("cds", task)))
 
     def best_encoder(self, arm: str, task: str) -> str:
-        return R.best_encoder(self.cells(arm, task), arm)
+        return self._pick(f"{arm}/{task} best encoder", R.best_encoder(self.cells(arm, task), arm))
+
+    def anchored_composition(self, enc: str, task: str) -> str:
+        return self._pick(f"tss/{task} {enc} anchored-chunk composition",
+                          R.pick(self.cells("tss", task), [f"tss_{enc}_chunk4mergc", f"tss_{enc}_chunk6mer"]))
 
 
 HOM = DIS = RND = None                  # set by load_records()
@@ -174,13 +337,24 @@ SEED_SPLITS: dict[int, tuple[Split, Split]] = {}
 STATS: dict = {}
 
 
-def load_records() -> None:
-    """Read every records file the tables use, and the statistics built from them."""
+def _read_sens() -> dict:
+    return json.loads(SENS.read_text())
+
+
+def load_records(perturbation: str | None = None) -> None:
+    """Read every records file the tables use, and the statistics built from them;
+    with ``perturbation``, replay that side of the selection-sensitive list onto both."""
     global HOM, DIS, RND, STATS
-    HOM, DIS, RND = Split(CDS), Split(TSS), Split(RAND)
+    sides, picks = {}, {}
+    if perturbation:
+        sens = _read_sens()
+        R.check_inputs(sens)                  # the deltas apply to these records files
+        sides = {c["key"]: c[perturbation] for c in sens["cells"] if c[perturbation]}
+        picks = {d["pick"]: (d["a"], d["b"]) for d in sens["builder_picks"][perturbation]}
+    HOM, DIS, RND = (Split(n, sides, picks) for n in (CDS, TSS, RAND))
     SEED_SPLITS.clear()
-    SEED_SPLITS.update({s: (Split(f"splits_seed{s}.json"), Split(f"splits_tss_disjoint_seed{s}.json"))
-                        for s in SEEDS})
+    SEED_SPLITS.update({s: (Split(f"splits_seed{s}.json", sides, picks),
+                            Split(f"splits_tss_disjoint_seed{s}.json", sides, picks)) for s in SEEDS})
     STATS = json.loads((R.V2 / "statistics.json").read_text())
     R.check_inputs(STATS)                 # no records file rewritten since statistics.json
     if STATS["n_iters"] != 1000:          # the captions say 1,000 resamples
@@ -189,6 +363,19 @@ def load_records() -> None:
     if STATS["stamp"] != R.stamp_of(HOM.recs, DIS.recs, RND.recs,
                                     *(s.recs for pair in SEED_SPLITS.values() for s in pair)):
         raise R.MixedRecords("statistics.json was built from other records than the tables read")
+    if perturbation:
+        if sens["sources"][perturbation]["a"] != STATS["stamp"]["git_sha"]:
+            raise R.MixedRecords(f"selection_sensitive.json diffs {perturbation} against "
+                                 f"{sens['sources'][perturbation]['a'][:7]}, not the canonical records")
+        splits = [HOM, DIS, RND, *(s for pair in SEED_SPLITS.values() for s in pair)]
+        before = {k: r for s in splits for k, r in s.canon.items()}
+        after = {k: r for s in splits for k, r in s.recs.items()}
+        nulls = {split: R.load(split, null=True) for split in (CDS, TSS)}
+        check_replayable(sens, perturbation, before.keys() | {k for n in nulls.values() for k in n},
+                         json.loads((R.V2 / "ridge_robust.json").read_text()))
+        STATS = perturb_stats(STATS, before, after)
+        for split, null in nulls.items():
+            STATS["null_bands"].update(perturbed_bands(STATS["null_bands"], split, null, sides))
 
 
 def interval(split: str, task: str, src: str) -> dict:
@@ -598,7 +785,7 @@ def build_tss_anchored():
             whole_rec = split.best(enc, "tss", "family5")
             whole = whole_rec[F1]
             c = interval(name, "family5", f"tss_{enc}_tssanchored")
-            comp = by[R.pick(by, [f"tss_{enc}_chunk4mergc", f"tss_{enc}_chunk6mer"])][F1]
+            comp = by[split.anchored_composition(enc, "family5")][F1]
             txt = f"{f(c['point'],3)} {_ci(c['ci95'])}"
             win = _beats(name, f"{enc} anchored > whole-window", by[f"tss_{enc}_tssanchored"], whole_rec)
             out.append(f"{ENC_DISPLAY[enc]} & {f(whole,3)} & {bold(txt) if win else txt} "
@@ -725,24 +912,46 @@ def build_ridge_robust():
         for r in rr["rows"])
 
 
-def main():
+# (key, builder, longtable): a longtable fragment is written whole, the rest as a tabular.
+FRAGMENTS = [
+    ("family5_main", build_family5_main, False),
+    ("ridge_main", build_ridge_main, False),
+    ("cds_tss", build_cds_tss, False),
+    ("split_comparison", build_split_comparison, False),
+    ("pooling_combined", build_pooling_combined, True),
+    ("regression_combined", build_regression_combined, True),
+    ("s_seed_sensitivity", build_seed_sensitivity, False),
+    ("s_cds_tss_paired", build_cds_tss_paired, False),
+    ("s_headline_ci_cls", build_headline_ci_cls, False),
+    ("s_headline_ci_reg", build_headline_ci_reg, False),
+    ("s_tss_disjoint", build_tss_disjoint, False),
+    ("s_paired_diff", build_paired_diff, False),
+    ("s_ridge_robust", build_ridge_robust, False),
+    ("s_tss_anchored", build_tss_anchored, False),
+    ("s_d5_sensitivity", build_d5_sensitivity, False),
+    ("s_split_population", build_split_population, False),
+]
+
+
+def build_fragments() -> dict[str, str]:
+    return {key: fn().rstrip() + "\n" if raw else tabular(key, fn()) for key, fn, raw in FRAGMENTS}
+
+
+def build_marked() -> dict[str, str]:
+    """Every fragment from the canonical records, marked where a replay moves a number."""
+    variants = []
+    for p in PERTURBATIONS:
+        load_records(p)
+        variants.append(build_fragments())
     load_records()
-    write("family5_main", build_family5_main())
-    write("ridge_main", build_ridge_main())
-    write("cds_tss", build_cds_tss())
-    write("split_comparison", build_split_comparison())
-    write_raw("pooling_combined", build_pooling_combined())
-    write_raw("regression_combined", build_regression_combined())
-    write("s_seed_sensitivity", build_seed_sensitivity())
-    write("s_cds_tss_paired", build_cds_tss_paired())
-    write("s_headline_ci_cls", build_headline_ci_cls())
-    write("s_headline_ci_reg", build_headline_ci_reg())
-    write("s_tss_disjoint", build_tss_disjoint())
-    write("s_paired_diff", build_paired_diff())
-    write("s_ridge_robust", build_ridge_robust())
-    write("s_tss_anchored", build_tss_anchored())
-    write("s_d5_sensitivity", build_d5_sensitivity())
-    write("s_split_population", build_split_population())
+    return {k: mark_unstable(text, [v[k] for v in variants]) for k, text in build_fragments().items()}
+
+
+def main():
+    OUT.mkdir(parents=True, exist_ok=True)
+    for key, text in build_marked().items():
+        (OUT / f"{key}.tex").write_text(text)
+        print(f"wrote {key}.tex ({text.count(chr(10))} lines, {text.count(MARK)} marked)")
     print("\nAll fragments written to", OUT)
 
 

@@ -37,6 +37,9 @@ class _Split:
     def best(self, enc, arm, task):
         return self.by[f"tss_{enc}_meanmean"]
 
+    def anchored_composition(self, enc, task):
+        return f"tss_{enc}_chunk4mergc"
+
 
 @pytest.mark.parametrize("lo,bolded", [(0.001, True), (-0.001, False)])
 def test_anchored_bolding_follows_the_paired_test(monkeypatch, lo, bolded):
@@ -58,7 +61,6 @@ def test_anchored_bolding_follows_the_paired_test(monkeypatch, lo, bolded):
             "a": f"{split}/{bt.ENF_CENTRE}", "b": f"{split}/{bt.ENF_WHOLE}", "delta_ci95": [lo, 0.2]}
     monkeypatch.setattr(bt, "HOM", _Split(per[bt.CDS]))
     monkeypatch.setattr(bt, "DIS", _Split(per[bt.TSS]))
-    monkeypatch.setattr(bt.R, "pick", lambda b, cands: cands[0])
     # Each anchored CI alone clears its whole-window point: the old rule always bolded.
     monkeypatch.setattr(bt, "STATS", {"exploratory": expl, "intervals": {
         f"{s}/family5/{src}": {"point": 0.4, "ci95": [0.35, 0.45]}
