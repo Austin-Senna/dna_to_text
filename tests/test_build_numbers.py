@@ -95,6 +95,42 @@ def test_the_window_overlap_is_computed_on_the_windows_the_records_used(monkeypa
         bn.build()
 
 
+def test_the_window_composition_is_the_audit_tables_overall_row(numbers):
+    """Appendix overlap audit and Results' "~1% coding": the mean target-CDS share
+    over every window, read from scripts/tss_overlap.py's table."""
+    import csv
+    with (bn.AUDIT / "overlap_by_family.csv").open() as fh:
+        overall = next(r for r in csv.DictReader(fh) if r["group"] == "overall")
+    assert numbers["tss-comp.target-cds"] == f"{float(overall['target_cds']):.3f}"
+    assert numbers["tss-comp.target-cds-pct"] == f"{float(overall['target_cds']) * 100:.0f}"
+    assert numbers["tss-comp.neighbor-exon-pct"] == f"{float(overall['neighbor_exon']) * 100:.0f}"
+    buckets = json.loads((bn.AUDIT / "provenance.json").read_text())["partition"]
+    assert sum(float(overall[b]) for b in buckets) == pytest.approx(1.0)   # the prose's parts cover the window
+    assert numbers["tss-comp.n"] == bn.count(int(overall["n_genes"]))
+
+
+@pytest.mark.parametrize("field", ["manifest_sha256", "gtf_sha256"])
+def test_a_composition_audit_older_than_the_windows_is_refused(monkeypatch, tmp_path, field):
+    prov = json.loads((bn.AUDIT / "provenance.json").read_text())
+    (tmp_path / "provenance.json").write_text(json.dumps({**prov, field: "0" * 64}))
+    (tmp_path / "overlap_by_family.csv").write_text((bn.AUDIT / "overlap_by_family.csv").read_text())
+    monkeypatch.setattr(bn, "AUDIT", tmp_path)
+    with pytest.raises(R.MixedRecords, match="composition audit"):
+        bn.build()
+
+
+def test_a_composition_audit_on_another_gene_set_is_refused(monkeypatch, tmp_path):
+    (tmp_path / "provenance.json").write_text((bn.AUDIT / "provenance.json").read_text())
+    table = (bn.AUDIT / "overlap_by_family.csv").read_text().splitlines(keepends=True)
+    head, overall = table[0], table[1].split(",")
+    assert overall[0] == "overall"
+    overall[1] = str(int(overall[1]) - 1)
+    (tmp_path / "overlap_by_family.csv").write_text(head + ",".join(overall) + "".join(table[2:]))
+    monkeypatch.setattr(bn, "AUDIT", tmp_path)
+    with pytest.raises(R.MixedRecords, match="genes"):
+        bn.build()
+
+
 def test_the_scored_overlap_counts_only_the_genes_left_after_the_purge(numbers):
     """Table A13 states the overlap on the test genes its homology-split F1 scores
     (Hayden, Oct 2): the partition minus the evaluation purge."""

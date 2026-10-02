@@ -15,6 +15,8 @@ Run: ``uv run scripts/tss_overlap.py``
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import sys
 from pathlib import Path
 
@@ -64,6 +66,10 @@ def _write_table(df: pd.DataFrame, name: str, tables_dir: Path, *, title: str, d
     df.to_csv(tables_dir / f"{name}.csv", index=False)
     if markdown:
         (tables_dir / f"{name}.md").write_text(f"# {title}\n\n{description}\n\n{_to_markdown(df)}")
+
+
+def _sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _savefig(fig, path: Path) -> None:
@@ -169,6 +175,13 @@ def main() -> None:
         description="Mean per-window partition (sums to 1.0) and raw overlapping fractions, "
                     f"averaged over {n_in_gtf} genes found in the GTF.",
     )
+
+    # What the audit read, so build_numbers.py can refuse a table older than the windows.
+    (tables_dir / "provenance.json").write_text(json.dumps({
+        "manifest": args.manifest.name, "manifest_sha256": _sha(args.manifest),
+        "gtf": args.gtf.name, "gtf_sha256": _sha(args.gtf), "ensembl_release": ENSEMBL_RELEASE,
+        "partition": list(PARTITION_BUCKETS),
+    }, indent=2) + "\n")
 
     plot_partition_by_family(summary, figures_dir / "partition_by_family.png")
     plot_intergenic_intron_distribution(per_gene, figures_dir / "intergenic_intron_distribution.png")

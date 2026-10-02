@@ -25,6 +25,9 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
   n.*, purge.*, pop.*, tss-overlap.*, single-chunk.*, selsens.*   counts; tss-overlap
         is the homology split's cross-partition window overlap over its test
         partition, and tss-overlap.scored.* over the test genes left after the purge
+  tss-comp.*                             the TSS windows' annotation make-up (the target-CDS
+        share, each partition bucket's percentage, genes, Ensembl release), from
+        scripts/tss_overlap.py's audit table
 
 Values are replayed through both protocol perturbations as the tables are
 (``build_paper_tables.load_records``); a number whose digits move carries
@@ -36,12 +39,13 @@ Run: uv run scripts/build_numbers.py [--check]
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 import sys
 
 import build_paper_tables as bt
-from data_loader.enformer_windows import MANIFEST, window_spans
+from data_loader.enformer_windows import GTF_PATH, MANIFEST, window_spans
 from data_loader.pool_names import POOL_DISPLAY
 from linear_trainer import records as R
 from splits.window_leak import window_leak_stats
@@ -52,6 +56,7 @@ COUNTS = R.V2 / "counts.json"
 KEY = re.compile(r"[a-z0-9]+(?:[.-][a-z0-9]+)*")
 SPLITS = {"hom": bt.CDS, "dis": bt.TSS, "rand": bt.RAND}
 TASKS = {"f5": "family5", "gp": "genept"}
+AUDIT = R.REPO_ROOT / "analysis" / "tss_overlap" / "tables"
 
 
 def slug(s: str) -> str:
@@ -211,6 +216,29 @@ def _counts(out: Keys) -> None:
         purge = json.loads(purges.pop())
         out[f"purge.{sk}.test"], out[f"purge.{sk}.val"] = count(len(purge["test_masked"])), count(len(purge["val_masked"]))
     _window_overlap(out)
+    _window_composition(out)
+
+
+def _window_composition(out: Keys) -> None:
+    """How each TSS window divides into the gene's own CDS, UTRs and introns,
+    neighbouring genes and intergenic sequence, from the audit table
+    scripts/tss_overlap.py writes (painting the GTF takes minutes). The audit
+    must have read the current window manifest, the GTF that manifest was built
+    from (its tracked pin, so the gitignored GTF isn't needed here) and every gene."""
+    prov = json.loads((AUDIT / "provenance.json").read_text())
+    meta = json.loads(MANIFEST.with_suffix(".meta.json").read_text())
+    if (prov["manifest_sha256"], prov["gtf_sha256"]) != (R._sha(MANIFEST), meta["inputs"][GTF_PATH.name]):
+        raise R.MixedRecords("the TSS composition audit predates the current window manifest or GTF: "
+                             "rerun scripts/tss_overlap.py")
+    with (AUDIT / "overlap_by_family.csv").open() as fh:
+        overall = next(r for r in csv.DictReader(fh) if r["group"] == "overall")
+    if int(overall["n_genes"]) != meta["n_genes"]:
+        raise R.MixedRecords(f"the TSS composition audit covers {overall['n_genes']} genes, "
+                             f"the window manifest {meta['n_genes']}")
+    out["tss-comp.target-cds"] = bt.f(float(overall["target_cds"]), 3)
+    for bucket in prov["partition"]:
+        out[f"tss-comp.{slug(bucket)}-pct"] = f"{float(overall[bucket]) * 100:.0f}"
+    out["tss-comp.n"], out["tss-comp.ensembl"] = count(int(overall["n_genes"])), str(prov["ensembl_release"])
 
 
 def _window_overlap(out: Keys) -> None:
