@@ -1,0 +1,396 @@
+{
+  "inputs": {
+    "gene_table": "57ac00b6fec95af03982e0249768328d25fa9a111c5702bb3627bfe7c8a27a68",
+    "hgnc": "1182d184baa6b8dfc26e3eb2b573531bb0a06de231d9510a66cf6526f824fd76",
+    "splits.json": "c8e64cd5650d20a350fcd83c50b8257ab02b382356d5218acb910c8be4eacd23",
+    "splits_tss_disjoint.json": "654b582f9732914b6aca196266c28a0f02f6b42be486de8f83ee8ea584b93c7d",
+    "splits_seed1.json": "05663da80c5b1626d14899fa4705f2b88b595956c74e5a4349d2b3bcd17406a3",
+    "splits_seed7.json": "c3b9360bcff2ce80523600b74d1172c186cc28765d61b6a8c71b7282e832fc1e",
+    "splits_seed123.json": "f06c9e7bc1902fb9983b8d2aaab1d0a617d5bbe402afc5c76619617fe9ec2c0e",
+    "protein_pairs": "d2874ad063f5e5e3b275ef80757e084cc55e73a56fd80d1ee1945188f3106450",
+    "clusters": "e0b12ecc630d8602fe4ca6294e37aeedef97aea0549d537c4e00c8742a561040"
+  },
+  "caches": {
+    "dnabert2": {
+      "cache": "data/chunk_reductions_v2_dnabert2",
+      "n_files": 3244,
+      "encoder": "dnabert2",
+      "model": "zhihan1996/DNABERT-2-117M",
+      "revision": "7bce263b15377fc15361f52cfab88f8b586abda0",
+      "max_content_tokens": "510",
+      "stride": "64",
+      "boundary_tokens": "True",
+      "device_name": "NVIDIA A10G",
+      "torch": "2.11.0+cu130",
+      "cuda": "13.0",
+      "counts_sha256": "63a8943b3fa15e3deff024098c02b9fb52954270fd8292b01f576667217c7735"
+    },
+    "nt_v2": {
+      "cache": "data/chunk_reductions_v2_nt_v2",
+      "n_files": 3244,
+      "encoder": "nt_v2",
+      "model": "InstaDeepAI/nucleotide-transformer-v2-100m-multi-species",
+      "revision": "f34324c6fde36a4f635f0f1f06cac5d25acd6798",
+      "max_content_tokens": "998",
+      "stride": "64",
+      "boundary_tokens": "True",
+      "device_name": "NVIDIA A10G",
+      "torch": "2.11.0+cu130",
+      "cuda": "13.0",
+      "counts_sha256": "e7fbae36b425af6a275c4e04417d95d4edf670b27c088244f6cb66e21aec7d95"
+    },
+    "gena_lm": {
+      "cache": "data/chunk_reductions_v2_gena_lm",
+      "n_files": 3244,
+      "encoder": "gena_lm",
+      "model": "AIRI-Institute/gena-lm-bert-base-t2t",
+      "revision": "4f1352bd4e820f1dba341047f54ad7795e083bf2",
+      "max_content_tokens": "510",
+      "stride": "64",
+      "boundary_tokens": "True",
+      "device_name": "NVIDIA A10G",
+      "torch": "2.11.0+cu130",
+      "cuda": "13.0",
+      "counts_sha256": "6fe33171feeb7d439a1bfc741c253585376a09492416c335560f62523aa9f944"
+    },
+    "hyena_dna": {
+      "cache": "data/chunk_reductions_v2_hyena_dna",
+      "n_files": 3244,
+      "encoder": "hyena_dna",
+      "model": "LongSafari/hyenadna-large-1m-seqlen-hf",
+      "revision": "0a629abf9c7f85b4ec9aa6a1aefa3adcf1907446",
+      "max_content_tokens": "8192",
+      "stride": "512",
+      "boundary_tokens": "False",
+      "device_name": "NVIDIA A10G",
+      "torch": "2.11.0+cu130",
+      "cuda": "13.0",
+      "counts_sha256": "feb7f0cf7348bf8082269a6388da6958243a8953ed9a07423b5cc26d017f67df"
+    }
+  },
+  "single_chunk": {
+    "dnabert2": {
+      "all genes": {
+        "single_chunk": 2656,
+        "of": 3244,
+        "share": 0.8187422934648582
+      },
+      "splits.json test": {
+        "single_chunk": 373,
+        "of": 487,
+        "share": 0.7659137577002053
+      },
+      "splits.json test after the purge": {
+        "single_chunk": 347,
+        "of": 459,
+        "share": 0.7559912854030502
+      },
+      "max_chunks": 48
+    },
+    "nt_v2": {
+      "all genes": {
+        "single_chunk": 3157,
+        "of": 3244,
+        "share": 0.9731812577065352
+      },
+      "splits.json test": {
+        "single_chunk": 469,
+        "of": 487,
+        "share": 0.9630390143737166
+      },
+      "splits.json test after the purge": {
+        "single_chunk": 441,
+        "of": 459,
+        "share": 0.9607843137254902
+      },
+      "max_chunks": 20
+    },
+    "gena_lm": {
+      "all genes": {
+        "single_chunk": 2849,
+        "of": 3244,
+        "share": 0.8782367447595562
+      },
+      "splits.json test": {
+        "single_chunk": 408,
+        "of": 487,
+        "share": 0.837782340862423
+      },
+      "splits.json test after the purge": {
+        "single_chunk": 380,
+        "of": 459,
+        "share": 0.8278867102396514
+      },
+      "max_chunks": 40
+    },
+    "hyena_dna": {
+      "all genes": {
+        "single_chunk": 3211,
+        "of": 3244,
+        "share": 0.9898273736128237
+      },
+      "splits.json test": {
+        "single_chunk": 481,
+        "of": 487,
+        "share": 0.9876796714579056
+      },
+      "splits.json test after the purge": {
+        "single_chunk": 453,
+        "of": 459,
+        "share": 0.9869281045751634
+      },
+      "max_chunks": 14
+    }
+  },
+  "noisy_tf_labels": {
+    "n": {
+      "all genes": 387,
+      "splits.json test": 84,
+      "splits.json test after the purge": 84
+    },
+    "of_tf_labelled": 1743
+  },
+  "noisy_kinase_labels": {
+    "n": {
+      "all genes": 150,
+      "splits.json test": 23,
+      "splits.json test after the purge": 23
+    },
+    "not_kinase": {
+      "all genes": 92,
+      "splits.json test": 12,
+      "splits.json test after the purge": 12
+    },
+    "small_molecule": {
+      "all genes": 58,
+      "splits.json test": 11,
+      "splits.json test after the purge": 11
+    },
+    "of_kinase_labelled": 558
+  },
+  "templated_summaries": {
+    "n": {
+      "all genes": 901,
+      "splits.json test": 64,
+      "splits.json test after the purge": 55
+    },
+    "n_groups": 66,
+    "largest_group": {
+      "n": 347,
+      "families": [
+        "gpcr"
+      ]
+    },
+    "empty_summary": {
+      "n": {
+        "all genes": 104,
+        "splits.json test": 18,
+        "splits.json test after the purge": 16
+      }
+    }
+  },
+  "split_population": {
+    "largest_clusters": [
+      298,
+      113,
+      55,
+      44,
+      38,
+      35,
+      34,
+      30,
+      24,
+      16
+    ],
+    "splits.json": {
+      "largest_clusters_in": [
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train"
+      ],
+      "train": {
+        "n": 2271,
+        "singleton_share": 0.18626155878467635,
+        "median_cluster_size": 3.0,
+        "share_in_clusters_ge10": 0.33069132540730956,
+        "gpcr": 414,
+        "olfactory": 388
+      },
+      "val": {
+        "n": 486,
+        "singleton_share": 0.8662551440329218,
+        "median_cluster_size": 1.0,
+        "share_in_clusters_ge10": 0.0,
+        "gpcr": 88,
+        "olfactory": 7
+      },
+      "test": {
+        "n": 487,
+        "singleton_share": 0.86652977412731,
+        "median_cluster_size": 1.0,
+        "share_in_clusters_ge10": 0.0,
+        "gpcr": 89,
+        "olfactory": 6
+      }
+    },
+    "splits_tss_disjoint.json": {
+      "largest_clusters_in": [
+        "train",
+        "train",
+        "val",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train"
+      ],
+      "train": {
+        "n": 2271,
+        "singleton_share": 0.29458388375165123,
+        "median_cluster_size": 3.0,
+        "share_in_clusters_ge10": 0.30647291941875826,
+        "gpcr": 414,
+        "olfactory": 346
+      },
+      "val": {
+        "n": 487,
+        "singleton_share": 0.6057494866529775,
+        "median_cluster_size": 1.0,
+        "share_in_clusters_ge10": 0.11293634496919917,
+        "gpcr": 88,
+        "olfactory": 55
+      },
+      "test": {
+        "n": 486,
+        "singleton_share": 0.6213991769547325,
+        "median_cluster_size": 1.0,
+        "share_in_clusters_ge10": 0.0,
+        "gpcr": 89,
+        "olfactory": 0
+      }
+    },
+    "splits_seed1.json": {
+      "largest_clusters_in": [
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train"
+      ],
+      "train": {
+        "n": 2271,
+        "singleton_share": 0.18626155878467635,
+        "median_cluster_size": 3.0,
+        "share_in_clusters_ge10": 0.33069132540730956,
+        "gpcr": 414,
+        "olfactory": 388
+      },
+      "val": {
+        "n": 487,
+        "singleton_share": 0.86652977412731,
+        "median_cluster_size": 1.0,
+        "share_in_clusters_ge10": 0.0,
+        "gpcr": 89,
+        "olfactory": 5
+      },
+      "test": {
+        "n": 486,
+        "singleton_share": 0.8662551440329218,
+        "median_cluster_size": 1.0,
+        "share_in_clusters_ge10": 0.0,
+        "gpcr": 88,
+        "olfactory": 8
+      }
+    },
+    "splits_seed7.json": {
+      "largest_clusters_in": [
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train"
+      ],
+      "train": {
+        "n": 2271,
+        "singleton_share": 0.18626155878467635,
+        "median_cluster_size": 3.0,
+        "share_in_clusters_ge10": 0.33069132540730956,
+        "gpcr": 414,
+        "olfactory": 388
+      },
+      "val": {
+        "n": 487,
+        "singleton_share": 0.86652977412731,
+        "median_cluster_size": 1.0,
+        "share_in_clusters_ge10": 0.0,
+        "gpcr": 88,
+        "olfactory": 11
+      },
+      "test": {
+        "n": 486,
+        "singleton_share": 0.8662551440329218,
+        "median_cluster_size": 1.0,
+        "share_in_clusters_ge10": 0.0,
+        "gpcr": 89,
+        "olfactory": 2
+      }
+    },
+    "splits_seed123.json": {
+      "largest_clusters_in": [
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train",
+        "train"
+      ],
+      "train": {
+        "n": 2270,
+        "singleton_share": 0.18590308370044054,
+        "median_cluster_size": 3.0,
+        "share_in_clusters_ge10": 0.33083700440528635,
+        "gpcr": 414,
+        "olfactory": 388
+      },
+      "val": {
+        "n": 487,
+        "singleton_share": 0.86652977412731,
+        "median_cluster_size": 1.0,
+        "share_in_clusters_ge10": 0.0,
+        "gpcr": 89,
+        "olfactory": 4
+      },
+      "test": {
+        "n": 487,
+        "singleton_share": 0.86652977412731,
+        "median_cluster_size": 1.0,
+        "share_in_clusters_ge10": 0.0,
+        "gpcr": 88,
+        "olfactory": 9
+      }
+    }
+  }
+}

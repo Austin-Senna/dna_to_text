@@ -1,0 +1,19 @@
+{
+  "git_sha": "a55568c49ad53f9a16924cd1d27ed955983a3d15",
+  "protocol_hash": "91c36f0fc4d5ca30",
+  "n_cells": 1764,
+  "g1": [
+    {
+      "key": "splits.json/cds/family5/kmer",
+      "hp": 0.01
+    },
+    {
+      "key": "splits.json/cds/genept/aa3",
+      "hp": 10000.0
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanD",
+      "hp": 0.1
+    }
+  ]
+}
