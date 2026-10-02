@@ -15,10 +15,10 @@
       ]
     }
   },
-  "n_common": 764,
-  "n_only_a": 1000,
-  "n_iter_changed": 308,
-  "max_val_delta": 0.01766508626531993,
+  "n_common": 1764,
+  "n_only_a": 0,
+  "n_iter_changed": 866,
+  "max_val_delta": 0.018759736822991452,
   "tol": 1e-09,
   "cells": [
     {
@@ -64,6 +64,440 @@
       }
     },
     {
+      "key": "splits.json/cds/family5/esm2_650m/shuf122",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 1280,
+      "n_train": 2271
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf134",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 0.1,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.10893246187363836,
+        "test_balanced_accuracy": 0.023015321968346603,
+        "test_kappa": 0.0279606390885343,
+        "test_macro_f1": 0.01028451118892168,
+        "unpurged.test_accuracy": 0.1190965092402464,
+        "unpurged.test_balanced_accuracy": 0.03864436160731832,
+        "unpurged.test_kappa": 0.04089905251820258,
+        "unpurged.test_macro_f1": 0.030783191155322437
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf147",
+      "what": [
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_kappa": 0.00041839026315171335,
+        "test_macro_f1": -0.00021266833994548762,
+        "unpurged.test_kappa": 0.00037223386687024185,
+        "unpurged.test_macro_f1": -0.00019186654052819052
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf157",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.008714596949891074,
+        "test_balanced_accuracy": 0.014695094742112058,
+        "test_kappa": 0.021135132616467822,
+        "test_macro_f1": 0.012572486142301609,
+        "unpurged.test_accuracy": 0.010266940451745366,
+        "unpurged.test_balanced_accuracy": 0.015789192081326953,
+        "unpurged.test_kappa": 0.023185708413871797,
+        "unpurged.test_macro_f1": 0.013908444352077887
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf172",
+      "what": [
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_balanced_accuracy": 0.0015933120236046039,
+        "test_kappa": 0.0010954568502608009,
+        "test_macro_f1": 0.00150725788602471,
+        "unpurged.test_balanced_accuracy": 0.0016146688560481903,
+        "unpurged.test_kappa": 0.0010734970806307587,
+        "unpurged.test_macro_f1": 0.001545082230826611
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf178",
+      "what": [
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 1.0,
+      "hp_b": 1.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.002178649237472796,
+        "test_balanced_accuracy": -0.0024390243902439046,
+        "test_kappa": -0.00447702114386439,
+        "test_macro_f1": -0.0023647457665998406,
+        "unpurged.test_accuracy": -0.002053388090349051,
+        "unpurged.test_balanced_accuracy": -0.002247191011235966,
+        "unpurged.test_kappa": -0.004219416416851307,
+        "unpurged.test_macro_f1": -0.0022427642703673756
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf180",
+      "what": [
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_kappa": 0.0011886093841289025,
+        "test_macro_f1": 4.412963843411499e-05,
+        "unpurged.test_kappa": 0.0011483259920985756,
+        "unpurged.test_macro_f1": 3.890146441820619e-05
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf182",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 10.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.01742919389978209,
+        "test_balanced_accuracy": -0.0032764785151335185,
+        "test_kappa": 0.004149340264156032,
+        "test_macro_f1": -0.002383476788290484,
+        "unpurged.test_accuracy": 0.01642710472279263,
+        "unpurged.test_balanced_accuracy": -0.0028656912849086558,
+        "unpurged.test_kappa": 0.004209282493677691,
+        "unpurged.test_macro_f1": -0.0023935023820885193
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf183",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.006535947712418277,
+        "test_balanced_accuracy": -0.005694375311100064,
+        "test_kappa": -0.013054440050378036,
+        "test_macro_f1": -0.0044856867145304236,
+        "unpurged.test_accuracy": -0.004106776180698157,
+        "unpurged.test_balanced_accuracy": -0.0030134745361402038,
+        "unpurged.test_kappa": -0.010632887960505988,
+        "unpurged.test_macro_f1": -0.001997864319494974
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf187",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 10.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.004357298474945537,
+        "test_balanced_accuracy": -0.011390447582043217,
+        "test_kappa": -0.008368037401108142,
+        "test_macro_f1": -0.010045398713750986,
+        "unpurged.test_accuracy": 0.008213552361396315,
+        "unpurged.test_balanced_accuracy": -0.009026401726905414,
+        "unpurged.test_kappa": -0.004039902310906673,
+        "unpurged.test_macro_f1": -0.007569339527225827
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf188",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.006535947712418333,
+        "test_balanced_accuracy": 0.01903559817501299,
+        "test_kappa": 0.010666802419833199,
+        "test_macro_f1": 0.02116697635922349,
+        "unpurged.test_accuracy": 0.006160164271047208,
+        "unpurged.test_balanced_accuracy": 0.01825156977423542,
+        "unpurged.test_kappa": 0.012228192577953934,
+        "unpurged.test_macro_f1": 0.02011982422745759
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf23",
+      "what": [
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_kappa": 0.0004004614398283035,
+        "test_macro_f1": -0.0001553213578827095,
+        "unpurged.test_kappa": 0.00034521066599579875,
+        "unpurged.test_macro_f1": -0.00011338588715731346
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf27",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 0.1,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.039215686274509776,
+        "test_balanced_accuracy": 0.02881998432311178,
+        "test_kappa": 0.03961303736331068,
+        "test_macro_f1": 0.02990838401577453,
+        "unpurged.test_accuracy": -0.045174537987679675,
+        "unpurged.test_balanced_accuracy": 0.02535371426111452,
+        "unpurged.test_kappa": 0.03337942618227041,
+        "unpurged.test_macro_f1": 0.02708047094978086
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf36",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 1.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.021786492374727684,
+        "test_balanced_accuracy": 0.006174510754503149,
+        "test_kappa": 0.02661065485762426,
+        "test_macro_f1": 0.0010509111938795113,
+        "unpurged.test_accuracy": -0.022587268993839837,
+        "unpurged.test_balanced_accuracy": 0.006768207656471403,
+        "unpurged.test_kappa": 0.02478984486815572,
+        "unpurged.test_macro_f1": 0.001903300797951618
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf37",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 1280,
+      "n_train": 2271
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf39",
+      "what": [
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_kappa": -0.0019312161823417107,
+        "test_macro_f1": 0.0002938373706574404,
+        "unpurged.test_kappa": -0.001827314929859769,
+        "unpurged.test_macro_f1": 0.0002179923072005152
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf48",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.008714596949891074,
+        "test_balanced_accuracy": 0.0033551605903732185,
+        "test_kappa": -0.010156771267088915,
+        "test_macro_f1": 0.0022515444885444214,
+        "unpurged.test_accuracy": -0.010266940451745421,
+        "unpurged.test_balanced_accuracy": 0.0019352041475249326,
+        "unpurged.test_kappa": -0.011700927734674682,
+        "unpurged.test_macro_f1": 0.0013260384094924693
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf54",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 0.1,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.12418300653594772,
+        "test_balanced_accuracy": 0.025262314877360414,
+        "test_kappa": 0.056871051994422994,
+        "test_macro_f1": 0.0216434178452882,
+        "unpurged.test_accuracy": 0.12525667351129366,
+        "unpurged.test_balanced_accuracy": 0.02362681420124607,
+        "unpurged.test_kappa": 0.051767587587428276,
+        "unpurged.test_macro_f1": 0.019248789590560533
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf6",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 1280,
+      "n_train": 2271
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf63",
+      "what": [
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_kappa": -0.00036121304866065795,
+        "test_macro_f1": 4.289665817125421e-05,
+        "unpurged.test_kappa": -0.0003132640491864125,
+        "unpurged.test_macro_f1": 3.685879109624479e-05
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf83",
+      "what": [
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.0021786492374727406,
+        "test_balanced_accuracy": -0.0024390243902439046,
+        "test_kappa": -0.0031822253045785676,
+        "test_macro_f1": -0.002036815623171623,
+        "unpurged.test_accuracy": -0.002053388090349051,
+        "unpurged.test_balanced_accuracy": -0.002247191011235966,
+        "unpurged.test_kappa": -0.002965454781620469,
+        "unpurged.test_macro_f1": -0.0019317002028548247
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/esm2_650m/shuf91",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 1.0,
+      "d": 1280,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.050108932461873645,
+        "test_balanced_accuracy": -0.004303931969437208,
+        "test_kappa": 0.0014025944045871208,
+        "test_macro_f1": -0.0018480889519951471,
+        "unpurged.test_accuracy": 0.05544147843942504,
+        "unpurged.test_balanced_accuracy": 0.0009595202398800795,
+        "unpurged.test_kappa": 0.0062161713779291805,
+        "unpurged.test_macro_f1": 0.002232952988645176
+      }
+    },
+    {
       "key": "splits.json/cds/family5/gena_lm_meanmean",
       "what": [
         "predictions",
@@ -104,6 +538,65 @@
         "unpurged.test_balanced_accuracy": -0.007071445550632993,
         "unpurged.test_kappa": -0.007008005394161465,
         "unpurged.test_macro_f1": -0.005659122002639183
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/kmer/shuf102",
+      "what": [
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 1.0,
+      "hp_b": 1.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "unpurged.test_accuracy": 0.0020533880903491064,
+        "unpurged.test_balanced_accuracy": 0.002247191011235966,
+        "unpurged.test_kappa": 0.0053726975458787685,
+        "unpurged.test_macro_f1": 0.0033879067547099018
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/kmer/shuf67",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 1000.0,
+      "hp_b": 1.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.002178649237472796,
+        "test_balanced_accuracy": -0.0024390243902439046,
+        "test_kappa": -0.004579098350146804,
+        "test_macro_f1": -0.004793897967350053,
+        "unpurged.test_accuracy": -0.002053388090349051,
+        "unpurged.test_balanced_accuracy": -0.0037280984975676945,
+        "unpurged.test_kappa": -0.007259079128207446,
+        "unpurged.test_macro_f1": -0.007564968722353044
+      }
+    },
+    {
+      "key": "splits.json/cds/family5/kmer/shuf84",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "edge"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_kappa": 0.0005588725723217891,
+        "unpurged.test_kappa": 0.0010893678382017935,
+        "unpurged.test_macro_f1": 6.734006734007703e-05
       }
     },
     {
@@ -503,6 +996,844 @@
         "unpurged.test_kappa": 0.0030685105957394265,
         "unpurged.test_macro_f1": -0.0018386882656833414
       }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf10",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.0021505376344086446,
+        "test_balanced_accuracy": -0.000806451612903214,
+        "test_kappa": -0.0020706989898660044,
+        "test_macro_f1": -0.0007924489661656209,
+        "unpurged.test_accuracy": -0.0020576131687242705,
+        "unpurged.test_balanced_accuracy": -0.0007662835249042377,
+        "unpurged.test_kappa": -0.0019745233231915904,
+        "unpurged.test_macro_f1": -0.0007512216755719836
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf100",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "edge"
+      ],
+      "hp_a": 1.0,
+      "hp_b": 1000.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.008602150537634468,
+        "test_balanced_accuracy": -0.0032258064516129115,
+        "test_kappa": 0.0044498403407378095,
+        "test_macro_f1": -0.00048033975161562714,
+        "unpurged.test_accuracy": -0.008230452674897082,
+        "unpurged.test_balanced_accuracy": -0.0030651340996168674,
+        "unpurged.test_kappa": 0.004517257819431464,
+        "unpurged.test_macro_f1": -0.00041991197643317935
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf106",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf112",
+      "what": [
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf113",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf114",
+      "what": [
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf115",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 1000.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.002150537634408589,
+        "test_balanced_accuracy": -0.0024096385542168586,
+        "test_kappa": -0.005489053884127348,
+        "test_macro_f1": -0.0036494183045907014,
+        "unpurged.test_accuracy": -0.002057613168724326,
+        "unpurged.test_balanced_accuracy": -0.002247191011235966,
+        "unpurged.test_kappa": -0.005260793120230645,
+        "unpurged.test_macro_f1": -0.003364866904845748
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf120",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 1000.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.002150537634408589,
+        "test_balanced_accuracy": -0.0024096385542168586,
+        "test_kappa": -0.00969792046752227,
+        "test_macro_f1": -0.003985186732415574,
+        "unpurged.test_accuracy": -0.0020576131687242705,
+        "unpurged.test_balanced_accuracy": -0.002247191011235966,
+        "unpurged.test_kappa": -0.009369206571775202,
+        "unpurged.test_macro_f1": -0.0037710721229721467
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf121",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf123",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf125",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf128",
+      "what": [
+        "converged",
+        "edge"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf129",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 1000.0,
+      "hp_b": 1.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.019354838709677413,
+        "test_balanced_accuracy": 0.007258064516129065,
+        "test_kappa": 0.00543698104143997,
+        "test_macro_f1": 0.003582483769776018,
+        "unpurged.test_accuracy": 0.020576131687242816,
+        "unpurged.test_balanced_accuracy": 0.007796596618758589,
+        "unpurged.test_kappa": 0.0073999727722841024,
+        "unpurged.test_macro_f1": 0.004086817351101224
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf14",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf142",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf144",
+      "what": [
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf145",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 1000.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.017204301075268824,
+        "test_balanced_accuracy": 0.008054799844539468,
+        "test_kappa": 0.017572146258589383,
+        "test_macro_f1": 0.0070131115195133376,
+        "unpurged.test_accuracy": 0.01851851851851849,
+        "unpurged.test_balanced_accuracy": 0.008377459210469673,
+        "unpurged.test_kappa": 0.016298011624226838,
+        "unpurged.test_macro_f1": 0.007206068297922474
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf149",
+      "what": [
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf150",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf151",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf152",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged"
+      ],
+      "hp_a": 1000.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.002150537634408589,
+        "test_balanced_accuracy": -0.0008064516129032417,
+        "test_kappa": -0.004048406756050782,
+        "test_macro_f1": -0.0006259780907668377,
+        "unpurged.test_accuracy": -0.0020576131687242705,
+        "unpurged.test_balanced_accuracy": -0.0007662835249042099,
+        "unpurged.test_kappa": -0.003909580886493513,
+        "unpurged.test_macro_f1": -0.0005952380952380931
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf160",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf164",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf166",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.006451612903225823,
+        "test_balanced_accuracy": 0.0007106768086169168,
+        "test_kappa": -0.005553382326872192,
+        "test_macro_f1": 0.004139423086529398,
+        "unpurged.test_accuracy": -0.006172839506172867,
+        "unpurged.test_balanced_accuracy": 0.0007358412821411309,
+        "unpurged.test_kappa": -0.005302330523831444,
+        "unpurged.test_macro_f1": 0.004177048707576625
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf168",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.006451612903225823,
+        "test_balanced_accuracy": -0.0024193548387096697,
+        "test_kappa": -0.006081375577528525,
+        "test_macro_f1": -0.0014403540793424263,
+        "unpurged.test_accuracy": -0.006172839506172867,
+        "unpurged.test_balanced_accuracy": -0.0022988505747126575,
+        "unpurged.test_kappa": -0.005724987242164081,
+        "unpurged.test_macro_f1": -0.001368555120606546
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf170",
+      "what": [
+        "pick"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf171",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf172",
+      "what": [
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf173",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.002150537634408589,
+        "test_balanced_accuracy": 0.0024096385542168863,
+        "test_kappa": 0.005513249770535911,
+        "test_macro_f1": 0.0040550550491465776,
+        "unpurged.test_accuracy": 0.0020576131687242705,
+        "unpurged.test_balanced_accuracy": 0.0023809523809523725,
+        "unpurged.test_kappa": 0.005350455280927147,
+        "unpurged.test_macro_f1": 0.003902478342538318
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf178",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "edge"
+      ],
+      "hp_a": 0.1,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.019354838709677413,
+        "test_balanced_accuracy": 0.014983476281402924,
+        "test_kappa": 0.013483774752767963,
+        "test_macro_f1": 0.039545596132366606,
+        "unpurged.test_accuracy": -0.014403292181069949,
+        "unpurged.test_balanced_accuracy": 0.02411264940028643,
+        "unpurged.test_kappa": 0.024873006308630985,
+        "unpurged.test_macro_f1": 0.05381356465349604
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf189",
+      "what": [
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf190",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf191",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf194",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 1000.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.004301075268817178,
+        "test_balanced_accuracy": -0.001612903225806428,
+        "test_kappa": -0.007720976425873327,
+        "test_macro_f1": -0.001065859968052446,
+        "unpurged.test_accuracy": -0.004115226337448541,
+        "unpurged.test_balanced_accuracy": -0.0015325670498084476,
+        "unpurged.test_kappa": -0.006866284695271951,
+        "unpurged.test_macro_f1": -0.0008859764720869634
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf195",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.002150537634408589,
+        "test_balanced_accuracy": 0.0024096385542168586,
+        "test_kappa": 0.007074145177721425,
+        "test_macro_f1": 0.003474611191703031,
+        "unpurged.test_balanced_accuracy": 0.0014809074863317562,
+        "unpurged.test_kappa": 0.004239563762864718,
+        "unpurged.test_macro_f1": 0.0025632300728245516
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf198",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf27",
+      "what": [
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf29",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf30",
+      "what": [
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf31",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 1000.0,
+      "hp_b": 1.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.019354838709677413,
+        "test_balanced_accuracy": 0.002448503692188103,
+        "test_kappa": 0.007756701781656883,
+        "test_macro_f1": -0.00438682992161199,
+        "unpurged.test_accuracy": 0.018518518518518545,
+        "unpurged.test_balanced_accuracy": 0.002453829265142704,
+        "unpurged.test_kappa": 0.0071190764609705415,
+        "unpurged.test_macro_f1": -0.004221490254851051
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf33",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.002150537634408589,
+        "test_balanced_accuracy": 0.000806451612903214,
+        "test_kappa": 0.0020220940993525005,
+        "test_macro_f1": 0.00042546948356805836,
+        "unpurged.test_accuracy": 0.0020576131687242705,
+        "unpurged.test_balanced_accuracy": 0.0007662835249042099,
+        "unpurged.test_kappa": 0.0019219893819089062,
+        "unpurged.test_macro_f1": 0.00040451351926762413
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf34",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf36",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf41",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf45",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.002150537634408589,
+        "test_balanced_accuracy": -0.0007967353284104306,
+        "test_kappa": -0.0009076077684224693,
+        "test_macro_f1": -0.002719091295662862,
+        "unpurged.test_accuracy": 0.0020576131687242705,
+        "unpurged.test_balanced_accuracy": -0.0007146239614275463,
+        "unpurged.test_kappa": -0.0008315163650520763,
+        "unpurged.test_macro_f1": -0.0024318008937119218
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf51",
+      "what": [
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf57",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 1000.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.004301075268817178,
+        "test_balanced_accuracy": -0.001612903225806428,
+        "test_kappa": -0.0034044233271551816,
+        "test_macro_f1": -0.0008611061161037936,
+        "unpurged.test_accuracy": -0.004115226337448541,
+        "unpurged.test_balanced_accuracy": -0.0015325670498084198,
+        "unpurged.test_kappa": -0.003273592044525042,
+        "unpurged.test_macro_f1": -0.0008595777266384441
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf58",
+      "what": [
+        "converged"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf61",
+      "what": [
+        "converged",
+        "edge"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf71",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics",
+        "converged",
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 1000.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": -0.002150537634408589,
+        "test_balanced_accuracy": -0.000806451612903214,
+        "test_kappa": -0.0026331569338982064,
+        "test_macro_f1": -0.0005108183291272217,
+        "unpurged.test_accuracy": -0.0020576131687242705,
+        "unpurged.test_balanced_accuracy": -0.0007662835249042099,
+        "unpurged.test_kappa": -0.0025030153822624968,
+        "unpurged.test_macro_f1": -0.00048642728004538727
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf73",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf74",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf76",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf78",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf81",
+      "what": [
+        "pick",
+        "predictions",
+        "metrics"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271,
+      "metric_deltas": {
+        "test_accuracy": 0.004301075268817178,
+        "test_balanced_accuracy": 0.0016129032258064557,
+        "test_kappa": -0.000840623684594366,
+        "test_macro_f1": 0.00044308008790558406,
+        "unpurged.test_accuracy": 0.004115226337448541,
+        "unpurged.test_balanced_accuracy": 0.0015325670498084198,
+        "unpurged.test_kappa": -0.0008810330638815422,
+        "unpurged.test_macro_f1": 0.0004786683036313577
+      }
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf92",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 100.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf94",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf95",
+      "what": [
+        "pick"
+      ],
+      "hp_a": 100.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
+    },
+    {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer/shuf96",
+      "what": [
+        "edge"
+      ],
+      "hp_a": 10.0,
+      "hp_b": 10.0,
+      "d": 256,
+      "n_train": 2271
     },
     {
       "key": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_chunk6mer",
