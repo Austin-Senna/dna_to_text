@@ -219,5 +219,5 @@ Optional flags:
 }
 ```
 
-The paper tables (`scripts/build_paper_tables.py`) and figures read this file,
+The paper tables (`scripts/build_paper_tables.py`), prose numbers (`scripts/build_numbers.py`) and figures read this file,
 and refuse it if any records file has changed since it was written.

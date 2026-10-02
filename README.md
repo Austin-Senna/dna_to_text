@@ -59,9 +59,12 @@ uv run python scripts/ridge_robust_metrics.py
 uv run python scripts/build_counts.py     # also needs the CDS chunk caches from Stage 2 extraction
 uv run python scripts/per_dim_r2.py
 
-# Stage 7: regenerate the manuscript figures and LaTeX table fragments (see docs/stage7-paper-figures-tables.md).
+# Stage 7: regenerate the manuscript figures, LaTeX table fragments and prose numbers (see docs/stage7-paper-figures-tables.md).
 uv run python scripts/build_result_figures.py
+uv run python scripts/build_umap_compare.py
+uv run python scripts/build_selection_sensitive.py
 uv run python scripts/build_paper_tables.py
+uv run python scripts/build_numbers.py --check
 ```
 
 Full data/encoder pipeline, when rebuilding from public sources:
@@ -108,9 +111,12 @@ scripts/recompute_all.sh all
 uv run python scripts/build_statistics.py
 uv run python scripts/build_counts.py
 
-# Stage 7: regenerate the manuscript figures and LaTeX table fragments.
+# Stage 7: regenerate the manuscript figures, LaTeX table fragments and prose numbers.
 uv run python scripts/build_result_figures.py
+uv run python scripts/build_umap_compare.py
+uv run python scripts/build_selection_sensitive.py
 uv run python scripts/build_paper_tables.py
+uv run python scripts/build_numbers.py --check
 ```
 
 ## Setup
@@ -148,7 +154,7 @@ uv run pytest -m slow    # real-data acceptance checks, a few minutes
 
 ## Troubleshooting
 
-- `ThreadPinError` from a probe script: set `OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1` before Python starts. The thread count changes lbfgs results, so probe fits refuse to run unpinned. Even pinned, some family5 picks move with the OpenBLAS kernel; `data/v2/selection_sensitive.json` lists the cells that move under 6 threads or another kernel.
+- `ThreadPinError` from a probe script: set `OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1` before Python starts. The thread count changes lbfgs results, so probe fits refuse to run unpinned. Even pinned, some family5 picks move with the OpenBLAS kernel; `data/v2/selection_sensitive.json` lists the cells that move under 6 threads or another kernel, and the paper marks each digit they move with a dagger.
 - `pytest: No such file or directory`: run `uv sync` (pytest is a dev dependency), then `uv run pytest`.
 - `pip: command not found`: use `uv run python ...` for scripts and `uv pip ...` to manage packages inside the project environment.
 - `uv pip install triton` fails on Apple Silicon + Python 3.12: Triton wheels are not available for this platform combination, and DNABERT-2 inference in this repo does not require Triton.

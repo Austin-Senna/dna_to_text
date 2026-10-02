@@ -54,7 +54,8 @@ runs every cell and null band into `data/v2/` (see the repository README), then
 `scripts/reproduce_headline.py` refits the headline cells independently and checks them
 against the records (docs/stage5-bootstrap.md). `--threads N` refits at N threads into a trial
 directory only (refused for `data/v2`), and `scripts/diff_records.py` compares two runs cell by cell;
-together they give the determinism checks behind `data/v2/selection_sensitive.json`.
+together they give the determinism checks that `scripts/build_selection_sensitive.py` merges into
+`data/v2/selection_sensitive.json`.
 
 ## Relevant Files
 
