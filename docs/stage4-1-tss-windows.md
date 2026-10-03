@@ -70,6 +70,31 @@ The manifest is written only if both checks pass:
 - **Regression:** wherever a window's genomic span overlaps the May 2026 window
   (`data/enformer_windows/`, fetched from Ensembl REST), the bases are identical.
 
+## TSS-Primary Split
+
+`data/splits_tss_disjoint.json` is the primary split for every TSS result. The
+homology split (`data/splits.json`, Stage 3) keeps protein clusters apart, but
+genes that sit near each other on a chromosome can fall in different clusters
+and still have overlapping windows. `scripts/make_tss_disjoint_split.py` groups
+the homology split's genes by the union of two links: windows that overlap on the
+chromosome, and a shared 40%-identity protein cluster
+(`data/clusters/homology_id40.tsv`). Whole groups are then assigned family-balanced
+70/15/15 by the same greedy assigner as the homology split, at seed 42
+(`splits.tss_disjoint.build_tss_disjoint`). The script stops if any window pair
+overlaps across splits or any protein cluster straddles them, and stamps the
+sha256 of its inputs into the output.
+
+On this split the evaluation purge applies Rule A at 40% and window overlap
+(`splits.leaks.rules_for`); the window mask is empty by construction. The cluster
+bootstrap resamples the same window-and-protein groups (`combined_groups`, Stage 5).
+TSS cells on `data/splits.json` are the sensitivity analysis for window overlap
+itself, so only Rule A is masked there. The CDS cells also run on this split, so
+the CDS-against-TSS comparison scores both sides on the same genes.
+
+The per-cell probe CLIs default to `data/splits.json`; pass
+`--splits data/splits_tss_disjoint.json` for a TSS cell. `scripts/recompute_all.py`
+names the split for every cell itself (`TSS_PRIMARY`).
+
 ## Outputs
 
 - `data/tss_windows.tsv`, `data/tss_windows.meta.json`: tracked manifest.

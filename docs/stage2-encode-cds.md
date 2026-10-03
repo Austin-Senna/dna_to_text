@@ -67,4 +67,9 @@ It therefore has no `clsmean` or `specialmean` pools, and the CDS grid has 22
 encoder x pooling configs.
 
 Encoder extraction is the expensive stage. Use one GPU/MPS encoder process per
-device and rely on caches for interrupted reruns.
+device and rely on caches for interrupted reruns: `embed_all_multi_pool` in
+`src/data_loader/multi_pool.py` writes one `.npz` per gene and skips any gene whose
+cached meta matches. For the long TSS windows (Stage 4.2) it runs with
+`collect=False`, which keeps reductions out of RAM, and
+`scripts/run_tss_extract_capped.py` caps GPU memory so an out-of-memory error stops
+the run cleanly instead of crashing the driver.
