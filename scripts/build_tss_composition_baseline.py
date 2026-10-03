@@ -1,7 +1,7 @@
 """Chunk-matched composition baseline for the E5 anchored result (MLCB camera-ready).
 
-THE test that adjudicates whether gena_lm's TSS-anchored family5 signal (0.431) is real
-encoder biology or trivial promoter composition. The existing `enformer_tss_4mer` baseline
+Asks whether an encoder's TSS-anchored family5 signal exceeds the composition of the
+same DNA (the paper's Table A17 compares each anchored cell with it). The `enformer_tss_4mer` baseline
 is a 4-mer over the FULL 196 kb window (diluted like global pooling); this featurizes the
 SAME ~2-4 kb anchored chunk the encoder pooled, per encoder, so the composition baseline is
 matched to the encoder's own region.

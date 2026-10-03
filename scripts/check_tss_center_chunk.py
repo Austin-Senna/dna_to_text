@@ -7,9 +7,9 @@ a count-based midpoint: it sits 3' of the base-pair centre (for HyenaDNA the
 whole chunk lies past the TSS), so it is not the TSS chunk.
 gena_lm uses variable-length BPE, so ``n//2``-by-token-count can land on a
 genomic region *offset* from the TSS, and on a different locus than the other
-encoders' center chunks. This makes centermean a possibly-uncontrolled
-comparison and is the one open confound on the gena_lm centermean outlier
-(0.411 hom / 0.393 disjoint vs at-chance global pooling).
+encoders' center chunks. That would make centermean an uncontrolled comparison
+across encoders, which is why the E5 features anchor on the TSS chunk instead
+(``tss_chunk_idx``, read by ``build_tss_anchored_datasets.py``).
 
 This script measures, per gene, where the ``n//2`` chunk actually lands in
 base pairs relative to the TSS, using ONLY the tokenizer (no model forward
