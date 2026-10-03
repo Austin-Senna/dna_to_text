@@ -119,6 +119,15 @@ def test_a_composition_audit_older_than_the_windows_is_refused(monkeypatch, tmp_
         bn.build()
 
 
+def test_scored_counts_and_interval_widths_come_from_the_records(numbers):
+    rec = next(r for r in R.load(bt.CDS).values() if r["arm"] == "cds" and r["task"] == "family5")
+    assert numbers["scored.hom.cds.n"] == str(rec["n_test_scored"])
+    assert {k: numbers[f"scored.hom.cds.{bn.slug(k)}"] for k in rec["n_test_scored_by_class"]} == \
+        {k: str(n) for k, n in rec["n_test_scored_by_class"].items()}
+    lo, hi = json.loads((R.V2 / "statistics.json").read_text())["confirmatory"]["T1 encoder > nucleotide k-mer"]["delta_ci95"]
+    assert numbers["t1.ci-half"] == f"{(hi - lo) / 2:.2f}"
+
+
 def test_a_composition_audit_on_another_gene_set_is_refused(monkeypatch, tmp_path):
     (tmp_path / "provenance.json").write_text((bn.AUDIT / "provenance.json").read_text())
     table = (bn.AUDIT / "overlap_by_family.csv").read_text().splitlines(keepends=True)

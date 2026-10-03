@@ -22,6 +22,8 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
         shuffled-label median (the random split has no null band)
   rr.<source>.{macro,pooled,top5-pct,median-rank}, rr.chance-top5-pct, rr.n-test   ridge_robust.json
   pool.<enc>.spread, pool.between-encoders.spread   CDS family5 macro-F1 ranges
+  scored.<split>.<arm>.{n,<family>}      scored test genes per family (family5, after the purge)
+  t1-t4.ci-half                          half a confirmatory interval's width (2 dp)
   n.*, purge.*, pop.*, tss-overlap.*, single-chunk.*, selsens.*   counts; tss-overlap
         is the homology split's cross-partition window overlap over its test
         partition, and tss-overlap.scored.* over the test genes left after the purge
@@ -145,6 +147,8 @@ def _statistics(out: Keys) -> None:
     s = bt.STATS
     for k, d in s["confirmatory"].items():
         _paired(out, k.split()[0].lower(), d)
+        lo, hi = d["delta_ci95"]
+        out[f"{k.split()[0].lower()}.ci-half"] = bt.f((hi - lo) / 2, 2)
     for k, d in s["exploratory"].items():
         split_file, rest = k.split(" ", 1)
         task, label = rest.split(": ", 1)
@@ -215,6 +219,16 @@ def _counts(out: Keys) -> None:
             raise R.MixedRecords(f"{split.name}/{arm}: {len(purges)} different purges")
         purge = json.loads(purges.pop())
         out[f"purge.{sk}.test"], out[f"purge.{sk}.val"] = count(len(purge["test_masked"])), count(len(purge["val_masked"]))
+    # Scored test genes per family (after the purge): what each macro-F1 averages over.
+    for sk, split, arm in (("hom", bt.HOM, "cds"), ("dis", bt.DIS, "tss")):
+        by_class = {json.dumps(r["n_test_scored_by_class"], sort_keys=True) for r in split.recs.values()
+                    if r["arm"] == arm and r["task"] == "family5"}
+        if len(by_class) != 1:
+            raise R.MixedRecords(f"{split.name}/{arm}: {len(by_class)} different scored test sets")
+        fams = json.loads(by_class.pop())
+        out[f"scored.{sk}.{arm}.n"] = count(sum(fams.values()))
+        for fam, n in fams.items():
+            out[f"scored.{sk}.{arm}.{slug(fam)}"] = count(n)
     _window_overlap(out)
     _window_composition(out)
 
@@ -378,7 +392,7 @@ def pending(texts: dict[str, str]) -> list[tuple[str, str]]:
 # Decimals in the prose that are not results: layout, model sizes, tool flags,
 # fixed facts. Anything else must come through \val (G: no hand-transcribed number).
 NOT_RESULTS = re.compile(r"width=\d|\d\\(column|text)width|\d\{\\,\}M|--min-seq-id|min_dist=|GRCh38\.|"
-                         r"\$\\geq\$\d|2\.5--97\.5|99\.9\\%|\d kb| -c \d")
+                         r"\$\\geq\$\d|2\.5--97\.5|99\.9\\%|\d kb| -c \d|10\.5281/zenodo")
 
 
 def bare_decimals(texts: dict[str, str]) -> list[tuple[str, str]]:
