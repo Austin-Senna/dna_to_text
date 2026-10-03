@@ -22,8 +22,9 @@ A missing cell raises.
         same test genes: per model, CDS vs TSS whole-window vs TSS-Anchored,
         Enformer pooled to match, plus the anchored chunk's best composition
         baseline (sec 3.4).
-  split_bars.png  -- random vs homology grouped bars per comparator, each split
-        re-selected on its own validation set (sec 3.5).
+  split_bars.png  -- random vs primary split, macro-F1, CDS (homology) and TSS
+        (disjoint) panels, every encoder, each split re-selected on its own
+        validation set (sec 3.5).
 
 Run: uv run scripts/build_result_figures.py
 """
@@ -265,48 +266,69 @@ def fig_tss_context():
 
 
 def fig_split_bars():
-    """Random vs homology split, side by side: macro-F1 (left), Ridge R^2 (right)."""
-    cells = [("nt_kmer", C_COMP), ("aa_best", C_COMP), ("nt_v2", C_DNA), ("dnabert2", C_DNA),
-             ("esm2_650m", C_ESM)]
-    cols = [c for _, c in cells]
-    # Each split and task picks its own k: name it only where all four picks agree.
+    """Random split vs each arm's primary split, macro-F1: CDS (left, homology split)
+    and the TSS window (right, disjoint split). Every encoder is shown, so the one
+    without random-split inflation (GENA-LM on CDS, Oct 3 audit) is not hidden; GenePT
+    R^2 per split is in Table A4."""
+    cds_cells = [("nt_kmer", C_COMP), ("aa_best", C_COMP), *[(e, C_DNA) for e in ENCODERS],
+                 ("esm2_650m", C_ESM)]
+    # Each split picks its own k: name it only where both picks agree.
     generic = {"nt_kmer": "CDS k-mer", "aa_best": "AA k-mer"}
-    labels = []
-    for n, _ in cells:
-        picks = {pick(r, "cds", t, n) for r in (HOM, RND) for t in ("family5", "genept")}
-        labels.append(generic[n] if n in generic and len(picks) > 1 else _cell_label(n, picks.pop()))
-    x = np.arange(len(cells))
-    w = 0.38
-    # Each split re-selects its pools and k on its own validation set.
-    f1_rand = [value(RND, "cds", "family5", n) for n, _ in cells]
-    f1_hom = [value(HOM, "cds", "family5", n) for n, _ in cells]
-    r2_rand = [value(RND, "cds", "genept", n) for n, _ in cells]
-    r2_hom = [value(HOM, "cds", "genept", n) for n, _ in cells]
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11.0, 3.6))
+    cds_labels = []
+    for n, _ in cds_cells:
+        picks = {pick(r, "cds", "family5", n) for r in (HOM, RND)}
+        cds_labels.append(generic[n] if n in generic and len(picks) > 1 else _cell_label(n, picks.pop()))
+    cds_rand = [value(RND, "cds", "family5", n) for n, _ in cds_cells]
+    cds_prim = [value(HOM, "cds", "family5", n) for n, _ in cds_cells]
 
-    panels = [(axL, f1_rand, f1_hom, "5-way family macro-F1", (0, 1.0), "{:.2f}", 0.01),
-              (axR, r2_rand, r2_hom, "Ridge-to-GenePT $R^2$", _fit_top((0, 0.4), r2_rand + r2_hom),
-               "{:.3f}", 0.004)]
-    for ax, rand, hom, ylabel, ylim, fmt, dy in panels:
+    # TSS: the 4-mer, each encoder at its best whole-window rule, Enformer's whole-window mean.
+    tss_src = ["enformer_tss_4mer", *ENCODERS, "enformer_trunk_global"]
+    tss_cols = [C_COMP] + [C_DNA] * len(ENCODERS) + [C_ESM]
+    tss_labels = ["TSS 4-mer"] + [ENC_DISP[e] for e in ENCODERS] + ["Enformer"]
+
+    def tss_value(recs, src):
+        by = R.cells(recs, "tss", "family5")
+        return by[R.best_pool(by, src, "tss") if src in ENCODERS else src][METRIC["family5"]]
+
+    tss_rand = [tss_value(RND, s) for s in tss_src]
+    tss_prim = [tss_value(DIS, s) for s in tss_src]
+
+    w = 0.38
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(12.0, 3.6),
+                                   gridspec_kw={"width_ratios": [len(cds_cells), len(tss_src)]})
+    panels = [(axL, cds_rand, cds_prim, [c for _, c in cds_cells], cds_labels,
+               null_band("splits.json", "family5", "kmer")),
+              (axR, tss_rand, tss_prim, tss_cols, tss_labels,
+               null_band("splits_tss_disjoint.json", "family5", "enformer_tss_4mer"))]
+    for ax, rand, prim, cols, labels, band in panels:
+        x = np.arange(len(rand))
         ax.bar(x - w / 2, rand, w, color=cols, alpha=0.5, edgecolor="white")
-        ax.bar(x + w / 2, hom, w, color=cols, edgecolor="white")
+        ax.bar(x + w / 2, prim, w, color=cols, edgecolor="white")
         _no_title(ax)
-        ax.set_ylabel(ylabel)
-        ax.set_ylim(*ylim)
-        _label_bars(ax, x - w / 2, rand, fmt=fmt, fontsize=7, dy=dy)
-        _label_bars(ax, x + w / 2, hom, fmt=fmt, fontsize=7, dy=dy)
+        ax.set_ylim(0, 1.0)
+        _label_bars(ax, x - w / 2, rand, fontsize=7, dy=0.01)
+        _label_bars(ax, x + w / 2, prim, fontsize=7, dy=0.01)
         ax.set_xticks(x)
-        ax.set_xticklabels(labels, fontsize=8.5)
-    _shade_null(axL, null_band("splits.json", "family5", "kmer"), name="homology-split 4-mer")
+        ax.set_xticklabels(labels, fontsize=8, rotation=30, ha="right")
+        _shade_null(ax, band, label=False)
+    axL.set_ylabel("5-way family macro-F1")
+    axL.set_xlabel("CDS", fontsize=9)
+    axR.set_xlabel("TSS window", fontsize=9)
     fig.legend(handles=[Patch(facecolor="#777", alpha=0.5, label="random split"),
-                        Patch(facecolor="#777", label="homology split")],
-               fontsize=8.5, frameon=False, loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.04))
+                        Patch(facecolor="#777", label="primary split (CDS: homology; TSS: disjoint)"),
+                        Patch(facecolor="#555", alpha=0.15, label="primary-split 4-mer shuffled-label band"),
+                        Patch(facecolor=C_COMP, label="composition"),
+                        Patch(facecolor=C_DNA, label="DNA encoder"),
+                        Patch(facecolor=C_ESM, label="reference model (ESM-2, Enformer)")],
+               fontsize=8, frameon=False, loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.12))
 
     fig.tight_layout()
     fig.savefig(OUT / "split_bars.png", dpi=180, bbox_inches="tight")
     plt.close(fig)
-    print("split_bars F1  random:", [round(v, 3) for v in f1_rand], "homology:", [round(v, 3) for v in f1_hom])
-    print("split_bars R2  random:", [round(v, 3) for v in r2_rand], "homology:", [round(v, 3) for v in r2_hom])
+    print("split_bars CDS random:", dict(zip(cds_labels, [round(v, 3) for v in cds_rand])))
+    print("split_bars CDS primary:", dict(zip(cds_labels, [round(v, 3) for v in cds_prim])))
+    print("split_bars TSS random:", dict(zip(tss_labels, [round(v, 3) for v in tss_rand])))
+    print("split_bars TSS primary:", dict(zip(tss_labels, [round(v, 3) for v in tss_prim])))
 
 
 # Pools that read a trained boundary token; undefined for encoders pretrained without one.

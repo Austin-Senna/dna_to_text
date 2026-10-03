@@ -14,6 +14,12 @@
   of 10 or more, and the olfactory receptors' share of GPCRs. A cluster split
   with family quotas puts the largest clusters in train, and the seeds re-deal
   only the small ones, so test is mostly genes without close paralogs.
+* **How much the seed splits share:** for every pair of the four CDS seed splits
+  (and the four TSS ones), the test genes both hold, against the primary split's
+  test size. Independent 70/15/15 splits would share about 15%.
+* **Irregular translations:** the canonical CDS listed in
+  ``data/translation_exceptions.tsv``, those with an internal stop (and how many
+  of those are olfactory receptors), and those with a non-ACGT base.
 
 Writes ``data/v2/counts.json``. Reads no probe records.
 
@@ -23,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import csv
 import hashlib
 import json
 from pathlib import Path
@@ -70,6 +77,34 @@ def _sha(path: Path) -> str:
 POPULATION_SPLITS = ("splits.json", "splits_tss_disjoint.json", "splits_seed1.json",
                      "splits_seed7.json", "splits_seed123.json")
 OLFACTORY = "Olfactory receptor"     # the HGNC group family behind the GPCR class's ORs
+SEED_SPLITS = {"cds": ("splits.json", "splits_seed1.json", "splits_seed7.json", "splits_seed123.json"),
+               "tss": ("splits_tss_disjoint.json", "splits_tss_disjoint_seed1.json",
+                       "splits_tss_disjoint_seed7.json", "splits_tss_disjoint_seed123.json")}
+TRANSLATION = DATA / "translation_exceptions.tsv"
+
+
+def _olfactory(hgnc) -> set[str]:
+    return set(hgnc.loc[hgnc["gene_group"].fillna("").str.contains(OLFACTORY), "ensembl_id"])
+
+
+def seed_test_shared(tests: dict[str, set[str]]) -> dict:
+    """Test genes each pair of seed splits shares; the first split is the primary and
+    its test size the denominator. The seeds re-deal the same clusters largest-first,
+    so they share far more than independent splits would."""
+    names = list(tests)
+    return {"n_primary_test": len(tests[names[0]]),
+            "shared": {f"{a} | {b}": len(tests[a] & tests[b])
+                       for i, a in enumerate(names) for b in names[i + 1:]}}
+
+
+def translation_exceptions(rows: list[dict], olfactory: set[str]) -> dict:
+    """Counts over ``translation_exceptions.tsv`` rows (``reason`` is ;-separated)."""
+    def has(r, reason):
+        return reason in r["reason"].split(";")
+    stop = [r for r in rows if has(r, "internal_stop")]
+    return {"n": len(rows), "internal_stop": len(stop),
+            "internal_stop_olfactory": sum(r["ensembl_id"] in olfactory for r in stop),
+            "non_acgt": sum(has(r, "non_acgt") for r in rows)}
 
 
 def _cluster_counts(family: dict[str, str]) -> dict:
@@ -91,7 +126,7 @@ def split_population(family: dict[str, str], hgnc) -> dict:
     for g, c in cluster.items():
         size[c] = size.get(c, 0) + 1
         members.setdefault(c, []).append(g)
-    olfactory = set(hgnc.loc[hgnc["gene_group"].fillna("").str.contains(OLFACTORY), "ensembl_id"])
+    olfactory = _olfactory(hgnc)
     largest = sorted(size, key=lambda c: (-size[c], c))[:10]
     out: dict = {"largest_clusters": [size[c] for c in largest]}
     for name in POPULATION_SPLITS:
@@ -148,9 +183,14 @@ def main() -> None:
     def within(genes: frozenset[str]) -> dict:
         return {name: len(genes & d) for name, d in denominators.items()}
 
+    seed_names = [n for names in SEED_SPLITS.values() for n in names]
+    with TRANSLATION.open() as fh:
+        translation_rows = list(csv.DictReader(fh, delimiter="\t"))
+
     result = {
-        "inputs": {**inputs, **{n: _sha(DATA / n) for n in POPULATION_SPLITS}, "protein_pairs": _sha(PAIRS),
-                   "clusters": _sha(DATA / "clusters" / "homology_id40.tsv")},
+        "inputs": {**inputs, **{n: _sha(DATA / n) for n in dict.fromkeys([*POPULATION_SPLITS, *seed_names])},
+                   "protein_pairs": _sha(PAIRS), "clusters": _sha(DATA / "clusters" / "homology_id40.tsv"),
+                   TRANSLATION.name: _sha(TRANSLATION)},
         "caches": caches,
         "single_chunk": chunks,
         "noisy_tf_labels": {"n": within(noisy),
@@ -166,6 +206,10 @@ def main() -> None:
         "split_population": split_population(family, hgnc),
         "families": dict(sorted(collections.Counter(family.values()).items())),
         "clusters": _cluster_counts(family),
+        "seed_test_shared": {arm: seed_test_shared({n: set(json.loads((DATA / n).read_text())["test"])
+                                                    for n in names})
+                             for arm, names in SEED_SPLITS.items()},
+        "translation_exceptions": translation_exceptions(translation_rows, _olfactory(hgnc)),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     stats.write_json(args.out, result)

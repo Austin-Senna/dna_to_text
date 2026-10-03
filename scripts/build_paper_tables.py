@@ -475,17 +475,20 @@ def build_ridge_main():
 
 
 # ===================================================================
-# Table 3: substrate ablation CDS vs TSS (main text). CDS rows on the CDS
-# primary (homology) split, TSS rows on the TSS primary (disjoint) split; Δ is
-# within each block against its own 4-mer. Enformer: its whole-window mean.
+# Table A3: substrate ablation CDS vs TSS (Figure 4's values). Every row on the
+# disjoint split, so CDS and TSS score the same test genes; Δ is within each block
+# against its own 4-mer. Enformer: its whole-window mean.
 # ===================================================================
 def build_cds_tss():
+    """Figure 4's CDS and whole-window values: every row on the disjoint split, so CDS
+    and TSS score the same test genes (the CDS rows were homology-split cells until
+    the Oct 3 audit, which the caption's "full values for Figure 4" did not hold for)."""
     out = [r"\multicolumn{6}{@{}l}{\textbf{Coding sequence (CDS)}}\\"]
-    nt_c, nt_r = HOM.cell("cds", "family5", "kmer"), HOM.cell("cds", "genept", "kmer")
+    nt_c, nt_r = DIS.cell("cds", "family5", "kmer"), DIS.cell("cds", "genept", "kmer")
     out.append(f"\\quad 4-mer & {f(nt_c[F1],3)} & {sgn(0,3)} & {f(nt_c[K],3)} & {f(nt_r[R2],3)} & {sgn(0,3)} \\\\")
     rows = []
     for enc in ENCODERS:
-        c, r = HOM.best(enc, "cds", "family5"), HOM.best(enc, "cds", "genept")
+        c, r = DIS.best(enc, "cds", "family5"), DIS.best(enc, "cds", "genept")
         rows.append((enc, c[F1], c[F1] - nt_c[F1], c[K], r[R2], r[R2] - nt_r[R2]))
     bf, br = max(r[1] for r in rows), max(r[4] for r in rows)
     for enc, f1, df1, k, r2, dr2 in rows:
@@ -511,8 +514,8 @@ def build_cds_tss():
 
 
 # ===================================================================
-# Random vs homology split comparison: each split re-selects its own pools
-# and k on its own validation set (CDS and TSS both random vs homology).
+# Random vs primary split comparison: each split re-selects its own pools and k
+# on its own validation set (CDS: random vs homology; TSS: random vs disjoint).
 # ===================================================================
 CMP_DISPLAY = {"codon": "Codon", "aa2": "AA 2-mer", "aa3": "AA 3-mer", "esm2_650m": "ESM-2 650M",
                **ENC_DISPLAY}

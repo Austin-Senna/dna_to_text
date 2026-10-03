@@ -214,5 +214,70 @@ def test_ridge_robust_rows_and_retrieval_chance_have_keys(numbers):
 
 
 def test_a_bare_result_decimal_in_the_prose_is_reported():
-    texts = {"a.tex": r"scores 0.693 here, \val{t1.delta} there, width=0.62\textwidth, 2.5--97.5\%"}
+    texts = {"a.tex": r"scores 0.693 here, \val{t1.delta} there, width=0.62\textwidth, 2.5--97.5\%, "
+                      r"CC BY 4.0 and CC BY-NC-SA 4.0"}
     assert bn.bare_decimals(texts) == [("a.tex", "0.693")]
+
+
+def test_seed_overlap_keys_come_from_the_split_files(numbers):
+    """Pairwise shared test genes over the four seed splits, read straight from the
+    split files, against the primary split's test size."""
+    import build_counts as bc
+    for arm, names in bc.SEED_SPLITS.items():
+        tests = [set(json.loads((R.REPO_ROOT / "data" / n).read_text())["test"]) for n in names]
+        pct = [100 * len(a & b) / len(tests[0]) for i, a in enumerate(tests) for b in tests[i + 1:]]
+        assert numbers[f"seed.{arm}.test-shared.min-pct"] == f"{min(pct):.0f}"
+        assert numbers[f"seed.{arm}.test-shared.max-pct"] == f"{max(pct):.0f}"
+
+
+def test_seed_overlap_counts_every_pair_against_the_primary():
+    import build_counts as bc
+    d = bc.seed_test_shared({"p": {"a", "b", "c", "d"}, "s1": {"a", "b"}, "s2": {"b", "x"}})
+    assert d == {"n_primary_test": 4, "shared": {"p | s1": 2, "p | s2": 1, "s1 | s2": 1}}
+
+
+def test_translation_counts_split_the_reason_field():
+    import build_counts as bc
+    rows = [{"ensembl_id": "g1", "reason": "non_acgt"},
+            {"ensembl_id": "g2", "reason": "length_not_multiple_of_3;internal_stop"},
+            {"ensembl_id": "g3", "reason": "internal_stop;no_terminal_stop"},
+            {"ensembl_id": "g4", "reason": "no_internal_stop_check;non_acgt_flank"}]   # tokens, not substrings
+    # g1 is an olfactory receptor without an internal stop: it must not count
+    assert bc.translation_exceptions(rows, {"g1", "g3"}) == {
+        "n": 4, "internal_stop": 2, "internal_stop_olfactory": 1, "non_acgt": 1}
+
+
+def test_translation_and_padding_keys_match_their_files(numbers):
+    import csv
+    from data_loader.enformer_windows import MANIFEST
+    with (R.REPO_ROOT / "data" / "translation_exceptions.tsv").open() as fh:
+        rows = list(csv.DictReader(fh, delimiter="\t"))
+    reasons = [r["reason"].split(";") for r in rows]
+    assert numbers["n.translation.irregular"] == str(len(rows))
+    assert numbers["n.translation.internal-stop"] == str(sum("internal_stop" in r for r in reasons))
+    assert numbers["n.translation.non-acgt"] == str(sum("non_acgt" in r for r in reasons))
+    c = json.loads((R.V2 / "counts.json").read_text())
+    assert numbers["n.translation.internal-stop-olfactory"] == str(c["translation_exceptions"]["internal_stop_olfactory"])
+    with MANIFEST.open() as fh:
+        pads = [int(r["pad_up"]) + int(r["pad_down"]) for r in csv.DictReader(fh, delimiter="\t")]
+    padded = [p for p in pads if p]
+    assert numbers["tss-pad.n"] == str(len(padded))
+    assert numbers["tss-pad.min-bp"] == bn.count(min(padded))
+    assert numbers["tss-pad.max-bp"] == bn.count(max(padded))
+
+
+def test_table_a3_cds_and_tss_rows_score_the_same_genes(numbers):
+    """Table A3 is Figure 4's values: CDS and TSS rows both on the disjoint split, so
+    each encoder's CDS minus TSS is the paired CDS-over-TSS delta on the same genes.
+    Fails if the CDS rows go back to the homology split (GENA-LM: 0.710 - 0.340)."""
+    rows = {}
+    block = None
+    for line in (bn.PAPER / "tables" / "cds_tss.tex").read_text().splitlines():
+        if "Coding sequence" in line or "TSS-centred" in line:
+            block = "cds" if "Coding" in line else "tss"
+        m = re.match(r"\\quad (\S+) & (?:\\textbf\{)?([0-9.]+)", line)
+        if m and block:
+            rows[(block, m.group(1))] = float(m.group(2))
+    for enc, slug in (("DNABERT-2", "dnabert2"), ("NT-v2", "nt-v2"), ("GENA-LM", "gena-lm"), ("HyenaDNA", "hyena-dna")):
+        delta = float(numbers[f"ex.dis.f5.{slug}-cds-gt-tss.delta"].replace(bt.MARK, ""))
+        assert abs(rows[("cds", enc)] - rows[("tss", enc)] - delta) <= 0.0015, enc

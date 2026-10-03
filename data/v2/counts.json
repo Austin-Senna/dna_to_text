@@ -7,8 +7,12 @@
     "splits_seed1.json": "05663da80c5b1626d14899fa4705f2b88b595956c74e5a4349d2b3bcd17406a3",
     "splits_seed7.json": "c3b9360bcff2ce80523600b74d1172c186cc28765d61b6a8c71b7282e832fc1e",
     "splits_seed123.json": "f06c9e7bc1902fb9983b8d2aaab1d0a617d5bbe402afc5c76619617fe9ec2c0e",
+    "splits_tss_disjoint_seed1.json": "f4b027223083df5b0cf6712e5fde15d365fb329f8e6737206ddbf5dac337ee7a",
+    "splits_tss_disjoint_seed7.json": "566dc02d8179ddbf359b812767a1bd924c1c5e663caa8da7c4da6bc680662ff8",
+    "splits_tss_disjoint_seed123.json": "2cbad89614106585ee895033ebd4b8afd9e84d2bfb8d78363639672a22fbced7",
     "protein_pairs": "d2874ad063f5e5e3b275ef80757e084cc55e73a56fd80d1ee1945188f3106450",
-    "clusters": "e0b12ecc630d8602fe4ca6294e37aeedef97aea0549d537c4e00c8742a561040"
+    "clusters": "e0b12ecc630d8602fe4ca6294e37aeedef97aea0549d537c4e00c8742a561040",
+    "translation_exceptions.tsv": "838d3d9f841e10569837e4e33a4bf0c4429f3c3736cb2f43c33b4c2636883a4c"
   },
   "caches": {
     "dnabert2": {
@@ -403,5 +407,35 @@
   "clusters": {
     "n": 1751,
     "genes_in_shared": 1978
+  },
+  "seed_test_shared": {
+    "cds": {
+      "n_primary_test": 487,
+      "shared": {
+        "splits.json | splits_seed1.json": 164,
+        "splits.json | splits_seed7.json": 185,
+        "splits.json | splits_seed123.json": 177,
+        "splits_seed1.json | splits_seed7.json": 181,
+        "splits_seed1.json | splits_seed123.json": 181,
+        "splits_seed7.json | splits_seed123.json": 167
+      }
+    },
+    "tss": {
+      "n_primary_test": 486,
+      "shared": {
+        "splits_tss_disjoint.json | splits_tss_disjoint_seed1.json": 190,
+        "splits_tss_disjoint.json | splits_tss_disjoint_seed7.json": 202,
+        "splits_tss_disjoint.json | splits_tss_disjoint_seed123.json": 224,
+        "splits_tss_disjoint_seed1.json | splits_tss_disjoint_seed7.json": 223,
+        "splits_tss_disjoint_seed1.json | splits_tss_disjoint_seed123.json": 218,
+        "splits_tss_disjoint_seed7.json | splits_tss_disjoint_seed123.json": 241
+      }
+    }
+  },
+  "translation_exceptions": {
+    "n": 18,
+    "internal_stop": 17,
+    "internal_stop_olfactory": 14,
+    "non_acgt": 1
   }
 }

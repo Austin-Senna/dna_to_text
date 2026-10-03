@@ -31,6 +31,12 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
         genes in a cluster of two or more (counts.json)
   edge.nonconverged                      probe cells whose pick sits next to a fit that
         did not converge, on the grid or in an extension (unshuffled records)
+  seed.<cds|tss>.test-shared.{min,max}-pct   test genes any two of the four seed splits
+        share, as a percentage of the primary split's test size (counts.json)
+  n.translation.{irregular,internal-stop,internal-stop-olfactory,non-acgt}
+        the irregular canonical CDS in data/translation_exceptions.tsv (counts.json)
+  tss-pad.{n,min-bp,max-bp}              windows padded with N past a chromosome end, from
+        the window manifest's pad_up + pad_down
   tss-comp.*                             the TSS windows' annotation make-up (the target-CDS
         share, each partition bucket's percentage, genes, Ensembl release), from
         scripts/tss_overlap.py's audit table
@@ -218,6 +224,18 @@ def _counts(out: Keys) -> None:
         if isinstance(d, dict) and "all genes" in d:
             out[f"single-chunk.{slug(enc)}.pct"] = f"{d['all genes']['share'] * 100:.1f}"
             out[f"single-chunk.{slug(enc)}.test-pct"] = f"{d['splits.json test after the purge']['share'] * 100:.1f}"
+    for name, sha in c["inputs"].items():       # the seed splits and the translation list behind these keys
+        if (name.startswith("splits") or name == "translation_exceptions.tsv") \
+                and sha != R._sha(R.REPO_ROOT / "data" / name):
+            raise R.MixedRecords(f"counts.json was built from another {name}; rerun scripts/build_counts.py")
+    for arm, d in c["seed_test_shared"].items():
+        pct = [100 * k / d["n_primary_test"] for k in d["shared"].values()]
+        out[f"seed.{arm}.test-shared.min-pct"] = f"{min(pct):.0f}"
+        out[f"seed.{arm}.test-shared.max-pct"] = f"{max(pct):.0f}"
+    t = c["translation_exceptions"]
+    out["n.translation.irregular"], out["n.translation.internal-stop"] = count(t["n"]), count(t["internal_stop"])
+    out["n.translation.internal-stop-olfactory"] = count(t["internal_stop_olfactory"])
+    out["n.translation.non-acgt"] = count(t["non_acgt"])
     for sk in ("hom", "dis"):
         for part, d in c["split_population"][SPLITS[sk]].items():
             if part in ("train", "val", "test"):
@@ -242,7 +260,18 @@ def _counts(out: Keys) -> None:
         for fam, n in fams.items():
             out[f"scored.{sk}.{arm}.{slug(fam)}"] = count(n)
     _window_overlap(out)
+    _window_padding(out)
     _window_composition(out)
+
+
+def _window_padding(out: Keys) -> None:
+    """Windows that run past a chromosome end are padded with N (the same input for
+    every model). Read from the manifest _window_overlap checked against the records."""
+    with MANIFEST.open() as fh:
+        pads = [int(r["pad_up"]) + int(r["pad_down"]) for r in csv.DictReader(fh, delimiter="\t")]
+    padded = [p for p in pads if p > 0]
+    out["tss-pad.n"] = count(len(padded))
+    out["tss-pad.min-bp"], out["tss-pad.max-bp"] = count(min(padded)), count(max(padded))
 
 
 def _window_composition(out: Keys) -> None:
@@ -405,7 +434,7 @@ def pending(texts: dict[str, str]) -> list[tuple[str, str]]:
 # Decimals in the prose that are not results: layout, model sizes, tool flags,
 # fixed facts. Anything else must come through \val (G: no hand-transcribed number).
 NOT_RESULTS = re.compile(r"width=\d|\d\\(column|text)width|\d\{\\,\}M|--min-seq-id|min_dist=|GRCh38\.|"
-                         r"\$\\geq\$\d|2\.5--97\.5|99\.9\\%|\d kb| -c \d|10\.5281/zenodo")
+                         r"\$\\geq\$\d|2\.5--97\.5|99\.9\\%|\d kb| -c \d|10\.5281/zenodo|CC BY(?:-NC-SA)? \d\.\d")
 
 
 def bare_decimals(texts: dict[str, str]) -> list[tuple[str, str]]:
