@@ -8,7 +8,6 @@ anti-baseline. The fit, validation sweep and test scoring are
 Outputs:
   - one record appended to --metrics-out per run
   - the cell's test predictions under --pred-dir (bootstraps rescore these)
-  - with --confusion-dir, a 5-way confusion matrix JSON
 """
 from __future__ import annotations
 
@@ -44,15 +43,12 @@ def main():
     ap.add_argument("--metrics-out", default=str(DATA / "metrics.json"))
     ap.add_argument("--pred-dir", default=None,
                     help="where test predictions go (default: outputs/predictions/<metrics stem>/)")
-    ap.add_argument("--confusion-dir", default=None,
-                    help="write confusion_5way_<dataset>.json here (default: not written)")
     args = ap.parse_args()
     pred_dir = Path(args.pred_dir) if args.pred_dir else PRED_ROOT / Path(args.metrics_out).stem
 
     print(f"=== cell: dataset={args.dataset} task={args.task} splits={args.splits} ===")
     res = run_cell(args.dataset, args.task, Path(args.splits), V2, pred_dir=pred_dir,
-                   label_seed=args.seed if args.shuffle_labels else None,
-                   confusion_dir=Path(args.confusion_dir) if args.confusion_dir else None)
+                   label_seed=args.seed if args.shuffle_labels else None)
     for r in res["sweep"]:
         mark = " *" if r["C"] == res["hp"] else ""
         flag = "" if r["converged"] else "  (not converged)"

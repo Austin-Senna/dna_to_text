@@ -27,5 +27,4 @@ history. Active docs mirror the sample input/output stages in `../samples/`.
 
 The paper's tables and figures are generated into the paper submodule
 (`dna_to_text_paper/paper/tables/`, `dna_to_text_paper/paper/figures/`); see
-`stage7-paper-figures-tables.md`. `analysis/tables/` and `analysis/figures/`
-hold retired Stage 6 outputs.
+`stage7-paper-figures-tables.md`. Stage 6 is retired and its outputs removed.

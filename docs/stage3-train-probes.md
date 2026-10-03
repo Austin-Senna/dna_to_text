@@ -92,7 +92,6 @@ together they give the determinism checks that `scripts/build_selection_sensitiv
 - `data/leaks/protein_pairs.tsv`, `data/leaks/protein_pairs.json` - the purge's homologous pairs and their build metadata.
 - `data/v2/metrics_<split stem>.json`, `data/v2/null_<split stem>.json` - the camera-ready records and null-band runs (written by `recompute_all.sh`; the canonical run is committed); predictions in `outputs/predictions/v2/<split stem>/` (not tracked).
 - `data/metrics.json` - appended probe and baseline metrics (per-cell CLI runs).
-- `data/confusion_5way_*.json` - family-classification confusion summaries from the May 2026 runs. Probe runs now write them only for unshuffled family5 cells, and only into the directory given by `--confusion-dir` (pass `--confusion-dir data` to refresh these).
 - `outputs/predictions/<metrics stem>/*.npz` - each cell's stored test predictions (content-addressed names), which the bootstraps rescore; `--pred-dir` overrides the location (gitignored).
 
 ## Headline Results

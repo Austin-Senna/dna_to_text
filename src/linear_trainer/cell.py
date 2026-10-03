@@ -15,7 +15,6 @@ import uuid
 from pathlib import Path
 
 import numpy as np
-from sklearn.metrics import confusion_matrix
 
 from linear_trainer import sources
 from linear_trainer.fit import fit, score, select
@@ -187,7 +186,7 @@ def _assert_classes(task: str, name: str, y: np.ndarray) -> None:
 
 def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protocol, *,
              pred_dir: Path, label_seed: int | None = None, select_by: str = "r2",
-             confusion_dir: Path | None = None, probe_out: Path | None = None,
+             probe_out: Path | None = None,
              purge=None) -> dict:
     """Run one cell. Returns the pick (``hp``, ``sweep``, ``edge``), test ``metrics``
     and the ``provenance`` fields every record carries.
@@ -273,13 +272,6 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
     # confirmatory cell.
     degenerate = (len(np.unique(stored["pred"])) == 1 if kind == "logistic"
                   else bool(np.all(np.ptp(stored["pred"], axis=0) == 0)))
-
-    if confusion_dir is not None and task == "family5" and label_seed is None:
-        classes = sorted(set(stored["y_true"].tolist()))
-        cm = confusion_matrix(stored["y_true"], stored["pred"], labels=classes).tolist()
-        Path(confusion_dir).mkdir(parents=True, exist_ok=True)
-        (Path(confusion_dir) / f"confusion_5way_{sources.cell_name(source)}.json").write_text(
-            json.dumps({"classes": classes, "matrix": cm}, indent=2))
 
     provenance = {
         "stamp": stamp(),

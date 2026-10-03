@@ -22,10 +22,9 @@ data/                 Tracked split metadata (primary, seed and robustness split
                       data/v2/ holds the camera-ready records of the canonical
                       run (committed); their stored predictions in
                       outputs/predictions/v2/ are not tracked.
-analysis/             Generated diagnostics. analysis/figures/ and analysis/tables/
-                      hold the retired Stage 6 outputs (May protocol, no
-                      generator, removed at the camera-ready release), plus
-                      per_dim_r2_distribution.png from scripts/per_dim_r2.py.
+analysis/             Generated diagnostics: analysis/tss_overlap/ (the TSS-window
+                      audits) and analysis/figures/per_dim_r2_distribution.png
+                      from scripts/per_dim_r2.py.
 samples/              Small input/output examples for each pipeline stage.
 dna_to_text_paper/    LaTeX manuscript source submodule for the report.
 docs/                 Stage-level pipeline notes plus archived planning history.
