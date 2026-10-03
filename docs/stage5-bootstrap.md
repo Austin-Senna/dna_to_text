@@ -221,3 +221,11 @@ Optional flags:
 
 The paper tables (`scripts/build_paper_tables.py`), prose numbers (`scripts/build_numbers.py`) and figures read this file,
 and refuse it if any records file has changed since it was written.
+
+## Where the numbers live
+
+This page states no results. The intervals, tests and bands are in the committed
+`data/v2/statistics.json`, and the point estimates in `data/v2/metrics_*.json`.
+To regenerate them, run `scripts/recompute_all.sh all` (see its header), then this
+script and the other builders in `docs/stage7-paper-figures-tables.md`. The gene
+counts above come from `data/v2/counts.json`.

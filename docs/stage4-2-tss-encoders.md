@@ -20,19 +20,26 @@ export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
 
 # All four self-supervised encoders on the canonical-TSS windows (Stage 4.1).
 # May timings on an RTX 5060: HyenaDNA ~80 min, DNABERT-2 ~110 min, GENA-LM ~70 min.
+# On a card with little VRAM, run_tss_extract_capped.py takes the same arguments.
 for enc in nt_v2 dnabert2 gena_lm hyena_dna; do
   uv run python scripts/run_tss_multi_pool_extract.py --encoder "$enc" --device auto
   uv run python scripts/build_tss_pooling_datasets.py --encoder "$enc"
 done
+# E5 features from the cached chunks (no GPU): TSS-anchored pools and their
+# chunk-matched composition baselines
+uv run python scripts/build_tss_anchored_datasets.py
+uv run python scripts/build_tss_composition_baseline.py
+
+# Per-cell probes default to data/splits.json; the TSS primary must be named.
 # Probe each pool in the encoder's TSS grid (model_registry.encoder_pools(enc, "TSS")):
-uv run python scripts/train_logistic_probe.py --dataset tss_nt_v2_meanmean --task family5 \
-  --splits data/splits_tss_disjoint.json
+S=data/splits_tss_disjoint.json
+uv run python scripts/train_logistic_probe.py --dataset tss_nt_v2_meanmean --task family5 --splits "$S"
 
 # Enformer + TSS 4-mer baseline probes
-uv run python scripts/train_logistic_probe.py --dataset enformer_tss_4mer --task family5
-uv run python scripts/train_probe.py --dataset data/dataset_enformer_tss_4mer.parquet --probe-out data/probe_enformer_tss_4mer.npz
-uv run python scripts/train_logistic_probe.py --dataset enformer_trunk_global --task family5
-uv run python scripts/train_probe.py --dataset data/dataset_enformer_trunk_center.parquet --probe-out data/probe_enformer_trunk_center.npz
+uv run python scripts/train_logistic_probe.py --dataset enformer_tss_4mer --task family5 --splits "$S"
+uv run python scripts/train_probe.py --dataset data/dataset_enformer_tss_4mer.parquet --splits "$S" --probe-out data/probe_enformer_tss_4mer.npz
+uv run python scripts/train_logistic_probe.py --dataset enformer_trunk_global --task family5 --splits "$S"
+uv run python scripts/train_probe.py --dataset data/dataset_enformer_trunk_global.parquet --splits "$S" --probe-out data/probe_enformer_trunk_global.npz
 
 # Camera-ready: every CDS and TSS cell, then the intervals (rescores stored predictions)
 scripts/recompute_all.sh all
@@ -44,7 +51,11 @@ uv run python scripts/build_statistics.py
 | File | What it does |
 | --- | --- |
 | `scripts/run_enformer_features.py` | Runs Enformer on cached TSS windows and writes trunk/track feature datasets; `--no-datasets` only fills the feature cache, `--from-cache` builds the datasets from a finished cache (e.g. one extracted on another machine) without the model. |
-| `scripts/run_tss_multi_pool_extract.py` | Runs DNA encoders over TSS windows and caches per-chunk reductions; `--gene-table` restricts the run to a parquet's genes. |
+| `scripts/run_tss_multi_pool_extract.py` | Runs DNA encoders over TSS windows and caches per-chunk reductions; `--gene-table` restricts the run to a parquet's genes. It calls `embed_all_multi_pool` with `collect=False`, so the reductions go to the per-gene `.npz` cache and are not held in RAM. |
+| `scripts/run_tss_extract_capped.py` | VRAM-capped launcher for the TSS extractor: caps the process at `MEM_FRACTION` of GPU memory (default 0.55) and sets `PYTORCH_CUDA_ALLOC_CONF` before the encoder loads, so a memory spike raises a Python OOM and a rerun resumes from the cache instead of crashing the driver. Forwards every argument to `run_tss_multi_pool_extract.py`. |
+| `scripts/check_tss_center_chunk.py` | Tokenizer-only check of where each encoder's middle chunk falls relative to the TSS; writes `analysis/tss_overlap/center_chunk_offsets_<encoder>.csv`, which the two E5 builders below read. |
+| `scripts/build_tss_anchored_datasets.py` | E5 `tssanchored` pool: per gene, the cached chunk whose content is most centred on the TSS. No GPU. |
+| `scripts/build_tss_composition_baseline.py` | E5 chunk-matched composition baselines (`chunk4mergc`, `chunk6mer`) over the same anchor chunk each encoder pooled. No GPU. |
 | `scripts/aws/extract_box.sh` | Runs every GPU extraction (CDS, TSS, Enformer, ESM-2) on one CUDA box, in order, and records the GPU, driver and torch build; `pilot` first replays the pre-fix code on a few genes whose inputs did not change and checks that the new code reproduces it bit for bit (HyenaDNA excepted: it now runs without CLS/SEP, so it is checked for constant features instead; GENA-LM excepted: the pre-fix code ran it at its random initialisation, so only the run-to-run repeat gates it). |
 | `scripts/compare_extraction_caches.py` | `pick` chooses the pilot genes; `compare` checks two caches gene by gene (bit-exact or against error thresholds); `census` checks that a finished cache holds exactly the manifest's genes, all stamped, finite and from a single run. |
 | `scripts/build_tss_pooling_datasets.py` | Aggregates TSS per-chunk reductions into probe-ready datasets. |
@@ -59,30 +70,24 @@ uv run python scripts/build_statistics.py
 
 ## Outputs
 
-- `data/dataset_tss_nt_v2_*.parquet` - TSS-window NT-v2 pooling datasets.
-- `data/dataset_enformer_trunk_global.parquet` - Enformer trunk family5 feature table.
-- `data/dataset_enformer_trunk_center.parquet` - Enformer trunk regression feature table.
+- `data/dataset_tss_<encoder>_<pool>.parquet` - TSS-window pooling datasets for all four encoders.
+- `data/dataset_tss_<encoder>_{tssanchored,chunk4mergc,chunk6mer}.parquet` - the E5 anchored pools and their chunk-matched composition baselines.
+- `data/dataset_enformer_trunk_global.parquet`, `data/dataset_enformer_trunk_center.parquet` - Enformer trunk features: the whole-window readout, and the central 16 bins (the E5 counterpart). Both run on both tasks.
 - The CDS vs TSS comparison is built in Stage 7 (`cds_tss.tex`, `tss_context.png`) from the `data/v2/` records. `analysis/tables/context_ablation.md` and `analysis/figures/context_ablation_cds_tss_enformer.png` are retired Stage 6 outputs (May protocol, no generator).
 
-## Result Summary
+## Splits
 
-All four self-supervised encoders collapse from CDS to TSS into a tight
-macro-F1 band of 0.39--0.46, with mutually-overlapping 95% bootstrap CIs:
+Every TSS result is reported on `data/splits_tss_disjoint.json` (Stage 4.1).
+`scripts/recompute_all.py` runs the full TSS grid, E5 cells included, on that
+split and on `data/splits.json` (the window-overlap sensitivity analysis), and
+the whole-window grid on the random split and the three disjoint seed splits.
 
-| Encoder | TSS best pool | macro-F1 [95% CI] | TSS R² [95% CI] |
-| --- | --- | --- | --- |
-| 4-mer (TSS) | — | 0.247 [0.225, 0.268] | 0.041 [0.028, 0.050] |
-| GENA-LM | clsmean | 0.389 [0.331, 0.442] | 0.059 [0.042, 0.071] |
-| HyenaDNA | meanmean | 0.419 [0.356, 0.476] | 0.085 [0.065, 0.101] |
-| NT-v2 | meanmean | 0.447 [0.384, 0.507] | 0.117 [0.094, 0.137] |
-| DNABERT-2 | maxmean | 0.455 [0.394, 0.517] | 0.122 [0.100, 0.140] |
-| Enformer trunk | center | 0.545 | 0.142 |
+## Results
 
-Note (Sept 29, 2026): the GENA-LM row came from a randomly initialised network (a loader bug, fixed in
-`7a0c6e1`), not the pretrained encoder. This table predates the camera-ready re-extraction, which replaces it.
-
-Every self-supervised encoder beats the TSS 4-mer baseline with
-non-overlapping CIs (encoders recover non-trivial regulatory-context
-signal), but no encoder is statistically separable from any other on
-TSS. The substrate, not the encoder, is the dominant variable —
-substrate dominance is encoder-general, not NT-v2-specific.
+This page states no results. The current numbers live in the records
+`data/v2/metrics_splits_tss_disjoint.json` (and the other `data/v2/metrics_*.json`)
+and in `data/v2/statistics.json`. The paper's tables come from
+`scripts/build_paper_tables.py` (the substrate ablation is `cds_tss.tex`), and its
+prose numbers (`numbers.tex`) from `scripts/build_numbers.py`. To regenerate them,
+run `scripts/recompute_all.sh all` (see its header), then the builders in
+`docs/stage7-paper-figures-tables.md`.
