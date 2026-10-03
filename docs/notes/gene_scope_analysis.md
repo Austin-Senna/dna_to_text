@@ -104,3 +104,12 @@ import pandas as pd
 ```
 
 Or rerun the inline block from the chat session of 2026-05-15 (see `docs/conference_resubmission_plan.md` live tracker for the commit hash that landed this report).
+
+## Addendum (Oct 2 2026): the three genes
+
+Re-deriving the curation with `src/data_loader/dataset_loader.py` (`FAMILIES`, `filter_family`) against
+`data/hgnc/hgnc_complete_set.tsv` and the GenePT v2 `ada_text` pickle reproduces every count above. The
+three genes in the 3,247 union but not in `data/gene_table.parquet` are all GPCRs (olfactory receptors):
+OR1D4 (ENSG00000255095), OR1E3 (ENSG00000142163), OR51J1 (ENSG00000184321). GPCR 594 - 3 = 591, the
+paper's count. The "HGNC regex match" column counts genes with an Ensembl ID (immune: 173 without that
+filter, 164 with it).

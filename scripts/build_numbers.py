@@ -27,6 +27,8 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
   n.*, purge.*, pop.*, tss-overlap.*, single-chunk.*, selsens.*   counts; tss-overlap
         is the homology split's cross-partition window overlap over its test
         partition, and tss-overlap.scored.* over the test genes left after the purge
+  edge.nonconverged                      probe cells whose pick sits next to a fit that
+        did not converge, on the grid or in an extension (unshuffled records)
   tss-comp.*                             the TSS windows' annotation make-up (the target-CDS
         share, each partition bucket's percentage, genes, Ensembl release), from
         scripts/tss_overlap.py's audit table
@@ -282,8 +284,9 @@ def _selection_sensitivity(out: Keys) -> None:
     R.check_inputs(sens)
     shuffled = re.compile(r"/shuf\d+$")
     main = [c for c in sens["cells"] if not shuffled.search(c["key"])]
-    n_main = sum(not r["shuffled_labels"] for p in R.V2.glob("metrics_*.json") for r in json.loads(p.read_text()))
-    out["selsens.main-cells"], out["selsens.moved"] = count(n_main), count(len(main))
+    recs = [r for p in R.V2.glob("metrics_*.json") for r in json.loads(p.read_text()) if not r["shuffled_labels"]]
+    out["selsens.main-cells"], out["selsens.moved"] = count(len(recs)), count(len(main))
+    out["edge.nonconverged"] = count(sum(r["edge"] == "nonconverged" for r in recs))
     out["selsens.pick-changed"] = count(sum(c["pick_changed"] for c in main))
     out["selsens.max-df1"] = bt.f(max(c["max_abs_d_test_f1"] or 0.0 for c in main), 3)
     out["selsens.moved-over-001"] = count(sum((c["max_abs_d_test_f1"] or 0.0) > 0.01 for c in main))

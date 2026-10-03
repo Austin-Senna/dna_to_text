@@ -818,20 +818,28 @@ def _key_label(key):
     return src_label(src.removeprefix("tss_")) + (" (TSS)" if src.startswith("tss_") else "")
 
 
+def _pair_label(d):
+    """'A $-$ B'; when one side is a TSS cell, the other is labelled (CDS) too (T4)."""
+    tss = [k.split("/")[1] == "tss" for k in (d["a"], d["b"])]       # key: split/arm/task/source
+    a, b = (_key_label(k) + (" (CDS)" if tss[0] != tss[1] and not t else "")
+            for k, t in zip((d["a"], d["b"]), tss))
+    return f"{a} $-$ {b}"
+
+
 def build_paired_diff():
-    line, name = _diff_line, _key_label
+    line, name = _diff_line, _pair_label
     conf = STATS["confirmatory"]
     out = [r"\multicolumn{3}{@{}l}{\textbf{Confirmatory, macro-F1 (Holm-adjusted $p$)}}\\"]
     for k, d in conf.items():
         where = " (disjoint split)" if k.startswith("T4") else ""
-        out.append(line(f"{name(d['a'])} $-$ {name(d['b'])}{where}", d, d["p_holm"]))
+        out.append(line(f"{name(d)}{where}", d, d["p_holm"]))
     out.append(r"\midrule")
     out.append(r"\multicolumn{3}{@{}l}{\textbf{Exploratory, GenePT $R^2$ (unadjusted $p$)}}\\")
     ex = STATS["exploratory"]
     for k in ("aa3 > aa2", "aa_kmer > nt_kmer", "encoder > aa_kmer", "esm2_650m > aa_kmer",
               "esm2_650m > encoder"):
         d = ex[f"{CDS} genept: {k}"]
-        out.append(line(f"{name(d['a'])} $-$ {name(d['b'])}", d, d["p_one_sided"]))
+        out.append(line(name(d), d, d["p_one_sided"]))
     return "\n".join(out)
 
 
@@ -850,7 +858,7 @@ def build_d5_sensitivity():
     out.append(r"\multicolumn{3}{@{}l}{\textbf{Encoder $-$ composition with log CDS length, macro-F1}}\\")
     for k in ("nt_kmer+len", "aa_kmer+len"):
         d = STATS["exploratory"][f"{CDS} family5: encoder > {k}"]
-        out.append(_diff_line(f"{_key_label(d['a'])} $-$ {_key_label(d['b'])}", d, d["p_one_sided"]))
+        out.append(_diff_line(_pair_label(d), d, d["p_one_sided"]))
     for name, title, metric in (("label_noise", "noisy TF labels", "macro-F1"),
                                 ("label_noise_kinase", "non-protein-kinase labels", "macro-F1"),
                                 ("template", "templated summaries", "GenePT $R^2$")):
@@ -866,7 +874,7 @@ def build_d5_sensitivity():
         out.append(rf"\multicolumn{{3}}{{@{{}}l}}{{\textbf{{Without {title} ({n}), {metric}}}}}\\")
         for k, d in tests.items():
             where = " (disjoint split)" if k.startswith("T4") else ""
-            out.append(_diff_line(f"{_key_label(d['a'])} $-$ {_key_label(d['b'])}{where}", d, d["p_one_sided"]))
+            out.append(_diff_line(f"{_pair_label(d)}{where}", d, d["p_one_sided"]))
     return "\n".join(out)
 
 
