@@ -3,7 +3,7 @@
 **TL;DR:** Under the homology-aware split that *Bioinformatics* requires, two of our headline claims weaken. NT-v2 still beats the weak CDS 4-mer baseline, but it is **statistically tied with a translated amino-acid composition baseline** on classification and **loses to it** on the GenePT-regression arm. We need to reframe "DNA-LMs recover protein-family signal beyond composition."
 
 ## What was done
-- New PRIMARY split: MMseqs2 protein clusters @40% id, whole clusters assigned to one split (0 clusters span train/val/test). 3,244 genes → **1,751 clusters** — i.e. ~1,500 genes had a paralog the old random split was free to leak across train/test. Random split kept as sensitivity (`splits_random.json`).
+- New PRIMARY split: MMseqs2 protein clusters @40% id, whole clusters assigned to one split (0 clusters span train/val/test). 3,244 genes → **1,751 clusters**; 1,978 genes share a cluster with another gene (corrected Oct 2 2026 from "~1,500", which was 3,244 − 1,751, the genes beyond each cluster's first). Random split kept as sensitivity (`splits_random.json`).
 - Re-ran all 125 probe cells on the homology split (no re-encoding; embeddings are split-independent). Results in `data/metrics_homology.json`; old random-split results preserved in `data/metrics.json`.
 - α now selected by validation macro-R² (was cosine); added composition baselines (6-mer, codon, translated AA 1/2/3-mer, GC+length); added paired-difference bootstrap.
 

@@ -159,12 +159,14 @@ how much leakage survives.
   (`n_translated = 3244`), so every gene is clustered on its real protein, not a singleton
   fallback.
 - **40%** → 1,751 clusters: ~1.85 genes/cluster on average. Many clusters are singletons (a
-  gene with no close paralog in the set); the rest are small families of duplicates. By the
-  arithmetic, 3244 − 1751 = **1,493 genes share a cluster with ≥1 other gene** — i.e. ~1,500
-  genes had a paralog the old random split was free to leak across train/test.
+  gene with no close paralog in the set); the rest are small families of duplicates. **1,978 genes
+  share a cluster with ≥1 other gene** (counted from `data/clusters/homology_id40.tsv`; corrected
+  Oct 2 2026: the earlier "3244 − 1751 = 1,493" counts the genes beyond each cluster's first, not
+  the genes in shared clusters). A random split separates about 1,489 of them from a partner in
+  expectation, the source of the old "~1,500".
 - **70%** → 2,869 clusters: stricter identity ⇒ the moderate-paralog clusters fragment into
   more, smaller clusters (2,869 > 1,751), covering the **same** 3,244 genes. Now only
-  3244 − 2869 = **375 genes** share a cluster with another — so far fewer genes are locked
+  **597 genes** share a cluster with another (3244 − 2869 = 375 is the genes beyond each cluster's first) — so far fewer genes are locked
   together ⇒ more leakage survives ⇒ higher scores.
 - Test size is ~15% (≈486–487) in every split; it barely changes because whole clusters move
   as a block but the target stays 70/15/15. **What differs between splits is *which* genes
