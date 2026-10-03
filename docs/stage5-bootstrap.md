@@ -1,4 +1,4 @@
-# Stage 5: Test-Set Uncertainty and Confirmatory Tests
+# Stage 5: Test-Set Uncertainty and Primary Tests
 
 `scripts/build_statistics.py` produces every interval, paired test and null
 band the paper reports. It fits nothing: it rescores the test predictions that
@@ -39,7 +39,7 @@ Sample input and output shapes are tracked in
 
 | File | What it does |
 | --- | --- |
-| `scripts/build_statistics.py` | Picks the headline cells on validation, runs the intervals, the confirmatory and exploratory paired tests and the null bands, writes `data/v2/statistics.json`. |
+| `scripts/build_statistics.py` | Picks the headline cells on validation, runs the intervals, the primary (T1-T4) and exploratory paired tests and the null bands, writes `data/v2/statistics.json`. |
 | `src/linear_trainer/stats.py` | Cluster bootstrap, paired bootstrap, Holm adjustment and null bands over stored predictions. |
 | `src/data_loader/label_audit.py` | The sensitivity subsets as rules: noisy TF labels, kinase-labelled genes that are not protein kinases, and templated GenePT summaries. |
 | `scripts/reproduce_headline.py` | The independent reimplementation (Rule 3): numpy, pandas and scikit-learn only, no repo imports; writes `data/v2/reproduction.json`, which `build_statistics.py` requires. `scripts/recompute_all.sh all` runs it at the end of an unsharded pass. |
@@ -71,7 +71,9 @@ For every cell it reports:
 the same scored genes. They report the difference A - B, its 95% interval
 and a one-sided p-value for A > B.
 
-**Confirmatory family:** four family5 macro-F1 tests, Holm-adjusted together.
+**Primary family:** four family5 macro-F1 tests, Holm-adjusted together. The paper calls them primary, not
+confirmatory: they were fixed after earlier results on the same test genes. The `confirmatory` key in
+`statistics.json` keeps its name.
 Each side other than ESM-2 650M (a fixed model) is the validation-selected cell.
 
 | Test | Comparison | Split |
@@ -81,7 +83,7 @@ Each side other than ESM-2 650M (a fixed model) is the validation-selected cell.
 | T3 | ESM-2 650M vs best DNA encoder | CDS primary |
 | T4 | best encoder on CDS vs the same encoder on TSS | TSS primary (disjoint) |
 
-A confirmatory cell whose pick sits at a search limit, whose fit or train+val
+A primary-test cell whose pick sits at a search limit, whose fit or train+val
 refit did not converge, that predicts a single class, or that scores fewer than
 15 test genes of some family after the purge stops the build.
 Every other paired test is exploratory and unadjusted.
@@ -134,7 +136,7 @@ the three subsets' sizes, and the per-partition test-population profile) come
 from `scripts/build_counts.py`, which writes `data/v2/counts.json`.
 
 Every family5 record also carries `n_test_scored_by_class`, the scored test genes
-per family after the purge; the confirmatory floor of 15 reads it.
+per family after the purge; the primary-test floor of 15 reads it.
 
 ## What it is not
 

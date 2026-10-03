@@ -10,7 +10,7 @@ history. Active docs mirror the sample input/output stages in `../samples/`.
 - `stage3-train-probes.md` - build the homology-aware splits and the evaluation purge, and train family5 and Ridge-to-GenePT probes under the V2 protocol.
 - `stage4-1-tss-windows.md` - derive strand-aware TSS-centered windows and the TSS-primary split (`data/splits_tss_disjoint.json`).
 - `stage4-2-tss-encoders.md` - run the four DNA encoders and Enformer on TSS windows, plus the GPU extraction pilot tooling.
-- `stage5-bootstrap.md` - cluster-bootstrap intervals, the confirmatory tests and the null bands.
+- `stage5-bootstrap.md` - cluster-bootstrap intervals, the four primary tests (T1-T4) and the null bands.
 - Stage 6 (report analysis artifacts) is retired.
 - `stage7-paper-figures-tables.md` - render the manuscript figures and LaTeX table fragments.
 
