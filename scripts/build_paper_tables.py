@@ -116,8 +116,8 @@ SPECS = {
                           width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lcr@{}",
                           header=r"Comparison & $\Delta$ [95\% CI] & $p$"),
     "s_tss_anchored": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
-                           width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrcr@{}",
-                           header=r"Model & Whole window & TSS-Anchored [95\% CI] & Chunk comp."),
+                           width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrccr@{}",
+                           header=r"Model & Whole window & TSS-Anchored [95\% CI] & $\Delta$ [95\% CI] & Chunk comp."),
     "s_d5_sensitivity": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.4}\selectfont",
                              width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lcr@{}",
                              header=r"Comparison & $\Delta$ [95\% CI] & $p$"),
@@ -763,38 +763,48 @@ def build_tss_disjoint():
 # 0"); the last column is the validation-selected composition
 # (4-mer+GC or 6-mer) of the same anchored chunk.
 # ===================================================================
-def _beats(split_name: str, label: str, a: dict, b: dict) -> bool:
-    """Bold a cell only when the paired test's interval for A - B excludes 0
-    (G26); one cell's interval against the other's point ignores B's noise."""
+def _paired(split_name: str, label: str, a: dict, b: dict) -> dict:
+    """The paired test of A - B, which must compare exactly the displayed cells and
+    centre on their difference (G8, G26)."""
     d = STATS["exploratory"][f"{split_name} family5: {label}"]
     if (d["a"], d["b"]) != (a["key"], b["key"]):
         raise R.MixedRecords(f"{label}: the paired test compares {d['a']} and {d['b']}, "
                              f"the table shows {a['key']} and {b['key']}")
-    return d["delta_ci95"][0] > 0
+    if abs(d["delta_point"] - (a[F1] - b[F1])) > 1e-9:
+        raise R.MixedRecords(f"{label}: paired point {d['delta_point']} is not the table's "
+                             f"difference {a[F1] - b[F1]}")
+    return d
+
+
+def _delta_cell(d: dict) -> str:
+    lo, hi = d["delta_ci95"]
+    return f"{sgn(d['delta_point'], 3)} [{sgn(lo, 3)}, {sgn(hi, 3)}]"
 
 
 def build_tss_anchored():
+    """Bold an anchored cell only when the paired interval excludes 0 (G26); one
+    cell's interval against the other's point ignores B's noise."""
     out = []
     for split, name, title in ((HOM, CDS, "Homology-aware split"),
                                (DIS, TSS, "Genomic-interval-disjoint split")):
         if out:
             out.append(r"\midrule")
-        out.append(r"\multicolumn{4}{@{}l}{\textbf{" + title + r"}}\\")
+        out.append(r"\multicolumn{5}{@{}l}{\textbf{" + title + r"}}\\")
         by = split.cells("tss", "family5")
         for enc in ENCODERS:
             whole_rec = split.best(enc, "tss", "family5")
-            whole = whole_rec[F1]
             c = interval(name, "family5", f"tss_{enc}_tssanchored")
             comp = by[split.anchored_composition(enc, "family5")][F1]
+            d = _paired(name, f"{enc} anchored > whole-window", by[f"tss_{enc}_tssanchored"], whole_rec)
             txt = f"{f(c['point'],3)} {_ci(c['ci95'])}"
-            win = _beats(name, f"{enc} anchored > whole-window", by[f"tss_{enc}_tssanchored"], whole_rec)
-            out.append(f"{ENC_DISPLAY[enc]} & {f(whole,3)} & {bold(txt) if win else txt} "
-                       f"& {f(comp,3)} \\\\")
+            out.append(f"{ENC_DISPLAY[enc]} & {f(whole_rec[F1],3)} & "
+                       f"{bold(txt) if d['delta_ci95'][0] > 0 else txt} & {_delta_cell(d)} & {f(comp,3)} \\\\")
         g_rec = split.cell("tss", "family5", ENF_WHOLE)
         c = interval(name, "family5", ENF_CENTRE)
+        d = _paired(name, "Enformer centre > whole", by[ENF_CENTRE], g_rec)
         txt = f"{f(c['point'],3)} {_ci(c['ci95'])}"
-        win = _beats(name, "Enformer centre > whole", by[ENF_CENTRE], g_rec)
-        out.append(f"Enformer & {f(g_rec[F1],3)} & {bold(txt) if win else txt} & --- \\\\")
+        out.append(f"Enformer & {f(g_rec[F1],3)} & {bold(txt) if d['delta_ci95'][0] > 0 else txt} & "
+                   f"{_delta_cell(d)} & --- \\\\")
     return "\n".join(out)
 
 
