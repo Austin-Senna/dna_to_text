@@ -11,7 +11,7 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
   <arm>.<task>.*, rand.<arm>.<task>.*     the validation picks: best encoder (name,
         pool, value), each encoder at its pool and minus the composition floor,
         the nucleotide and amino-acid k, ESM-2, Enformer
-  t1-t4.{delta,ci,p,p-holm}               the confirmatory tests
+  t1-t4.{delta,ci,p,p-holm}               the four primary tests (Holm-adjusted together)
   ex.<split>.<task>.<label>.{delta,ci,p}  exploratory paired tests
   pool3x.*, masked.<mask>.*               the D5 pooling and masked-label tests (with the
         genes each mask removes: excluded, excluded-dis on the disjoint split)
@@ -23,7 +23,7 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
   rr.<source>.{macro,pooled,top5-pct,median-rank}, rr.chance-top5-pct, rr.n-test   ridge_robust.json
   pool.<enc>.spread, pool.between-encoders.spread   CDS family5 macro-F1 ranges
   scored.<split>.<arm>.{n,<family>}      scored test genes per family (family5, after the purge)
-  t1-t4.ci-half                          half a confirmatory interval's width (2 dp)
+  t1-t4.ci-half                          half a primary test's interval width (2 dp)
   n.*, purge.*, pop.*, tss-overlap.*, single-chunk.*, selsens.*   counts; tss-overlap
         is the homology split's cross-partition window overlap over its test
         partition, and tss-overlap.scored.* over the test genes left after the purge
@@ -37,6 +37,8 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
         the irregular canonical CDS in data/translation_exceptions.tsv (counts.json)
   tss-pad.{n,min-bp,max-bp}              windows padded with N past a chromosome end, from
         the window manifest's pad_up + pad_down
+  subm.<key>                             a value the submission printed (data/submitted_values.json,
+        read verbatim from the submission source), for the changes-since-submission appendix
   tss-comp.*                             the TSS windows' annotation make-up (the target-CDS
         share, each partition bucket's percentage, genes, Ensembl release), from
         scripts/tss_overlap.py's audit table
@@ -69,6 +71,7 @@ KEY = re.compile(r"[a-z0-9]+(?:[.-][a-z0-9]+)*")
 SPLITS = {"hom": bt.CDS, "dis": bt.TSS, "rand": bt.RAND}
 TASKS = {"f5": "family5", "gp": "genept"}
 AUDIT = R.REPO_ROOT / "analysis" / "tss_overlap" / "tables"
+SUBMITTED = R.REPO_ROOT / "data" / "submitted_values.json"
 
 
 def slug(s: str) -> str:
@@ -262,6 +265,13 @@ def _counts(out: Keys) -> None:
     _window_overlap(out)
     _window_padding(out)
     _window_composition(out)
+    _submitted(out)
+
+
+def _submitted(out: Keys) -> None:
+    """The submission's printed values, for the changes-since-submission appendix."""
+    for key, d in json.loads(SUBMITTED.read_text())["values"].items():
+        out[f"subm.{key}"] = d["value"]
 
 
 def _window_padding(out: Keys) -> None:

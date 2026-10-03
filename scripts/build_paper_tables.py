@@ -812,7 +812,7 @@ def build_tss_anchored():
 
 
 # ===================================================================
-# Paired differences: the four confirmatory tests (Holm-adjusted p) and the
+# Paired differences: the four primary tests (Holm-adjusted p) and the
 # exploratory comparisons (one-sided p, unadjusted).
 # ===================================================================
 def _diff_line(disp, d, p):
@@ -842,7 +842,7 @@ def _pair_label(d):
 def build_paired_diff():
     line, name = _diff_line, _pair_label
     conf = STATS["confirmatory"]
-    out = [r"\multicolumn{3}{@{}l}{\textbf{Confirmatory, macro-F1 (Holm-adjusted $p$)}}\\"]
+    out = [r"\multicolumn{3}{@{}l}{\textbf{Primary, macro-F1 (Holm-adjusted $p$)}}\\"]
     for k, d in conf.items():
         where = " (disjoint split)" if k.startswith("T4") else ""
         out.append(line(f"{name(d)}{where}", d, d["p_holm"]))

@@ -281,3 +281,24 @@ def test_table_a3_cds_and_tss_rows_score_the_same_genes(numbers):
     for enc, slug in (("DNABERT-2", "dnabert2"), ("NT-v2", "nt-v2"), ("GENA-LM", "gena-lm"), ("HyenaDNA", "hyena-dna")):
         delta = float(numbers[f"ex.dis.f5.{slug}-cds-gt-tss.delta"].replace(bt.MARK, ""))
         assert abs(rows[("cds", enc)] - rows[("tss", enc)] - delta) <= 0.0015, enc
+
+
+def test_submitted_values_are_verbatim_in_the_submission_source(numbers):
+    """Each subm.* value is what the submission printed for that quantity: it sits in its
+    context, a verbatim phrase of the named file at the recorded submission commit (so a
+    value moved to the wrong quantity fails). Skipped where that commit is unavailable."""
+    import shutil
+    import subprocess
+    sub = json.loads(bn.SUBMITTED.read_text())
+    for key, d in sub["values"].items():
+        assert set(d) == {"value", "what", "file", "context"} and re.fullmatch(r"\d\.\d{3}", d["value"]), key
+        assert re.search(rf"(?<![\d.]){re.escape(d['value'])}(?!\d)", d["context"]), key
+        assert numbers[f"subm.{key}"] == d["value"]
+    repo = R.REPO_ROOT / "dna_to_text_paper"
+    if not shutil.which("git") or subprocess.run(["git", "-C", str(repo), "cat-file", "-e", sub["commit"]],
+                                                 capture_output=True).returncode:
+        pytest.skip(f"submission commit {sub['commit'][:7]} not available here")
+    for key, d in sub["values"].items():
+        text = subprocess.run(["git", "-C", str(repo), "show", f"{sub['commit']}:{d['file']}"],
+                              capture_output=True, text=True, check=True).stdout
+        assert d["context"] in text, (key, d["context"], d["file"])

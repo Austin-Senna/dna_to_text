@@ -1,0 +1,102 @@
+{
+  "_doc": "Values the MLCB 2026 submission printed, read verbatim from its source (paper submodule commit below, recovered Aug 18). build_numbers.py keys them as subm.<key> for the changes-since-submission appendix; tests/test_build_numbers.py checks each value sits inside its context, a verbatim phrase of the named file at that commit.",
+  "commit": "45a7aa2c685bc7565eb0accd2d0f066cc0d4f350",
+  "values": {
+    "cds.f5.best-encoder": {
+      "value": "0.727",
+      "what": "NT-v2 (meanG, pooling picked on test), CDS macro-F1",
+      "file": "paper/results.tex",
+      "context": "NT-v2 (\\texttt{meanG}) at macro-F1 0.727"
+    },
+    "cds.f5.4mer": {
+      "value": "0.633",
+      "what": "CDS 4-mer, macro-F1 (the fixed nucleotide reference)",
+      "file": "paper/results.tex",
+      "context": "CDS 4-mer baseline (0.633)"
+    },
+    "cds.f5.aa2": {
+      "value": "0.735",
+      "what": "AA 2-mer, macro-F1 (the amino-acid reference)",
+      "file": "paper/results.tex",
+      "context": "amino-acid 2-mer baseline (0.735)"
+    },
+    "cds.f5.esm": {
+      "value": "0.960",
+      "what": "ESM-2 650M, CDS macro-F1",
+      "file": "paper/results.tex",
+      "context": "ESM-2 650M upper bound (macro-F1 0.960)"
+    },
+    "cds.f5.nt-v2-maxmean": {
+      "value": "0.519",
+      "what": "NT-v2 with maxmean (Max), the bottom of its pooling range",
+      "file": "paper/results.tex",
+      "context": "macro-F1 0.519 (\\texttt{maxmean})"
+    },
+    "cds.gp.best-encoder": {
+      "value": "0.077",
+      "what": "DNABERT-2 (meanD), GenePT R^2",
+      "file": "paper/results.tex",
+      "context": "(DNABERT-2 \\texttt{meanD}, 0.077)"
+    },
+    "cds.gp.aa3": {
+      "value": "0.090",
+      "what": "AA 3-mer, GenePT R^2",
+      "file": "paper/results.tex",
+      "context": "AA 3-mer baseline is the best non-control cell ($R^2$ 0.090)"
+    },
+    "cds.gp.4mer": {
+      "value": "0.045",
+      "what": "CDS 4-mer, GenePT R^2",
+      "file": "paper/results.tex",
+      "context": "CDS 4-mer floor (0.045)"
+    },
+    "cds.gp.esm": {
+      "value": "0.181",
+      "what": "ESM-2 650M, GenePT R^2",
+      "file": "paper/results.tex",
+      "context": "upper bound (0.181)"
+    },
+    "tss.f5.best-encoder": {
+      "value": "0.326",
+      "what": "best TSS encoder (DNABERT-2), homology split, macro-F1",
+      "file": "paper/results.tex",
+      "context": "reaches only 0.326 (DNABERT-2"
+    },
+    "tss.f5.nt-v2": {
+      "value": "0.313",
+      "what": "NT-v2 on the TSS window, homology split",
+      "file": "paper/results.tex",
+      "context": "NT-v2 0.313)"
+    },
+    "tss.f5.enformer": {
+      "value": "0.401",
+      "what": "Enformer on the TSS window, homology split",
+      "file": "paper/results.tex",
+      "context": "macro-F1 0.401 on TSS"
+    },
+    "rand.cds.f5.nt-v2": {
+      "value": "0.828",
+      "what": "NT-v2, CDS, random split",
+      "file": "paper/results.tex",
+      "context": "(NT-v2: 0.828 to 0.727)"
+    },
+    "rand.cds.f5.aa2": {
+      "value": "0.837",
+      "what": "AA 2-mer, CDS, random split",
+      "file": "paper/results.tex",
+      "context": "(AA 2-mer versus NT-v2: 0.837 vs.\\ 0.828 random"
+    },
+    "rand.tss.f5.nt-v2": {
+      "value": "0.447",
+      "what": "NT-v2, TSS window, random split",
+      "file": "paper/results.tex",
+      "context": "TSS drops from 0.447 to 0.313"
+    },
+    "chance": {
+      "value": "0.224",
+      "what": "the shuffled-label chance floor (one shuffled run)",
+      "file": "paper/results.tex",
+      "context": "chance floor (0.224)"
+    }
+  }
+}

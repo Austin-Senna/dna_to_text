@@ -54,6 +54,7 @@ refitted at 6 threads or on another BLAS kernel carries a dagger (`\sens{}`, def
 - Stored test predictions in `outputs/predictions/v2/` (not tracked).
 - `data/gene_table.parquet` and `data/hgnc/` (not tracked) - the Stage 1 gene table and HGNC groups, read by `build_statistics.py` and `build_counts.py`.
 - `data/v2/selection_sensitive.json` - from `scripts/build_selection_sensitive.py` over `data/v2/determinism_t6.json` (the main and null groups refitted at 6 threads) and `data/v2/determinism_kernel.json` (the clean room on another OpenBLAS kernel), both `scripts/diff_records.py` reports: the cells whose pick or scores move under either perturbation, with their metric deltas, which the tables and `numbers.tex` replay to mark moving digits.
+- `data/submitted_values.json` - the values the MLCB 2026 submission printed, read verbatim from its source (paper submodule commit in the file); `build_numbers.py` keys them as `subm.*` for the changes-since-submission appendix, and a test checks each against that commit.
 - `data/tss_windows.tsv` and the split files - `build_numbers.py` computes the TSS-window overlap from them (it must be the manifest the records' window purge read).
 - `analysis/tss_overlap/tables/overlap_by_family.csv` and `provenance.json` - from `scripts/tss_overlap.py` (tracked); checked against `data/tss_windows.tsv` and the GTF pin in `data/tss_windows.meta.json`.
 
