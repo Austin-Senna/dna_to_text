@@ -25,9 +25,10 @@ echo "deposit ${deposit}; clean copy ${clean} at $(git -C "${repo}" rev-parse --
 
 (cd "${deposit}" && sha256sum --check --quiet SHA256SUMS)
 git -C "${repo}" archive HEAD | tar -x -C "${clean}"
-for t in "${deposit}"/*.tar.gz; do
-    tar -xzf "${t}" -C "${clean}"
-done
+# Only what SHA256SUMS lists: a stray tarball in the directory is not unpacked.
+while read -r _ name; do
+    case "${name}" in *.tar.gz) tar -xzf "${deposit}/${name}" -C "${clean}" ;; esac
+done < "${deposit}/SHA256SUMS"
 
 export PYTHONPATH="${clean}/src:${clean}/scripts"
 export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1

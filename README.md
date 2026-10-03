@@ -137,7 +137,9 @@ uv pip install ".[enformer]"
 
 External large inputs:
 
-- Camera-ready deposit (sequences, extracted features, chunk caches, stored test predictions, the gene table and its HGNC snapshot, so every step after embedding extraction runs without a GPU): Zenodo DOI `10.5281/zenodo.23031890` (reserved; it resolves once the record is published).
+- Camera-ready deposit (sequences, extracted features, chunk caches, stored test predictions, the gene table and its HGNC snapshot, so every step after embedding extraction runs without a GPU): Zenodo DOI `10.5281/zenodo.23031890` (reserved; it resolves once the record is published). Unpack each tarball at the repository root; `docs/zenodo_deposit.md` lists them, and `scripts/check_deposit.sh` rebuilds every stamped parquet from them in a clean copy.
+
+Licences go by path (`LICENSES.md`): code MIT, data CC BY 4.0, and files derived from NT-v2 outputs CC BY-NC-SA 4.0 (NT-v2's licence).
 - GenePT v2 artifacts: Zenodo DOI `10.5281/zenodo.10833191`; unzip `GenePT_emebdding_v2.zip` into `GenePT_emebdding_v2/`.
 - HGNC complete gene set: downloaded by `src/data_loader/dataset_loader.py` from `https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt`.
 - Ensembl canonical CDS: fetched by `src/data_loader/sequence_fetcher.py` from Ensembl REST `/lookup/id/{gene_id}` and `/sequence/id/{transcript_id}?type=cds`.

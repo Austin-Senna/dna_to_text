@@ -66,6 +66,8 @@ NC_ENCODERS = ("nt_v2",)
 COMPOSITION_SUFFIXES = ("chunk4mergc", "chunk6mer")
 TARGETS_SOURCE = "genept_targets"
 
+# Copied next to the tarballs, under these names.
+DOCS = {"README.md": "docs/zenodo_deposit.md", "LICENSES.md": "LICENSES.md"}
 PRIVATE = ("docs/reviews/", "STATUS.md", "MINA.md", "logs/")
 MAX_FILES = 100   # Zenodo's per-record limit
 
@@ -249,6 +251,8 @@ def plan_parts(root: Path, stamps: dict[str, Stamp]) -> list[Part]:
              (*cache("data/sequences", ".fa", ignore=("_lookup",)), GENE_TABLE, HGNC, *untracked[CC_BY]),
              "CDS sequences (Ensembl 115), gene table with GenePT targets, HGNC snapshot, "
              "and the stamped E5 parquets git does not track"),
+        Part("mina_inputs_nt_v2.tar.gz", NC_LICENCE, untracked[NC_LICENCE],
+             "The stamped NT-v2 parquets git does not track (Stage 5 reads them)"),
         Part("mina_tss_windows_e115.tar.gz", CC_BY, cache("data/tss_windows_e115", ".fa"),
              "Strand-aware 196,608 bp canonical-TSS windows (Ensembl 115)"),
         *prediction_parts(stamps),
@@ -258,7 +262,7 @@ def plan_parts(root: Path, stamps: dict[str, Stamp]) -> list[Part]:
              (*cache("data/esm2_150m_embeddings_v2"), *cache("data/esm2_650m_embeddings_v2")),
              "ESM-2 150M and 650M per-gene protein embeddings (fp32)"),
     ]
-    nc: list[str] = list(untracked[NC_LICENCE])
+    nc: list[str] = []
     for name in ENCODER_SPECS:
         spec = ENCODER_SPECS[name]
         cds = cache(spec.chunk_dir.relative_to(REPO_ROOT).as_posix())
@@ -271,8 +275,7 @@ def plan_parts(root: Path, stamps: dict[str, Stamp]) -> list[Part]:
                   Part(f"mina_tss_chunks_{name}.tar.gz", CC_BY, tss,
                        f"{spec.display_name}: per-chunk reductions over each TSS window")]
     parts.append(Part("mina_nt_v2.tar.gz", NC_LICENCE, tuple(nc),
-                      "NT-v2: per-chunk reductions over each CDS and TSS window, and the "
-                      "stamped NT-v2 parquets git does not track"))
+                      "NT-v2: per-chunk reductions over each CDS and TSS window"))
     return parts
 
 
@@ -326,7 +329,7 @@ def main() -> None:
     verify_stamped(REPO_ROOT, stamps)
     check_predictions_dir(REPO_ROOT, stamps)
     parts = [p for p in plan_parts(REPO_ROOT, stamps) if p.files]
-    if len(parts) + 2 > MAX_FILES:   # + deposit_manifest.json and SHA256SUMS
+    if len(parts) + 2 + len(DOCS) > MAX_FILES:   # + deposit_manifest.json, SHA256SUMS, docs
         raise DepositError(f"{len(parts)} tarballs exceed Zenodo's {MAX_FILES} files")
     print(f"{len(recs)} records, {len(stamps)} stamped files verified; {len(parts)} tarballs")
     for p in parts:
@@ -335,6 +338,8 @@ def main() -> None:
         return
 
     out = args.out.resolve()
+    if out.exists() and any(out.iterdir()):
+        raise DepositError(f"{out} is not empty; pack into a fresh directory so nothing stale rides along")
     with ProcessPoolExecutor(max_workers=args.jobs) as pool:
         entries = list(pool.map(pack_part, [REPO_ROOT] * len(parts), parts, [out] * len(parts)))
     stamp = records.stamp_of({r["key"]: r for r in recs})
@@ -343,8 +348,10 @@ def main() -> None:
                                                  capture_output=True, text=True).stdout.strip(),
                 "parts": entries}
     (out / "deposit_manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
-    write_sha256sums(out, [*entries, {"name": "deposit_manifest.json",
-                                      "sha256": _sha256(out / "deposit_manifest.json")}])
+    for name, src in DOCS.items():
+        (out / name).write_bytes((REPO_ROOT / check_public(src)).read_bytes())
+    extras = ["deposit_manifest.json", *DOCS]
+    write_sha256sums(out, [*entries, *({"name": n, "sha256": _sha256(out / n)} for n in extras)])
     total = sum(e["bytes"] for e in entries)
     print(f"wrote {len(entries)} tarballs, {total / 1e9:.2f} GB, to {out}")
 
