@@ -78,6 +78,15 @@ def test_one_path_with_two_stamps_is_refused(tmp_path):
         bd.stamped([a, b])
 
 
+def test_one_path_read_under_two_licences_is_refused(tmp_path):
+    rec = _record(tmp_path, "dnabert2_meanD")
+    other = {**rec, "feature_source": "nt_v2_meanD"}
+    del other["features"]
+    other["pred_file"], other["pred_sha256"] = rec["pred_file"], rec["pred_sha256"]
+    with pytest.raises(bd.DepositError, match="different licences"):
+        bd.stamped([rec, other])
+
+
 def test_exact_files_refuses_extras_and_gaps(tmp_path):
     d = tmp_path / "cache"
     d.mkdir()

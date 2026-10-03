@@ -25,7 +25,7 @@ Every tarball unpacks at the repository root and restores the paths the code rea
 | `README.md`, `LICENSES.md` | | This file, and the map from paths to licences |
 | `SHA256SUMS` | | Checksums of every file above |
 
-The pooled feature parquets every probe reads ship in the repository, not here.
+Most pooled feature parquets ship in the repository; the deposit adds only the few git does not track.
 
 ## Reproducing
 
@@ -43,8 +43,10 @@ Where to start depends on what you want to check:
 - **Every probe cell (Stage 5)**: the two `mina_inputs*` tarballs are enough, then `scripts/recompute_all.sh`. It runs
   on CPU at one thread (about 1 h 40 min across 60 shards on a c6a.16xlarge) and ends with an independent
   reimplementation of the headline cells.
-- **Pooling (Stage 4)**: add the cache tarballs. `scripts/check_deposit.sh` rebuilds every stamped parquet
-  from them in a clean copy of the repository and checks each against its record.
+- **Pooling (Stage 4)**: add the cache tarballs. `scripts/check_deposit.sh <deposit dir>` (after `uv sync`;
+  it uses the repository's `.venv`) checks every stamped file in a clean copy of the repository, rebuilds
+  every stamped parquet from the caches, and checks them again. The composition features need the
+  encoders' tokenizers, which it fetches from Hugging Face at the pinned revisions.
 - **Extraction (Stages 1 to 3)** needs a GPU. Ours ran on an AWS g5.xlarge (NVIDIA A10G, driver 595.91.07,
   torch 2.11.0+cu130, CUDA 13.0, Python 3.13.13). Model revisions are pinned in
   `src/data_loader/model_registry.py`, and every cache file records its model, revision, input sequence

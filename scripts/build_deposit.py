@@ -129,6 +129,9 @@ def stamped(recs: list[dict]) -> dict[str, Stamp]:
         path = check_public(path)
         if path in out and out[path].sha256 != stamp.sha256:
             raise DepositError(f"{path} is stamped with two hashes")
+        if path in out and licence_of_source(out[path].source) != licence_of_source(stamp.source):
+            raise DepositError(f"{path} is read as {out[path].source} and {stamp.source}, "
+                               "which carry different licences")
         out.setdefault(path, stamp)
 
     for r in recs:
@@ -225,8 +228,9 @@ def prediction_parts(stamps: dict[str, Stamp]) -> list[Part]:
 
 
 def _tracked(root: Path, paths) -> set[str]:
-    out = subprocess.run(["git", "ls-files", "--", *paths], cwd=root, check=True,
-                         capture_output=True, text=True).stdout
+    """Paths committed at HEAD (the source tarball), not merely staged."""
+    out = subprocess.run(["git", "ls-tree", "-r", "--name-only", "HEAD", "--", *paths], cwd=root,
+                         check=True, capture_output=True, text=True).stdout
     return set(out.split())
 
 
@@ -322,10 +326,11 @@ def main() -> None:
         return
     if args.out is None and not args.dry_run:
         ap.error("--out is required unless --verify or --dry-run")
-    dirty = subprocess.run(["git", "status", "--porcelain", "--", "src", "scripts"], cwd=REPO_ROOT,
-                           check=True, capture_output=True, text=True).stdout
+    # Tracked parquets ship in the source tarball, so they too must be as committed.
+    dirty = subprocess.run(["git", "status", "--porcelain", "--", "src", "scripts", "data", *DOCS.values()],
+                           cwd=REPO_ROOT, check=True, capture_output=True, text=True).stdout
     if dirty and not args.dry_run:
-        raise DepositError(f"uncommitted changes under src or scripts; the manifest names HEAD:\n{dirty}")
+        raise DepositError(f"uncommitted changes under src, scripts or data; the manifest names HEAD:\n{dirty}")
     verify_stamped(REPO_ROOT, stamps)
     check_predictions_dir(REPO_ROOT, stamps)
     parts = [p for p in plan_parts(REPO_ROOT, stamps) if p.files]
