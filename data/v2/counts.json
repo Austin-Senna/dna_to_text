@@ -392,5 +392,16 @@
         "olfactory": 9
       }
     }
+  },
+  "families": {
+    "gpcr": 591,
+    "immune": 154,
+    "ion": 198,
+    "kinase": 558,
+    "tf": 1743
+  },
+  "clusters": {
+    "n": 1751,
+    "genes_in_shared": 1978
   }
 }

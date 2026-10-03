@@ -22,6 +22,7 @@ Run: uv run scripts/build_counts.py
 from __future__ import annotations
 
 import argparse
+import collections
 import hashlib
 import json
 from pathlib import Path
@@ -69,6 +70,16 @@ def _sha(path: Path) -> str:
 POPULATION_SPLITS = ("splits.json", "splits_tss_disjoint.json", "splits_seed1.json",
                      "splits_seed7.json", "splits_seed123.json")
 OLFACTORY = "Olfactory receptor"     # the HGNC group family behind the GPCR class's ORs
+
+
+def _cluster_counts(family: dict[str, str]) -> dict:
+    """The 40% protein clusters over the gene table: how many, and how many genes share one."""
+    from cluster.mmseqs_cluster import parse_cluster_tsv
+    cluster = parse_cluster_tsv(DATA / "clusters" / "homology_id40.tsv")
+    if set(cluster) != set(family):
+        raise RuntimeError("the cluster file and the gene table hold different genes")
+    size = collections.Counter(cluster.values())
+    return {"n": len(size), "genes_in_shared": sum(size[c] > 1 for c in cluster.values())}
 
 
 def split_population(family: dict[str, str], hgnc) -> dict:
@@ -153,6 +164,8 @@ def main() -> None:
             "empty_summary": {"n": within(frozenset(groups.get("", [])))},
         },
         "split_population": split_population(family, hgnc),
+        "families": dict(sorted(collections.Counter(family.values()).items())),
+        "clusters": _cluster_counts(family),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     stats.write_json(args.out, result)

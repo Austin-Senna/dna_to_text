@@ -22,7 +22,11 @@ uv run scripts/build_numbers.py --check  # submission gate: no \pending, undefin
 ```
 
 The prose never types a result: it prints `\val{key}` from `numbers.tex` (key families in
-`scripts/build_numbers.py`'s docstring). A printed digit that moves when the frozen protocol is
+`scripts/build_numbers.py`'s docstring). Data counts are keyed too (genes, families, clusters,
+partition sizes). Two kinds stay typed: design constants (the 1,536-d GenePT vector, the 196,608 bp
+window, the 2,048 bp centre, 70/15/15) and the curation table and Limitations counts that come from
+the frozen HGNC snapshot and GenePT pickle (re-derivation in `docs/notes/gene_scope_analysis.md`).
+`--check` enforces only result decimals; a new typed count needs one of these two reasons. A printed digit that moves when the frozen protocol is
 refitted at 6 threads or on another BLAS kernel carries a dagger (`\sens{}`, defined in
 `paper/header.tex`), in the tables and in the prose alike.
 

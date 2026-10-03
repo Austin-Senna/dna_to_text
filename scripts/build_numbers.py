@@ -27,6 +27,8 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
   n.*, purge.*, pop.*, tss-overlap.*, single-chunk.*, selsens.*   counts; tss-overlap
         is the homology split's cross-partition window overlap over its test
         partition, and tss-overlap.scored.* over the test genes left after the purge
+  n.family.<fam>, n.clusters, n.shared-cluster   family sizes; 40% protein clusters and the
+        genes in a cluster of two or more (counts.json)
   edge.nonconverged                      probe cells whose pick sits next to a fit that
         did not converge, on the grid or in an extension (unshuffled records)
   tss-comp.*                             the TSS windows' annotation make-up (the target-CDS
@@ -195,6 +197,14 @@ def _counts(out: Keys) -> None:
         if c["inputs"][name] != sha:
             raise R.MixedRecords(f"counts.json and statistics.json read different {name} files; rebuild both")
     out["n.genes"] = count(c["single_chunk"]["dnabert2"]["all genes"]["of"])
+    for fam, n in c["families"].items():
+        out[f"n.family.{slug(fam)}"] = count(n)
+    if sum(c["families"].values()) != c["single_chunk"]["dnabert2"]["all genes"]["of"]:
+        raise R.MixedRecords("counts.json: the family totals do not sum to the gene count")
+    split_clusters = json.loads((R.REPO_ROOT / "data" / bt.CDS).read_text())["cluster_stats"]["n_clusters"]
+    if c["clusters"]["n"] != split_clusters:
+        raise R.MixedRecords(f"counts.json has {c['clusters']['n']} clusters, {bt.CDS} {split_clusters}")
+    out["n.clusters"], out["n.shared-cluster"] = count(c["clusters"]["n"]), count(c["clusters"]["genes_in_shared"])
     tf, kin, tpl = c["noisy_tf_labels"], c["noisy_kinase_labels"], c["templated_summaries"]
     out["n.noisy-tf"], out["n.tf-labelled"] = count(tf["n"]["all genes"]), count(tf["of_tf_labelled"])
     out["n.noisy-tf.test"] = count(tf["n"]["splits.json test after the purge"])
