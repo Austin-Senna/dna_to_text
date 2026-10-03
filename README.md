@@ -98,6 +98,7 @@ uv run python scripts/train_logistic_probe.py --dataset nt_v2_meanD --task famil
 uv run python scripts/build_tss_windows.py
 uv run python scripts/make_tss_disjoint_split.py
 uv run python scripts/run_enformer_features.py --skip-model
+uv run python scripts/tss_overlap.py   # window composition audit; build_numbers.py refuses one older than the manifest
 
 # Stage 4.2: extract TSS-window features (each encoder, then Enformer); the TSS probe
 # cells run in scripts/recompute_all.sh.

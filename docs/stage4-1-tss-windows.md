@@ -37,6 +37,7 @@ uv run python scripts/run_enformer_features.py --skip-model   # matched TSS 4-me
 | `scripts/make_tss_disjoint_split.py` | Builds the TSS-primary split, disjoint on windows and protein clusters. |
 | `src/splits/tss_disjoint.py`, `src/splits/window_leak.py` | Split assignment (`combined_groups`: the window-and-protein groups the split and the cluster bootstrap both use) and the cross-split window-overlap statistics. |
 | `analysis/tss_overlap/window_leak.json` | Cross-split window overlap for the homology split and the disjoint split. |
+| `analysis/tss_overlap/tables/` | Window composition audit from `scripts/tss_overlap.py`: per-gene and per-family shares of the gene's own CDS, UTRs and introns, neighbouring genes and intergenic sequence. |
 | `scripts/run_enformer_features.py` | Writes matched TSS 4-mer features (and, without `--skip-model`, Enformer features). |
 | `data/dataset_enformer_tss_4mer.parquet` | Probe-ready TSS-window 4-mer feature table. |
 
@@ -75,4 +76,5 @@ The manifest is written only if both checks pass:
 - `data/tss_windows_e115/{ENSG...}.fa`: ignored window cache.
 - `data/splits_tss_disjoint.json`: TSS-primary split, stamped with the sha256 of its inputs.
 - `analysis/tss_overlap/window_leak.json`: cross-split window overlap statistics.
+- `analysis/tss_overlap/tables/{overlap_by_family.csv,per_gene_overlap.csv,provenance.json}`: the window composition audit (`scripts/tss_overlap.py`, needs the release 115 GTF). `provenance.json` records the sha256 of `data/tss_windows.tsv` and of the GTF, the release and the partition buckets; rerun the audit after any manifest change, since `build_numbers.py` refuses a stale table.
 - `data/dataset_enformer_tss_4mer.parquet`: matched TSS-window 4-mer baseline table.
