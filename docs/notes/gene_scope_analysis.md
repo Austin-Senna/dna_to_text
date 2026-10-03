@@ -63,7 +63,7 @@ Current gene_table has **3,244 rows**. So the within-5-families ceiling is +3 ge
 | Genes in `gene_table.parquet` without a `.fa` file | **0** |
 | `.fa` files not in `gene_table.parquet` | 0 |
 
-The 3-gene gap between the regex-ceiling (3,247) and the current table (3,244) is consistent with three Ensembl REST fetches having failed at original-build time. Recovery would require re-running `scripts/prepare_data.py` against a stable REST snapshot or fetching from a secondary source (NCBI RefSeq) — but at +3 genes the lift is negligible.
+The 3-gene gap between the regex-ceiling (3,247) and the current table (3,244) is consistent with three Ensembl REST fetches having failed at original-build time (the three genes are named in the addendum below). Recovery would require re-running `scripts/prepare_data.py` against a stable REST snapshot or fetching from a secondary source (NCBI RefSeq) — but at +3 genes the lift is negligible.
 
 ## Scope-(b) ceiling — all protein-coding genes with GenePT
 
