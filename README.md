@@ -64,6 +64,7 @@ uv run python scripts/build_umap_compare.py
 uv run python scripts/build_selection_sensitive.py
 uv run python scripts/build_paper_tables.py
 uv run python scripts/build_numbers.py --check
+uv run python scripts/build_fig1.py --check   # Figure 1's numbers and PNG; without --check it refills and re-renders (Docker)
 ```
 
 Full data/encoder pipeline, when rebuilding from public sources:
@@ -117,6 +118,7 @@ uv run python scripts/build_umap_compare.py
 uv run python scripts/build_selection_sensitive.py
 uv run python scripts/build_paper_tables.py
 uv run python scripts/build_numbers.py --check
+uv run python scripts/build_fig1.py --check   # Figure 1's numbers and PNG; without --check it refills and re-renders (Docker)
 ```
 
 ## Setup
