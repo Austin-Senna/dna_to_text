@@ -7,6 +7,7 @@ decimal sits in a cell the builder does not own, or when panel B's worked exampl
 stops being HTR1A's real sequence, chunk and embedding."""
 from __future__ import annotations
 
+import dataclasses
 import html
 import json
 import re
@@ -64,12 +65,28 @@ def test_the_worked_example_is_htr1as_real_sequence(drawio):
 
 
 def test_the_worked_example_window_is_dnabert2s(drawio):
-    """Panel B's window and overlap are DNABERT-2's extraction settings (content plus CLS and SEP)."""
+    """Panel B's window and overlap are DNABERT-2's extraction settings, W in content tokens."""
     spec, cells = ENCODER_SPECS["dnabert2"], bf.values_in(drawio)
-    assert spec.boundary_tokens
     for cell in ("460", "487"):
-        assert f"W = {spec.max_content_tokens + 2}" in _text(cells[cell]), cell
+        assert f"W = {spec.max_content_tokens}" in _text(cells[cell]), cell
     assert f"overlap by {spec.stride} tokens" in _text(cells["489"])
+
+
+def test_panel_a_prints_each_encoders_chunk_length(drawio):
+    """Panel A's W column is the CDS chunk length in content tokens, the appendix's numbers,
+    not the model context window (NT-v2 2,048 and HyenaDNA 1M were printed before Oct 4)."""
+    cells = bf.values_in(drawio)
+    assert _text(cells["616"]) == "Chunk W (tokens)"
+    for name_cell, w_cell, enc in (("618", "619", "dnabert2"), ("621", "622", "nt_v2"),
+                                   ("624", "625", "gena_lm"), ("627", "628", "hyena_dna")):
+        assert ENCODER_SPECS[enc].display_name.startswith(_text(cells[name_cell]).strip()), name_cell
+        assert _text(cells[w_cell]) == f"{ENCODER_SPECS[enc].max_content_tokens:,}", enc
+
+
+def test_a_moved_chunk_length_is_caught(numbers, drawio, monkeypatch):
+    moved = dict(ENCODER_SPECS, nt_v2=dataclasses.replace(ENCODER_SPECS["nt_v2"], max_content_tokens=999))
+    monkeypatch.setattr(bf, "ENCODER_SPECS", moved)
+    assert [cell for cell, _, _ in bf.stale_cells(drawio, numbers)] == ["622"]
 
 
 def test_the_worked_example_is_htr1as_one_chunk_and_its_embedding(drawio):

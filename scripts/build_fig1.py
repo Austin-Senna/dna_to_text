@@ -2,10 +2,11 @@
 """Figure 1's numbers, written into its draw.io source, and the PNG rendered from it.
 
 The study-design figure (``dna_to_text_paper/paper/figures/dna_to_text_detailed.drawio``)
-is Austin's hand-drawn diagram. Its panel A gene counts, panel B single-window
-share and panel C scores are typed text; this builder owns those cells (``CELLS``,
-located by cell id), fills them from ``numbers.tex`` (the values the prose
-prints), renders ``mina_fig1.png`` with draw.io's headless image (pinned,
+is Austin's hand-drawn diagram. Its panel A gene counts and chunk lengths, panel B
+chunk settings and single-window share, and panel C scores are typed text; this
+builder owns those cells (``CELLS``, located by cell id), fills them from
+``numbers.tex`` (the values the prose prints) and the encoder registry (the
+extraction settings), renders ``mina_fig1.png`` with draw.io's headless image (pinned,
 byte-deterministic), and writes ``mina_fig1.stamp`` with the digests of both, so
 a guard can tell when the PNG is older than the source. Everything else in the
 drawing is edited by hand, then this builder re-renders it.
@@ -27,6 +28,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.sax.saxutils import escape
 
+from data_loader.model_registry import ENCODER_SPECS
+
 PAPER = Path(__file__).resolve().parents[1] / "dna_to_text_paper" / "paper"
 NUMBERS = PAPER / "numbers.tex"
 DRAWIO = PAPER / "figures" / "dna_to_text_detailed.drawio"
@@ -34,7 +37,8 @@ PNG = PAPER / "figures" / "mina_fig1.png"
 STAMP = PAPER / "figures" / "mina_fig1.stamp"
 IMAGE = "rlespinasse/drawio-desktop-headless@sha256:f33bc2f204738209a063ce38edf8003959c3be09cc18ecc9087a295aa5c585ef"
 
-# Cell id -> its value, with {key} slots read from numbers.tex.
+# Cell id -> its value, with {key} slots read from numbers.tex or, for chunk.* and
+# overlap.*, from the encoder registry (``registry_values``).
 CELLS = {
     "434": "<b>({n.genes} total)</b>",
     "436": "{n.family.tf}",
@@ -42,14 +46,20 @@ CELLS = {
     "440": "{n.family.kinase}",
     "442": "{n.family.ion}",
     "444": "{n.family.immune}",
+    "460": "<b>DNABERT-2</b><br><span style='font-size:11px;color:#111827'>W = {chunk.dnabert2}, D = 768</span>",
+    "487": "Use encoder-compatible W<br>example: W = {chunk.dnabert2} tokens",
     "489": "HTR1A fits one DNABERT-2 window, as {single-chunk.dnabert2.pct}% of genes do; longer genes give "
-           "chunks c<sub>1</sub>…c<sub>K</sub> that overlap by 64 tokens",
+           "chunks c<sub>1</sub>…c<sub>K</sub> that overlap by {overlap.dnabert2} tokens",
     "538": "<div>{cds.f5.best-encoder}, {cds.f5.best-encoder.pool}: {cds.f5.best-encoder.value}</div>"
            "<div>AA {cds.f5.aa-kmer.k}-mer: {cds.f5.aa-kmer}</div>"
            "<div>CDS {cds.f5.nt-kmer.k}-mer: {cds.f5.nt-kmer}</div>",
     "664": "<div>{cds.gp.best-encoder}, {cds.gp.best-encoder.pool}: {cds.gp.best-encoder.value}</div>"
            "<div>AA {cds.gp.aa-kmer.k}-mer: {cds.gp.aa-kmer}</div>"
            "<div>CDS {cds.gp.nt-kmer.k}-mer: {cds.gp.nt-kmer}</div>",
+    "619": "{chunk.dnabert2}",
+    "622": "{chunk.nt-v2}",
+    "625": "{chunk.gena-lm}",
+    "628": "{chunk.hyena-dna}",
 }
 EXAMPLE_EMBEDDING = "574"     # panel B's e_c1: HTR1A's one DNABERT-2 chunk, token mean, first two dims (tests check the cache)
 SHORT_POOL = {"Mean (Boundary-including)": "Mean (Bound.-incl.)"}   # as panel B's pooling list spells it
@@ -72,9 +82,19 @@ def plain(tex: str) -> str:
     return text
 
 
+def registry_values() -> dict[str, str]:
+    """Each encoder's CDS chunk length W in content tokens (boundary tokens excluded, as
+    the appendix states it) and the overlap between chunks, as numbers.tex-style values."""
+    return {f"{field}.{name.replace('_', '-')}": f"{n:,}".replace(",", "{,}")
+            for name, spec in ENCODER_SPECS.items()
+            for field, n in (("chunk", spec.max_content_tokens), ("overlap", spec.stride))}
+
+
 def cell_values(numbers: dict[str, str]) -> dict[str, str]:
+    known = {**numbers, **registry_values()}
+
     def slot(m: re.Match) -> str:
-        text = plain(numbers[m[1]])
+        text = plain(known[m[1]])
         return SHORT_POOL.get(text, text) if m[1].endswith(".pool") else text
     return {cell: SLOT.sub(slot, template) for cell, template in CELLS.items()}
 
@@ -164,7 +184,7 @@ def main() -> None:
     problems = check(numbers)
     for p in problems:
         print(f"  {p}")
-    print(f"{DRAWIO.name}: {len(CELLS)} cells from numbers.tex, {len(problems)} problems")
+    print(f"{DRAWIO.name}: {len(CELLS)} cells from numbers.tex and the encoder registry, {len(problems)} problems")
     if problems:
         sys.exit(1)
 

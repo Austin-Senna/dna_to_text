@@ -32,6 +32,12 @@
       "file": "paper/results.tex",
       "context": "macro-F1 0.519 (\\texttt{maxmean})"
     },
+    "cds.f5.gena-lm": {
+      "value": "0.415",
+      "what": "GENA-LM (meanD, pooling picked on test; weights never loaded, so a randomly initialised network), CDS macro-F1, submitted Table A1",
+      "file": "paper/tables/family5_main.tex",
+      "context": "GENA-LM & \\texttt{meanD} & 0.415"
+    },
     "cds.gp.best-encoder": {
       "value": "0.077",
       "what": "DNABERT-2 (meanD), GenePT R^2",
@@ -70,7 +76,7 @@
     },
     "tss.f5.enformer": {
       "value": "0.401",
-      "what": "Enformer on the TSS window, homology split",
+      "what": "Enformer on the TSS window, homology split, central readout (the submitted appendix's default: the central 16 bins, 2,048 bp)",
       "file": "paper/results.tex",
       "context": "macro-F1 0.401 on TSS"
     },

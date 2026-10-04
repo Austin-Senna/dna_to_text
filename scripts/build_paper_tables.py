@@ -124,8 +124,8 @@ SPECS = {
     "s_split_population": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
                                width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrrr@{}",
                                header=r"Partition & Genes & Singleton & Median & In $\geq$10 & ORs / GPCRs"),
-    "s_ridge_robust": dict(setup=r"\setlength{\tabcolsep}{3pt}",
-                           width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
+    "s_ridge_robust": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
+                           width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
                            header=r"Method & Macro-$R^2$ & Pooled-$R^2$ & Retr.@5 & Med.\ rank"),
 }
 
