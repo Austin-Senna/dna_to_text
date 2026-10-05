@@ -37,7 +37,7 @@ These files are small, reviewer-readable examples for each stage of the project 
 - Full commands: `scripts/run_enformer_features.py`, `scripts/run_tss_multi_pool_extract.py`, `scripts/build_tss_pooling_datasets.py`, `scripts/train_logistic_probe.py`, and `scripts/train_probe.py`
 - Details: `docs/stage4-2-tss-encoders.md`
 
-## Stage 5: Test-Set Uncertainty and Confirmatory Tests
+## Stage 5: Test-Set Uncertainty and Primary Tests
 
 - Input: `stage5_bootstrap_input.json`
 - Output: `stage5_bootstrap_output.json`

@@ -66,6 +66,9 @@ CLS token, and as a causal model a CLS at position 0 reaches every position.
 It therefore has no `clsmean` or `specialmean` pools, and the CDS grid has 22
 encoder x pooling configs.
 
+NT-v2's tokenizer adds a CLS token but no SEP, so its chunks are CLS plus 998
+content tokens (999 in all); DNABERT-2 and GENA-LM add CLS and SEP around 510.
+
 Encoder extraction is the expensive stage. Use one GPU/MPS encoder process per
 device and rely on caches for interrupted reruns: `embed_all_multi_pool` in
 `src/data_loader/multi_pool.py` writes one `.npz` per gene and skips any gene whose
