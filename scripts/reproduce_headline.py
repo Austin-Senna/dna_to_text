@@ -1,7 +1,7 @@
 """Independent reproduction of the MINA headline probe cells.
 
 What: recompute ten headline cells (picks, evaluation purge, sweep, refit, test score) and the
-T1-T4 confirmatory statistics from the raw inputs (split files, feature parquets, CDS FASTA,
+T1-T4 primary-test statistics from the raw inputs (split files, feature parquets, CDS FASTA,
 protein-pair and TSS-window tables), then compare every number with the pipeline's records.
 
 Why: the camera-ready numbers come from one probe pipeline. This script was written from a spec

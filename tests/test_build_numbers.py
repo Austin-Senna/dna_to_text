@@ -10,6 +10,7 @@ import pytest
 
 import build_numbers as bn
 import build_paper_tables as bt
+from data_loader.model_registry import ENCODER_SPECS
 from linear_trainer import records as R
 
 
@@ -302,3 +303,63 @@ def test_submitted_values_are_verbatim_in_the_submission_source(numbers):
         text = subprocess.run(["git", "-C", str(repo), "show", f"{sub['commit']}:{d['file']}"],
                               capture_output=True, text=True, check=True).stdout
         assert d["context"] in text, (key, d["context"], d["file"])
+
+
+# Settings and counts the paper keeps as typed text, each checked against its source.
+FAMILY_ROWS = {"Transcription factor": "tf", "GPCR": "gpcr", "Kinase": "kinase", "Ion channel": "ion",
+               "Immune receptor": "immune"}
+EXTRACTION_GROUPS = {"DNABERT-2 and GENA-LM": ("dnabert2", "gena_lm"), "NT-v2": ("nt_v2",), "HyenaDNA": ("hyena_dna",)}
+
+
+def _int(tex: str) -> int:
+    return int(tex.replace("{,}", ""))
+
+
+def extraction_mismatches(appendix: str) -> list[str]:
+    """The Extraction paragraph's CDS chunk lengths and overlaps against the encoder registry."""
+    text, out = " ".join(appendix.split()), []
+    for label, encoders in EXTRACTION_GROUPS.items():
+        m = re.search(rf"(\S+) (?:content tokens )?overlapping by (\S+) for {re.escape(label)}\b", text)
+        if not m:
+            out.append(f"{label}: no chunk sentence")
+            continue
+        for enc in encoders:
+            spec = ENCODER_SPECS[enc]
+            if (_int(m[1]), _int(m[2])) != (spec.max_content_tokens, spec.stride):
+                out.append(f"{enc}: prints {m[1]}/{m[2]}, registry {spec.max_content_tokens}/{spec.stride}")
+    return out
+
+
+def test_the_extraction_paragraph_prints_the_registrys_chunks():
+    appendix = (bn.PAPER / "appendix.tex").read_text()
+    assert extraction_mismatches(appendix) == []
+    assert "for HyenaDNA, which has no boundary tokens" in " ".join(appendix.split())
+    assert not ENCODER_SPECS["hyena_dna"].boundary_tokens
+    assert len(extraction_mismatches(appendix.replace("998 overlapping", "999 overlapping"))) == 1
+
+
+def composition_mismatches(appendix: str) -> list[str]:
+    """Table A5's typed family counts against the gene table and data/splits.json."""
+    import pandas as pd
+    table_path = R.REPO_ROOT / "data" / "gene_table.parquet"
+    if not table_path.exists():
+        pytest.skip("no gene table on this machine (it ships in the Zenodo deposit)")
+    genes = pd.read_parquet(table_path, columns=["ensembl_id", "family"])
+    family = dict(zip(genes.ensembl_id, genes.family))
+    split = json.loads((R.REPO_ROOT / "data" / "splits.json").read_text())
+    table = appendix[appendix.index(r"\label{tab:dataset-composition}"):]
+    table, out = table[:table.index(r"\end{tabular*}")], []
+    for name, fam in FAMILY_ROWS.items():
+        row = re.search(rf"^{re.escape(name)} & (.+?) \\\\", table, re.M)
+        printed = [_int(x) for x in row[1].split(" & ")] if row else None
+        want = [sum(f == fam for f in family.values())] + [sum(family[g] == fam for g in split[p])
+                                                          for p in ("train", "val", "test")]
+        if printed != want:
+            out.append(f"{name}: prints {printed}, split file gives {want}")
+    return out
+
+
+def test_the_dataset_composition_table_counts_the_split_file():
+    appendix = (bn.PAPER / "appendix.tex").read_text()
+    assert composition_mismatches(appendix) == []
+    assert len(composition_mismatches(appendix.replace("GPCR & 591 & 414", "GPCR & 591 & 415"))) == 1

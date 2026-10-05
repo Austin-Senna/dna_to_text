@@ -26,7 +26,7 @@ resamples them.
   one-sided p-value for ``A > B``,
   ``p = (1 + #{A - B <= 0}) / (B_iters + 1)``.
 - **Holm.** Step-down adjustment over one named family of p-values. Only the
-  four confirmatory tests go in it (decided Sept 29); everything else is
+  four primary tests go in it (decided Sept 29); everything else is
   reported unadjusted and labelled exploratory.
 - **Null band.** The 2.5-97.5% range of a metric over label-shuffled runs of
   one cell, each with its full selection loop. It replaces the single shuffled

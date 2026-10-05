@@ -8,8 +8,10 @@ picks each headline cell on validation scores only, and runs the statistics in
 records (``scripts/reproduce_headline.py``, Rule 3), and cross-checks T1-T4
 against that independent reimplementation.
 
-Confirmatory family (Holm-adjusted together; decided Sept 29), family5 macro-F1,
-each side the validation-selected cell, one-sided for A > B:
+Primary family (Holm-adjusted together; decided Sept 29), family5 macro-F1,
+each side the validation-selected cell, one-sided for A > B. The paper calls these
+the primary tests; the ``confirmatory`` key in statistics.json and the identifiers
+below keep the older name, which records and tests read:
 
   T1  best DNA encoder (CDS)  vs  nucleotide k-mer (k in {4, 6} chosen on val)
   T2  best DNA encoder (CDS)  vs  amino-acid k-mer (k in {1, 2, 3} chosen on val)
@@ -65,7 +67,7 @@ def _headline(recs: dict, task: str) -> dict[str, str]:
             **{f"best_{e}": R.best_pool(cds, e, "cds") for e in R.ENCODERS}}
 
 
-# A confirmatory cell whose pick sits at a search limit, stopped on a fit that
+# A primary-test cell whose pick sits at a search limit, stopped on a fit that
 # didn't converge, whose train+val refit didn't converge, that predicts one
 # class, or that scores fewer than MIN_PER_FAMILY test genes of some family
 # (each family is a fifth of macro-F1; G28) fails the build. "plateau" (the
@@ -76,7 +78,7 @@ MIN_PER_FAMILY = 15
 
 
 class UnsoundConfirmatoryCell(RuntimeError):
-    """A confirmatory test would rest on an edge or degenerate pick."""
+    """A primary test would rest on an edge or degenerate pick."""
 
 
 def check_confirmatory_cell(rec: dict) -> None:

@@ -10,7 +10,8 @@ same pass so disk + compute are amortised across all pooling variants:
 
 Boundary tokens come from the encoder spec, not from whatever the tokenizer
 declares: with ``boundary_tokens`` each chunk is wrapped in the tokenizer's
-CLS/SEP (position 0 IS the trained CLS representation; content is 1..-2);
+CLS and, where the tokenizer has one, SEP (position 0 IS the trained CLS
+representation; content is 1..-2, or 1..end for NT-v2, whose tokenizer has no SEP);
 without them (HyenaDNA) the model sees DNA tokens only, and only ``mean`` and
 ``max`` are stored (``special_mean`` would equal ``mean``, and there is no CLS).
 

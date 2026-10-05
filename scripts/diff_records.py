@@ -5,7 +5,7 @@ Joins the records of two runs (``metrics_*.json`` and ``null_*.json``) on cell
 key and compares what the paper uses:
 
   * each cell's pick (C or alpha), its convergence flag, and the fields the
-    statistics gate a confirmatory cell on (edge, degeneracy, scored counts,
+    statistics gate a primary-test cell on (edge, degeneracy, scored counts,
     purge, GenePT targets);
   * its test predictions: classification bit for bit (the stored arrays'
     sha256), regression within ``--tol`` (absolute, on the stored predictions);
@@ -39,7 +39,7 @@ from linear_trainer import records as R
 from linear_trainer.selection import MissingRecord, val_score
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-# Compared exactly: build_statistics refuses a confirmatory cell on these.
+# Compared exactly: build_statistics refuses a primary-test cell on these.
 GATE_FIELDS = ("edge", "degenerate", "n_test_scored", "n_test_scored_by_class", "purge",
                "targets_sha256")
 

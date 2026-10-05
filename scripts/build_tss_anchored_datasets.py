@@ -1,4 +1,4 @@
-"""Materialize TSS-anchored pooling datasets (MLCB E5 confirmatory re-probe).
+"""Materialize TSS-anchored pooling datasets (MLCB E5 re-probe; exploratory in the paper).
 
 `centermean` reduces each gene to the chunk at token-count index ``n_chunks // 2``,
 which the center-chunk-position diagnostic showed sits ~half a chunk *downstream*
@@ -35,7 +35,7 @@ OFFSETS_DIR = REPO_ROOT / "analysis" / "tss_overlap"
 
 
 # Anchor rules: which chunk index to pool per gene, from the offsets CSV.
-#   nearestcenter -> tss_chunk_idx (argmin |chunk_center - TSS|); the confirmatory
+#   nearestcenter -> tss_chunk_idx (argmin |chunk_center - TSS|); the E5
 #                    re-probe feature. Output stem "tssanchored".
 #   containstss   -> the chunk that BRACKETS the TSS base pair (tss_contain_chunk_idx),
 #                    falling back to nearestcenter where none contains it (GAP 5 anchor

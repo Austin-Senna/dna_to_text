@@ -620,7 +620,7 @@ def _side_longtable(caption, label, metrics, body):
            + "Source & Pooling & " + metrics + " & " + metrics + r" \\")
     return "\n".join([
         r"{\scriptsize",
-        r"\setlength{\tabcolsep}{4pt}\setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}\setlength{\LTcapwidth}{\textwidth}",
+        r"\setlength{\tabcolsep}{3.25pt}\setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}\setlength{\LTcapwidth}{\textwidth}",
         r"\begin{longtable}{@{}llrrr@{\hspace{0.9em}\vrule width 1.1pt\hspace{0.9em}}rrr@{}}",
         r"\caption{" + caption + r"\label{" + label + r"}}\\",
         r"\toprule", hdr, r"\midrule", r"\endfirsthead",

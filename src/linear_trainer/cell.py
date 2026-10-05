@@ -229,7 +229,7 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
     stack = np.vstack if kind == "ridge" else np.concatenate
     # The pick converged on train; its train+val refit may not (shuffled labels at
     # high C). Decided Oct 1: keep the refit and record ``converged`` (False here);
-    # a confirmatory cell with a non-converged refit fails the statistics build,
+    # a primary-test cell with a non-converged refit fails the statistics build,
     # and null bands count them.
     probe = fit(kind, np.vstack([X_tr, X_va]), stack([y_tr, y_va]), sel.hp, protocol, strict=False)
     if probe_out is not None and kind == "ridge":
@@ -269,7 +269,7 @@ def run_cell(source: str | Path, task: str, splits_path: Path, protocol: Protoco
         metrics["unpurged"] = score(kind, full["y_true"], full["pred"])
     # G3: a probe that predicts one class (or one vector) for every test gene
     # scores at the majority level whatever its features; 1E refuses such a
-    # confirmatory cell.
+    # primary-test cell.
     degenerate = (len(np.unique(stored["pred"])) == 1 if kind == "logistic"
                   else bool(np.all(np.ptp(stored["pred"], axis=0) == 0)))
 

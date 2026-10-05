@@ -4,7 +4,11 @@ Pipeline: translate each gene's CDS to protein -> write a FASTA -> run
 ``mmseqs easy-cluster`` at a stated identity/coverage threshold -> parse the
 ``*_cluster.tsv`` into an ``ensembl_id -> cluster_id`` mapping. The mapping
 feeds the homology-aware (whole-cluster) train/val/test split required by the
-Bioinformatics submission, so paralogous genes cannot straddle the split.
+Bioinformatics submission, so no cluster straddles the split. Related genes can
+still land in different clusters (members are linked only to their cluster's
+representative, and clustering reads proteins cut at the first stop); the
+evaluation purge masks the validation or test member of such a pair when a
+full-length search finds it within the thresholds. Training genes are never masked.
 """
 from __future__ import annotations
 
