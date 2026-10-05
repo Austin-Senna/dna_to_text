@@ -3,7 +3,7 @@
 
 The study-design figure (``dna_to_text_paper/paper/figures/dna_to_text_detailed.drawio``)
 is Austin's hand-drawn diagram. Its panel A gene counts and chunk lengths, panel B
-chunk settings and single-window share, and panel C scores are typed text; this
+chunk settings, and panel C scores are typed text; this
 builder owns those cells (``CELLS``, located by cell id), fills them from
 ``numbers.tex`` (the values the prose prints) and the encoder registry (the
 extraction settings), renders ``mina_fig1.png`` with draw.io's headless image (pinned,
@@ -36,6 +36,7 @@ DRAWIO = PAPER / "figures" / "dna_to_text_detailed.drawio"
 PNG = PAPER / "figures" / "mina_fig1.png"
 STAMP = PAPER / "figures" / "mina_fig1.stamp"
 IMAGE = "rlespinasse/drawio-desktop-headless@sha256:f33bc2f204738209a063ce38edf8003959c3be09cc18ecc9087a295aa5c585ef"
+EXPORT_SCALE = "0.95"   # the headless export hangs (exit 124 after its 10 s timeout) on a PNG wider than about 1,760 px; the drawing is about 1,840
 
 # Cell id -> its value, with {key} slots read from numbers.tex or, for chunk.* and
 # overlap.*, from the encoder registry (``registry_values``).
@@ -46,10 +47,9 @@ CELLS = {
     "440": "{n.family.kinase}",
     "442": "{n.family.ion}",
     "444": "{n.family.immune}",
-    "460": "<b>DNABERT-2</b><br><span style='font-size:11px;color:#111827'>W = {chunk.dnabert2}, D = 768</span>",
+    "460": "<b>DNABERT-2</b><br><span style='font-size:13px;color:#111827'>W = {chunk.dnabert2}, D = 768</span>",
     "487": "Use encoder-compatible W<br>example: W = {chunk.dnabert2} tokens",
-    "489": "HTR1A fits one DNABERT-2 window, as {single-chunk.dnabert2.pct}% of genes do; longer genes give "
-           "chunks c<sub>1</sub>…c<sub>K</sub> that overlap by {overlap.dnabert2} tokens",
+    "489": "c<sub>2</sub> … c<sub>K</sub> (longer genes)<br>overlap: {overlap.dnabert2} tokens",
     "538": "<div>{cds.f5.best-encoder}, {cds.f5.best-encoder.pool}: {cds.f5.best-encoder.value}</div>"
            "<div>AA {cds.f5.aa-kmer.k}-mer: {cds.f5.aa-kmer}</div>"
            "<div>CDS {cds.f5.nt-kmer.k}-mer: {cds.f5.nt-kmer}</div>",
@@ -130,7 +130,7 @@ def _sha(data: bytes) -> str:
 
 def stamp_for(drawio: bytes, png: bytes) -> dict:
     return {"drawio": DRAWIO.name, "drawio_sha256": _sha(drawio), "png": PNG.name, "png_sha256": _sha(png),
-            "renderer": IMAGE}
+            "renderer": IMAGE, "export_scale": EXPORT_SCALE}
 
 
 def stamp_problems(drawio: bytes, png: bytes | None, stamp: dict | None) -> list[str]:
@@ -139,7 +139,8 @@ def stamp_problems(drawio: bytes, png: bytes | None, stamp: dict | None) -> list
     want = stamp_for(drawio, png)
     problems = {"drawio_sha256": f"{DRAWIO.name} changed since {PNG.name} was rendered",
                 "png_sha256": f"{PNG.name} is not the render the stamp records",
-                "renderer": f"{PNG.name} was rendered by {stamp.get('renderer')}, not {IMAGE}"}
+                "renderer": f"{PNG.name} was rendered by {stamp.get('renderer')}, not {IMAGE}",
+                "export_scale": f"{PNG.name} was rendered at scale {stamp.get('export_scale')}, not {EXPORT_SCALE}"}
     return [msg for field, msg in problems.items() if stamp.get(field) != want[field]]
 
 
@@ -153,7 +154,8 @@ def render(drawio: bytes) -> bytes:
     with tempfile.TemporaryDirectory() as tmp:
         Path(tmp, DRAWIO.name).write_bytes(drawio)
         subprocess.run(["docker", "run", "--rm", "-w", "/data", "-v", f"{tmp}:/data", IMAGE,
-                        "-x", "-f", "png", "--crop", "-o", PNG.name, DRAWIO.name], check=True, timeout=600)
+                        "-x", "-f", "png", "--crop", "-s", EXPORT_SCALE, "-o", PNG.name, DRAWIO.name],
+                       check=True, timeout=600)
         return Path(tmp, PNG.name).read_bytes()
 
 

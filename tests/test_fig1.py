@@ -1,5 +1,5 @@
 """Figure 1 (truth pass E): the study-design figure is Austin's hand-drawn draw.io
-diagram, and its panel A counts, panel B single-window share and panel C scores
+diagram, and its panel A counts, panel B chunk settings and panel C scores
 are typed text. The builder fills those cells from numbers.tex and stamps the
 rendered PNG with the .drawio's digest; these guards fail when a number moves
 without the figure, when the .drawio changes without a re-render, when a result
@@ -50,7 +50,6 @@ def test_the_drawio_prints_the_numbers_tex_values(numbers, drawio):
                          f"CDS {v('nt-kmer.k')}-mer: {v('nt-kmer')}"], (cell, lines)
     assert _text(cells["436"]) == bf.plain(numbers["n.family.tf"])
     assert bf.plain(numbers["n.genes"]) in _text(cells["434"])
-    assert bf.plain(numbers["single-chunk.dnabert2.pct"]) in _text(cells["489"])
 
 
 def test_the_worked_example_is_htr1as_real_sequence(drawio):
@@ -69,7 +68,7 @@ def test_the_worked_example_window_is_dnabert2s(drawio):
     spec, cells = ENCODER_SPECS["dnabert2"], bf.values_in(drawio)
     for cell in ("460", "487"):
         assert f"W = {spec.max_content_tokens}" in _text(cells[cell]), cell
-    assert f"overlap by {spec.stride} tokens" in _text(cells["489"])
+    assert f"overlap: {spec.stride} tokens" in _text(cells["489"])
 
 
 def test_panel_a_prints_each_encoders_chunk_length(drawio):
@@ -130,6 +129,13 @@ def test_an_edit_without_a_render_is_caught():
     drawio, png = bf.DRAWIO.read_bytes(), bf.PNG.read_bytes()
     assert len(bf.stamp_problems(drawio + b" ", png, stamp)) == 1
     assert len(bf.stamp_problems(drawio, png + b"\0", stamp)) == 1
+
+
+def test_a_changed_export_scale_is_caught(monkeypatch):
+    stamp = json.loads(bf.STAMP.read_text())
+    monkeypatch.setattr(bf, "EXPORT_SCALE", "0.9")
+    assert bf.stamp_problems(bf.DRAWIO.read_bytes(), bf.PNG.read_bytes(), stamp) == [
+        f"{bf.PNG.name} was rendered at scale {stamp['export_scale']}, not 0.9"]
 
 
 def test_no_result_decimal_outside_the_builders_cells(drawio):
