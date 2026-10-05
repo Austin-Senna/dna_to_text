@@ -40,14 +40,14 @@ Where to start depends on what you want to check:
 
 - **Statistics from the stored predictions** (no refitting): the predictions tarballs, then
   `uv run scripts/build_statistics.py`. Every prediction file is checked against the hash its record stamps.
-- **Every probe cell (Stage 5)**: the two `mina_inputs*` tarballs are enough, then `scripts/recompute_all.sh`. It runs
+- **Every probe cell (Stage 3)**: the two `mina_inputs*` tarballs are enough, then `scripts/recompute_all.sh`. It runs
   on CPU at one thread (about 1 h 40 min across 60 shards on a c6a.16xlarge) and ends with an independent
   reimplementation of the headline cells.
-- **Pooling (Stage 4)**: add the cache tarballs. `scripts/check_deposit.sh <deposit dir>` (after `uv sync`;
+- **Pooling (Stages 2 and 4)**: add the cache tarballs. `scripts/check_deposit.sh <deposit dir>` (after `uv sync`;
   it uses the repository's `.venv`) checks every stamped file in a clean copy of the repository, rebuilds
   every stamped parquet from the caches, and checks them again. The composition features need the
   encoders' tokenizers, which it fetches from Hugging Face at the pinned revisions.
-- **Extraction (Stages 1 to 3)** needs a GPU. Ours ran on an AWS g5.xlarge (NVIDIA A10G, driver 595.91.07,
+- **Extraction (Stages 2 and 4)** needs a GPU. Ours ran on an AWS g5.xlarge (NVIDIA A10G, driver 595.91.07,
   torch 2.11.0+cu130, CUDA 13.0, Python 3.13.13). Model revisions are pinned in
   `src/data_loader/model_registry.py`, and every cache file records its model, revision, input sequence
   hash, card and torch build, so the loaders refuse a file built from anything else.
@@ -66,7 +66,7 @@ Everything is CC BY 4.0 except the files derived from NT-v2 outputs (`*_nt_v2*` 
 NT-v2's licence, CC BY-NC-SA 4.0. Attribution for the models whose outputs these are:
 
 - DNABERT-2 (Zhou et al., 2024), Apache 2.0.
-- NT-v2 (Dalla-Torre et al., 2024), CC BY-NC-SA 4.0.
+- NT-v2 (Dalla-Torre et al., 2025), CC BY-NC-SA 4.0.
 - GENA-LM (Fishman et al., 2025), MIT (code repository).
 - HyenaDNA (Nguyen et al., 2023), BSD 3-Clause.
 - Enformer (Avsec et al., 2021), CC BY 4.0, via the EleutherAI PyTorch port.
