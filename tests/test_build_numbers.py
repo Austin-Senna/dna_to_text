@@ -306,8 +306,7 @@ def test_submitted_values_are_verbatim_in_the_submission_source(numbers):
 
 
 # Settings and counts the paper keeps as typed text, each checked against its source.
-FAMILY_ROWS = {"Transcription factor": "tf", "GPCR": "gpcr", "Kinase": "kinase", "Ion channel": "ion",
-               "Immune receptor": "immune"}
+FAMILY_ROWS = {"TF": "tf", "GPCR": "gpcr", "Kinase": "kinase", "Ion channel": "ion", "Immune": "immune"}
 EXTRACTION_GROUPS = {"DNABERT-2 and GENA-LM": ("dnabert2", "gena_lm"), "NT-v2": ("nt_v2",), "HyenaDNA": ("hyena_dna",)}
 
 
@@ -339,7 +338,7 @@ def test_the_extraction_paragraph_prints_the_registrys_chunks():
 
 
 def composition_mismatches(appendix: str) -> list[str]:
-    """Table A5's typed family counts against the gene table and data/splits.json."""
+    """The curation table's typed train/val/test counts against the gene table and data/splits.json."""
     import pandas as pd
     table_path = R.REPO_ROOT / "data" / "gene_table.parquet"
     if not table_path.exists():
@@ -350,11 +349,11 @@ def composition_mismatches(appendix: str) -> list[str]:
     table = appendix[appendix.index(r"\label{tab:dataset-composition}"):]
     table, out = table[:table.index(r"\end{tabular*}")], []
     for name, fam in FAMILY_ROWS.items():
-        row = re.search(rf"^{re.escape(name)} & (.+?) \\\\", table, re.M)
-        printed = [_int(x) for x in row[1].split(" & ")] if row else None
-        want = [sum(f == fam for f in family.values())] + [sum(family[g] == fam for g in split[p])
-                                                          for p in ("train", "val", "test")]
-        if printed != want:
+        # Family & patterns & Match & GenePT & Kept & Train & Val & Test
+        row = re.search(rf"^{re.escape(name)} & .+? \\\\", table, re.M | re.S)
+        printed = [_int(x) for x in row[0].rstrip("\\").split(" & ")[-3:]] if row else None
+        want = [sum(family[g] == fam for g in split[p]) for p in ("train", "val", "test")]
+        if printed != want or sum(want) != sum(f == fam for f in family.values()):
             out.append(f"{name}: prints {printed}, split file gives {want}")
     return out
 
@@ -362,4 +361,4 @@ def composition_mismatches(appendix: str) -> list[str]:
 def test_the_dataset_composition_table_counts_the_split_file():
     appendix = (bn.PAPER / "appendix.tex").read_text()
     assert composition_mismatches(appendix) == []
-    assert len(composition_mismatches(appendix.replace("GPCR & 591 & 414", "GPCR & 591 & 415"))) == 1
+    assert len(composition_mismatches(appendix.replace("594 & 414 & 88 & 89", "594 & 415 & 88 & 89"))) == 1

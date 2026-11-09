@@ -474,7 +474,8 @@ def paper_sources() -> dict[str, str]:
 
 
 def undefined(texts: dict[str, str], keys: set[str]) -> list[tuple[str, str]]:
-    return [(name, k) for name, t in texts.items() for k in re.findall(r"\\val\{([^}]*)\}", t) if k not in keys]
+    # \val{key} and \valplain{key} are both uses; a macro argument (#1) is a definition, not a use
+    return [(name, k) for name, t in texts.items() for k in re.findall(r"\\val(?:plain)?\{([^}#]*)\}", t) if k not in keys]
 
 
 def pending(texts: dict[str, str]) -> list[tuple[str, str]]:
