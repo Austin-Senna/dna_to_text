@@ -760,11 +760,11 @@ def build_tss_disjoint():
 
 
 # ===================================================================
-# E5: TSS-Anchored vs whole-window pooling, both splits. The anchored cell
-# carries its cluster-bootstrap CI, bold when the paired anchored - whole-window
-# interval excludes 0 (caption: "Bold: the paired difference's 95% CI excludes
-# 0"); the last column is the validation-selected composition
-# (4-mer+GC or 6-mer) of the same anchored chunk.
+# E5: TSS-Anchored vs whole-window pooling, both splits. Whole-window and
+# anchored cells carry their cluster-bootstrap CIs; an anchored cell is bold when
+# the paired anchored - whole-window interval excludes 0 (caption: "Bold: the
+# paired difference's 95% CI excludes 0"); the last column is the
+# validation-selected composition (4-mer+GC or 6-mer) of the same anchored chunk.
 # ===================================================================
 def _paired(split_name: str, label: str, a: dict, b: dict) -> dict:
     """The paired test of A - B, which must compare exactly the displayed cells and
@@ -785,8 +785,8 @@ def _delta_cell(d: dict) -> str:
 
 
 def build_tss_anchored():
-    """Bold an anchored cell only when the paired interval excludes 0 (G26); one
-    cell's interval against the other's point ignores B's noise."""
+    """Every cell carries its cluster-bootstrap CI; an anchored cell is bold when the
+    paired anchored - whole-window interval excludes 0 on either side (G26)."""
     out = []
     for split, name, title in ((HOM, CDS, "Homology-aware split"),
                                (DIS, TSS, "Genomic-interval-disjoint split")):
@@ -794,19 +794,30 @@ def build_tss_anchored():
             out.append(r"\midrule")
         out.append(r"\multicolumn{5}{@{}l}{\textbf{" + title + r"}}\\")
         by = split.cells("tss", "family5")
+
+        def whole_txt(rec):
+            c = interval(name, "family5", rec["key"].rsplit("/", 1)[-1])
+            if abs(c["point"] - rec[F1]) > 1e-9:
+                raise R.MixedRecords(f"{rec['key']}: interval point {c['point']} is not the cell {rec[F1]}")
+            return f"{f(rec[F1],3)} {_ci(c['ci95'])}"
+
+        def anchored_txt(src, d):
+            c = interval(name, "family5", src)
+            txt = f"{f(c['point'],3)} {_ci(c['ci95'])}"
+            lo, hi = d["delta_ci95"]
+            return bold(txt) if (lo > 0 or hi < 0) else txt
+
+        four = by["enformer_tss_4mer"]
+        out.append(f"TSS 4-mer & {whole_txt(four)} & --- & --- & --- \\\\")
         for enc in ENCODERS:
             whole_rec = split.best(enc, "tss", "family5")
-            c = interval(name, "family5", f"tss_{enc}_tssanchored")
             comp = by[split.anchored_composition(enc, "family5")][F1]
             d = _paired(name, f"{enc} anchored > whole-window", by[f"tss_{enc}_tssanchored"], whole_rec)
-            txt = f"{f(c['point'],3)} {_ci(c['ci95'])}"
-            out.append(f"{ENC_DISPLAY[enc]} & {f(whole_rec[F1],3)} & "
-                       f"{bold(txt) if d['delta_ci95'][0] > 0 else txt} & {_delta_cell(d)} & {f(comp,3)} \\\\")
+            out.append(f"{ENC_DISPLAY[enc]} & {whole_txt(whole_rec)} & "
+                       f"{anchored_txt(f'tss_{enc}_tssanchored', d)} & {_delta_cell(d)} & {f(comp,3)} \\\\")
         g_rec = split.cell("tss", "family5", ENF_WHOLE)
-        c = interval(name, "family5", ENF_CENTRE)
         d = _paired(name, "Enformer centre > whole", by[ENF_CENTRE], g_rec)
-        txt = f"{f(c['point'],3)} {_ci(c['ci95'])}"
-        out.append(f"Enformer & {f(g_rec[F1],3)} & {bold(txt) if d['delta_ci95'][0] > 0 else txt} & "
+        out.append(f"Enformer & {whole_txt(g_rec)} & {anchored_txt(ENF_CENTRE, d)} & "
                    f"{_delta_cell(d)} & --- \\\\")
     return "\n".join(out)
 

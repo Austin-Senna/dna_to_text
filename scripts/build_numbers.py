@@ -8,6 +8,7 @@ Keys (``<split>`` is hom, dis or rand: the CDS primary, TSS primary and random
 splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
 
   cell.<split>.<arm>.<task>.<source>     a cell's test macro-F1 or GenePT R^2
+  dis.cds.*                              the CDS arm on the disjoint split (the T4 CDS side)
   <arm>.<task>.*, rand.<arm>.<task>.*     the validation picks: best encoder (name,
         pool, value), each encoder at its pool and minus the composition floor,
         the nucleotide and amino-acid k, ESM-2, Enformer
@@ -39,6 +40,8 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
         the window manifest's pad_up + pad_down
   subm.<key>                             a value the submission printed (data/submitted_values.json,
         read verbatim from the submission source), for the changes-since-submission appendix
+  reb.<key>                              a value the author response gave the reviewers
+        (data/rebuttal_values.json), for the same appendix
   tss-comp.*                             the TSS windows' annotation make-up (the target-CDS
         share, each partition bucket's percentage, genes, Ensembl release), from
         scripts/tss_overlap.py's audit table
@@ -72,6 +75,7 @@ SPLITS = {"hom": bt.CDS, "dis": bt.TSS, "rand": bt.RAND}
 TASKS = {"f5": "family5", "gp": "genept"}
 AUDIT = R.REPO_ROOT / "analysis" / "tss_overlap" / "tables"
 SUBMITTED = R.REPO_ROOT / "data" / "submitted_values.json"
+REBUTTAL = R.REPO_ROOT / "data" / "rebuttal_values.json"
 
 
 def slug(s: str) -> str:
@@ -127,6 +131,7 @@ def _records(out: Keys) -> None:
                 for src, rec in split.cells(arm, task).items():
                     out[f"cell.{sk}.{arm}.{tk}.{slug(src)}"] = bt.f(rec[m], 3)
     for prefix, split, arm in (("cds", bt.HOM, "cds"), ("tss", bt.DIS, "tss"),
+                               ("dis.cds", bt.DIS, "cds"),
                                ("rand.cds", bt.RND, "cds"), ("rand.tss", bt.RND, "tss")):
         for tk, task in TASKS.items():
             m = bt.F1 if task == "family5" else bt.R2
@@ -266,6 +271,13 @@ def _counts(out: Keys) -> None:
     _window_padding(out)
     _window_composition(out)
     _submitted(out)
+    _rebuttal(out)
+
+
+def _rebuttal(out: Keys) -> None:
+    """The values the author response gave the reviewers, for the same appendix."""
+    for key, d in json.loads(REBUTTAL.read_text())["values"].items():
+        out[f"reb.{key}"] = d["value"]
 
 
 def _submitted(out: Keys) -> None:

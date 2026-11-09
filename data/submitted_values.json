@@ -103,6 +103,30 @@
       "what": "the shuffled-label chance floor (one shuffled run)",
       "file": "paper/results.tex",
       "context": "chance floor (0.224)"
+    },
+    "cds.f5.dnabert2": {
+      "value": "0.654",
+      "what": "DNABERT-2 (meanG, pooling picked on test), CDS macro-F1, submitted Table A1",
+      "file": "paper/tables/family5_main.tex",
+      "context": "DNABERT-2 & \\texttt{meanG} & 0.654"
+    },
+    "cds.f5.hyena-dna": {
+      "value": "0.641",
+      "what": "HyenaDNA (meanD, pooling picked on test; read an untrained CLS token), CDS macro-F1, submitted Table A1",
+      "file": "paper/tables/family5_main.tex",
+      "context": "HyenaDNA & \\texttt{meanD} & 0.641"
+    },
+    "tss.f5.4mer": {
+      "value": "0.181",
+      "what": "TSS-window 4-mer, macro-F1, homology split, submitted Table A3",
+      "file": "paper/tables/cds_tss.tex",
+      "context": "\\quad 4-mer & 0.181"
+    },
+    "tss.f5.gena-lm": {
+      "value": "0.244",
+      "what": "GENA-LM TSS whole-window (untrained weights), macro-F1, homology split, submitted Table A3",
+      "file": "paper/tables/cds_tss.tex",
+      "context": "\\quad GENA-LM & 0.244"
     }
   }
 }

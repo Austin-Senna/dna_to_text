@@ -122,16 +122,21 @@ def _cell_label(name, src):
     return {"codon": "Codon", "esm2_650m": "ESM-2 650M"}.get(name, ENC_DISP.get(name, name))
 
 
-def _label_bars(ax, xs, vals, fmt="{:.2f}", fontsize=7, dy=0.01, rot=0):
+def _label_bars(ax, xs, vals, fmt="{:.2f}", fontsize=7, dy=0.01, rot=0, above=None):
+    """Print each bar's value above it; ``above`` (same length as ``vals``) gives a
+    marker height the label must also clear, so a label never sits on a diamond."""
     top = ax.get_ylim()[1]
-    for xp, v in zip(xs, vals):
+    above = above if above is not None else [None] * len(vals)
+    for xp, v, a in zip(xs, vals, above):
         if v is None or (isinstance(v, float) and np.isnan(v)):
             continue
-        if v < 0:  # label below a negative bar, not inside it
-            ax.text(xp, v - dy, fmt.format(v), ha="center", va="top",
+        if v < 0:  # label below a negative bar, not inside it, and below any marker there
+            y = v if a is None or not np.isfinite(a) else min(v, a - 1.5 * dy)
+            ax.text(xp, y - dy, fmt.format(v), ha="center", va="top",
                     fontsize=fontsize, color="#222", rotation=rot)
             continue
-        ax.text(xp, min(v + dy, top - dy), fmt.format(v),
+        y = v if a is None or not np.isfinite(a) else max(v, a + 1.5 * dy)
+        ax.text(xp, min(y + dy, top - dy), fmt.format(v),
                 ha="center", va="bottom", fontsize=fontsize, color="#222", rotation=rot)
 
 
@@ -229,16 +234,18 @@ def fig_tss_context():
     lo, hi = min(min(r2_vals), 0.0), max(max(r2_vals), 0.0)
     pad = 0.2 * (hi - lo)
     r2_lim = (lo - pad, hi + pad)
-    panels = [(axL, cds, whole, anchored, "5-way family macro-F1", (0, 0.95), "{:.2f}", 0.008),
-              (axR, cds_r2, whole_r2, anchored_r2, "Ridge-to-GenePT $R^2$", r2_lim, "{:.3f}",
+    panels = [(axL, cds, whole, anchored, comp, "5-way family macro-F1", (0, 0.95), "{:.2f}", 0.008),
+              (axR, cds_r2, whole_r2, anchored_r2, comp_r2, "Ridge-to-GenePT $R^2$", r2_lim, "{:.3f}",
                0.015 * (r2_lim[1] - r2_lim[0]))]
-    for ax, c, wv, an, ylabel, ylim, fmt, dy in panels:
+    for ax, c, wv, an, cp, ylabel, ylim, fmt, dy in panels:
         ax.bar(x - w, c, w, color=hues, edgecolor="white")
         ax.bar(x, wv, w, color=hues, alpha=0.4, hatch="//", edgecolor="white")
         ax.bar(x + w, an, w, color=hues, alpha=0.75, edgecolor="#222", linewidth=0.9)
         ax.set_ylim(*ylim)
-        for xs, vals in ((x - w, c), (x, wv), (x + w, an)):
+        for xs, vals in ((x - w, c), (x, wv)):
             _label_bars(ax, xs, vals, fmt=fmt, fontsize=7, dy=dy)
+        # the anchored bars share their slot with the chunk-composition diamonds
+        _label_bars(ax, x + w, an, fmt=fmt, fontsize=7, dy=dy, above=[np.nan, *cp, np.nan])
         _no_title(ax)
         ax.set_ylabel(ylabel, fontsize=10)
         ax.set_xticks(x)
