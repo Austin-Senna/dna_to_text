@@ -54,16 +54,21 @@ def _anchored_fixture(monkeypatch, lo, delta=0.1):
             expl[f"{split} family5: {enc} anchored > whole-window"] = {
                 "a": f"{split}/tss_{enc}_tssanchored", "b": f"{split}/tss_{enc}_meanmean",
                 "delta_point": delta, "delta_ci95": [lo, 0.2]}
-        for src, v in ((bt.ENF_WHOLE, 0.3), (bt.ENF_CENTRE, 0.4)):
+        for src, v in ((bt.ENF_WHOLE, 0.3), (bt.ENF_CENTRE, 0.4), ("enformer_tss_4mer", 0.28)):
             by[src] = {"key": f"{split}/{src}", bt.F1: v}
         expl[f"{split} family5: Enformer centre > whole"] = {
             "a": f"{split}/{bt.ENF_CENTRE}", "b": f"{split}/{bt.ENF_WHOLE}",
             "delta_point": delta, "delta_ci95": [lo, 0.2]}
     monkeypatch.setattr(bt, "HOM", _Split(per[bt.CDS]))
     monkeypatch.setattr(bt, "DIS", _Split(per[bt.TSS]))
-    monkeypatch.setattr(bt, "STATS", {"exploratory": expl, "intervals": {
-        f"{s}/family5/{src}": {"point": 0.4, "ci95": [0.35, 0.45]}
-        for s in (bt.CDS, bt.TSS) for src in [*(f"tss_{e}_tssanchored" for e in bt.ENCODERS), bt.ENF_CENTRE]}})
+    # every displayed cell carries its own interval: anchored cells at 0.40, whole-window
+    # cells at their point (the builder checks the interval's point equals the cell)
+    intervals = {f"{s}/family5/{src}": {"point": 0.4, "ci95": [0.35, 0.45]}
+                 for s in (bt.CDS, bt.TSS) for src in [*(f"tss_{e}_tssanchored" for e in bt.ENCODERS), bt.ENF_CENTRE]}
+    for s in (bt.CDS, bt.TSS):
+        for src, rec in per[s].items():
+            intervals.setdefault(f"{s}/family5/{src}", {"point": rec[bt.F1], "ci95": [rec[bt.F1] - 0.05, rec[bt.F1] + 0.05]})
+    monkeypatch.setattr(bt, "STATS", {"exploratory": expl, "intervals": intervals})
 
 
 @pytest.mark.parametrize("lo,bolded", [(0.001, True), (-0.001, False)])
