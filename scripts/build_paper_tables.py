@@ -86,11 +86,11 @@ def _ci(pair, dp=3):
 # paper keeps the caption + source-note via \processtable{cap}{\input{..}}{note}.
 SPECS = {
     "family5_main": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7.5}{8.8}\selectfont",
-                         width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llrrrr@{}",
-                         header=r"Source & Pool & F1 & $\Delta$F1 & $\kappa$ & Acc."),
-    "ridge_main": dict(setup=r"\setlength{\tabcolsep}{2.5pt}",
-                       width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llrrr@{}",
-                       header=r"Source & Pool & $R^2$ & $\Delta$ & Cos."),
+                         width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llcrcr@{}",
+                         header=r"Source & Pool & F1 [95\% CI] & $\Delta$F1 & $\kappa$ [95\% CI] & Acc."),
+    "ridge_main": dict(setup=r"\setlength{\tabcolsep}{2.5pt}\fontsize{7.5}{8.8}\selectfont",
+                       width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llcrr@{}",
+                       header=r"Source & Pool & $R^2$ [95\% CI] & $\Delta$ & Cos."),
     "cds_tss": dict(setup=r"\setlength{\tabcolsep}{2.5pt}\fontsize{8}{9.5}\selectfont",
                     width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrrr@{}",
                     header=r"Source & F1 & $\Delta$F1 & $\kappa$ & $R^2$ & $\Delta R^2$"),
@@ -100,15 +100,6 @@ SPECS = {
     "s_seed_sensitivity": dict(setup="", width=r"0.9\columnwidth",
                                cols=r"@{\extracolsep{\fill}}lrr@{}",
                                header=r"Cell & Macro-F1 (4 splits) & GenePT $R^2$ (4 splits)"),
-    "s_cds_tss_paired": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{6.5}{7.5}\selectfont",
-                             width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lccr@{}",
-                             header=r"Encoder & $\Delta$Macro-F1 [95\% CI] & $\Delta R^2$ [95\% CI] & $P^*(\textrm{CDS}{>}\textrm{TSS})$"),
-    "s_headline_ci_cls": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
-                              width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llcc@{}",
-                              header=r"Source & Pool & Macro-F1 [95\% CI] & $\kappa$ [95\% CI]"),
-    "s_headline_ci_reg": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
-                              width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llc@{}",
-                              header=r"Source & Pool & GenePT $R^2$ [95\% CI]"),
     "s_tss_disjoint": dict(setup=r"\setlength{\tabcolsep}{3pt}",
                            width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
                            header=r"Source & Homology F1 & Disjoint F1 & $\Delta$"),
@@ -118,9 +109,6 @@ SPECS = {
     "s_tss_anchored": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
                            width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrccr@{}",
                            header=r"Model & Whole window & TSS-Anchored [95\% CI] & $\Delta$ [95\% CI] & Chunk comp."),
-    "s_d5_sensitivity": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.4}\selectfont",
-                             width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lcr@{}",
-                             header=r"Comparison & $\Delta$ [95\% CI] & $p$"),
     "s_split_population": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
                                width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrrr@{}",
                                header=r"Partition & Genes & Singleton & Median & In $\geq$10 & ORs / GPCRs"),
@@ -429,22 +417,41 @@ def _composition_rows(task: str) -> list[tuple[str, str]]:
 
 
 def build_family5_main():
+    """Figure 2's cells with their cluster-bootstrap CIs (macro-F1 and kappa), delta to the
+    nucleotide floor, and accuracy; the shuffled-label row carries its null band."""
     base = HOM.cell("cds", "family5", HOM.nt("family5"))[F1]
     disp, b = null_row_cls(CDS)
-    rows = [(disp, "---", b["median"], b["median"] - base, b["medians"].get(K), b["medians"].get(ACC), True)]
     comp = _composition_rows("family5")
+    rows = []  # (display, pool, src or None, record)
     for rid, d in comp:
-        r = HOM.cell("cds", "family5", rid)
-        rows.append((d, "---", r[F1], r[F1] - base, r[K], r[ACC], False))
+        rows.append((d, "---", rid, HOM.cell("cds", "family5", rid)))
     for enc in ENCODERS:
         src = HOM.best_pool(enc, "cds", "family5")
-        r = HOM.cell("cds", "family5", src)
-        rows.append((ENC_DISPLAY[enc], pool_name(pool_of(src)), r[F1], r[F1] - base, r[K], r[ACC], False))
-    body = render_main_rows(rows, dp=3, rule_after=1 + len(comp))
+        rows.append((ENC_DISPLAY[enc], pool_name(pool_of(src)), src, HOM.cell("cds", "family5", src)))
+    best = {m: max(r[3][m] for r in rows) for m in (F1, K, ACC)}
+
+    def cell(r, m, txt):
+        return bold(txt) if r[m] == best[m] else txt
+
+    def line(d, pool, src, r):
+        c = interval(CDS, "family5", src)
+        if abs(c["point"] - r[F1]) > 1e-9 or abs(c["kappa_point"] - r[K]) > 1e-9:
+            raise R.MixedRecords(f"{src}: interval point is not the cell value")
+        f1 = cell(r, F1, f"{f(r[F1],3)} {_ci(c['ci95'])}")
+        return (f"{d} & {pool} & {f1} & {sgn(r[F1] - base, 3)} & "
+                f"{cell(r, K, f'{f(r[K],3)} {_ci(c['kappa_ci95'])}')} & {cell(r, ACC, f(r[ACC], 3))} \\\\")
+
+    out = [f"{disp} & --- & {f(b['median'],3)} {_ci(b['band95'])} & {sgn(b['median'] - base, 3)} & "
+           f"{f(b['medians'][K],3)} & {f(b['medians'][ACC],3)} \\\\", r"\midrule"]
+    for i, (d, pool, src, r) in enumerate(rows):
+        out.append(line(d, pool, src, r))
+        if i == len(comp) - 1:
+            out.append(r"\midrule")
     esm = HOM.cell("cds", "family5", "esm2_650m")
-    esm_row = (f"ESM-2 650M & --- & {f(esm[F1], 3)} & {sgn(esm[F1] - base, 3)} "
-               f"& {f(esm[K], 3)} & {f(esm[ACC], 3)} \\\\")
-    return body + "\n" + r"\midrule" + "\n" + esm_row
+    ce = interval(CDS, "family5", "esm2_650m")
+    out += [r"\midrule", f"ESM-2 650M & --- & {f(esm[F1],3)} {_ci(ce['ci95'])} & {sgn(esm[F1] - base, 3)} & "
+            f"{f(esm[K],3)} {_ci(ce['kappa_ci95'])} & {f(esm[ACC],3)} \\\\"]
+    return "\n".join(out)
 
 
 # ===================================================================
@@ -462,15 +469,21 @@ def build_ridge_main():
         r = HOM.cell("cds", "genept", src)
         rows.append((ENC_DISPLAY[enc], pool_name(pool_of(src)), r[R2], r[R2] - base, r[COS]))
     best_r2, best_cos = max(r[2] for r in rows), max(r[4] for r in rows)
+    srcs = [rid for rid, _ in comp] + [HOM.best_pool(enc, "cds", "genept") for enc in ENCODERS]
     out = []
-    for i, (disp, pool, r2, delta, cos) in enumerate(rows):
-        r2t = bold(f(r2, 3)) if r2 == best_r2 else f(r2, 3)
+    for i, ((disp, pool, r2, delta, cos), src) in enumerate(zip(rows, srcs)):
+        c = interval(CDS, "genept", src)
+        if abs(c["point"] - r2) > 1e-9:
+            raise R.MixedRecords(f"{src}: interval point {c['point']} is not the cell {r2}")
+        r2t = f"{f(r2, 3)} {_ci(c['ci95'])}"
+        r2t = bold(r2t) if r2 == best_r2 else r2t
         cost = bold(f(cos, 3)) if cos == best_cos else f(cos, 3)
         out.append(f"{disp} & {pool} & {r2t} & {sgn(delta, 3)} & {cost} \\\\")
         if i == len(comp) - 1:
             out.append(r"\midrule")
     esm = HOM.cell("cds", "genept", "esm2_650m")
-    esm_row = f"ESM-2 650M & --- & {f(esm[R2], 3)} & {sgn(esm[R2] - base, 3)} & {f(esm[COS], 3)} \\\\"
+    ce = interval(CDS, "genept", "esm2_650m")
+    esm_row = f"ESM-2 650M & --- & {f(esm[R2], 3)} {_ci(ce['ci95'])} & {sgn(esm[R2] - base, 3)} & {f(esm[COS], 3)} \\\\"
     return "\n".join(out) + "\n" + r"\midrule" + "\n" + esm_row
 
 
@@ -681,60 +694,14 @@ def build_seed_sensitivity():
 # CDS-vs-TSS paired cluster-bootstrap CIs (disjoint split: same test genes).
 # P* is the share of resamples with CDS > TSS (not a posterior probability).
 # ===================================================================
-def build_cds_tss_paired():
-    ex = STATS["exploratory"]
-    rows = [(ENC_DISPLAY[e], f"{e} CDS > TSS") for e in ENCODERS]
-    rows.append(("4-mer (control)", "kmer CDS > TSS 4-mer (control)"))
-    out = []
-    for disp, key in rows:
-        c, r = ex[f"{TSS} family5: {key}"], ex[f"{TSS} genept: {key}"]
-        f1 = f"{sgn(c['delta_point'],3)} [{sgn(c['delta_ci95'][0],3)}, {sgn(c['delta_ci95'][1],3)}]"
-        r2 = f"{sgn(r['delta_point'],3)} [{sgn(r['delta_ci95'][0],3)}, {sgn(r['delta_ci95'][1],3)}]"
-        out.append(f"{disp} & {f1} & {r2} & {c['p_a_gt_b']:.3f} \\\\")
-    return "\n".join(out)
 
 
 # ===================================================================
 # Headline cluster-bootstrap CIs. The point is the recorded value; the
 # bracket is the 1,000-resample cluster bootstrap of the stored predictions.
 # ===================================================================
-def build_headline_ci_cls():
-    _, b = null_row_cls(CDS)
-    rows = [f"Shuffled labels (median, null 2.5--97.5\\%) & --- & {f(b['median'],3)} {_ci(b['band95'])} "
-            f"& --- \\\\", r"\midrule"]
-
-    def row(d, pool, src):
-        c = interval(CDS, "family5", src)
-        return f"{d} & {pool} & {f(c['point'],3)} {_ci(c['ci95'])} & {f(c['kappa_point'],3)} {_ci(c['kappa_ci95'])} \\\\"
-
-    for rid, d in _composition_rows("family5"):
-        rows.append(row(d, "---", rid))
-    rows.append(r"\midrule")
-    for enc in ENCODERS:
-        src = HOM.best_pool(enc, "cds", "family5")
-        rows.append(row(ENC_DISPLAY[enc], pool_name(pool_of(src)), src))
-    rows.append(r"\midrule")
-    rows.append(row("ESM-2 650M", "---", "esm2_650m"))
-    return "\n".join(rows)
 
 
-def build_headline_ci_reg():
-    rows = []
-
-    def row(d, pool, src):
-        c = interval(CDS, "genept", src)
-        # 4 dp: the AA 3-mer vs AA 2-mer gap was quoted to R1 at this precision.
-        return f"{d} & {pool} & {f(c['point'],4)} {_ci(c['ci95'], 4)} \\\\"
-
-    for rid, d in _composition_rows("genept"):
-        rows.append(row(d, "---", rid))
-    rows.append(r"\midrule")
-    for enc in ENCODERS:
-        src = HOM.best_pool(enc, "cds", "genept")
-        rows.append(row(ENC_DISPLAY[enc], pool_name(pool_of(src)), src))
-    rows.append(r"\midrule")
-    rows.append(row("ESM-2 650M", "---", "esm2_650m"))
-    return "\n".join(rows)
 
 
 # ===================================================================
@@ -864,16 +831,28 @@ def build_paired_diff():
               "esm2_650m > encoder"):
         d = ex[f"{CDS} genept: {k}"]
         out.append(line(name(d), d, d["p_one_sided"]))
+    # CDS - TSS per encoder on the disjoint split (same held-out genes), both metrics
+    pairs = [(ENC_DISPLAY[e], f"{e} CDS > TSS") for e in ENCODERS] + [("4-mer (control)", "kmer CDS > TSS 4-mer (control)")]
+    for task, metric in (("family5", "macro-F1"), ("genept", "GenePT $R^2$")):
+        out.append(r"\midrule")
+        out.append(rf"\multicolumn{{3}}{{@{{}}l}}{{\textbf{{CDS $-$ TSS window, same genes, disjoint split, {metric} (unadjusted $p$)}}}}\\")
+        for disp, key in pairs:
+            d = ex[f"{TSS} {task}: {key}"]
+            out.append(line(disp, d, d["p_one_sided"]))
+    out.append(r"\midrule")
+    out.append(_sensitivity_rows())
     return "\n".join(out)
+
+
+def _sensitivity_rows():
+    """The sensitivity blocks (Ends-rule control, length controls, label-noise masks), unadjusted p."""
+    out = [r"\multicolumn{3}{@{}l}{\textbf{Ends + Mean $-$ Mean $\times 3$ at $3\times C$, macro-F1 (unadjusted $p$)}}\\"]
 
 
 # ===================================================================
 # D5: Ends + Mean at matched regularisation, and the headline tests with each
 # disclosed defect masked from scoring. Exploratory, unadjusted p.
 # ===================================================================
-def build_d5_sensitivity():
-    # Headers stay short (one line at the table width); the caption says every p is one-sided, unadjusted.
-    out = [r"\multicolumn{3}{@{}l}{\textbf{Ends + Mean $-$ Mean $\times 3$ at $3\times C$, macro-F1}}\\"]
     p3 = STATS["pooling_3x"]
     for e in ENCODERS:
         d = p3[f"family5/{e}"]["Ends+Mean > Mean x3 (3x C)"]
@@ -950,14 +929,10 @@ FRAGMENTS = [
     ("pooling_combined", build_pooling_combined, True),
     ("regression_combined", build_regression_combined, True),
     ("s_seed_sensitivity", build_seed_sensitivity, False),
-    ("s_cds_tss_paired", build_cds_tss_paired, False),
-    ("s_headline_ci_cls", build_headline_ci_cls, False),
-    ("s_headline_ci_reg", build_headline_ci_reg, False),
     ("s_tss_disjoint", build_tss_disjoint, False),
     ("s_paired_diff", build_paired_diff, False),
     ("s_ridge_robust", build_ridge_robust, False),
     ("s_tss_anchored", build_tss_anchored, False),
-    ("s_d5_sensitivity", build_d5_sensitivity, False),
     ("s_split_population", build_split_population, False),
 ]
 
