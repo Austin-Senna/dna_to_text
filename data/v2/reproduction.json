@@ -1,0 +1,2047 @@
+{
+  "ok": true,
+  "records_dir": "data/v2",
+  "inputs": {
+    "metrics_splits.json": "dcd06ca40250753ba878299edfd3bc4e242776b7609811a5f0d9546d5b5d61c7",
+    "metrics_splits_homology70.json": "5cbb6ef5868a1d1f6ef7d495b753c78b576133b67fab7572cd32a1c2d6664065",
+    "metrics_splits_random.json": "cd07fe7e6268a975ba0d5150f790941907ebd8013288fedcf3be55d48ea891a3",
+    "metrics_splits_seed1.json": "676ef0c5806b70b4b269edc1228d09bfd468a18f351975c180c8c5c763b7da1d",
+    "metrics_splits_seed123.json": "867960ef1ce7032de47afe14db210c17f20efb38029b1dc1925561e9f0617dc2",
+    "metrics_splits_seed7.json": "d505ece865abb0da0239e8dd7f161f63b9202e988cab26cdef8af118f3e4be8e",
+    "metrics_splits_tss_disjoint.json": "7df0a9228ce0fe2ad3beb77cb721acd80b42c0b9cec2dcdd1845c4083f3aa41e",
+    "metrics_splits_tss_disjoint_seed1.json": "78f923ca598f8926942f0c015271808b39ae224b31c03c8afdb592af30cf06ea",
+    "metrics_splits_tss_disjoint_seed123.json": "2e81f6867e6b87906c0fa621d07b10228ac6d37e5cf3cc17da224edd792115db",
+    "metrics_splits_tss_disjoint_seed7.json": "d65d56b9c563e408471c576e7fe67748700b4913649dc94a7043ac2bcee4a42c",
+    "null_splits.json": "e0a33015f2b6c9ca040360d3b1c174d9032ea95be66ec9c1ea1c656237888d0e",
+    "null_splits_tss_disjoint.json": "15feefd85a4f7b86aa0b87c85f48d5f43e361efd7be5d2b317467dd825fc4d30"
+  },
+  "picks": {
+    "splits.json/cds/family5/dnabert2 pool": {
+      "candidates": [
+        "dnabert2_maxmean",
+        "dnabert2_specialmean",
+        "dnabert2_meanmean",
+        "dnabert2_clsmean",
+        "dnabert2_meanD",
+        "dnabert2_meanG"
+      ],
+      "pick": "splits.json/cds/family5/dnabert2_meanD",
+      "val": 0.5557691838110854
+    },
+    "splits.json/cds/family5/nt_v2 pool": {
+      "candidates": [
+        "nt_v2_specialmean",
+        "nt_v2_meanmean",
+        "nt_v2_maxmean",
+        "nt_v2_clsmean",
+        "nt_v2_meanD",
+        "nt_v2_meanG"
+      ],
+      "pick": "splits.json/cds/family5/nt_v2_meanG",
+      "val": 0.5983633184359947
+    },
+    "splits.json/cds/family5/gena_lm pool": {
+      "candidates": [
+        "gena_lm_maxmean",
+        "gena_lm_specialmean",
+        "gena_lm_meanmean",
+        "gena_lm_clsmean",
+        "gena_lm_meanD",
+        "gena_lm_meanG"
+      ],
+      "pick": "splits.json/cds/family5/gena_lm_clsmean",
+      "val": 0.5615664243429823
+    },
+    "splits.json/cds/family5/hyena_dna pool": {
+      "candidates": [
+        "hyena_dna_maxmean",
+        "hyena_dna_meanmean",
+        "hyena_dna_meanD",
+        "hyena_dna_meanG"
+      ],
+      "pick": "splits.json/cds/family5/hyena_dna_meanG",
+      "val": 0.5298892399717448
+    },
+    "splits.json/cds/family5/best_encoder": {
+      "pick": "splits.json/cds/family5/nt_v2_meanG",
+      "val": 0.5983633184359947,
+      "per_encoder": {
+        "dnabert2": "splits.json/cds/family5/dnabert2_meanD",
+        "nt_v2": "splits.json/cds/family5/nt_v2_meanG",
+        "gena_lm": "splits.json/cds/family5/gena_lm_clsmean",
+        "hyena_dna": "splits.json/cds/family5/hyena_dna_meanG"
+      }
+    },
+    "splits.json/cds/family5/nucleotide k-mer": {
+      "candidates": [
+        "kmer",
+        "kmer6"
+      ],
+      "pick": "splits.json/cds/family5/kmer6",
+      "val": 0.5507137729313394
+    },
+    "splits.json/cds/family5/AA k-mer": {
+      "candidates": [
+        "aa1",
+        "aa2",
+        "aa3"
+      ],
+      "pick": "splits.json/cds/family5/aa3",
+      "val": 0.7134547074771234
+    },
+    "splits_tss_disjoint.json/cds/family5/dnabert2 pool": {
+      "candidates": [
+        "dnabert2_meanmean",
+        "dnabert2_specialmean",
+        "dnabert2_maxmean",
+        "dnabert2_meanD",
+        "dnabert2_meanG",
+        "dnabert2_clsmean"
+      ],
+      "pick": "splits_tss_disjoint.json/cds/family5/dnabert2_specialmean",
+      "val": 0.6025853761635612
+    },
+    "splits_tss_disjoint.json/cds/family5/nt_v2 pool": {
+      "candidates": [
+        "nt_v2_meanmean",
+        "nt_v2_specialmean",
+        "nt_v2_maxmean",
+        "nt_v2_meanD",
+        "nt_v2_meanG",
+        "nt_v2_clsmean"
+      ],
+      "pick": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+      "val": 0.710181457338648
+    },
+    "splits_tss_disjoint.json/cds/family5/gena_lm pool": {
+      "candidates": [
+        "gena_lm_meanmean",
+        "gena_lm_specialmean",
+        "gena_lm_maxmean",
+        "gena_lm_meanD",
+        "gena_lm_meanG",
+        "gena_lm_clsmean"
+      ],
+      "pick": "splits_tss_disjoint.json/cds/family5/gena_lm_clsmean",
+      "val": 0.6070443132993443
+    },
+    "splits_tss_disjoint.json/cds/family5/hyena_dna pool": {
+      "candidates": [
+        "hyena_dna_meanD",
+        "hyena_dna_meanmean",
+        "hyena_dna_meanG",
+        "hyena_dna_maxmean"
+      ],
+      "pick": "splits_tss_disjoint.json/cds/family5/hyena_dna_meanG",
+      "val": 0.6097159604424315
+    },
+    "splits_tss_disjoint.json/cds/family5/best_encoder": {
+      "pick": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+      "val": 0.710181457338648,
+      "per_encoder": {
+        "dnabert2": "splits_tss_disjoint.json/cds/family5/dnabert2_specialmean",
+        "nt_v2": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+        "gena_lm": "splits_tss_disjoint.json/cds/family5/gena_lm_clsmean",
+        "hyena_dna": "splits_tss_disjoint.json/cds/family5/hyena_dna_meanG"
+      }
+    },
+    "splits_tss_disjoint.json/tss/family5/nt_v2 pool": {
+      "candidates": [
+        "tss_nt_v2_meanG",
+        "tss_nt_v2_meanD",
+        "tss_nt_v2_maxmean",
+        "tss_nt_v2_clsmean",
+        "tss_nt_v2_meanmean"
+      ],
+      "pick": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+      "val": 0.415480143726075
+    },
+    "splits.json/cds/genept/dnabert2 pool": {
+      "candidates": [
+        "dnabert2_specialmean",
+        "dnabert2_clsmean",
+        "dnabert2_maxmean",
+        "dnabert2_meanmean",
+        "dnabert2_meanD",
+        "dnabert2_meanG"
+      ],
+      "pick": "splits.json/cds/genept/dnabert2_specialmean",
+      "val": 0.04663472732231333
+    },
+    "splits.json/cds/genept/nt_v2 pool": {
+      "candidates": [
+        "nt_v2_meanmean",
+        "nt_v2_clsmean",
+        "nt_v2_specialmean",
+        "nt_v2_maxmean",
+        "nt_v2_meanD",
+        "nt_v2_meanG"
+      ],
+      "pick": "splits.json/cds/genept/nt_v2_specialmean",
+      "val": 0.015055805809534287
+    },
+    "splits.json/cds/genept/gena_lm pool": {
+      "candidates": [
+        "gena_lm_clsmean",
+        "gena_lm_meanmean",
+        "gena_lm_maxmean",
+        "gena_lm_specialmean",
+        "gena_lm_meanD",
+        "gena_lm_meanG"
+      ],
+      "pick": "splits.json/cds/genept/gena_lm_meanD",
+      "val": 0.02139673926327587
+    },
+    "splits.json/cds/genept/hyena_dna pool": {
+      "candidates": [
+        "hyena_dna_maxmean",
+        "hyena_dna_meanmean",
+        "hyena_dna_meanD",
+        "hyena_dna_meanG"
+      ],
+      "pick": "splits.json/cds/genept/hyena_dna_meanD",
+      "val": 0.002302435547862212
+    },
+    "splits.json/cds/genept/best_encoder": {
+      "pick": "splits.json/cds/genept/dnabert2_specialmean",
+      "val": 0.04663472732231333,
+      "per_encoder": {
+        "dnabert2": "splits.json/cds/genept/dnabert2_specialmean",
+        "nt_v2": "splits.json/cds/genept/nt_v2_specialmean",
+        "gena_lm": "splits.json/cds/genept/gena_lm_meanD",
+        "hyena_dna": "splits.json/cds/genept/hyena_dna_meanD"
+      }
+    },
+    "splits.json/cds/genept/nucleotide k-mer": {
+      "candidates": [
+        "kmer",
+        "kmer6"
+      ],
+      "pick": "splits.json/cds/genept/kmer6",
+      "val": 0.01691365809291324
+    },
+    "splits.json/cds/genept/AA k-mer": {
+      "candidates": [
+        "aa1",
+        "aa2",
+        "aa3"
+      ],
+      "pick": "splits.json/cds/genept/aa3",
+      "val": 0.059957440206506896
+    },
+    "cells": {
+      "1": "splits.json/cds/family5/nt_v2_meanG",
+      "2": "splits.json/cds/family5/kmer6",
+      "3": "splits.json/cds/family5/aa3",
+      "4": "splits.json/cds/family5/esm2_650m",
+      "5": "splits.json/cds/family5/kmer",
+      "6": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+      "7": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+      "8": "splits.json/cds/genept/dnabert2_specialmean",
+      "9": "splits.json/cds/genept/aa3",
+      "10": "splits.json/cds/family5/kmer/shuf0"
+    },
+    "edge_cells": {
+      "multi-step extension": "splits.json/tss/genept/tss_hyena_dna_maxmean",
+      "nonconverged": "splits.json/tss/family5/tss_hyena_dna_meanmean",
+      "plateau": "splits.json/tss/family5/tss_hyena_dna_chunk6mer"
+    }
+  },
+  "purge": {
+    "window_convention": "closed [start, end]",
+    "max_window_length_closed": 196608,
+    "n_windows_shorter": 8,
+    "overlap_pairs": 4254,
+    "touching_only_pairs": 0,
+    "splits.json": {
+      "val_masked": [
+        "ENSG00000006194",
+        "ENSG00000074966",
+        "ENSG00000121966",
+        "ENSG00000125968",
+        "ENSG00000130368",
+        "ENSG00000136807",
+        "ENSG00000143105",
+        "ENSG00000158050",
+        "ENSG00000163623",
+        "ENSG00000167635",
+        "ENSG00000170549",
+        "ENSG00000170608",
+        "ENSG00000171956",
+        "ENSG00000172888",
+        "ENSG00000173275",
+        "ENSG00000173338",
+        "ENSG00000180871",
+        "ENSG00000187792",
+        "ENSG00000196670",
+        "ENSG00000197037",
+        "ENSG00000205581",
+        "ENSG00000254658",
+        "ENSG00000258806",
+        "ENSG00000260811",
+        "ENSG00000278129"
+      ],
+      "test_masked": [
+        "ENSG00000069812",
+        "ENSG00000072786",
+        "ENSG00000085644",
+        "ENSG00000103199",
+        "ENSG00000105261",
+        "ENSG00000111199",
+        "ENSG00000112486",
+        "ENSG00000115474",
+        "ENSG00000117318",
+        "ENSG00000126353",
+        "ENSG00000128709",
+        "ENSG00000129152",
+        "ENSG00000129535",
+        "ENSG00000132704",
+        "ENSG00000144648",
+        "ENSG00000157551",
+        "ENSG00000169981",
+        "ENSG00000171574",
+        "ENSG00000178394",
+        "ENSG00000179195",
+        "ENSG00000179627",
+        "ENSG00000181315",
+        "ENSG00000184350",
+        "ENSG00000196391",
+        "ENSG00000196652",
+        "ENSG00000197162",
+        "ENSG00000225997",
+        "ENSG00000262085"
+      ],
+      "records_checked": 748,
+      "records_differing": 0
+    },
+    "splits_tss_disjoint.json": {
+      "val_masked": [
+        "ENSG00000065613",
+        "ENSG00000074966",
+        "ENSG00000082458",
+        "ENSG00000112486",
+        "ENSG00000125798",
+        "ENSG00000126353",
+        "ENSG00000129514",
+        "ENSG00000150672",
+        "ENSG00000151789",
+        "ENSG00000162676",
+        "ENSG00000179455",
+        "ENSG00000179456",
+        "ENSG00000196391",
+        "ENSG00000205581",
+        "ENSG00000273085"
+      ],
+      "test_masked": [
+        "ENSG00000069812",
+        "ENSG00000111049",
+        "ENSG00000111199",
+        "ENSG00000121807",
+        "ENSG00000125968",
+        "ENSG00000129048",
+        "ENSG00000129535",
+        "ENSG00000130368",
+        "ENSG00000143257",
+        "ENSG00000152518",
+        "ENSG00000164600",
+        "ENSG00000165995",
+        "ENSG00000172201",
+        "ENSG00000173585",
+        "ENSG00000178394",
+        "ENSG00000179195",
+        "ENSG00000182983",
+        "ENSG00000183813",
+        "ENSG00000187792",
+        "ENSG00000204612",
+        "ENSG00000278570"
+      ],
+      "records_checked": 530,
+      "records_differing": 0
+    }
+  },
+  "cells": {
+    "1": {
+      "cell": "best encoder",
+      "key": "splits.json/cds/family5/nt_v2_meanG",
+      "hp_name": "C",
+      "pick": 0.1,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": 0.40389639862679083,
+          "converged": true,
+          "n_iter": 209
+        },
+        {
+          "hp": 0.001,
+          "score": 0.550922898713577,
+          "converged": true,
+          "n_iter": 463
+        },
+        {
+          "hp": 0.01,
+          "score": 0.5791581321903904,
+          "converged": true,
+          "n_iter": 902
+        },
+        {
+          "hp": 0.1,
+          "score": 0.5983633184359947,
+          "converged": true,
+          "n_iter": 1661
+        },
+        {
+          "hp": 1.0,
+          "score": 0.590498370265963,
+          "converged": true,
+          "n_iter": 2269
+        },
+        {
+          "hp": 10.0,
+          "score": 0.5798110265162273,
+          "converged": true,
+          "n_iter": 1907
+        },
+        {
+          "hp": 100.0,
+          "score": 0.5770026467275968,
+          "converged": true,
+          "n_iter": 683
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.5768093211156564,
+          "converged": true,
+          "n_iter": 450
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.5533897675010293,
+          "converged": true,
+          "n_iter": 247
+        }
+      ],
+      "test_score": 0.692802040891217,
+      "record_test_score": 0.692802040891217,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": 926,
+      "test_ids_n": 487,
+      "seconds": 97.4
+    },
+    "2": {
+      "cell": "nucleotide k-mer pick",
+      "key": "splits.json/cds/family5/kmer6",
+      "hp_name": "C",
+      "pick": 10.0,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": 0.2955392588300313,
+          "converged": true,
+          "n_iter": 75
+        },
+        {
+          "hp": 0.001,
+          "score": 0.4887100729636063,
+          "converged": true,
+          "n_iter": 151
+        },
+        {
+          "hp": 0.01,
+          "score": 0.5442269447516359,
+          "converged": true,
+          "n_iter": 208
+        },
+        {
+          "hp": 0.1,
+          "score": 0.5445246459774549,
+          "converged": true,
+          "n_iter": 228
+        },
+        {
+          "hp": 1.0,
+          "score": 0.534696389574293,
+          "converged": true,
+          "n_iter": 175
+        },
+        {
+          "hp": 10.0,
+          "score": 0.5507137729313394,
+          "converged": true,
+          "n_iter": 81
+        },
+        {
+          "hp": 100.0,
+          "score": 0.5490457249546805,
+          "converged": true,
+          "n_iter": 63
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.47970688827858066,
+          "converged": true,
+          "n_iter": 24
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.4785286053815466,
+          "converged": true,
+          "n_iter": 23
+        }
+      ],
+      "test_score": 0.6386482368062592,
+      "record_test_score": 0.6386482368062592,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": 89,
+      "test_ids_n": 487,
+      "seconds": 24.1
+    },
+    "3": {
+      "cell": "AA k-mer pick",
+      "key": "splits.json/cds/family5/aa3",
+      "hp_name": "C",
+      "pick": 100.0,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": 0.32928729796836737,
+          "converged": true,
+          "n_iter": 60
+        },
+        {
+          "hp": 0.001,
+          "score": 0.6178921624219397,
+          "converged": true,
+          "n_iter": 70
+        },
+        {
+          "hp": 0.01,
+          "score": 0.6410452617747493,
+          "converged": true,
+          "n_iter": 82
+        },
+        {
+          "hp": 0.1,
+          "score": 0.6527614452987588,
+          "converged": true,
+          "n_iter": 71
+        },
+        {
+          "hp": 1.0,
+          "score": 0.659959732072944,
+          "converged": true,
+          "n_iter": 66
+        },
+        {
+          "hp": 10.0,
+          "score": 0.6823401655104935,
+          "converged": true,
+          "n_iter": 53
+        },
+        {
+          "hp": 100.0,
+          "score": 0.7134547074771234,
+          "converged": true,
+          "n_iter": 34
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.6602647667507229,
+          "converged": true,
+          "n_iter": 18
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.6602647667507229,
+          "converged": true,
+          "n_iter": 18
+        }
+      ],
+      "test_score": 0.7674303758119946,
+      "record_test_score": 0.7674303758119946,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": 20,
+      "test_ids_n": 487,
+      "seconds": 23.3
+    },
+    "4": {
+      "cell": "esm2_650m",
+      "key": "splits.json/cds/family5/esm2_650m",
+      "hp_name": "C",
+      "pick": 100.0,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": 0.7309904711872285,
+          "converged": true,
+          "n_iter": 109
+        },
+        {
+          "hp": 0.001,
+          "score": 0.7738615133304017,
+          "converged": true,
+          "n_iter": 182
+        },
+        {
+          "hp": 0.01,
+          "score": 0.8208655948801191,
+          "converged": true,
+          "n_iter": 227
+        },
+        {
+          "hp": 0.1,
+          "score": 0.8570183824240724,
+          "converged": true,
+          "n_iter": 226
+        },
+        {
+          "hp": 1.0,
+          "score": 0.8655890892270506,
+          "converged": true,
+          "n_iter": 341
+        },
+        {
+          "hp": 10.0,
+          "score": 0.8722988165058236,
+          "converged": true,
+          "n_iter": 144
+        },
+        {
+          "hp": 100.0,
+          "score": 0.8797098373420484,
+          "converged": true,
+          "n_iter": 54
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.871348319995047,
+          "converged": true,
+          "n_iter": 34
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.8685405890716791,
+          "converged": true,
+          "n_iter": 27
+        }
+      ],
+      "test_score": 0.95362805991962,
+      "record_test_score": 0.95362805991962,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": 68,
+      "test_ids_n": 487,
+      "seconds": 8.9
+    },
+    "5": {
+      "cell": "kmer",
+      "key": "splits.json/cds/family5/kmer",
+      "hp_name": "C",
+      "pick": 0.01,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": 0.23612200435729847,
+          "converged": true,
+          "n_iter": 56
+        },
+        {
+          "hp": 0.001,
+          "score": 0.37863567223746913,
+          "converged": true,
+          "n_iter": 74
+        },
+        {
+          "hp": 0.01,
+          "score": 0.524382793174856,
+          "converged": true,
+          "n_iter": 140
+        },
+        {
+          "hp": 0.1,
+          "score": 0.5173086201841757,
+          "converged": true,
+          "n_iter": 239
+        },
+        {
+          "hp": 1.0,
+          "score": 0.44882738123132215,
+          "converged": true,
+          "n_iter": 564
+        },
+        {
+          "hp": 10.0,
+          "score": 0.437205768353958,
+          "converged": true,
+          "n_iter": 1140
+        },
+        {
+          "hp": 100.0,
+          "score": 0.44370089957175446,
+          "converged": true,
+          "n_iter": 2782
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.4396760781485331,
+          "converged": false,
+          "n_iter": 5000
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.44970724640776216,
+          "converged": false,
+          "n_iter": 5000
+        }
+      ],
+      "test_score": 0.64818007815698,
+      "record_test_score": 0.64818007815698,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": 119,
+      "test_ids_n": 487,
+      "seconds": 20.5
+    },
+    "6": {
+      "cell": "best encoder",
+      "key": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+      "hp_name": "C",
+      "pick": 1.0,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": 0.4290303725961359,
+          "converged": true,
+          "n_iter": 60
+        },
+        {
+          "hp": 0.001,
+          "score": 0.5280384819343199,
+          "converged": true,
+          "n_iter": 143
+        },
+        {
+          "hp": 0.01,
+          "score": 0.6319278852256979,
+          "converged": true,
+          "n_iter": 270
+        },
+        {
+          "hp": 0.1,
+          "score": 0.6944185148700538,
+          "converged": true,
+          "n_iter": 409
+        },
+        {
+          "hp": 1.0,
+          "score": 0.710181457338648,
+          "converged": true,
+          "n_iter": 813
+        },
+        {
+          "hp": 10.0,
+          "score": 0.6978276683724964,
+          "converged": true,
+          "n_iter": 1218
+        },
+        {
+          "hp": 100.0,
+          "score": 0.6944305948680404,
+          "converged": true,
+          "n_iter": 1523
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.6933990135498338,
+          "converged": true,
+          "n_iter": 1007
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.6716537765075836,
+          "converged": true,
+          "n_iter": 638
+        }
+      ],
+      "test_score": 0.693555859714189,
+      "record_test_score": 0.693555859714189,
+      "n_test_scored": 465,
+      "refit_converged": true,
+      "refit_n_iter": 882,
+      "test_ids_n": 486,
+      "seconds": 18.6
+    },
+    "7": {
+      "cell": "TSS pool pick of cell 6's encoder",
+      "key": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+      "hp_name": "C",
+      "pick": 0.1,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": 0.2732050155738359,
+          "converged": true,
+          "n_iter": 111
+        },
+        {
+          "hp": 0.001,
+          "score": 0.3044804852320675,
+          "converged": true,
+          "n_iter": 171
+        },
+        {
+          "hp": 0.01,
+          "score": 0.3647654099526799,
+          "converged": true,
+          "n_iter": 224
+        },
+        {
+          "hp": 0.1,
+          "score": 0.415480143726075,
+          "converged": true,
+          "n_iter": 515
+        },
+        {
+          "hp": 1.0,
+          "score": 0.4060650297060807,
+          "converged": true,
+          "n_iter": 1199
+        },
+        {
+          "hp": 10.0,
+          "score": 0.39563705469985433,
+          "converged": true,
+          "n_iter": 2891
+        },
+        {
+          "hp": 100.0,
+          "score": 0.38261058385025937,
+          "converged": false,
+          "n_iter": 5000
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.3724024006777201,
+          "converged": false,
+          "n_iter": 5000
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.3743114904179878,
+          "converged": false,
+          "n_iter": 5000
+        }
+      ],
+      "test_score": 0.30035742035742036,
+      "record_test_score": 0.30035742035742036,
+      "n_test_scored": 465,
+      "refit_converged": true,
+      "refit_n_iter": 513,
+      "test_ids_n": 486,
+      "seconds": 52.9
+    },
+    "8": {
+      "cell": "best encoder",
+      "key": "splits.json/cds/genept/dnabert2_specialmean",
+      "hp_name": "alpha",
+      "max_abs_pred_diff": 0.0,
+      "pick": 10000.0,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": -0.3246715721720055,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 0.001,
+          "score": -0.3246538536016615,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 0.01,
+          "score": -0.32447686378084845,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 0.1,
+          "score": -0.3227262417687164,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 1.0,
+          "score": -0.3068647992998937,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 10.0,
+          "score": -0.21950745000195118,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 100.0,
+          "score": -0.06640820470009742,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.025401274396190346,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.04663472732231333,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 100000.0,
+          "score": 0.02855485016767173,
+          "converged": true,
+          "n_iter": null
+        }
+      ],
+      "test_score": 0.06516900658607483,
+      "record_test_score": 0.06516900658607483,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": null,
+      "test_ids_n": 487,
+      "seconds": 3.4
+    },
+    "9": {
+      "cell": "AA k-mer pick",
+      "key": "splits.json/cds/genept/aa3",
+      "hp_name": "alpha",
+      "max_abs_pred_diff": 0.0,
+      "pick": 10000.0,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": -0.3177689583016226,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 0.001,
+          "score": -0.3177683657287141,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 0.01,
+          "score": -0.317762440221572,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 0.1,
+          "score": -0.3177032078197562,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 1.0,
+          "score": -0.3171131318172385,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 10.0,
+          "score": -0.311420179106648,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 100.0,
+          "score": -0.2669135939307645,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 1000.0,
+          "score": -0.09299547683332417,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.059957440206506896,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 100000.0,
+          "score": 0.0377200058771589,
+          "converged": true,
+          "n_iter": null
+        }
+      ],
+      "test_score": 0.08018061518669128,
+      "record_test_score": 0.08018061518669128,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": null,
+      "test_ids_n": 487,
+      "seconds": 35.2
+    },
+    "10": {
+      "cell": "kmer null, lowest label_seed",
+      "key": "splits.json/cds/family5/kmer/shuf0",
+      "hp_name": "C",
+      "pick": 1.0,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": 0.13954802259887006,
+          "converged": true,
+          "n_iter": 54
+        },
+        {
+          "hp": 0.001,
+          "score": 0.13954802259887006,
+          "converged": true,
+          "n_iter": 62
+        },
+        {
+          "hp": 0.01,
+          "score": 0.16754068141367912,
+          "converged": true,
+          "n_iter": 83
+        },
+        {
+          "hp": 0.1,
+          "score": 0.1748855915383563,
+          "converged": true,
+          "n_iter": 221
+        },
+        {
+          "hp": 1.0,
+          "score": 0.19688046331865727,
+          "converged": true,
+          "n_iter": 598
+        },
+        {
+          "hp": 10.0,
+          "score": 0.19224620926748587,
+          "converged": true,
+          "n_iter": 1438
+        },
+        {
+          "hp": 100.0,
+          "score": 0.18749981675958552,
+          "converged": true,
+          "n_iter": 4051
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.18876661127718625,
+          "converged": false,
+          "n_iter": 5000
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.18900083888464608,
+          "converged": false,
+          "n_iter": 5000
+        }
+      ],
+      "test_score": 0.21017466655995273,
+      "record_test_score": 0.21017466655995273,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": 600,
+      "test_ids_n": 487,
+      "seconds": 23.2
+    },
+    "11": {
+      "cell": "edge branch: plateau",
+      "key": "splits.json/tss/family5/tss_hyena_dna_chunk6mer",
+      "hp_name": "C",
+      "pick": 10000.0,
+      "edge": "plateau",
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": 0.2063277459704307,
+          "converged": true,
+          "n_iter": 155
+        },
+        {
+          "hp": 0.001,
+          "score": 0.24848927559422612,
+          "converged": true,
+          "n_iter": 236
+        },
+        {
+          "hp": 0.01,
+          "score": 0.27116782948230667,
+          "converged": true,
+          "n_iter": 309
+        },
+        {
+          "hp": 0.1,
+          "score": 0.2798254441389218,
+          "converged": true,
+          "n_iter": 361
+        },
+        {
+          "hp": 1.0,
+          "score": 0.2924625356012628,
+          "converged": true,
+          "n_iter": 306
+        },
+        {
+          "hp": 10.0,
+          "score": 0.2944153743086054,
+          "converged": true,
+          "n_iter": 228
+        },
+        {
+          "hp": 100.0,
+          "score": 0.2866807598942692,
+          "converged": true,
+          "n_iter": 106
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.3093123570490561,
+          "converged": true,
+          "n_iter": 50
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.3239208823037664,
+          "converged": true,
+          "n_iter": 29
+        },
+        {
+          "hp": 100000.0,
+          "score": 0.3239208823037664,
+          "converged": true,
+          "n_iter": 29
+        }
+      ],
+      "test_score": 0.3288523758860256,
+      "record_test_score": 0.3288523758860256,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": 46,
+      "test_ids_n": 487,
+      "seconds": 38.9
+    },
+    "13": {
+      "cell": "edge branch: nonconverged",
+      "key": "splits.json/tss/family5/tss_hyena_dna_meanmean",
+      "hp_name": "C",
+      "pick": 10.0,
+      "edge": "nonconverged",
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": 0.16395537804710095,
+          "converged": true,
+          "n_iter": 80
+        },
+        {
+          "hp": 0.001,
+          "score": 0.20726434855467116,
+          "converged": true,
+          "n_iter": 103
+        },
+        {
+          "hp": 0.01,
+          "score": 0.22331377198152547,
+          "converged": true,
+          "n_iter": 132
+        },
+        {
+          "hp": 0.1,
+          "score": 0.2762461279896574,
+          "converged": true,
+          "n_iter": 334
+        },
+        {
+          "hp": 1.0,
+          "score": 0.2784228367528992,
+          "converged": true,
+          "n_iter": 983
+        },
+        {
+          "hp": 10.0,
+          "score": 0.2848886563172277,
+          "converged": true,
+          "n_iter": 2584
+        },
+        {
+          "hp": 100.0,
+          "score": 0.3060665357145148,
+          "converged": false,
+          "n_iter": 5000
+        },
+        {
+          "hp": 1000.0,
+          "score": 0.29006721622186077,
+          "converged": false,
+          "n_iter": 5000
+        },
+        {
+          "hp": 10000.0,
+          "score": 0.2882982498982499,
+          "converged": false,
+          "n_iter": 5000
+        }
+      ],
+      "test_score": 0.2734832451499118,
+      "record_test_score": 0.2734832451499118,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": 2941,
+      "test_ids_n": 487,
+      "seconds": 29.9
+    },
+    "14": {
+      "cell": "edge branch: multi-step extension",
+      "key": "splits.json/tss/genept/tss_hyena_dna_maxmean",
+      "hp_name": "alpha",
+      "max_abs_pred_diff": 0.0,
+      "pick": 100000.0,
+      "edge": false,
+      "sweep": [
+        {
+          "hp": 0.0001,
+          "score": -0.14764278347470558,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 0.001,
+          "score": -0.14764198761866895,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 0.01,
+          "score": -0.14763402981983664,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 0.1,
+          "score": -0.14755452789401352,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 1.0,
+          "score": -0.1467670250654375,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 10.0,
+          "score": -0.13956464995867776,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 100.0,
+          "score": -0.10015098077377155,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 1000.0,
+          "score": -0.047525408195304986,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 10000.0,
+          "score": -0.038214651021181135,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 100000.0,
+          "score": -0.031831002172708706,
+          "converged": true,
+          "n_iter": null
+        },
+        {
+          "hp": 1000000.0,
+          "score": -0.033971471346678196,
+          "converged": true,
+          "n_iter": null
+        }
+      ],
+      "test_score": -0.019412914291024208,
+      "record_test_score": -0.019412914291024208,
+      "n_test_scored": 459,
+      "refit_converged": true,
+      "refit_n_iter": null,
+      "test_ids_n": 487,
+      "seconds": 1.2
+    }
+  },
+  "statistics": {
+    "T1": {
+      "a": "splits.json/cds/family5/nt_v2_meanG",
+      "b": "splits.json/cds/family5/kmer6",
+      "delta_point": 0.054153804084957846,
+      "n_test": 459,
+      "n_groups": 425,
+      "delta_ci95": [
+        -0.015619149226777717,
+        0.12143123671967729
+      ],
+      "p_one_sided": 0.06196901549225387,
+      "n_boot": 2000,
+      "seed": 20261001
+    },
+    "T2": {
+      "a": "splits.json/cds/family5/nt_v2_meanG",
+      "b": "splits.json/cds/family5/aa3",
+      "delta_point": -0.07462833492077758,
+      "n_test": 459,
+      "n_groups": 425,
+      "delta_ci95": [
+        -0.1343424844874807,
+        -0.013079441536782248
+      ],
+      "p_one_sided": 0.9910044977511244,
+      "n_boot": 2000,
+      "seed": 20261001
+    },
+    "T3": {
+      "a": "splits.json/cds/family5/esm2_650m",
+      "b": "splits.json/cds/family5/nt_v2_meanG",
+      "delta_point": 0.26082601902840297,
+      "n_test": 459,
+      "n_groups": 425,
+      "delta_ci95": [
+        0.20195740426076975,
+        0.32175093021315565
+      ],
+      "p_one_sided": 0.0004997501249375312,
+      "n_boot": 2000,
+      "seed": 20261001
+    },
+    "T4": {
+      "a": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+      "delta_point": 0.3931984393567686,
+      "n_test": 465,
+      "n_groups": 284,
+      "delta_ci95": [
+        0.308954481291676,
+        0.47909489451458376
+      ],
+      "p_one_sided": 0.0004997501249375312,
+      "n_boot": 2000,
+      "seed": 20261001
+    }
+  },
+  "statistics_check": {
+    "skipped": "statistics.json absent"
+  },
+  "cells_run": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    13,
+    14
+  ],
+  "cells_expected": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    13,
+    14
+  ],
+  "n_boot": 2000,
+  "checks": [
+    {
+      "check": "cds_manifest",
+      "ok": true,
+      "detail": "3244 sequences, 0 mismatched"
+    },
+    {
+      "check": "purge splits.json",
+      "ok": true,
+      "detail": "val masked 25, test masked 28, n_test_scored 459; 748 records, 0 differ"
+    },
+    {
+      "check": "purge splits_tss_disjoint.json",
+      "ok": true,
+      "detail": "val masked 15, test masked 21, n_test_scored 465; 530 records, 0 differ"
+    },
+    {
+      "check": "pick splits.json/cds/family5/dnabert2 pool",
+      "ok": true,
+      "detail": "dnabert2_meanD (val 0.555769) from ['dnabert2_maxmean', 'dnabert2_specialmean', 'dnabert2_meanmean', 'dnabert2_clsmean', 'dnabert2_meanD', 'dnabert2_meanG']"
+    },
+    {
+      "check": "pick splits.json/cds/family5/nt_v2 pool",
+      "ok": true,
+      "detail": "nt_v2_meanG (val 0.598363) from ['nt_v2_specialmean', 'nt_v2_meanmean', 'nt_v2_maxmean', 'nt_v2_clsmean', 'nt_v2_meanD', 'nt_v2_meanG']"
+    },
+    {
+      "check": "pick splits.json/cds/family5/gena_lm pool",
+      "ok": true,
+      "detail": "gena_lm_clsmean (val 0.561566) from ['gena_lm_maxmean', 'gena_lm_specialmean', 'gena_lm_meanmean', 'gena_lm_clsmean', 'gena_lm_meanD', 'gena_lm_meanG']"
+    },
+    {
+      "check": "pick splits.json/cds/family5/hyena_dna pool",
+      "ok": true,
+      "detail": "hyena_dna_meanG (val 0.529889) from ['hyena_dna_maxmean', 'hyena_dna_meanmean', 'hyena_dna_meanD', 'hyena_dna_meanG']"
+    },
+    {
+      "check": "pick splits.json/cds/family5 best encoder",
+      "ok": true,
+      "detail": "nt_v2_meanG (val 0.598363) from ['dnabert2_meanD', 'nt_v2_meanG', 'gena_lm_clsmean', 'hyena_dna_meanG']"
+    },
+    {
+      "check": "pick splits.json/cds/family5/nucleotide k-mer",
+      "ok": true,
+      "detail": "kmer6 (val 0.550714) from ['kmer', 'kmer6']"
+    },
+    {
+      "check": "pick splits.json/cds/family5/AA k-mer",
+      "ok": true,
+      "detail": "aa3 (val 0.713455) from ['aa1', 'aa2', 'aa3']"
+    },
+    {
+      "check": "pick splits_tss_disjoint.json/cds/family5/dnabert2 pool",
+      "ok": true,
+      "detail": "dnabert2_specialmean (val 0.602585) from ['dnabert2_meanmean', 'dnabert2_specialmean', 'dnabert2_maxmean', 'dnabert2_meanD', 'dnabert2_meanG', 'dnabert2_clsmean']"
+    },
+    {
+      "check": "pick splits_tss_disjoint.json/cds/family5/nt_v2 pool",
+      "ok": true,
+      "detail": "nt_v2_specialmean (val 0.710181) from ['nt_v2_meanmean', 'nt_v2_specialmean', 'nt_v2_maxmean', 'nt_v2_meanD', 'nt_v2_meanG', 'nt_v2_clsmean']"
+    },
+    {
+      "check": "pick splits_tss_disjoint.json/cds/family5/gena_lm pool",
+      "ok": true,
+      "detail": "gena_lm_clsmean (val 0.607044) from ['gena_lm_meanmean', 'gena_lm_specialmean', 'gena_lm_maxmean', 'gena_lm_meanD', 'gena_lm_meanG', 'gena_lm_clsmean']"
+    },
+    {
+      "check": "pick splits_tss_disjoint.json/cds/family5/hyena_dna pool",
+      "ok": true,
+      "detail": "hyena_dna_meanG (val 0.609716) from ['hyena_dna_meanD', 'hyena_dna_meanmean', 'hyena_dna_meanG', 'hyena_dna_maxmean']"
+    },
+    {
+      "check": "pick splits_tss_disjoint.json/cds/family5 best encoder",
+      "ok": true,
+      "detail": "nt_v2_specialmean (val 0.710181) from ['dnabert2_specialmean', 'nt_v2_specialmean', 'gena_lm_clsmean', 'hyena_dna_meanG']"
+    },
+    {
+      "check": "pick splits_tss_disjoint.json/tss/family5/nt_v2 pool",
+      "ok": true,
+      "detail": "tss_nt_v2_meanmean (val 0.415480) from ['tss_nt_v2_meanG', 'tss_nt_v2_meanD', 'tss_nt_v2_maxmean', 'tss_nt_v2_clsmean', 'tss_nt_v2_meanmean']"
+    },
+    {
+      "check": "pick splits.json/cds/genept/dnabert2 pool",
+      "ok": true,
+      "detail": "dnabert2_specialmean (val 0.046635) from ['dnabert2_specialmean', 'dnabert2_clsmean', 'dnabert2_maxmean', 'dnabert2_meanmean', 'dnabert2_meanD', 'dnabert2_meanG']"
+    },
+    {
+      "check": "pick splits.json/cds/genept/nt_v2 pool",
+      "ok": true,
+      "detail": "nt_v2_specialmean (val 0.015056) from ['nt_v2_meanmean', 'nt_v2_clsmean', 'nt_v2_specialmean', 'nt_v2_maxmean', 'nt_v2_meanD', 'nt_v2_meanG']"
+    },
+    {
+      "check": "pick splits.json/cds/genept/gena_lm pool",
+      "ok": true,
+      "detail": "gena_lm_meanD (val 0.021397) from ['gena_lm_clsmean', 'gena_lm_meanmean', 'gena_lm_maxmean', 'gena_lm_specialmean', 'gena_lm_meanD', 'gena_lm_meanG']"
+    },
+    {
+      "check": "pick splits.json/cds/genept/hyena_dna pool",
+      "ok": true,
+      "detail": "hyena_dna_meanD (val 0.002302) from ['hyena_dna_maxmean', 'hyena_dna_meanmean', 'hyena_dna_meanD', 'hyena_dna_meanG']"
+    },
+    {
+      "check": "pick splits.json/cds/genept best encoder",
+      "ok": true,
+      "detail": "dnabert2_specialmean (val 0.046635) from ['dnabert2_specialmean', 'nt_v2_specialmean', 'gena_lm_meanD', 'hyena_dna_meanD']"
+    },
+    {
+      "check": "pick splits.json/cds/genept/nucleotide k-mer",
+      "ok": true,
+      "detail": "kmer6 (val 0.016914) from ['kmer', 'kmer6']"
+    },
+    {
+      "check": "pick splits.json/cds/genept/AA k-mer",
+      "ok": true,
+      "detail": "aa3 (val 0.059957) from ['aa1', 'aa2', 'aa3']"
+    },
+    {
+      "check": "[1] cell splits.json/cds/family5/nt_v2_meanG pick",
+      "ok": true,
+      "detail": "mine 0.1, record 0.1"
+    },
+    {
+      "check": "[1] cell splits.json/cds/family5/nt_v2_meanG edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[1] cell splits.json/cds/family5/nt_v2_meanG sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]"
+    },
+    {
+      "check": "[1] cell splits.json/cds/family5/nt_v2_meanG sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[1] cell splits.json/cds/family5/nt_v2_meanG test predictions",
+      "ok": true,
+      "detail": "0 of 487 test genes differ"
+    },
+    {
+      "check": "[1] cell splits.json/cds/family5/nt_v2_meanG npz y_true vs parquet family",
+      "ok": true,
+      "detail": "0 differ"
+    },
+    {
+      "check": "[1] cell splits.json/cds/family5/nt_v2_meanG test macro-F1",
+      "ok": true,
+      "detail": "mine 0.692802040891217, record 0.692802040891217"
+    },
+    {
+      "check": "[1] cell splits.json/cds/family5/nt_v2_meanG n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "[2] cell splits.json/cds/family5/kmer6 pick",
+      "ok": true,
+      "detail": "mine 10, record 10"
+    },
+    {
+      "check": "[2] cell splits.json/cds/family5/kmer6 edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[2] cell splits.json/cds/family5/kmer6 sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]"
+    },
+    {
+      "check": "[2] cell splits.json/cds/family5/kmer6 sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[2] cell splits.json/cds/family5/kmer6 test predictions",
+      "ok": true,
+      "detail": "0 of 487 test genes differ"
+    },
+    {
+      "check": "[2] cell splits.json/cds/family5/kmer6 npz y_true vs parquet family",
+      "ok": true,
+      "detail": "0 differ"
+    },
+    {
+      "check": "[2] cell splits.json/cds/family5/kmer6 test macro-F1",
+      "ok": true,
+      "detail": "mine 0.6386482368062592, record 0.6386482368062592"
+    },
+    {
+      "check": "[2] cell splits.json/cds/family5/kmer6 n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "[3] cell splits.json/cds/family5/aa3 pick",
+      "ok": true,
+      "detail": "mine 100, record 100"
+    },
+    {
+      "check": "[3] cell splits.json/cds/family5/aa3 edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[3] cell splits.json/cds/family5/aa3 sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]"
+    },
+    {
+      "check": "[3] cell splits.json/cds/family5/aa3 sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[3] cell splits.json/cds/family5/aa3 test predictions",
+      "ok": true,
+      "detail": "0 of 487 test genes differ"
+    },
+    {
+      "check": "[3] cell splits.json/cds/family5/aa3 npz y_true vs parquet family",
+      "ok": true,
+      "detail": "0 differ"
+    },
+    {
+      "check": "[3] cell splits.json/cds/family5/aa3 test macro-F1",
+      "ok": true,
+      "detail": "mine 0.7674303758119946, record 0.7674303758119946"
+    },
+    {
+      "check": "[3] cell splits.json/cds/family5/aa3 n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "[4] cell splits.json/cds/family5/esm2_650m pick",
+      "ok": true,
+      "detail": "mine 100, record 100"
+    },
+    {
+      "check": "[4] cell splits.json/cds/family5/esm2_650m edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[4] cell splits.json/cds/family5/esm2_650m sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]"
+    },
+    {
+      "check": "[4] cell splits.json/cds/family5/esm2_650m sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[4] cell splits.json/cds/family5/esm2_650m test predictions",
+      "ok": true,
+      "detail": "0 of 487 test genes differ"
+    },
+    {
+      "check": "[4] cell splits.json/cds/family5/esm2_650m npz y_true vs parquet family",
+      "ok": true,
+      "detail": "0 differ"
+    },
+    {
+      "check": "[4] cell splits.json/cds/family5/esm2_650m test macro-F1",
+      "ok": true,
+      "detail": "mine 0.95362805991962, record 0.95362805991962"
+    },
+    {
+      "check": "[4] cell splits.json/cds/family5/esm2_650m n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "[5] cell splits.json/cds/family5/kmer pick",
+      "ok": true,
+      "detail": "mine 0.01, record 0.01"
+    },
+    {
+      "check": "[5] cell splits.json/cds/family5/kmer edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[5] cell splits.json/cds/family5/kmer sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]"
+    },
+    {
+      "check": "[5] cell splits.json/cds/family5/kmer sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[5] cell splits.json/cds/family5/kmer test predictions",
+      "ok": true,
+      "detail": "0 of 487 test genes differ"
+    },
+    {
+      "check": "[5] cell splits.json/cds/family5/kmer npz y_true vs parquet family",
+      "ok": true,
+      "detail": "0 differ"
+    },
+    {
+      "check": "[5] cell splits.json/cds/family5/kmer test macro-F1",
+      "ok": true,
+      "detail": "mine 0.64818007815698, record 0.64818007815698"
+    },
+    {
+      "check": "[5] cell splits.json/cds/family5/kmer n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "[6] cell splits_tss_disjoint.json/cds/family5/nt_v2_specialmean pick",
+      "ok": true,
+      "detail": "mine 1, record 1"
+    },
+    {
+      "check": "[6] cell splits_tss_disjoint.json/cds/family5/nt_v2_specialmean edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[6] cell splits_tss_disjoint.json/cds/family5/nt_v2_specialmean sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]"
+    },
+    {
+      "check": "[6] cell splits_tss_disjoint.json/cds/family5/nt_v2_specialmean sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[6] cell splits_tss_disjoint.json/cds/family5/nt_v2_specialmean test predictions",
+      "ok": true,
+      "detail": "0 of 486 test genes differ"
+    },
+    {
+      "check": "[6] cell splits_tss_disjoint.json/cds/family5/nt_v2_specialmean npz y_true vs parquet family",
+      "ok": true,
+      "detail": "0 differ"
+    },
+    {
+      "check": "[6] cell splits_tss_disjoint.json/cds/family5/nt_v2_specialmean test macro-F1",
+      "ok": true,
+      "detail": "mine 0.693555859714189, record 0.693555859714189"
+    },
+    {
+      "check": "[6] cell splits_tss_disjoint.json/cds/family5/nt_v2_specialmean n_test_scored",
+      "ok": true,
+      "detail": "mine 465, record 465"
+    },
+    {
+      "check": "[7] cell splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean pick",
+      "ok": true,
+      "detail": "mine 0.1, record 0.1"
+    },
+    {
+      "check": "[7] cell splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[7] cell splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]"
+    },
+    {
+      "check": "[7] cell splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[7] cell splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean test predictions",
+      "ok": true,
+      "detail": "0 of 486 test genes differ"
+    },
+    {
+      "check": "[7] cell splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean npz y_true vs parquet family",
+      "ok": true,
+      "detail": "0 differ"
+    },
+    {
+      "check": "[7] cell splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean test macro-F1",
+      "ok": true,
+      "detail": "mine 0.30035742035742036, record 0.30035742035742036"
+    },
+    {
+      "check": "[7] cell splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean n_test_scored",
+      "ok": true,
+      "detail": "mine 465, record 465"
+    },
+    {
+      "check": "[8] cell splits.json/cds/genept/dnabert2_specialmean pick",
+      "ok": true,
+      "detail": "mine 10000, record 10000"
+    },
+    {
+      "check": "[8] cell splits.json/cds/genept/dnabert2_specialmean edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[8] cell splits.json/cds/genept/dnabert2_specialmean sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]"
+    },
+    {
+      "check": "[8] cell splits.json/cds/genept/dnabert2_specialmean sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[8] cell splits.json/cds/genept/dnabert2_specialmean targets_file vs parquet y",
+      "ok": true,
+      "detail": "max |diff| 0"
+    },
+    {
+      "check": "[8] cell splits.json/cds/genept/dnabert2_specialmean test R2",
+      "ok": true,
+      "detail": "mine 0.06516900658607483, record 0.06516900658607483, max |pred diff| 0"
+    },
+    {
+      "check": "[8] cell splits.json/cds/genept/dnabert2_specialmean n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "[9] cell splits.json/cds/genept/aa3 pick",
+      "ok": true,
+      "detail": "mine 10000, record 10000"
+    },
+    {
+      "check": "[9] cell splits.json/cds/genept/aa3 edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[9] cell splits.json/cds/genept/aa3 sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]"
+    },
+    {
+      "check": "[9] cell splits.json/cds/genept/aa3 sweep points",
+      "ok": true,
+      "detail": "max |dscore| 5.55e-17"
+    },
+    {
+      "check": "[9] cell splits.json/cds/genept/aa3 targets_file vs parquet y",
+      "ok": true,
+      "detail": "max |diff| 0"
+    },
+    {
+      "check": "[9] cell splits.json/cds/genept/aa3 test R2",
+      "ok": true,
+      "detail": "mine 0.08018061518669128, record 0.08018061518669128, max |pred diff| 0"
+    },
+    {
+      "check": "[9] cell splits.json/cds/genept/aa3 n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "[10] cell splits.json/cds/family5/kmer/shuf0 pick",
+      "ok": true,
+      "detail": "mine 1, record 1"
+    },
+    {
+      "check": "[10] cell splits.json/cds/family5/kmer/shuf0 edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[10] cell splits.json/cds/family5/kmer/shuf0 sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]"
+    },
+    {
+      "check": "[10] cell splits.json/cds/family5/kmer/shuf0 sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[10] cell splits.json/cds/family5/kmer/shuf0 test predictions",
+      "ok": true,
+      "detail": "0 of 487 test genes differ"
+    },
+    {
+      "check": "[10] cell splits.json/cds/family5/kmer/shuf0 npz y_true vs parquet family",
+      "ok": true,
+      "detail": "0 differ"
+    },
+    {
+      "check": "[10] cell splits.json/cds/family5/kmer/shuf0 test macro-F1",
+      "ok": true,
+      "detail": "mine 0.21017466655995273, record 0.21017466655995273"
+    },
+    {
+      "check": "[10] cell splits.json/cds/family5/kmer/shuf0 n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "[11] cell splits.json/tss/family5/tss_hyena_dna_chunk6mer pick",
+      "ok": true,
+      "detail": "mine 10000, record 10000"
+    },
+    {
+      "check": "[11] cell splits.json/tss/family5/tss_hyena_dna_chunk6mer edge",
+      "ok": true,
+      "detail": "mine 'plateau', record 'plateau'"
+    },
+    {
+      "check": "[11] cell splits.json/tss/family5/tss_hyena_dna_chunk6mer sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]"
+    },
+    {
+      "check": "[11] cell splits.json/tss/family5/tss_hyena_dna_chunk6mer sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[11] cell splits.json/tss/family5/tss_hyena_dna_chunk6mer test predictions",
+      "ok": true,
+      "detail": "0 of 487 test genes differ"
+    },
+    {
+      "check": "[11] cell splits.json/tss/family5/tss_hyena_dna_chunk6mer npz y_true vs parquet family",
+      "ok": true,
+      "detail": "0 differ"
+    },
+    {
+      "check": "[11] cell splits.json/tss/family5/tss_hyena_dna_chunk6mer test macro-F1",
+      "ok": true,
+      "detail": "mine 0.3288523758860256, record 0.3288523758860256"
+    },
+    {
+      "check": "[11] cell splits.json/tss/family5/tss_hyena_dna_chunk6mer n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "[13] cell splits.json/tss/family5/tss_hyena_dna_meanmean pick",
+      "ok": true,
+      "detail": "mine 10, record 10"
+    },
+    {
+      "check": "[13] cell splits.json/tss/family5/tss_hyena_dna_meanmean edge",
+      "ok": true,
+      "detail": "mine 'nonconverged', record 'nonconverged'"
+    },
+    {
+      "check": "[13] cell splits.json/tss/family5/tss_hyena_dna_meanmean sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]"
+    },
+    {
+      "check": "[13] cell splits.json/tss/family5/tss_hyena_dna_meanmean sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[13] cell splits.json/tss/family5/tss_hyena_dna_meanmean test predictions",
+      "ok": true,
+      "detail": "0 of 487 test genes differ"
+    },
+    {
+      "check": "[13] cell splits.json/tss/family5/tss_hyena_dna_meanmean npz y_true vs parquet family",
+      "ok": true,
+      "detail": "0 differ"
+    },
+    {
+      "check": "[13] cell splits.json/tss/family5/tss_hyena_dna_meanmean test macro-F1",
+      "ok": true,
+      "detail": "mine 0.2734832451499118, record 0.2734832451499118"
+    },
+    {
+      "check": "[13] cell splits.json/tss/family5/tss_hyena_dna_meanmean n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "[14] cell splits.json/tss/genept/tss_hyena_dna_maxmean pick",
+      "ok": true,
+      "detail": "mine 100000, record 100000"
+    },
+    {
+      "check": "[14] cell splits.json/tss/genept/tss_hyena_dna_maxmean edge",
+      "ok": true,
+      "detail": "mine False, record False"
+    },
+    {
+      "check": "[14] cell splits.json/tss/genept/tss_hyena_dna_maxmean sweep grid",
+      "ok": true,
+      "detail": "mine [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0], record [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0]"
+    },
+    {
+      "check": "[14] cell splits.json/tss/genept/tss_hyena_dna_maxmean sweep points",
+      "ok": true,
+      "detail": "max |dscore| 0"
+    },
+    {
+      "check": "[14] cell splits.json/tss/genept/tss_hyena_dna_maxmean targets_file vs parquet y",
+      "ok": true,
+      "detail": "max |diff| 0"
+    },
+    {
+      "check": "[14] cell splits.json/tss/genept/tss_hyena_dna_maxmean test R2",
+      "ok": true,
+      "detail": "mine -0.019412914291024208, record -0.019412914291024208, max |pred diff| 0"
+    },
+    {
+      "check": "[14] cell splits.json/tss/genept/tss_hyena_dna_maxmean n_test_scored",
+      "ok": true,
+      "detail": "mine 459, record 459"
+    },
+    {
+      "check": "gene universe",
+      "ok": true,
+      "detail": "cluster table 3244 genes, parquet 3244, differing 0"
+    },
+    {
+      "check": "stats T1 y_true",
+      "ok": true,
+      "detail": "0 npz y_true differ from parquet family"
+    },
+    {
+      "check": "stats T2 y_true",
+      "ok": true,
+      "detail": "0 npz y_true differ from parquet family"
+    },
+    {
+      "check": "stats T3 y_true",
+      "ok": true,
+      "detail": "0 npz y_true differ from parquet family"
+    },
+    {
+      "check": "stats T4 y_true",
+      "ok": true,
+      "detail": "0 npz y_true differ from parquet family"
+    }
+  ],
+  "failures": []
+}

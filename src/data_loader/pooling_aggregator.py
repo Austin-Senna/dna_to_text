@@ -6,11 +6,29 @@ docs/stage3-train-probes.md.
 
 Variants:
     meanmean  : mean across chunks of (mean tokens per chunk).        d
+    centermean: the center chunk's (mean tokens) vector.              d
     specialmean: mean across chunks of (mean all tokens per chunk).   d
     maxmean   : mean across chunks of (max  tokens per chunk).        d
     clsmean   : mean across chunks of (CLS  per chunk).               d
     meanD     : concat[first, last, mean] of (mean tokens).           3d
     meanG     : concat[first, last, mean, max] of (mean tokens).      4d
+
+TSS windows are in gene orientation (Phase 1B), so for every gene the first
+chunk is the most upstream and the last the most downstream; meanD/meanG's
+first/last read the window's 5' and 3' ends. (Before Phase 1B minus-strand
+windows were forward strand, so "first" was downstream for 48% of genes.)
+
+`centermean` takes the chunk at index ``n_chunks // 2``, a count-based midpoint
+and NOT the TSS. Chunks overlap by ``stride`` and the last chunk is aligned to
+the sequence end, so this chunk sits systematically 3' of the window's bp
+midpoint, i.e. downstream of the TSS. The May 2026 measurement (forward-strand
+windows): median offset +1.2 kb (DNABERT-2), +1.4 kb (GENA-LM), +5.6 kb (NT-v2,
+HyenaDNA); it contained the TSS base in ~50% of genes for the 510-token
+encoders but only 0.03% for the wide-window ones, so it is not a same-locus
+comparison across encoders (``analysis/tss_overlap/center_chunk_finding.md``,
+to be re-measured on the canonical-TSS windows by ``check_tss_center_chunk.py``).
+For a genuine TSS-anchored feature (``argmin_k |chunk_bp_center - TSS|``) use
+``scripts/build_tss_anchored_datasets.py``.
 
 The "max" inside meanG is per-dim max ACROSS chunks of the mean-tokens-per-
 chunk vectors — distinct from maxmean (which is mean ACROSS chunks of the
@@ -20,12 +38,18 @@ from __future__ import annotations
 
 import numpy as np
 
+# The CDS sweep pools. `centermean` is TSS-only: it is the template the E5
+# TSS-anchored builders read, not a pool that competes in validation selection.
 POOLING_VARIANTS = ("meanmean", "specialmean", "maxmean", "clsmean", "meanD", "meanG")
+TSS_POOLING_VARIANTS = POOLING_VARIANTS + ("centermean",)
 
 
-def available_variants(per_chunk: dict[str, np.ndarray]) -> tuple[str, ...]:
-    """Return pooling variants supported by the available per-chunk reductions."""
-    variants = ["meanmean"]
+def available_variants(per_chunk: dict[str, np.ndarray], include_center: bool = False) -> tuple[str, ...]:
+    """Return pooling variants supported by the available per-chunk reductions.
+
+    ``include_center`` adds the TSS-only ``centermean`` (see TSS_POOLING_VARIANTS).
+    """
+    variants = ["meanmean", "centermean"] if include_center else ["meanmean"]
     if "special_mean" in per_chunk:
         variants.append("specialmean")
     if "max" in per_chunk:
@@ -41,6 +65,8 @@ def aggregate(per_chunk: dict[str, np.ndarray], variant: str) -> np.ndarray:
     mean = per_chunk["mean"]   # (n_chunks, d)
     if variant == "meanmean":
         return mean.mean(axis=0).astype(np.float32)
+    if variant == "centermean":
+        return mean[mean.shape[0] // 2].astype(np.float32)
     if variant == "specialmean":
         if "special_mean" not in per_chunk:
             raise ValueError("specialmean requested but per-chunk reductions do not include 'special_mean'")
@@ -63,7 +89,7 @@ def aggregate(per_chunk: dict[str, np.ndarray], variant: str) -> np.ndarray:
 
 
 def output_dim(variant: str, per_chunk_d: int) -> int:
-    if variant in ("meanmean", "specialmean", "maxmean", "clsmean"):
+    if variant in ("meanmean", "centermean", "specialmean", "maxmean", "clsmean"):
         return per_chunk_d
     if variant == "meanD":
         return 3 * per_chunk_d

@@ -63,7 +63,7 @@ Current gene_table has **3,244 rows**. So the within-5-families ceiling is +3 ge
 | Genes in `gene_table.parquet` without a `.fa` file | **0** |
 | `.fa` files not in `gene_table.parquet` | 0 |
 
-The 3-gene gap between the regex-ceiling (3,247) and the current table (3,244) is consistent with three Ensembl REST fetches having failed at original-build time. Recovery would require re-running `scripts/prepare_data.py` against a stable REST snapshot or fetching from a secondary source (NCBI RefSeq) — but at +3 genes the lift is negligible.
+The 3-gene gap between the regex-ceiling (3,247) and the current table (3,244) is consistent with three Ensembl REST fetches having failed at original-build time (the three genes are named in the addendum below). Recovery would require re-running `scripts/prepare_data.py` against a stable REST snapshot or fetching from a secondary source (NCBI RefSeq) — but at +3 genes the lift is negligible.
 
 ## Scope-(b) ceiling — all protein-coding genes with GenePT
 
@@ -104,3 +104,12 @@ import pandas as pd
 ```
 
 Or rerun the inline block from the chat session of 2026-05-15 (see `docs/conference_resubmission_plan.md` live tracker for the commit hash that landed this report).
+
+## Addendum (Oct 2 2026): the three genes
+
+Re-deriving the curation with `src/data_loader/dataset_loader.py` (`FAMILIES`, `filter_family`) against
+`data/hgnc/hgnc_complete_set.tsv` and the GenePT v2 `ada_text` pickle reproduces every count above. The
+three genes in the 3,247 union but not in `data/gene_table.parquet` are all GPCRs (olfactory receptors):
+OR1D4 (ENSG00000255095), OR1E3 (ENSG00000142163), OR51J1 (ENSG00000184321). GPCR 594 - 3 = 591, the
+paper's count. The "HGNC regex match" column counts genes with an Ensembl ID (immune: 173 without that
+filter, 164 with it).

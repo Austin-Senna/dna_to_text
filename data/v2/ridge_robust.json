@@ -1,0 +1,138 @@
+{
+  "stamp": {
+    "git_sha": "a55568c49ad53f9a16924cd1d27ed955983a3d15",
+    "protocol_hash": "91c36f0fc4d5ca30"
+  },
+  "inputs": {
+    "metrics_splits.json": "dcd06ca40250753ba878299edfd3bc4e242776b7609811a5f0d9546d5b5d61c7",
+    "metrics_splits_homology70.json": "5cbb6ef5868a1d1f6ef7d495b753c78b576133b67fab7572cd32a1c2d6664065",
+    "metrics_splits_random.json": "cd07fe7e6268a975ba0d5150f790941907ebd8013288fedcf3be55d48ea891a3",
+    "metrics_splits_seed1.json": "676ef0c5806b70b4b269edc1228d09bfd468a18f351975c180c8c5c763b7da1d",
+    "metrics_splits_seed123.json": "867960ef1ce7032de47afe14db210c17f20efb38029b1dc1925561e9f0617dc2",
+    "metrics_splits_seed7.json": "d505ece865abb0da0239e8dd7f161f63b9202e988cab26cdef8af118f3e4be8e",
+    "metrics_splits_tss_disjoint.json": "7df0a9228ce0fe2ad3beb77cb721acd80b42c0b9cec2dcdd1845c4083f3aa41e",
+    "metrics_splits_tss_disjoint_seed1.json": "78f923ca598f8926942f0c015271808b39ae224b31c03c8afdb592af30cf06ea",
+    "metrics_splits_tss_disjoint_seed123.json": "2e81f6867e6b87906c0fa621d07b10228ac6d37e5cf3cc17da224edd792115db",
+    "metrics_splits_tss_disjoint_seed7.json": "d65d56b9c563e408471c576e7fe67748700b4913649dc94a7043ac2bcee4a42c",
+    "null_splits.json": "e0a33015f2b6c9ca040360d3b1c174d9032ea95be66ec9c1ea1c656237888d0e",
+    "null_splits_tss_disjoint.json": "15feefd85a4f7b86aa0b87c85f48d5f43e361efd7be5d2b317467dd825fc4d30"
+  },
+  "rows": [
+    {
+      "label": "ESM-2 650M (upper bound)",
+      "key": "splits.json/cds/genept/esm2_650m",
+      "alpha": 1000.0,
+      "macro_r2": 0.17597945034503937,
+      "pooled_r2": 0.18736642599105835,
+      "n_test": 459,
+      "top1": 0.11546840958605664,
+      "top5": 0.27450980392156865,
+      "top10": 0.3877995642701525,
+      "median_rank": 18.0,
+      "chance_top1": 0.002178649237472767,
+      "chance_top5": 0.010893246187363835
+    },
+    {
+      "label": "ESM-2 150M",
+      "key": "splits.json/cds/genept/esm2_150m",
+      "alpha": 1000.0,
+      "macro_r2": 0.15788577497005463,
+      "pooled_r2": 0.1686314344406128,
+      "n_test": 459,
+      "top1": 0.06535947712418301,
+      "top5": 0.20261437908496732,
+      "top10": 0.29411764705882354,
+      "median_rank": 31.0,
+      "chance_top1": 0.002178649237472767,
+      "chance_top5": 0.010893246187363835
+    },
+    {
+      "label": "DNABERT-2 specialmean (best DNA)",
+      "key": "splits.json/cds/genept/dnabert2_specialmean",
+      "alpha": 10000.0,
+      "macro_r2": 0.06516900658607483,
+      "pooled_r2": 0.07205343246459961,
+      "n_test": 459,
+      "top1": 0.006535947712418301,
+      "top5": 0.05010893246187364,
+      "top10": 0.09586056644880174,
+      "median_rank": 96.0,
+      "chance_top1": 0.002178649237472767,
+      "chance_top5": 0.010893246187363835
+    },
+    {
+      "label": "NT-v2 specialmean",
+      "key": "splits.json/cds/genept/nt_v2_specialmean",
+      "alpha": 1000.0,
+      "macro_r2": 0.04259210824966431,
+      "pooled_r2": 0.05072474479675293,
+      "n_test": 459,
+      "top1": 0.010893246187363835,
+      "top5": 0.06318082788671024,
+      "top10": 0.1111111111111111,
+      "median_rank": 79.0,
+      "chance_top1": 0.002178649237472767,
+      "chance_top5": 0.010893246187363835
+    },
+    {
+      "label": "GENA-LM meanD",
+      "key": "splits.json/cds/genept/gena_lm_meanD",
+      "alpha": 10000.0,
+      "macro_r2": 0.048762161284685135,
+      "pooled_r2": 0.055978238582611084,
+      "n_test": 459,
+      "top1": 0.013071895424836602,
+      "top5": 0.058823529411764705,
+      "top10": 0.10021786492374728,
+      "median_rank": 91.0,
+      "chance_top1": 0.002178649237472767,
+      "chance_top5": 0.010893246187363835
+    },
+    {
+      "label": "HyenaDNA meanD",
+      "key": "splits.json/cds/genept/hyena_dna_meanD",
+      "alpha": 1000.0,
+      "macro_r2": 0.029011325910687447,
+      "pooled_r2": 0.034851670265197754,
+      "n_test": 459,
+      "top1": 0.017429193899782137,
+      "top5": 0.05228758169934641,
+      "top10": 0.07625272331154684,
+      "median_rank": 111.0,
+      "chance_top1": 0.002178649237472767,
+      "chance_top5": 0.010893246187363835
+    },
+    {
+      "label": "TSS DNABERT-2 meanmean",
+      "key": "splits_tss_disjoint.json/tss/genept/tss_dnabert2_meanmean",
+      "alpha": 1000.0,
+      "macro_r2": -0.011393665336072445,
+      "pooled_r2": -0.010079503059387207,
+      "n_test": 465,
+      "top1": 0.004301075268817204,
+      "top5": 0.023655913978494623,
+      "top10": 0.03655913978494624,
+      "median_rank": 195.0,
+      "chance_top1": 0.002150537634408602,
+      "chance_top5": 0.010752688172043012
+    },
+    {
+      "label": "Shuffled-label control (4-mer, median of 200)",
+      "key": "null band",
+      "n_shuffles": 200,
+      "macro_r2_band95": [
+        -0.026767436228692532,
+        -0.024708776967599988
+      ],
+      "macro_r2": -0.026709984987974167,
+      "pooled_r2": -0.026381313800811768,
+      "top1": 0.002178649237472767,
+      "top5": 0.010893246187363835,
+      "top10": 0.02178649237472767,
+      "median_rank": 230.0,
+      "n_test": 459.0,
+      "chance_top1": 0.002178649237472767,
+      "chance_top5": 0.010893246187363835
+    }
+  ]
+}

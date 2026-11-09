@@ -7,11 +7,12 @@ history. Active docs mirror the sample input/output stages in `../samples/`.
 
 - `stage1-curate-genes.md` - curate genes, join GenePT/HGNC, and fetch CDS.
 - `stage2-encode-cds.md` - run CDS encoders and build pooling datasets.
-- `stage3-train-probes.md` - train family5 and Ridge-to-GenePT probes.
-- `stage4-1-tss-windows.md` - derive strand-aware TSS-centered windows.
-- `stage4-2-tss-encoders.md` - run TSS NT-v2 and Enformer context ablations.
-- `stage5-bootstrap.md` - 1,000-run bootstrap confidence interval protocol.
-- `stage6-analysis-artifacts.md` - regenerate report tables and figures.
+- `stage3-train-probes.md` - build the homology-aware splits and the evaluation purge, and train family5 and Ridge-to-GenePT probes under the V2 protocol.
+- `stage4-1-tss-windows.md` - derive strand-aware TSS-centered windows and the TSS-primary split (`data/splits_tss_disjoint.json`).
+- `stage4-2-tss-encoders.md` - run the four DNA encoders and Enformer on TSS windows, plus the GPU extraction pilot tooling.
+- `stage5-bootstrap.md` - cluster-bootstrap intervals, the four primary tests (T1-T4) and the null bands.
+- Stage 6 (report analysis artifacts) is retired.
+- `stage7-paper-figures-tables.md` - render the manuscript figures and LaTeX table fragments.
 
 ## Submission Entry Points
 
@@ -24,5 +25,6 @@ history. Active docs mirror the sample input/output stages in `../samples/`.
 - `archive/project-history/` - original pitch, framework, next-step log, and writeup scaffold.
 - `archive/notes/` - older method notes and paper-revision follow-up log.
 
-Generated report tables and figures live outside this docs tree in
-`analysis/tables/` and `analysis/figures/`.
+The paper's tables and figures are generated into the paper submodule
+(`dna_to_text_paper/paper/tables/`, `dna_to_text_paper/paper/figures/`); see
+`stage7-paper-figures-tables.md`. Stage 6 is retired and its outputs removed.

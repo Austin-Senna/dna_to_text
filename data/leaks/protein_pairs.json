@@ -1,0 +1,39 @@
+{
+  "proteins": {
+    "translation": "translate_cds(mode=\"through\")",
+    "n": 3244,
+    "fasta_sha256": "79cfe426962ded3b68f4c5cd3819aadc02f52d9c56484c7a5bea83a9df11cce3",
+    "gene_universe": {
+      "path": "data/splits.json",
+      "sha256": "c8e64cd5650d20a350fcd83c50b8257ab02b382356d5218acb910c8be4eacd23"
+    }
+  },
+  "mmseqs": {
+    "version": "18cc7493f392b95699ded8c0534dad1558ccc0f1",
+    "command": "easy-search",
+    "flags": [
+      "--exhaustive-search",
+      "1",
+      "--max-seqs",
+      "10000",
+      "-e",
+      "1e-3",
+      "--seq-id-mode",
+      "0",
+      "--alignment-mode",
+      "3",
+      "--threads",
+      "1",
+      "--format-output",
+      "query,target,fident,alnlen,qcov,tcov,evalue"
+    ]
+  },
+  "rule_a": {
+    "max_evalue": 0.001,
+    "min_fident": 0.4,
+    "min_coverage_both": 0.8,
+    "direction": "either direction passing"
+  },
+  "n_pairs": 54946,
+  "table_sha256": "d2874ad063f5e5e3b275ef80757e084cc55e73a56fd80d1ee1945188f3106450"
+}

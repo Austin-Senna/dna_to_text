@@ -1,8 +1,9 @@
 """Parse an Ensembl GTF into a compact feature table and per-chromosome index.
 
-Coordinates are kept in GTF convention: 1-based, inclusive on both ends. This
-matches ``data_loader.enformer_windows.centered_window`` so window/feature
-intersections need no offset juggling.
+Coordinates are kept in GTF convention: 1-based, inclusive on both ends, the
+same as the window manifest's spans, so window/feature intersections need no
+offset juggling. Use the pinned release (``enformer_windows.GTF_PATH``) and a
+cache named for it, so features and windows come from one annotation.
 """
 from __future__ import annotations
 

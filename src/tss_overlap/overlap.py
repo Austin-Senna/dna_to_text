@@ -1,8 +1,9 @@
 """Per-window genomic-feature overlap accounting for TSS windows.
 
-For each TSS-centered window we paint length-``L`` boolean masks of the bases
-covered by the target gene's CDS / UTR / exon / gene-span and by neighbour
-genes, then report two views:
+For each TSS window (its genomic span from the window manifest; N padding at a
+chromosome edge covers no genome) we paint boolean masks of the bases covered
+by the target gene's CDS / UTR / exon / gene-span and by neighbour genes, then
+report two views:
 
 * **raw fractions** -- fraction of the window overlapping each feature type
   independently (these can overlap, e.g. CDS is a subset of exon);
@@ -11,14 +12,13 @@ genes, then report two views:
 """
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from data_loader.enformer_windows import ENFORMER_WINDOW_LENGTH, centered_window
+from data_loader.enformer_windows import MANIFEST, load_manifest
 
 UTR_FEATURES = ("five_prime_utr", "three_prime_utr")
 
@@ -55,19 +55,15 @@ def _paint(mask: np.ndarray, start: int, end: int, w0: int, length: int) -> None
         mask[a:b] = True
 
 
-def window_overlap(target_id: str, lookup: dict, gtf_index: dict[str, dict]) -> dict:
+def window_overlap(target_id: str, span: tuple[str, int, int], gtf_index: dict[str, dict],
+                   strand: int | None = None) -> dict:
     """Compute overlap fractions for one gene's TSS window.
 
-    ``lookup`` is the cached Ensembl lookup dict (``seq_region_name``, ``start``,
-    ``end``, ``strand``, ...). ``gtf_index`` is the output of
+    ``span`` is the window's genomic ``(chrom, start, end)`` (1-based inclusive)
+    from the manifest. ``gtf_index`` is the output of
     :func:`tss_overlap.gtf.index_by_chrom`.
     """
-    chrom, w0, w1 = centered_window(
-        seq_region_name=str(lookup["seq_region_name"]),
-        start=int(lookup["start"]),
-        end=int(lookup["end"]),
-        strand=int(lookup.get("strand", 1)),
-    )
+    chrom, w0, w1 = span
     length = w1 - w0 + 1
     result: dict = {
         "ensembl_id": target_id,
@@ -75,7 +71,7 @@ def window_overlap(target_id: str, lookup: dict, gtf_index: dict[str, dict]) -> 
         "window_start": w0,
         "window_end": w1,
         "window_len": length,
-        "biotype": lookup.get("biotype"),
+        "strand": strand,
         "in_gtf": False,
         "n_neighbor_genes": 0,
     }
@@ -156,7 +152,7 @@ def window_overlap(target_id: str, lookup: dict, gtf_index: dict[str, dict]) -> 
 
 def compute_all(
     meta_df: pd.DataFrame,
-    lookup_dir: str | Path,
+    manifest: str | Path,
     gtf_index: dict[str, dict],
     *,
     progress: bool = True,
@@ -165,9 +161,9 @@ def compute_all(
 
     ``meta_df`` must have ``ensembl_id`` (and optionally ``symbol``/``family``).
     Returns ``(per_gene_df, skipped)`` where ``skipped`` lists ``(ensembl_id, reason)``
-    for genes without a cached lookup JSON.
+    for genes missing from the window manifest.
     """
-    lookup_dir = Path(lookup_dir)
+    m = load_manifest(manifest if manifest is not None else MANIFEST)
     rows: list[dict] = []
     skipped: list[tuple[str, str]] = []
 
@@ -175,12 +171,12 @@ def compute_all(
     iterator = tqdm(records, desc="tss overlap") if progress else records
     for row in iterator:
         eid = row["ensembl_id"]
-        lk_path = lookup_dir / f"{eid}.json"
-        if not lk_path.exists():
-            skipped.append((eid, "no_lookup"))
+        if eid not in m.index:
+            skipped.append((eid, "not_in_manifest"))
             continue
-        lookup = json.loads(lk_path.read_text())
-        res = window_overlap(eid, lookup, gtf_index)
+        r = m.loc[eid]
+        res = window_overlap(eid, (str(r["chrom"]), int(r["start"]), int(r["end"])),
+                             gtf_index, strand=int(r["strand"]))
         res["symbol"] = row.get("symbol")
         res["family"] = row.get("family")
         rows.append(res)

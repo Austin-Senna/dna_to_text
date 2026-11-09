@@ -1,41 +1,35 @@
-"""Train the linear probe: sweep alpha on val, refit on train+val, evaluate on test."""
+"""Train the Ridge probe (encoder embeddings -> GenePT vectors) for one parquet.
+
+Sweep alpha on val, refit on train+val, score test once: ``run_cell`` under
+the V2 protocol.
+"""
 from __future__ import annotations
 
 import argparse
-import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-import numpy as np
-from sklearn.metrics import r2_score
-
-from linear_trainer import LinearProbe, fit, sweep_alpha
-from splits import load_split
+from linear_trainer.cell import append_record, run_cell
+from linear_trainer.protocol import V2
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA = REPO_ROOT / "data"
-DEFAULT_ALPHAS = [1e-2, 1e-1, 1.0, 10.0, 100.0, 1000.0]
+PRED_ROOT = REPO_ROOT / "outputs" / "predictions"
 
 
-def _cosine(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    num = (a * b).sum(axis=-1)
-    den = np.linalg.norm(a, axis=-1) * np.linalg.norm(b, axis=-1)
-    return num / np.clip(den, 1e-12, None)
-
-
-def _append_metrics(path: Path, entry: dict) -> None:
-    runs: list = []
-    if path.exists():
-        runs = json.loads(path.read_text())
-        if not isinstance(runs, list):
-            raise ValueError(f"{path} is not a JSON array")
-    runs.append(entry)
-    path.write_text(json.dumps(runs, indent=2))
+def print_sweep(res: dict, select_by: str) -> None:
+    for r in res["sweep"]:
+        mark = " *" if r["alpha"] == res["hp"] else ""
+        print(f"  alpha={r['alpha']:>8.3g}  val_r2={r['r2']:.4f}  "
+              f"mean_cosine={r['mean_cosine']:.4f}{mark}")
+    m = res["metrics"]
+    print(f"  best alpha = {res['hp']:g}  (selected by val {select_by}; edge={res['edge']})")
+    print(f"  test_mean_cosine = {m['test_mean_cosine']:.4f}  "
+          f"test_median_cosine = {m['test_median_cosine']:.4f}  test_r2_macro = {m['test_r2_macro']:.4f}")
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--alphas", type=float, nargs="+", default=DEFAULT_ALPHAS)
     ap.add_argument(
         "--select-by",
         choices=["r2", "cosine"],
@@ -44,49 +38,20 @@ def main():
     )
     ap.add_argument("--dataset", default=str(DATA / "dataset.parquet"))
     ap.add_argument("--probe-out", default=str(DATA / "probe.npz"))
+    ap.add_argument("--splits", default=str(DATA / "splits.json"))
     ap.add_argument("--metrics-out", default=str(DATA / "metrics.json"))
+    ap.add_argument("--pred-dir", default=None,
+                    help="where test predictions go (default: outputs/predictions/<metrics stem>/)")
     args = ap.parse_args()
+    pred_dir = Path(args.pred_dir) if args.pred_dir else PRED_ROOT / Path(args.metrics_out).stem
 
     dataset_path = Path(args.dataset)
-    print(f"=== loading splits from {dataset_path.name} ===")
-    X_tr, Y_tr, _ = load_split("train", dataset_path=dataset_path)
-    X_val, Y_val, _ = load_split("val", dataset_path=dataset_path)
-    X_te, Y_te, _ = load_split("test", dataset_path=dataset_path)
-    print(f"  train={X_tr.shape} val={X_val.shape} test={X_te.shape}")
-
-    print(f"\n=== alpha sweep (select by val {args.select_by}) ===")
-    best_alpha, sweep = sweep_alpha(
-        X_tr, Y_tr, X_val, Y_val, args.alphas, select_by=args.select_by
-    )
-    for r in sweep:
-        mark = " *" if r["alpha"] == best_alpha else ""
-        print(
-            f"  alpha={r['alpha']:>8.3g}  "
-            f"val_r2={r['r2']:.4f}  mean_cosine={r['mean_cosine']:.4f}{mark}"
-        )
-    print(f"  best alpha = {best_alpha}  (selected by val {args.select_by})")
-
-    print("\n=== refit on train+val ===")
-    X_fit = np.vstack([X_tr, X_val])
-    Y_fit = np.vstack([Y_tr, Y_val])
-    probe = fit(X_fit, Y_fit, best_alpha)
-    assert probe.W.shape == (X_tr.shape[1], Y_tr.shape[1]), probe.W.shape
-    assert probe.b.shape == (Y_tr.shape[1],), probe.b.shape
-
-    print("\n=== evaluate on test ===")
-    Y_hat = probe.predict(X_te)
-    cos = _cosine(Y_hat, Y_te)
-    test_mean_cos = float(cos.mean())
-    test_median_cos = float(np.median(cos))
-    test_r2_macro = float(r2_score(Y_te, Y_hat, multioutput="uniform_average"))
-    assert test_mean_cos > 0, f"pipeline broken: mean cosine {test_mean_cos}"
-    print(f"  test_mean_cosine   = {test_mean_cos:.4f}")
-    print(f"  test_median_cosine = {test_median_cos:.4f}")
-    print(f"  test_r2_macro      = {test_r2_macro:.4f}")
-
-    probe_path = Path(args.probe_out)
-    probe.save(probe_path)
-    print(f"\n  wrote probe → {probe_path}")
+    print(f"=== Ridge cell: {dataset_path.name} splits={args.splits} ===")
+    res = run_cell(dataset_path, "genept", Path(args.splits), V2, pred_dir=pred_dir,
+                   select_by=args.select_by, probe_out=Path(args.probe_out))
+    print_sweep(res, args.select_by)
+    m = res["metrics"]
+    assert m["test_mean_cosine"] > 0, f"pipeline broken: mean cosine {m['test_mean_cosine']}"
 
     ts = datetime.now(timezone.utc).isoformat(timespec="seconds")
     entry = {
@@ -94,14 +59,13 @@ def main():
         "timestamp": ts,
         "model": "linear_probe",
         "dataset": dataset_path.name,
-        "alpha": best_alpha,
+        "alpha": res["hp"],
         "select_by": args.select_by,
-        "alpha_sweep": sweep,
-        "test_mean_cosine": test_mean_cos,
-        "test_median_cosine": test_median_cos,
-        "test_r2_macro": test_r2_macro,
+        "alpha_sweep": res["sweep"],
+        **m,
+        **res["provenance"],
     }
-    _append_metrics(Path(args.metrics_out), entry)
+    append_record(Path(args.metrics_out), entry)
     print(f"  appended metrics → {args.metrics_out}")
 
 

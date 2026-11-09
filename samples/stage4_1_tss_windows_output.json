@@ -1,10 +1,14 @@
 {
-  "description": "Small example of Stage 4.1 outputs after TSS windows are fetched and converted into a matched TSS 4-mer feature table.",
+  "description": "Small example of Stage 4.1 outputs: the window manifest and cache, and the matched TSS 4-mer feature table.",
   "stage": "4.1",
   "outputs": [
     {
-      "path": "data/enformer_windows/",
-      "contents": "One cached FASTA window per gene that could be mapped to a TSS-centered genomic interval."
+      "path": "data/tss_windows.tsv",
+      "contents": "Tracked manifest: transcript, strand, TSS, genomic span, N padding, cDNA prefix and sha256 per window."
+    },
+    {
+      "path": "data/tss_windows_e115/",
+      "contents": "One cached FASTA window per gene, gene orientation, TSS at index 98,304."
     },
     {
       "path": "data/dataset_enformer_tss_4mer.parquet",

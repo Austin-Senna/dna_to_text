@@ -1,5 +1,5 @@
 {
-  "description": "Small excerpt of analysis/tables/context_ablation.csv after Stage 4.2 metrics are present.",
+  "description": "Small excerpt of analysis/tables/context_ablation.csv, a retired Stage 6 output (May protocol, no generator). The camera-ready CDS vs TSS comparison is built in Stage 7.",
   "stage": "4.2",
   "output_table": "analysis/tables/context_ablation.csv",
   "output_figure": "analysis/figures/context_ablation_cds_tss_enformer.png",

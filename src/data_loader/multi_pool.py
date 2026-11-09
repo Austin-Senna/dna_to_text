@@ -1,18 +1,23 @@
 """Per-chunk reductions for the Phase 4b pooling sweep.
 
-Forward pass once per chunk; capture four per-chunk reductions in the same
-pass so disk + compute are amortised across all pooling variants:
+Forward pass once per chunk; capture up to four per-chunk reductions in the
+same pass so disk + compute are amortised across all pooling variants:
 
     mean : per-dim mean over content tokens (excludes special tokens)
     special_mean : per-dim mean over every model token (includes specials)
     max  : per-dim max  over content tokens (excludes special tokens)
     cls  : the model's CLS-token representation (position 0)
 
-Tokenisation includes special tokens so position 0 IS the trained CLS
-representation. Content tokens are positions 1..-2 (excluding CLS at 0
-and SEP at -1).
+Boundary tokens come from the encoder spec, not from whatever the tokenizer
+declares: with ``boundary_tokens`` each chunk is wrapped in the tokenizer's
+CLS and, where the tokenizer has one, SEP (position 0 IS the trained CLS
+representation; content is 1..-2, or 1..end for NT-v2, whose tokenizer has no SEP);
+without them (HyenaDNA) the model sees DNA tokens only, and only ``mean`` and
+``max`` are stored (``special_mean`` would equal ``mean``, and there is no CLS).
 
-Output per gene: an .npz with three or four (n_chunks, d) arrays.
+Output per gene: an .npz of (n_chunks, d) arrays plus a ``meta`` record
+(``cache_meta``); a file built from other inputs, code, model, card or torch
+build is refused.
 """
 from __future__ import annotations
 
@@ -22,6 +27,9 @@ from typing import Callable
 import numpy as np
 import torch
 from tqdm import tqdm
+
+from data_loader.cache_meta import (RUNTIME_KEYS, StaleCache, read_meta, read_npz, runtime_stamp,
+                                    sha256_text, write_npz)
 
 REDUCTION_KEYS = ("mean", "special_mean", "max", "cls")
 
@@ -49,23 +57,23 @@ def embed_sequence_multi_pool(
     device: str,
     max_content_tokens: int,
     stride: int,
+    *,
+    boundary_tokens: bool,
 ) -> dict[str, np.ndarray]:
-    """Tokenise the sequence, chunk into content windows, run forward with CLS+SEP
-    wrapped per chunk, and return per-chunk reductions.
-
-    Returns: {"mean": (n_chunks, d), "special_mean": (n_chunks, d),
-    "max": (n_chunks, d), "cls": (n_chunks, d)}. The "cls" key is omitted
-    when the tokenizer has no CLS/BOS token.
+    """Tokenise the sequence, chunk into content windows, run forward per chunk
+    (wrapped in CLS/SEP only when ``boundary_tokens``), and return per-chunk
+    reductions: {"mean", "max"} plus "special_mean" and "cls" with boundary tokens.
     """
-    # CLS/BOS at start is optional. BERT-family tokenizers expose a trained
-    # summary position, but some long-context DNA tokenizers do not. If absent,
-    # we still cache mean/max reductions and downstream code skips clsmean.
-    cls_id = tokenizer.cls_token_id
-    if cls_id is None:
-        cls_id = tokenizer.bos_token_id
-    sep_id = tokenizer.sep_token_id
-    if sep_id is None:
-        sep_id = tokenizer.eos_token_id
+    cls_id = sep_id = None
+    if boundary_tokens:
+        cls_id = tokenizer.cls_token_id
+        if cls_id is None:
+            cls_id = tokenizer.bos_token_id
+        sep_id = tokenizer.sep_token_id
+        if sep_id is None:
+            sep_id = tokenizer.eos_token_id
+        if cls_id is None:
+            raise ValueError("boundary_tokens=True but the tokenizer has no CLS/BOS token")
     has_cls = cls_id is not None
     has_sep = sep_id is not None
 
@@ -105,55 +113,113 @@ def embed_sequence_multi_pool(
 
     reductions = {
         "mean": np.stack(mean_per_chunk, axis=0),
-        "special_mean": np.stack(special_mean_per_chunk, axis=0),
         "max":  np.stack(max_per_chunk, axis=0),
     }
+    if boundary_tokens:
+        reductions["special_mean"] = np.stack(special_mean_per_chunk, axis=0)
     if cls_per_chunk:
         reductions["cls"] = np.stack(cls_per_chunk, axis=0)
     return reductions
 
 
+def _auto_device() -> str:
+    if torch.cuda.is_available():
+        return "cuda"
+    if torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+
+def extraction_meta(spec, seq: str, device: str | None, runtime: dict | None = None) -> dict:
+    """What one gene's reductions depend on: the encoder, its revision and
+    chunking, the device, the card and torch build (``runtime_stamp``), and the
+    exact input sequence (G19)."""
+    return {"encoder": spec.name, "model": spec.model_name, "revision": spec.revision,
+            "boundary_tokens": bool(spec.boundary_tokens),
+            "max_content_tokens": int(spec.max_content_tokens), "stride": int(spec.stride),
+            "device": None if device is None else device.split(":")[0],
+            **(runtime or dict.fromkeys(RUNTIME_KEYS)),
+            "input_sha256": sha256_text(seq)}
+
+
 def embed_all_multi_pool(
-    cds: dict[str, str],
+    seqs: dict[str, str],
     load_model_fn: Callable,
     cache_dir: str | Path,
-    max_content_tokens: int,
-    stride: int,
+    spec,
     device: str | None = None,
     desc: str = "multi-pool embed",
+    collect: bool = True,
 ) -> dict[str, dict[str, np.ndarray]]:
-    """Run multi-pool extraction over all CDS, caching one .npz per gene.
+    """Run multi-pool extraction over every sequence, caching one .npz per gene.
 
-    `load_model_fn` is the encoder's existing `load_model(device)` returning
-    (model, tokenizer, device). Loaded only if there are pending sequences.
+    ``spec`` is the encoder's ``EncoderSpec`` (chunking, boundary tokens,
+    revision). A cached file is reused only if its meta matches exactly; any
+    other file raises ``StaleCache`` (G19). `load_model_fn` is the encoder's
+    `load_model(device)` returning (model, tokenizer, device), loaded only if
+    something is pending.
+
+    `collect=False` skips retaining the per-gene arrays in the returned dict
+    (values become None) so long-window runs do not accumulate GB of reductions
+    in RAM; the per-gene .npz cache is still written. `len(out)` stays correct.
     """
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
+    device = device or _auto_device()  # resolved first: the device is part of the meta
+    runtime = runtime_stamp(device)
 
     out: dict[str, dict[str, np.ndarray]] = {}
-    pending: list[tuple[str, str]] = []
-    for eid, seq in cds.items():
-        cache_file = cache_dir / f"{eid}.npz"
-        if cache_file.exists():
-            with np.load(cache_file) as data:
-                cached = {k: data[k] for k in REDUCTION_KEYS if k in data.files}
-            if "special_mean" in cached:
-                out[eid] = cached
-            else:
-                pending.append((eid, seq))
+    pending: list[tuple[str, str, dict]] = []
+    for eid, seq in seqs.items():
+        meta = extraction_meta(spec, seq, device, runtime)
+        cached = read_npz(cache_dir / f"{eid}.npz", meta)
+        if cached is None:
+            pending.append((eid, seq, meta))
         else:
-            pending.append((eid, seq))
+            out[eid] = cached if collect else None
 
     if not pending:
         return out
 
     model, tokenizer, device = load_model_fn(device)
     print(f"  encoding pending sequences: {len(pending)} on {device}")
-    for eid, seq in tqdm(pending, desc=desc):
+    for eid, seq, meta in tqdm(pending, desc=desc):
         red = embed_sequence_multi_pool(
             seq, model, tokenizer, device,
-            max_content_tokens=max_content_tokens, stride=stride,
+            max_content_tokens=spec.max_content_tokens, stride=spec.stride,
+            boundary_tokens=spec.boundary_tokens,
         )
-        np.savez(cache_dir / f"{eid}.npz", **red)
-        out[eid] = red
+        write_npz(cache_dir / f"{eid}.npz", red, meta)
+        out[eid] = red if collect else None
+    return out
+
+
+def load_reductions(cache_dir: str | Path, spec, seqs: dict[str, str]) -> dict[str, dict[str, np.ndarray]]:
+    """Every gene's cached reductions, each checked against its current input.
+
+    Pool builders read through this, so a parquet can only be built from
+    reductions of these exact sequences (windows from the manifest, CDS from
+    the sequence cache) and this encoder revision (G19), all from one device,
+    card and torch build, which may be another machine's. Missing genes raise.
+    """
+    run_keys = ("device", *RUNTIME_KEYS)
+    out: dict[str, dict[str, np.ndarray]] = {}
+    missing: list[str] = []
+    devices: set = set()
+    for eid, seq in seqs.items():
+        path = Path(cache_dir) / f"{eid}.npz"
+        cached = read_npz(path, extraction_meta(spec, seq, None), ignore=run_keys)
+        if cached is None:
+            missing.append(eid)
+            continue
+        out[eid] = cached
+        meta = read_meta(path)
+        if meta.get("device_name") is None:
+            raise StaleCache(f"{path} is unstamped: no record of the card or torch build it ran on")
+        devices.add(tuple(meta.get(k) for k in run_keys))
+    if missing:
+        raise RuntimeError(f"{spec.name}: no reductions in {cache_dir} for {len(missing)} genes: "
+                           f"{missing[:5]}{'...' if len(missing) > 5 else ''}")
+    if len(devices) > 1:
+        raise StaleCache(f"{spec.name}: reductions in {cache_dir} mix runs {sorted(devices, key=str)}")
     return out

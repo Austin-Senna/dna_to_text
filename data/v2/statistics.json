@@ -1,0 +1,5716 @@
+{
+  "stamp": {
+    "git_sha": "a55568c49ad53f9a16924cd1d27ed955983a3d15",
+    "protocol_hash": "91c36f0fc4d5ca30"
+  },
+  "inputs": {
+    "metrics_splits.json": "dcd06ca40250753ba878299edfd3bc4e242776b7609811a5f0d9546d5b5d61c7",
+    "metrics_splits_homology70.json": "5cbb6ef5868a1d1f6ef7d495b753c78b576133b67fab7572cd32a1c2d6664065",
+    "metrics_splits_random.json": "cd07fe7e6268a975ba0d5150f790941907ebd8013288fedcf3be55d48ea891a3",
+    "metrics_splits_seed1.json": "676ef0c5806b70b4b269edc1228d09bfd468a18f351975c180c8c5c763b7da1d",
+    "metrics_splits_seed123.json": "867960ef1ce7032de47afe14db210c17f20efb38029b1dc1925561e9f0617dc2",
+    "metrics_splits_seed7.json": "d505ece865abb0da0239e8dd7f161f63b9202e988cab26cdef8af118f3e4be8e",
+    "metrics_splits_tss_disjoint.json": "7df0a9228ce0fe2ad3beb77cb721acd80b42c0b9cec2dcdd1845c4083f3aa41e",
+    "metrics_splits_tss_disjoint_seed1.json": "78f923ca598f8926942f0c015271808b39ae224b31c03c8afdb592af30cf06ea",
+    "metrics_splits_tss_disjoint_seed123.json": "2e81f6867e6b87906c0fa621d07b10228ac6d37e5cf3cc17da224edd792115db",
+    "metrics_splits_tss_disjoint_seed7.json": "d65d56b9c563e408471c576e7fe67748700b4913649dc94a7043ac2bcee4a42c",
+    "null_splits.json": "e0a33015f2b6c9ca040360d3b1c174d9032ea95be66ec9c1ea1c656237888d0e",
+    "null_splits_tss_disjoint.json": "15feefd85a4f7b86aa0b87c85f48d5f43e361efd7be5d2b317467dd825fc4d30"
+  },
+  "n_iters": 1000,
+  "seed": 42,
+  "confirmatory": {
+    "T1 encoder > nucleotide k-mer": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/nt_v2_meanG",
+      "b": "splits.json/cds/family5/kmer6",
+      "delta_point": 0.054153804084957846,
+      "delta_ci95": [
+        -0.010685367493215692,
+        0.12616420525820438
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.947,
+      "p_one_sided": 0.053946053946053944,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "edges": [
+        false,
+        false
+      ],
+      "p_holm": 0.10789210789210789
+    },
+    "T2 encoder > amino-acid k-mer": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/nt_v2_meanG",
+      "b": "splits.json/cds/family5/aa3",
+      "delta_point": -0.07462833492077758,
+      "delta_ci95": [
+        -0.13720979375023645,
+        -0.0013619507534032888
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.02,
+      "p_one_sided": 0.98001998001998,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "edges": [
+        false,
+        false
+      ],
+      "p_holm": 0.98001998001998
+    },
+    "T3 ESM-2 650M > encoder": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/esm2_650m",
+      "b": "splits.json/cds/family5/nt_v2_meanG",
+      "delta_point": 0.26082601902840297,
+      "delta_ci95": [
+        0.200159264060547,
+        0.3223693277019716
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "edges": [
+        false,
+        false
+      ],
+      "p_holm": 0.003996003996003996
+    },
+    "T4 CDS > TSS (same encoder)": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+      "delta_point": 0.3931984393567686,
+      "delta_ci95": [
+        0.31204192396562125,
+        0.47856501086319975
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "edges": [
+        false,
+        false
+      ],
+      "p_holm": 0.003996003996003996
+    }
+  },
+  "intervals": {
+    "splits.json/family5/aa1": {
+      "key": "splits.json/cds/family5/aa1",
+      "metric": "test_macro_f1",
+      "point": 0.6970008950516358,
+      "ci95": [
+        0.6371850386099694,
+        0.7605827637458731
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.6791575492341357,
+      "kappa_ci95": [
+        0.6159038923309461,
+        0.7387748849697072
+      ]
+    },
+    "splits.json/family5/aa1_len": {
+      "key": "splits.json/cds/family5/aa1_len",
+      "metric": "test_macro_f1",
+      "point": 0.6772699089409662,
+      "ci95": [
+        0.6145131905109776,
+        0.739107464101669
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.6789868182993022,
+      "kappa_ci95": [
+        0.6140521272516373,
+        0.7396586512429749
+      ]
+    },
+    "splits.json/family5/aa2": {
+      "key": "splits.json/cds/family5/aa2",
+      "metric": "test_macro_f1",
+      "point": 0.7603458446315589,
+      "ci95": [
+        0.6977957231784728,
+        0.8159579275925891
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.7289127516778524,
+      "kappa_ci95": [
+        0.6677926061377938,
+        0.7827114641762323
+      ]
+    },
+    "splits.json/family5/aa2_len": {
+      "key": "splits.json/cds/family5/aa2_len",
+      "metric": "test_macro_f1",
+      "point": 0.7545952948265578,
+      "ci95": [
+        0.6924453373737662,
+        0.8081974915627566
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.7291205211726384,
+      "kappa_ci95": [
+        0.6656200142840978,
+        0.7812931251482974
+      ]
+    },
+    "splits.json/family5/aa3": {
+      "key": "splits.json/cds/family5/aa3",
+      "metric": "test_macro_f1",
+      "point": 0.7674303758119946,
+      "ci95": [
+        0.7034960716284921,
+        0.8214543315360443
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.7569867261657149,
+      "kappa_ci95": [
+        0.697832781360136,
+        0.8081127315097629
+      ]
+    },
+    "splits.json/family5/aa3_len": {
+      "key": "splits.json/cds/family5/aa3_len",
+      "metric": "test_macro_f1",
+      "point": 0.7821310878210653,
+      "ci95": [
+        0.7181992747185941,
+        0.8366429500644864
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.767854581688344,
+      "kappa_ci95": [
+        0.7125966045197816,
+        0.8185312683397704
+      ]
+    },
+    "splits.json/family5/codon": {
+      "key": "splits.json/cds/family5/codon",
+      "metric": "test_macro_f1",
+      "point": 0.6396568316509014,
+      "ci95": [
+        0.5693545209060549,
+        0.7035568884740908
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.616538359437218,
+      "kappa_ci95": [
+        0.5495264530637308,
+        0.6819359816247623
+      ]
+    },
+    "splits.json/family5/dnabert2_meanD": {
+      "key": "splits.json/cds/family5/dnabert2_meanD",
+      "metric": "test_macro_f1",
+      "point": 0.6276008578526874,
+      "ci95": [
+        0.5567424361646535,
+        0.6899445765850615
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.5982998995464369,
+      "kappa_ci95": [
+        0.5361100799596219,
+        0.6655596658756883
+      ]
+    },
+    "splits.json/family5/esm2_150m": {
+      "key": "splits.json/cds/family5/esm2_150m",
+      "metric": "test_macro_f1",
+      "point": 0.9448182426529328,
+      "ci95": [
+        0.9151637846863818,
+        0.9687615292115662
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.9292015248224346,
+      "kappa_ci95": [
+        0.8982438947168656,
+        0.958140619188753
+      ]
+    },
+    "splits.json/family5/esm2_650m": {
+      "key": "splits.json/cds/family5/esm2_650m",
+      "metric": "test_macro_f1",
+      "point": 0.95362805991962,
+      "ci95": [
+        0.9227121519635685,
+        0.9772675495568531
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.939152016850664,
+      "kappa_ci95": [
+        0.9069759634946576,
+        0.9663488301188621
+      ]
+    },
+    "splits.json/family5/gc": {
+      "key": "splits.json/cds/family5/gc",
+      "metric": "test_macro_f1",
+      "point": 0.15926686787894767,
+      "ci95": [
+        0.1388315897518129,
+        0.1831628422004473
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.0007802340702209865,
+      "kappa_ci95": [
+        -0.03627366288965981,
+        0.041342486072624036
+      ]
+    },
+    "splits.json/family5/gena_lm_clsmean": {
+      "key": "splits.json/cds/family5/gena_lm_clsmean",
+      "metric": "test_macro_f1",
+      "point": 0.7099527548216024,
+      "ci95": [
+        0.6469002532820907,
+        0.7648659637968928
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.650567922287524,
+      "kappa_ci95": [
+        0.590129984033476,
+        0.7101905808298865
+      ]
+    },
+    "splits.json/family5/hyena_dna_meanG": {
+      "key": "splits.json/cds/family5/hyena_dna_meanG",
+      "metric": "test_macro_f1",
+      "point": 0.6326059535871589,
+      "ci95": [
+        0.570940437476346,
+        0.6862540991614594
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.5727123262989573,
+      "kappa_ci95": [
+        0.5028094635274817,
+        0.6314546031259288
+      ]
+    },
+    "splits.json/family5/kmer": {
+      "key": "splits.json/cds/family5/kmer",
+      "metric": "test_macro_f1",
+      "point": 0.64818007815698,
+      "ci95": [
+        0.5761115116784754,
+        0.7082994461379724
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.5904838008937439,
+      "kappa_ci95": [
+        0.5253597353569369,
+        0.6551051809922523
+      ]
+    },
+    "splits.json/family5/kmer6": {
+      "key": "splits.json/cds/family5/kmer6",
+      "metric": "test_macro_f1",
+      "point": 0.6386482368062592,
+      "ci95": [
+        0.5718350779225402,
+        0.6969920751421693
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.5927483391862572,
+      "kappa_ci95": [
+        0.5212798589845842,
+        0.652548157695679
+      ]
+    },
+    "splits.json/family5/kmer6_len": {
+      "key": "splits.json/cds/family5/kmer6_len",
+      "metric": "test_macro_f1",
+      "point": 0.6422026968132295,
+      "ci95": [
+        0.5772161880105962,
+        0.7004994085535013
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.5960380975111317,
+      "kappa_ci95": [
+        0.5300485012155324,
+        0.6586218948842909
+      ]
+    },
+    "splits.json/family5/kmer_len": {
+      "key": "splits.json/cds/family5/kmer_len",
+      "metric": "test_macro_f1",
+      "point": 0.6676234444826354,
+      "ci95": [
+        0.5982679465475842,
+        0.7285030541672859
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.6068598325552683,
+      "kappa_ci95": [
+        0.544454211607741,
+        0.6685071813132945
+      ]
+    },
+    "splits.json/family5/nt_v2_meanG": {
+      "key": "splits.json/cds/family5/nt_v2_meanG",
+      "metric": "test_macro_f1",
+      "point": 0.692802040891217,
+      "ci95": [
+        0.6285315860343236,
+        0.7542547076612086
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.6525255402235097,
+      "kappa_ci95": [
+        0.5937069392477107,
+        0.7100856092479171
+      ]
+    },
+    "splits_tss_disjoint.json/family5/dnabert2_specialmean": {
+      "key": "splits_tss_disjoint.json/cds/family5/dnabert2_specialmean",
+      "metric": "test_macro_f1",
+      "point": 0.6375672366984627,
+      "ci95": [
+        0.5355484091393841,
+        0.7032544117869288
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.6072377762405796,
+      "kappa_ci95": [
+        0.523260778802239,
+        0.6763904549016208
+      ]
+    },
+    "splits_tss_disjoint.json/family5/gena_lm_clsmean": {
+      "key": "splits_tss_disjoint.json/cds/family5/gena_lm_clsmean",
+      "metric": "test_macro_f1",
+      "point": 0.6067357570530398,
+      "ci95": [
+        0.5373747092775619,
+        0.6700808858992567
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.5368960415689388,
+      "kappa_ci95": [
+        0.4670302566991881,
+        0.6065152633929475
+      ]
+    },
+    "splits_tss_disjoint.json/family5/hyena_dna_meanG": {
+      "key": "splits_tss_disjoint.json/cds/family5/hyena_dna_meanG",
+      "metric": "test_macro_f1",
+      "point": 0.6518380536788368,
+      "ci95": [
+        0.5747782474026456,
+        0.7123615780297946
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.5872781065088757,
+      "kappa_ci95": [
+        0.5183122328311598,
+        0.6527577418325273
+      ]
+    },
+    "splits_tss_disjoint.json/family5/kmer": {
+      "key": "splits_tss_disjoint.json/cds/family5/kmer",
+      "metric": "test_macro_f1",
+      "point": 0.54973623319914,
+      "ci95": [
+        0.4874375150619791,
+        0.6045857143959169
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.5089263263766659,
+      "kappa_ci95": [
+        0.4346128764833831,
+        0.5756122777661172
+      ]
+    },
+    "splits_tss_disjoint.json/family5/nt_v2_specialmean": {
+      "key": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+      "metric": "test_macro_f1",
+      "point": 0.693555859714189,
+      "ci95": [
+        0.6135158135256683,
+        0.7590714006230496
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.6437802040451047,
+      "kappa_ci95": [
+        0.5721424252373168,
+        0.7077694808295808
+      ]
+    },
+    "splits_tss_disjoint.json/family5/enformer_trunk_center": {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_trunk_center",
+      "metric": "test_macro_f1",
+      "point": 0.4114125230411694,
+      "ci95": [
+        0.3453156542803115,
+        0.4720213710837277
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.31121576968361886,
+      "kappa_ci95": [
+        0.24685635635329192,
+        0.3751166502954519
+      ]
+    },
+    "splits_tss_disjoint.json/family5/enformer_trunk_global": {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_trunk_global",
+      "metric": "test_macro_f1",
+      "point": 0.4126914143789301,
+      "ci95": [
+        0.331302726923634,
+        0.4867498925352477
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.2676600015440439,
+      "kappa_ci95": [
+        0.19391957379641458,
+        0.3355850329124299
+      ]
+    },
+    "splits_tss_disjoint.json/family5/enformer_tss_4mer": {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer",
+      "metric": "test_macro_f1",
+      "point": 0.28144693687239986,
+      "ci95": [
+        0.2232663223639603,
+        0.33140838999203054
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.12271019257867555,
+      "kappa_ci95": [
+        0.05426764016962471,
+        0.18809251916196335
+      ]
+    },
+    "splits_tss_disjoint.json/family5/tss_dnabert2_meanG": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_meanG",
+      "metric": "test_macro_f1",
+      "point": 0.25766774513713153,
+      "ci95": [
+        0.19899347282821928,
+        0.30785625106337555
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.10433968885249734,
+      "kappa_ci95": [
+        0.03788043538202466,
+        0.16019693531959395
+      ]
+    },
+    "splits_tss_disjoint.json/family5/tss_dnabert2_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.28117760851460094,
+      "ci95": [
+        0.23451384222938634,
+        0.32245692751527566
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.17123519458544845,
+      "kappa_ci95": [
+        0.09991029436821243,
+        0.23332507840011918
+      ]
+    },
+    "splits_tss_disjoint.json/family5/tss_gena_lm_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_meanmean",
+      "metric": "test_macro_f1",
+      "point": 0.3396627491847998,
+      "ci95": [
+        0.26574048309636455,
+        0.4060867356398068
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.19162532248462005,
+      "kappa_ci95": [
+        0.12115850127878003,
+        0.2539423514634026
+      ]
+    },
+    "splits_tss_disjoint.json/family5/tss_gena_lm_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.3665114084128213,
+      "ci95": [
+        0.3043150955757141,
+        0.4268710962490915
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.2669636737491432,
+      "kappa_ci95": [
+        0.19946558884173898,
+        0.32797868862963314
+      ]
+    },
+    "splits_tss_disjoint.json/family5/tss_hyena_dna_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_hyena_dna_meanmean",
+      "metric": "test_macro_f1",
+      "point": 0.26396098994921535,
+      "ci95": [
+        0.22001150377957956,
+        0.30505172241440565
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.11319480313083552,
+      "kappa_ci95": [
+        0.049266471420720416,
+        0.17506349822516085
+      ]
+    },
+    "splits_tss_disjoint.json/family5/tss_hyena_dna_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_hyena_dna_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.2760035177744709,
+      "ci95": [
+        0.2239945522330246,
+        0.32978348582140576
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.15315832649712868,
+      "kappa_ci95": [
+        0.08987841040917809,
+        0.21680359682493552
+      ]
+    },
+    "splits_tss_disjoint.json/family5/tss_nt_v2_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+      "metric": "test_macro_f1",
+      "point": 0.30035742035742036,
+      "ci95": [
+        0.23934164357428872,
+        0.35419744352615473
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.19001472031403344,
+      "kappa_ci95": [
+        0.12435367131473497,
+        0.248980060774734
+      ]
+    },
+    "splits_tss_disjoint.json/family5/tss_nt_v2_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.35082117707062066,
+      "ci95": [
+        0.2851115210513582,
+        0.41095913901883474
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.25613775226809854,
+      "kappa_ci95": [
+        0.18425994789779446,
+        0.31970089650316624
+      ]
+    },
+    "splits.json/family5/enformer_trunk_center": {
+      "key": "splits.json/tss/family5/enformer_trunk_center",
+      "metric": "test_macro_f1",
+      "point": 0.40239286867905905,
+      "ci95": [
+        0.3116954778896078,
+        0.46032650183959595
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.26955137920581995,
+      "kappa_ci95": [
+        0.1764581855969586,
+        0.336971329012384
+      ]
+    },
+    "splits.json/family5/enformer_trunk_global": {
+      "key": "splits.json/tss/family5/enformer_trunk_global",
+      "metric": "test_macro_f1",
+      "point": 0.3355201177060813,
+      "ci95": [
+        0.2513286152387202,
+        0.39260884901714443
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.14793552660631493,
+      "kappa_ci95": [
+        0.07368304131869877,
+        0.21242383941332607
+      ]
+    },
+    "splits.json/family5/enformer_tss_4mer": {
+      "key": "splits.json/tss/family5/enformer_tss_4mer",
+      "metric": "test_macro_f1",
+      "point": 0.28321469289861073,
+      "ci95": [
+        0.22780970913404813,
+        0.33136195265964624
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.14562821454812647,
+      "kappa_ci95": [
+        0.07867626409079842,
+        0.19865225648103363
+      ]
+    },
+    "splits.json/family5/tss_dnabert2_meanmean": {
+      "key": "splits.json/tss/family5/tss_dnabert2_meanmean",
+      "metric": "test_macro_f1",
+      "point": 0.36056638572639255,
+      "ci95": [
+        0.275576165678765,
+        0.4266217574940207
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.1918091853204429,
+      "kappa_ci95": [
+        0.11829032919612649,
+        0.25329622772665306
+      ]
+    },
+    "splits.json/family5/tss_dnabert2_tssanchored": {
+      "key": "splits.json/tss/family5/tss_dnabert2_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.26059060518826876,
+      "ci95": [
+        0.21364410881590723,
+        0.29938802369671363
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.12166282282882657,
+      "kappa_ci95": [
+        0.060930587874026804,
+        0.17291238225330052
+      ]
+    },
+    "splits.json/family5/tss_gena_lm_clsmean": {
+      "key": "splits.json/tss/family5/tss_gena_lm_clsmean",
+      "metric": "test_macro_f1",
+      "point": 0.3064753603610416,
+      "ci95": [
+        0.24132290955157873,
+        0.3645816821547375
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.1735699397399817,
+      "kappa_ci95": [
+        0.106930533934832,
+        0.23562227661712978
+      ]
+    },
+    "splits.json/family5/tss_gena_lm_tssanchored": {
+      "key": "splits.json/tss/family5/tss_gena_lm_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.35016790814418897,
+      "ci95": [
+        0.28480703268850543,
+        0.40773404995678386
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.20247234873129472,
+      "kappa_ci95": [
+        0.12799718495868542,
+        0.2676729415356426
+      ]
+    },
+    "splits.json/family5/tss_hyena_dna_meanG": {
+      "key": "splits.json/tss/family5/tss_hyena_dna_meanG",
+      "metric": "test_macro_f1",
+      "point": 0.2582715157053077,
+      "ci95": [
+        0.21529380159403083,
+        0.2959391843094616
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.13395522084597322,
+      "kappa_ci95": [
+        0.06943528324641282,
+        0.18850003928153913
+      ]
+    },
+    "splits.json/family5/tss_hyena_dna_tssanchored": {
+      "key": "splits.json/tss/family5/tss_hyena_dna_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.29811678699712,
+      "ci95": [
+        0.23149341054030748,
+        0.34023358465574094
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.1691335387976436,
+      "kappa_ci95": [
+        0.08519572142584232,
+        0.2279996168752759
+      ]
+    },
+    "splits.json/family5/tss_nt_v2_meanmean": {
+      "key": "splits.json/tss/family5/tss_nt_v2_meanmean",
+      "metric": "test_macro_f1",
+      "point": 0.3471224492453543,
+      "ci95": [
+        0.284475772969895,
+        0.393940384819793
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.22221614868030615,
+      "kappa_ci95": [
+        0.15290375010461085,
+        0.2795186541620985
+      ]
+    },
+    "splits.json/family5/tss_nt_v2_tssanchored": {
+      "key": "splits.json/tss/family5/tss_nt_v2_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.369757428018651,
+      "ci95": [
+        0.3113671446021669,
+        0.41683313731847454
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0,
+      "kappa_point": 0.2590140626041365,
+      "kappa_ci95": [
+        0.19538531858703773,
+        0.3111900885800954
+      ]
+    },
+    "splits.json/genept/aa1": {
+      "key": "splits.json/cds/genept/aa1",
+      "metric": "test_r2_macro",
+      "point": 0.022009655833244324,
+      "ci95": [
+        0.0038995630049612376,
+        0.032940132357180116
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/aa1_len": {
+      "key": "splits.json/cds/genept/aa1_len",
+      "metric": "test_r2_macro",
+      "point": 0.023820258677005768,
+      "ci95": [
+        0.005676683003548533,
+        0.03508828021585941
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/aa2": {
+      "key": "splits.json/cds/genept/aa2",
+      "metric": "test_r2_macro",
+      "point": 0.059483494609594345,
+      "ci95": [
+        0.039622203446924686,
+        0.07304138839244842
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/aa2_len": {
+      "key": "splits.json/cds/genept/aa2_len",
+      "metric": "test_r2_macro",
+      "point": 0.06051141023635864,
+      "ci95": [
+        0.04056772841140628,
+        0.07410447373986244
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/aa3": {
+      "key": "splits.json/cds/genept/aa3",
+      "metric": "test_r2_macro",
+      "point": 0.08018061518669128,
+      "ci95": [
+        0.05841080183163285,
+        0.0935926778241992
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/aa3_len": {
+      "key": "splits.json/cds/genept/aa3_len",
+      "metric": "test_r2_macro",
+      "point": 0.08063731342554092,
+      "ci95": [
+        0.058878615777939555,
+        0.09403251297771931
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/codon": {
+      "key": "splits.json/cds/genept/codon",
+      "metric": "test_r2_macro",
+      "point": 0.03771740570664406,
+      "ci95": [
+        0.017935970285907387,
+        0.048027716018259524
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/dnabert2_specialmean": {
+      "key": "splits.json/cds/genept/dnabert2_specialmean",
+      "metric": "test_r2_macro",
+      "point": 0.06516900658607483,
+      "ci95": [
+        0.03752279654145241,
+        0.08898759000003338
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/esm2_150m": {
+      "key": "splits.json/cds/genept/esm2_150m",
+      "metric": "test_r2_macro",
+      "point": 0.15788577497005463,
+      "ci95": [
+        0.13438590914011,
+        0.17242200672626495
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/esm2_650m": {
+      "key": "splits.json/cds/genept/esm2_650m",
+      "metric": "test_r2_macro",
+      "point": 0.17597945034503937,
+      "ci95": [
+        0.1523401729762554,
+        0.19058360755443574
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/gc": {
+      "key": "splits.json/cds/genept/gc",
+      "metric": "test_r2_macro",
+      "point": -0.021187877282500267,
+      "ci95": [
+        -0.03395882435142994,
+        -0.016960393404588103
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/gena_lm_meanD": {
+      "key": "splits.json/cds/genept/gena_lm_meanD",
+      "metric": "test_r2_macro",
+      "point": 0.048762161284685135,
+      "ci95": [
+        0.024202292319387197,
+        0.06676936578005552
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/hyena_dna_meanD": {
+      "key": "splits.json/cds/genept/hyena_dna_meanD",
+      "metric": "test_r2_macro",
+      "point": 0.029011325910687447,
+      "ci95": [
+        0.005664785113185644,
+        0.04376471526920796
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/kmer": {
+      "key": "splits.json/cds/genept/kmer",
+      "metric": "test_r2_macro",
+      "point": 0.03200363740324974,
+      "ci95": [
+        0.009902756079100072,
+        0.047558201849460593
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/kmer6": {
+      "key": "splits.json/cds/genept/kmer6",
+      "metric": "test_r2_macro",
+      "point": 0.038671184331178665,
+      "ci95": [
+        0.013730773469433188,
+        0.05666434913873672
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/kmer6_len": {
+      "key": "splits.json/cds/genept/kmer6_len",
+      "metric": "test_r2_macro",
+      "point": 0.03932177275419235,
+      "ci95": [
+        0.014440255146473647,
+        0.05716500040143728
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/kmer_len": {
+      "key": "splits.json/cds/genept/kmer_len",
+      "metric": "test_r2_macro",
+      "point": 0.033481527119874954,
+      "ci95": [
+        0.011347456648945809,
+        0.0489394562318921
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/nt_v2_specialmean": {
+      "key": "splits.json/cds/genept/nt_v2_specialmean",
+      "metric": "test_r2_macro",
+      "point": 0.04259210824966431,
+      "ci95": [
+        0.018005749396979808,
+        0.057469927892088886
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/dnabert2_specialmean": {
+      "key": "splits_tss_disjoint.json/cds/genept/dnabert2_specialmean",
+      "metric": "test_r2_macro",
+      "point": 0.048333246260881424,
+      "ci95": [
+        0.03041043267585337,
+        0.055232183728367086
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/gena_lm_meanD": {
+      "key": "splits_tss_disjoint.json/cds/genept/gena_lm_meanD",
+      "metric": "test_r2_macro",
+      "point": 0.026789924129843712,
+      "ci95": [
+        0.011850709817372263,
+        0.032566250301897526
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/hyena_dna_meanD": {
+      "key": "splits_tss_disjoint.json/cds/genept/hyena_dna_meanD",
+      "metric": "test_r2_macro",
+      "point": 0.014679874293506145,
+      "ci95": [
+        0.00025803780299611407,
+        0.021978145046159622
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/kmer": {
+      "key": "splits_tss_disjoint.json/cds/genept/kmer",
+      "metric": "test_r2_macro",
+      "point": 0.01396311353892088,
+      "ci95": [
+        0.000549441869952716,
+        0.018651914969086646
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/nt_v2_meanG": {
+      "key": "splits_tss_disjoint.json/cds/genept/nt_v2_meanG",
+      "metric": "test_r2_macro",
+      "point": 0.025215474888682365,
+      "ci95": [
+        0.008524435013532639,
+        0.034152694325894115
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/enformer_trunk_center": {
+      "key": "splits_tss_disjoint.json/tss/genept/enformer_trunk_center",
+      "metric": "test_r2_macro",
+      "point": -0.0020830377470701933,
+      "ci95": [
+        -0.03814604515209794,
+        0.012524762563407421
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/enformer_trunk_global": {
+      "key": "splits_tss_disjoint.json/tss/genept/enformer_trunk_global",
+      "metric": "test_r2_macro",
+      "point": -0.0060059321112930775,
+      "ci95": [
+        -0.02523183412849903,
+        0.0010951245640171692
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/enformer_tss_4mer": {
+      "key": "splits_tss_disjoint.json/tss/genept/enformer_tss_4mer",
+      "metric": "test_r2_macro",
+      "point": -0.03428565338253975,
+      "ci95": [
+        -0.048036053963005546,
+        -0.02809612764976919
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/tss_dnabert2_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_dnabert2_meanmean",
+      "metric": "test_r2_macro",
+      "point": -0.011393665336072445,
+      "ci95": [
+        -0.023154882015660405,
+        -0.007073516049422324
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/tss_dnabert2_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_dnabert2_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.024023311212658882,
+      "ci95": [
+        -0.038866665586829184,
+        -0.016909553296864034
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/tss_gena_lm_clsmean": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_gena_lm_clsmean",
+      "metric": "test_r2_macro",
+      "point": -0.02005712501704693,
+      "ci95": [
+        -0.0329166897572577,
+        -0.014711989462375643
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/tss_gena_lm_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_gena_lm_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.030107030645012856,
+      "ci95": [
+        -0.04594667572528124,
+        -0.021374783432111147
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/tss_hyena_dna_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_hyena_dna_meanmean",
+      "metric": "test_r2_macro",
+      "point": -0.037268247455358505,
+      "ci95": [
+        -0.05230950526893139,
+        -0.03032665536738933
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/tss_hyena_dna_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_hyena_dna_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.057345833629369736,
+      "ci95": [
+        -0.07758139669895173,
+        -0.044404329359531404
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/tss_nt_v2_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_nt_v2_meanmean",
+      "metric": "test_r2_macro",
+      "point": -0.013091583736240864,
+      "ci95": [
+        -0.02532885647378862,
+        -0.008804047922603786
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json/genept/tss_nt_v2_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_nt_v2_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.015557508915662766,
+      "ci95": [
+        -0.029615639802068473,
+        -0.0076826531207189
+      ],
+      "point_in_ci": true,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/enformer_trunk_center": {
+      "key": "splits.json/tss/genept/enformer_trunk_center",
+      "metric": "test_r2_macro",
+      "point": 0.013977468945086002,
+      "ci95": [
+        -0.0167803100310266,
+        0.023380085360258814
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/enformer_trunk_global": {
+      "key": "splits.json/tss/genept/enformer_trunk_global",
+      "metric": "test_r2_macro",
+      "point": 0.005553519818931818,
+      "ci95": [
+        -0.024371358985081314,
+        0.015291363513097163
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/enformer_tss_4mer": {
+      "key": "splits.json/tss/genept/enformer_tss_4mer",
+      "metric": "test_r2_macro",
+      "point": -0.019440654665231705,
+      "ci95": [
+        -0.04762481981888413,
+        -0.01213272798340768
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/tss_dnabert2_meanmean": {
+      "key": "splits.json/tss/genept/tss_dnabert2_meanmean",
+      "metric": "test_r2_macro",
+      "point": 0.0035689950454980135,
+      "ci95": [
+        -0.028503468492999673,
+        0.015111316321417687
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/tss_dnabert2_tssanchored": {
+      "key": "splits.json/tss/genept/tss_dnabert2_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.011154145002365112,
+      "ci95": [
+        -0.036779590789228676,
+        -0.004612101300153881
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/tss_gena_lm_meanmean": {
+      "key": "splits.json/tss/genept/tss_gena_lm_meanmean",
+      "metric": "test_r2_macro",
+      "point": -0.010338817723095417,
+      "ci95": [
+        -0.04315519388765097,
+        -3.732628442776471e-05
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/tss_gena_lm_tssanchored": {
+      "key": "splits.json/tss/genept/tss_gena_lm_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.01671561598777771,
+      "ci95": [
+        -0.0377840637229383,
+        -0.01251986895222217
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/tss_hyena_dna_maxmean": {
+      "key": "splits.json/tss/genept/tss_hyena_dna_maxmean",
+      "metric": "test_r2_macro",
+      "point": -0.019412914291024208,
+      "ci95": [
+        -0.04406918538734317,
+        -0.013347536674700679
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/tss_hyena_dna_tssanchored": {
+      "key": "splits.json/tss/genept/tss_hyena_dna_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.02279774285852909,
+      "ci95": [
+        -0.042917638272047046,
+        -0.01920827473513782
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/tss_nt_v2_meanmean": {
+      "key": "splits.json/tss/genept/tss_nt_v2_meanmean",
+      "metric": "test_r2_macro",
+      "point": -0.004514009691774845,
+      "ci95": [
+        -0.03482186747714877,
+        0.005161090102046726
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json/genept/tss_nt_v2_tssanchored": {
+      "key": "splits.json/tss/genept/tss_nt_v2_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.004334941040724516,
+      "ci95": [
+        -0.032353218737989665,
+        0.002439670747844501
+      ],
+      "point_in_ci": true,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    }
+  },
+  "exploratory": {
+    "splits.json family5: aa_kmer > nt_kmer": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/aa3",
+      "b": "splits.json/cds/family5/kmer6",
+      "delta_point": 0.12878213900573543,
+      "delta_ci95": [
+        0.0648401902209101,
+        0.19400526839224672
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: aa2 > kmer": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/aa2",
+      "b": "splits.json/cds/family5/kmer",
+      "delta_point": 0.11216576647457888,
+      "delta_ci95": [
+        0.04658751498869144,
+        0.17637668448406152
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: esm2_650m > esm2_150m": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/esm2_650m",
+      "b": "splits.json/cds/family5/esm2_150m",
+      "delta_point": 0.00880981726668717,
+      "delta_ci95": [
+        -0.026189731661158223,
+        0.045411489920690044
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.7,
+      "p_one_sided": 0.3006993006993007,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: esm2_650m > aa_kmer": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/esm2_650m",
+      "b": "splits.json/cds/family5/aa3",
+      "delta_point": 0.18619768410762538,
+      "delta_ci95": [
+        0.1329324881832234,
+        0.25093382848616647
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: encoder > nt_kmer+len": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/nt_v2_meanG",
+      "b": "splits.json/cds/family5/kmer6_len",
+      "delta_point": 0.050599344077987496,
+      "delta_ci95": [
+        -0.016557652336909208,
+        0.12226150312086272
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.937,
+      "p_one_sided": 0.06393606393606394,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: encoder > aa_kmer+len": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/nt_v2_meanG",
+      "b": "splits.json/cds/family5/aa3_len",
+      "delta_point": -0.08932904692984833,
+      "delta_ci95": [
+        -0.15273710249351588,
+        -0.01997498278206013
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.006,
+      "p_one_sided": 0.994005994005994,
+      "n_test": 459,
+      "n_groups": 425,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: kmer CDS > TSS 4-mer (control)": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/cds/family5/kmer",
+      "b": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer",
+      "delta_point": 0.26828929632674015,
+      "delta_ci95": [
+        0.1947333850267112,
+        0.34631186601867325
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: Enformer centre > whole": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/tss/family5/enformer_trunk_center",
+      "b": "splits_tss_disjoint.json/tss/family5/enformer_trunk_global",
+      "delta_point": -0.0012788913377607125,
+      "delta_ci95": [
+        -0.04678499666852328,
+        0.044244398614830246
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.513,
+      "p_one_sided": 0.4875124875124875,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: dnabert2 CDS > TSS": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/cds/family5/dnabert2_specialmean",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_meanG",
+      "delta_point": 0.3798994915613312,
+      "delta_ci95": [
+        0.295347392972966,
+        0.4524319966199363
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: dnabert2 anchored > whole-window": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_meanG",
+      "delta_point": 0.02350986337746941,
+      "delta_ci95": [
+        -0.030288165523071682,
+        0.07509459463730632
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.822,
+      "p_one_sided": 0.17882117882117882,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: dnabert2 anchored > anchored-chunk composition": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_chunk4mergc",
+      "delta_point": -0.019542571009686482,
+      "delta_ci95": [
+        -0.0829991574637054,
+        0.035338747447593036
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.234,
+      "p_one_sided": 0.7662337662337663,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: nt_v2 CDS > TSS": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+      "delta_point": 0.3931984393567686,
+      "delta_ci95": [
+        0.31204192396562125,
+        0.47856501086319975
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: nt_v2 anchored > whole-window": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+      "delta_point": 0.0504637567132003,
+      "delta_ci95": [
+        -0.0047096284818179445,
+        0.10562716816618477
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.963,
+      "p_one_sided": 0.03796203796203796,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: nt_v2 anchored > anchored-chunk composition": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_chunk6mer",
+      "delta_point": 0.015113608352508412,
+      "delta_ci95": [
+        -0.06639948599706895,
+        0.09634449119150079
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.593,
+      "p_one_sided": 0.4075924075924076,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: gena_lm CDS > TSS": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/cds/family5/gena_lm_clsmean",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_meanmean",
+      "delta_point": 0.26707300786824006,
+      "delta_ci95": [
+        0.1729676613140644,
+        0.3709756916083223
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: gena_lm anchored > whole-window": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_meanmean",
+      "delta_point": 0.026848659228021543,
+      "delta_ci95": [
+        -0.05839084333400111,
+        0.11998032982747832
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.736,
+      "p_one_sided": 0.2647352647352647,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: gena_lm anchored > anchored-chunk composition": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_chunk6mer",
+      "delta_point": 0.10424610792747341,
+      "delta_ci95": [
+        0.044485274574155506,
+        0.16084128411427234
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: hyena_dna CDS > TSS": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/cds/family5/hyena_dna_meanG",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_hyena_dna_meanmean",
+      "delta_point": 0.3878770637296215,
+      "delta_ci95": [
+        0.3074884620187715,
+        0.4548467588031118
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: hyena_dna anchored > whole-window": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/tss/family5/tss_hyena_dna_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_hyena_dna_meanmean",
+      "delta_point": 0.012042527825255556,
+      "delta_ci95": [
+        -0.05497126707741896,
+        0.07862761601462576
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.62,
+      "p_one_sided": 0.3806193806193806,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json family5: hyena_dna anchored > anchored-chunk composition": {
+      "metric": "test_macro_f1",
+      "a": "splits_tss_disjoint.json/tss/family5/tss_hyena_dna_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/family5/tss_hyena_dna_chunk6mer",
+      "delta_point": -0.04875557979738554,
+      "delta_ci95": [
+        -0.09860928801054174,
+        0.005486273556084805
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.041,
+      "p_one_sided": 0.9590409590409591,
+      "n_test": 465,
+      "n_groups": 284,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: kmer CDS > TSS 4-mer (control)": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/kmer",
+      "b": "splits.json/tss/family5/enformer_tss_4mer",
+      "delta_point": 0.36496538525836925,
+      "delta_ci95": [
+        0.2730691373779757,
+        0.4240620277170105
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: Enformer centre > whole": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/tss/family5/enformer_trunk_center",
+      "b": "splits.json/tss/family5/enformer_trunk_global",
+      "delta_point": 0.06687275097297773,
+      "delta_ci95": [
+        -0.020719583435833914,
+        0.1503312933488022
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.931,
+      "p_one_sided": 0.06993006993006994,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: dnabert2 CDS > TSS": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/dnabert2_meanD",
+      "b": "splits.json/tss/family5/tss_dnabert2_meanmean",
+      "delta_point": 0.26703447212629483,
+      "delta_ci95": [
+        0.1729660426828477,
+        0.3407436837163289
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: dnabert2 anchored > whole-window": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/tss/family5/tss_dnabert2_tssanchored",
+      "b": "splits.json/tss/family5/tss_dnabert2_meanmean",
+      "delta_point": -0.09997578053812378,
+      "delta_ci95": [
+        -0.17758844752283948,
+        -0.00983172017282881
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.019,
+      "p_one_sided": 0.981018981018981,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: dnabert2 anchored > anchored-chunk composition": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/tss/family5/tss_dnabert2_tssanchored",
+      "b": "splits.json/tss/family5/tss_dnabert2_chunk6mer",
+      "delta_point": -0.03243749577542637,
+      "delta_ci95": [
+        -0.0868312977757131,
+        0.030504989199785074
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.158,
+      "p_one_sided": 0.8421578421578422,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: nt_v2 CDS > TSS": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/nt_v2_meanG",
+      "b": "splits.json/tss/family5/tss_nt_v2_meanmean",
+      "delta_point": 0.3456795916458627,
+      "delta_ci95": [
+        0.27725548954245677,
+        0.4309284062025077
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: nt_v2 anchored > whole-window": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/tss/family5/tss_nt_v2_tssanchored",
+      "b": "splits.json/tss/family5/tss_nt_v2_meanmean",
+      "delta_point": 0.022634978773296732,
+      "delta_ci95": [
+        -0.03812443728510729,
+        0.09527458759230409
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.776,
+      "p_one_sided": 0.22477522477522477,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: nt_v2 anchored > anchored-chunk composition": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/tss/family5/tss_nt_v2_tssanchored",
+      "b": "splits.json/tss/family5/tss_nt_v2_chunk6mer",
+      "delta_point": 0.06542275118253943,
+      "delta_ci95": [
+        0.015403958859997886,
+        0.12227008545789562
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.999,
+      "p_one_sided": 0.001998001998001998,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: gena_lm CDS > TSS": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/gena_lm_clsmean",
+      "b": "splits.json/tss/family5/tss_gena_lm_clsmean",
+      "delta_point": 0.40347739446056075,
+      "delta_ci95": [
+        0.334096430218515,
+        0.47150344470164685
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: gena_lm anchored > whole-window": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/tss/family5/tss_gena_lm_tssanchored",
+      "b": "splits.json/tss/family5/tss_gena_lm_clsmean",
+      "delta_point": 0.04369254778314735,
+      "delta_ci95": [
+        -0.02083286954892796,
+        0.11173315485131922
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.902,
+      "p_one_sided": 0.0989010989010989,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: gena_lm anchored > anchored-chunk composition": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/tss/family5/tss_gena_lm_tssanchored",
+      "b": "splits.json/tss/family5/tss_gena_lm_chunk6mer",
+      "delta_point": 0.058811981197882834,
+      "delta_ci95": [
+        -0.006952753078189833,
+        0.12081619555697475
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.964,
+      "p_one_sided": 0.03696303696303696,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: hyena_dna CDS > TSS": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/cds/family5/hyena_dna_meanG",
+      "b": "splits.json/tss/family5/tss_hyena_dna_meanG",
+      "delta_point": 0.37433443788185117,
+      "delta_ci95": [
+        0.2754618383875118,
+        0.4412075324152765
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: hyena_dna anchored > whole-window": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/tss/family5/tss_hyena_dna_tssanchored",
+      "b": "splits.json/tss/family5/tss_hyena_dna_meanG",
+      "delta_point": 0.03984527129181231,
+      "delta_ci95": [
+        -0.03172709766756192,
+        0.09724851589854457
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.873,
+      "p_one_sided": 0.12787212787212787,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json family5: hyena_dna anchored > anchored-chunk composition": {
+      "metric": "test_macro_f1",
+      "a": "splits.json/tss/family5/tss_hyena_dna_tssanchored",
+      "b": "splits.json/tss/family5/tss_hyena_dna_chunk6mer",
+      "delta_point": -0.030735588888905596,
+      "delta_ci95": [
+        -0.1142538395903948,
+        0.03069947216531302
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.171,
+      "p_one_sided": 0.8291708291708292,
+      "n_test": 459,
+      "n_groups": 311,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: aa_kmer > nt_kmer": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/aa3",
+      "b": "splits.json/cds/genept/kmer6",
+      "delta_point": 0.04150943085551262,
+      "delta_ci95": [
+        0.030970895569771527,
+        0.05395530126988888
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: aa2 > kmer": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/aa2",
+      "b": "splits.json/cds/genept/kmer",
+      "delta_point": 0.027479857206344604,
+      "delta_ci95": [
+        0.022509402874857188,
+        0.03400748185813427
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: esm2_650m > esm2_150m": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/esm2_650m",
+      "b": "splits.json/cds/genept/esm2_150m",
+      "delta_point": 0.01809367537498474,
+      "delta_ci95": [
+        0.010223608091473579,
+        0.02623256556689739
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: esm2_650m > aa_kmer": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/esm2_650m",
+      "b": "splits.json/cds/genept/aa3",
+      "delta_point": 0.09579883515834808,
+      "delta_ci95": [
+        0.08182905102148652,
+        0.11063066590577364
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: encoder > nt_kmer+len": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/dnabert2_specialmean",
+      "b": "splits.json/cds/genept/kmer6_len",
+      "delta_point": 0.025847233831882477,
+      "delta_ci95": [
+        0.01768191489391029,
+        0.033660912234336135
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: encoder > aa_kmer+len": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/dnabert2_specialmean",
+      "b": "splits.json/cds/genept/aa3_len",
+      "delta_point": -0.015468306839466095,
+      "delta_ci95": [
+        -0.03128972901031375,
+        -0.0002655323594808592
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.021,
+      "p_one_sided": 0.9790209790209791,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: encoder > nt_kmer": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/dnabert2_specialmean",
+      "b": "splits.json/cds/genept/kmer6",
+      "delta_point": 0.026497822254896164,
+      "delta_ci95": [
+        0.018291062815114854,
+        0.03437765864655375
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: encoder > aa_kmer": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/dnabert2_specialmean",
+      "b": "splits.json/cds/genept/aa3",
+      "delta_point": -0.015011608600616455,
+      "delta_ci95": [
+        -0.030893210880458356,
+        0.0002368696033954604
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.029,
+      "p_one_sided": 0.971028971028971,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: esm2_650m > encoder": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/esm2_650m",
+      "b": "splits.json/cds/genept/dnabert2_specialmean",
+      "delta_point": 0.11081044375896454,
+      "delta_ci95": [
+        0.08743750136345625,
+        0.1335690600797534
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: aa3 > aa2": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/aa3",
+      "b": "splits.json/cds/genept/aa2",
+      "delta_point": 0.02069712057709694,
+      "delta_ci95": [
+        0.013192098215222358,
+        0.02936463849619031
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: aa2 > aa1": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/aa2",
+      "b": "splits.json/cds/genept/aa1",
+      "delta_point": 0.03747383877635002,
+      "delta_ci95": [
+        0.03237921402323991,
+        0.04242087467573583
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: kmer CDS > TSS 4-mer (control)": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/cds/genept/kmer",
+      "b": "splits_tss_disjoint.json/tss/genept/enformer_tss_4mer",
+      "delta_point": 0.04824876692146063,
+      "delta_ci95": [
+        0.038595721242018044,
+        0.05773728436324745
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: Enformer centre > whole": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/tss/genept/enformer_trunk_center",
+      "b": "splits_tss_disjoint.json/tss/genept/enformer_trunk_global",
+      "delta_point": 0.003922894364222884,
+      "delta_ci95": [
+        -0.018600814160890877,
+        0.019903549971058965
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.687,
+      "p_one_sided": 0.31368631368631367,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: dnabert2 CDS > TSS": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/cds/genept/dnabert2_specialmean",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_dnabert2_meanmean",
+      "delta_point": 0.05972691159695387,
+      "delta_ci95": [
+        0.04560914214234799,
+        0.07084710630588233
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: dnabert2 anchored > whole-window": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/tss/genept/tss_dnabert2_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_dnabert2_meanmean",
+      "delta_point": -0.012629645876586437,
+      "delta_ci95": [
+        -0.022648473829030992,
+        -0.0032173974439501777
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.003,
+      "p_one_sided": 0.997002997002997,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: dnabert2 anchored > anchored-chunk composition": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/tss/genept/tss_dnabert2_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_dnabert2_chunk4mergc",
+      "delta_point": 0.012933896854519844,
+      "delta_ci95": [
+        0.007322511449456215,
+        0.018896377785131334
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: nt_v2 CDS > TSS": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/cds/genept/nt_v2_meanG",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_nt_v2_meanmean",
+      "delta_point": 0.03830705862492323,
+      "delta_ci95": [
+        0.02716481841634959,
+        0.04879285492934286
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: nt_v2 anchored > whole-window": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/tss/genept/tss_nt_v2_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_nt_v2_meanmean",
+      "delta_point": -0.0024659251794219017,
+      "delta_ci95": [
+        -0.010194831201806665,
+        0.005711048864759504
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.25,
+      "p_one_sided": 0.7502497502497503,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: nt_v2 anchored > anchored-chunk composition": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/tss/genept/tss_nt_v2_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_nt_v2_chunk4mergc",
+      "delta_point": 0.015538929030299187,
+      "delta_ci95": [
+        0.011046742601320148,
+        0.020748251024633645
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: gena_lm CDS > TSS": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/cds/genept/gena_lm_meanD",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_gena_lm_clsmean",
+      "delta_point": 0.04684704914689064,
+      "delta_ci95": [
+        0.035071076615713535,
+        0.05568661824800074
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: gena_lm anchored > whole-window": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/tss/genept/tss_gena_lm_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_gena_lm_clsmean",
+      "delta_point": -0.010049905627965927,
+      "delta_ci95": [
+        -0.021537250280380248,
+        -0.0009426063857972625
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.014,
+      "p_one_sided": 0.986013986013986,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: gena_lm anchored > anchored-chunk composition": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/tss/genept/tss_gena_lm_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_gena_lm_chunk4mergc",
+      "delta_point": 0.003209521993994713,
+      "delta_ci95": [
+        -0.0034236914478242395,
+        0.010103984130546449
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.852,
+      "p_one_sided": 0.14885114885114886,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: hyena_dna CDS > TSS": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/cds/genept/hyena_dna_meanD",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_hyena_dna_meanmean",
+      "delta_point": 0.05194812174886465,
+      "delta_ci95": [
+        0.039916578668635336,
+        0.06313501081895083
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: hyena_dna anchored > whole-window": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/tss/genept/tss_hyena_dna_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_hyena_dna_meanmean",
+      "delta_point": -0.02007758617401123,
+      "delta_ci95": [
+        -0.03548585916869342,
+        -0.005318842548877003
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.005,
+      "p_one_sided": 0.995004995004995,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits_tss_disjoint.json genept: hyena_dna anchored > anchored-chunk composition": {
+      "metric": "test_r2_macro",
+      "a": "splits_tss_disjoint.json/tss/genept/tss_hyena_dna_tssanchored",
+      "b": "splits_tss_disjoint.json/tss/genept/tss_hyena_dna_chunk6mer",
+      "delta_point": -0.022877834737300873,
+      "delta_ci95": [
+        -0.03531687594950199,
+        -0.010452249739319089
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.0,
+      "p_one_sided": 1.0,
+      "n_test": 465,
+      "n_groups": 252,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: kmer CDS > TSS 4-mer (control)": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/kmer",
+      "b": "splits.json/tss/genept/enformer_tss_4mer",
+      "delta_point": 0.051444292068481445,
+      "delta_ci95": [
+        0.04155111536383629,
+        0.06025610736105591
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: Enformer centre > whole": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/tss/genept/enformer_trunk_center",
+      "b": "splits.json/tss/genept/enformer_trunk_global",
+      "delta_point": 0.008423949126154184,
+      "delta_ci95": [
+        -3.9887180901132445e-05,
+        0.01519837164087221
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.974,
+      "p_one_sided": 0.026973026973026972,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: dnabert2 CDS > TSS": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/dnabert2_specialmean",
+      "b": "splits.json/tss/genept/tss_dnabert2_meanmean",
+      "delta_point": 0.061600011540576816,
+      "delta_ci95": [
+        0.04459816489834338,
+        0.07043439596236567
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: dnabert2 anchored > whole-window": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/tss/genept/tss_dnabert2_tssanchored",
+      "b": "splits.json/tss/genept/tss_dnabert2_meanmean",
+      "delta_point": -0.014723140047863126,
+      "delta_ci95": [
+        -0.022909086162690072,
+        -0.0004533041268587131
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.021,
+      "p_one_sided": 0.9790209790209791,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: dnabert2 anchored > anchored-chunk composition": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/tss/genept/tss_dnabert2_tssanchored",
+      "b": "splits.json/tss/genept/tss_dnabert2_chunk6mer",
+      "delta_point": 0.007393611595034599,
+      "delta_ci95": [
+        0.0030671894550323487,
+        0.01021305189351551
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.998,
+      "p_one_sided": 0.002997002997002997,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: nt_v2 CDS > TSS": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/nt_v2_specialmean",
+      "b": "splits.json/tss/genept/tss_nt_v2_meanmean",
+      "delta_point": 0.04710611794143915,
+      "delta_ci95": [
+        0.0345017175655812,
+        0.057590400613844385
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: nt_v2 anchored > whole-window": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/tss/genept/tss_nt_v2_tssanchored",
+      "b": "splits.json/tss/genept/tss_nt_v2_meanmean",
+      "delta_point": 0.0001790686510503292,
+      "delta_ci95": [
+        -0.007559685688465834,
+        0.010673456592485305
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.523,
+      "p_one_sided": 0.4775224775224775,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: nt_v2 anchored > anchored-chunk composition": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/tss/genept/tss_nt_v2_tssanchored",
+      "b": "splits.json/tss/genept/tss_nt_v2_chunk6mer",
+      "delta_point": 0.015547140035778284,
+      "delta_ci95": [
+        0.008104181266389787,
+        0.024139118217863142
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.999,
+      "p_one_sided": 0.001998001998001998,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: gena_lm CDS > TSS": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/gena_lm_meanD",
+      "b": "splits.json/tss/genept/tss_gena_lm_meanmean",
+      "delta_point": 0.05910097900778055,
+      "delta_ci95": [
+        0.04840871542692184,
+        0.06859293095767498
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: gena_lm anchored > whole-window": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/tss/genept/tss_gena_lm_tssanchored",
+      "b": "splits.json/tss/genept/tss_gena_lm_meanmean",
+      "delta_point": -0.006376798264682293,
+      "delta_ci95": [
+        -0.013899943929072832,
+        0.009184058988466855
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.196,
+      "p_one_sided": 0.8041958041958042,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: gena_lm anchored > anchored-chunk composition": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/tss/genept/tss_gena_lm_tssanchored",
+      "b": "splits.json/tss/genept/tss_gena_lm_chunk6mer",
+      "delta_point": 0.0038725044578313828,
+      "delta_ci95": [
+        0.002304657711647451,
+        0.006968247517943382
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: hyena_dna CDS > TSS": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/cds/genept/hyena_dna_meanD",
+      "b": "splits.json/tss/genept/tss_hyena_dna_maxmean",
+      "delta_point": 0.048424240201711655,
+      "delta_ci95": [
+        0.03826249301200733,
+        0.057033811276778576
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 1.0,
+      "p_one_sided": 0.000999000999000999,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: hyena_dna anchored > whole-window": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/tss/genept/tss_hyena_dna_tssanchored",
+      "b": "splits.json/tss/genept/tss_hyena_dna_maxmean",
+      "delta_point": -0.003384828567504883,
+      "delta_ci95": [
+        -0.006881239404901862,
+        0.0035612965002655974
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.159,
+      "p_one_sided": 0.8411588411588412,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    },
+    "splits.json genept: hyena_dna anchored > anchored-chunk composition": {
+      "metric": "test_r2_macro",
+      "a": "splits.json/tss/genept/tss_hyena_dna_tssanchored",
+      "b": "splits.json/tss/genept/tss_hyena_dna_chunk4mergc",
+      "delta_point": -1.3597309589385986e-06,
+      "delta_ci95": [
+        -0.0006464362144470215,
+        0.0013085133396089077
+      ],
+      "point_in_ci": true,
+      "p_a_gt_b": 0.543,
+      "p_one_sided": 0.45754245754245754,
+      "n_test": 459,
+      "n_groups": 256,
+      "n_iters": 1000,
+      "seed": 42,
+      "n_short_class": 0
+    }
+  },
+  "chance": {
+    "splits.json/family5/aa1": {
+      "key": "splits.json/cds/family5/aa1",
+      "metric": "test_macro_f1",
+      "point": 0.6970008950516358,
+      "chance_median": 0.19749122660942836,
+      "chance95": [
+        0.16388326306611295,
+        0.23886749975709876
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/aa1_len": {
+      "key": "splits.json/cds/family5/aa1_len",
+      "metric": "test_macro_f1",
+      "point": 0.6772699089409662,
+      "chance_median": 0.19749760639252767,
+      "chance95": [
+        0.16349366998868356,
+        0.2373637029853752
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/aa2": {
+      "key": "splits.json/cds/family5/aa2",
+      "metric": "test_macro_f1",
+      "point": 0.7603458446315589,
+      "chance_median": 0.19739974311402883,
+      "chance95": [
+        0.16319228390656962,
+        0.24113939631796774
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/aa2_len": {
+      "key": "splits.json/cds/family5/aa2_len",
+      "metric": "test_macro_f1",
+      "point": 0.7545952948265578,
+      "chance_median": 0.1973102481067202,
+      "chance95": [
+        0.16444456315263226,
+        0.23852256265676983
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/aa3": {
+      "key": "splits.json/cds/family5/aa3",
+      "metric": "test_macro_f1",
+      "point": 0.7674303758119946,
+      "chance_median": 0.19764832391561032,
+      "chance95": [
+        0.1633530380603791,
+        0.23959993733804646
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/aa3_len": {
+      "key": "splits.json/cds/family5/aa3_len",
+      "metric": "test_macro_f1",
+      "point": 0.7821310878210653,
+      "chance_median": 0.19826537928930432,
+      "chance95": [
+        0.16379536033341546,
+        0.23917914028482481
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/codon": {
+      "key": "splits.json/cds/family5/codon",
+      "metric": "test_macro_f1",
+      "point": 0.6396568316509014,
+      "chance_median": 0.19589997899857053,
+      "chance95": [
+        0.1640017787034095,
+        0.23846106677277915
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/dnabert2_meanD": {
+      "key": "splits.json/cds/family5/dnabert2_meanD",
+      "metric": "test_macro_f1",
+      "point": 0.6276008578526874,
+      "chance_median": 0.19774425864818262,
+      "chance95": [
+        0.1619958505351165,
+        0.23939544465636006
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/enformer_trunk_center": {
+      "key": "splits.json/tss/family5/enformer_trunk_center",
+      "metric": "test_macro_f1",
+      "point": 0.40239286867905905,
+      "chance_median": 0.19463395036620262,
+      "chance95": [
+        0.16069422946165904,
+        0.23248366823510166
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/enformer_trunk_global": {
+      "key": "splits.json/tss/family5/enformer_trunk_global",
+      "metric": "test_macro_f1",
+      "point": 0.3355201177060813,
+      "chance_median": 0.19041684402525177,
+      "chance95": [
+        0.160879970900932,
+        0.22875330034843344
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/enformer_tss_4mer": {
+      "key": "splits.json/tss/family5/enformer_tss_4mer",
+      "metric": "test_macro_f1",
+      "point": 0.28321469289861073,
+      "chance_median": 0.19152443565842303,
+      "chance95": [
+        0.15892337625621994,
+        0.2288827431214048
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/esm2_150m": {
+      "key": "splits.json/cds/family5/esm2_150m",
+      "metric": "test_macro_f1",
+      "point": 0.9448182426529328,
+      "chance_median": 0.19842346201783456,
+      "chance95": [
+        0.1653710090912086,
+        0.2379685822616085
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/esm2_650m": {
+      "key": "splits.json/cds/family5/esm2_650m",
+      "metric": "test_macro_f1",
+      "point": 0.95362805991962,
+      "chance_median": 0.19877029072498564,
+      "chance95": [
+        0.16577425752909858,
+        0.23767865407032374
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/gc": {
+      "key": "splits.json/cds/family5/gc",
+      "metric": "test_macro_f1",
+      "point": 0.15926686787894767,
+      "chance_median": 0.15866985295357453,
+      "chance95": [
+        0.14067123558544956,
+        0.18038622104635493
+      ],
+      "p_above_chance": 0.4755244755244755,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/gena_lm_clsmean": {
+      "key": "splits.json/cds/family5/gena_lm_clsmean",
+      "metric": "test_macro_f1",
+      "point": 0.7099527548216024,
+      "chance_median": 0.19842945286955976,
+      "chance95": [
+        0.166374225370944,
+        0.23928192568569417
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/hyena_dna_meanG": {
+      "key": "splits.json/cds/family5/hyena_dna_meanG",
+      "metric": "test_macro_f1",
+      "point": 0.6326059535871589,
+      "chance_median": 0.19924220541556764,
+      "chance95": [
+        0.16100407598537322,
+        0.23431593097730094
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/kmer": {
+      "key": "splits.json/cds/family5/kmer",
+      "metric": "test_macro_f1",
+      "point": 0.64818007815698,
+      "chance_median": 0.19834466801742334,
+      "chance95": [
+        0.16266332428164348,
+        0.24058290270267374
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/kmer6": {
+      "key": "splits.json/cds/family5/kmer6",
+      "metric": "test_macro_f1",
+      "point": 0.6386482368062592,
+      "chance_median": 0.19726470875410365,
+      "chance95": [
+        0.16247356529923312,
+        0.2383343857593554
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/kmer6_len": {
+      "key": "splits.json/cds/family5/kmer6_len",
+      "metric": "test_macro_f1",
+      "point": 0.6422026968132295,
+      "chance_median": 0.19743301258955487,
+      "chance95": [
+        0.16365768961411206,
+        0.23696432746658183
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/kmer_len": {
+      "key": "splits.json/cds/family5/kmer_len",
+      "metric": "test_macro_f1",
+      "point": 0.6676234444826354,
+      "chance_median": 0.19844406929014743,
+      "chance95": [
+        0.1629949678313577,
+        0.23966197637788786
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/nt_v2_meanG": {
+      "key": "splits.json/cds/family5/nt_v2_meanG",
+      "metric": "test_macro_f1",
+      "point": 0.692802040891217,
+      "chance_median": 0.19885120396203698,
+      "chance95": [
+        0.164637438447748,
+        0.24036848132121388
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/tss_dnabert2_meanmean": {
+      "key": "splits.json/tss/family5/tss_dnabert2_meanmean",
+      "metric": "test_macro_f1",
+      "point": 0.36056638572639255,
+      "chance_median": 0.19051740413463827,
+      "chance95": [
+        0.1595068248530144,
+        0.23001459727523071
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/tss_dnabert2_tssanchored": {
+      "key": "splits.json/tss/family5/tss_dnabert2_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.26059060518826876,
+      "chance_median": 0.19471039625472497,
+      "chance95": [
+        0.16272527426388111,
+        0.23354821777451246
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/tss_gena_lm_clsmean": {
+      "key": "splits.json/tss/family5/tss_gena_lm_clsmean",
+      "metric": "test_macro_f1",
+      "point": 0.3064753603610416,
+      "chance_median": 0.19059611614397154,
+      "chance95": [
+        0.1585714952812276,
+        0.22721925086750774
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/tss_gena_lm_tssanchored": {
+      "key": "splits.json/tss/family5/tss_gena_lm_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.35016790814418897,
+      "chance_median": 0.19788134138944743,
+      "chance95": [
+        0.16420023636819633,
+        0.23633164096080087
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/tss_hyena_dna_meanG": {
+      "key": "splits.json/tss/family5/tss_hyena_dna_meanG",
+      "metric": "test_macro_f1",
+      "point": 0.2582715157053077,
+      "chance_median": 0.19244860496658459,
+      "chance95": [
+        0.1613838140551302,
+        0.2319103284908608
+      ],
+      "p_above_chance": 0.002997002997002997,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/tss_hyena_dna_tssanchored": {
+      "key": "splits.json/tss/family5/tss_hyena_dna_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.29811678699712,
+      "chance_median": 0.1962252659054193,
+      "chance95": [
+        0.1647720820332837,
+        0.23764438852044698
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/tss_nt_v2_meanmean": {
+      "key": "splits.json/tss/family5/tss_nt_v2_meanmean",
+      "metric": "test_macro_f1",
+      "point": 0.3471224492453543,
+      "chance_median": 0.1949100154966077,
+      "chance95": [
+        0.15944663111562551,
+        0.23315500188824212
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/family5/tss_nt_v2_tssanchored": {
+      "key": "splits.json/tss/family5/tss_nt_v2_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.369757428018651,
+      "chance_median": 0.1960992860114272,
+      "chance95": [
+        0.16085724619320863,
+        0.23582975964868755
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa1": {
+      "key": "splits.json/cds/genept/aa1",
+      "metric": "test_r2_macro",
+      "point": 0.022009655833244324,
+      "chance_median": -0.043668147176504135,
+      "chance95": [
+        -0.0503412626683712,
+        -0.03706797799095511
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa1_len": {
+      "key": "splits.json/cds/genept/aa1_len",
+      "metric": "test_r2_macro",
+      "point": 0.023820258677005768,
+      "chance_median": -0.043835923075675964,
+      "chance95": [
+        -0.05058989962562919,
+        -0.03696802435442805
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa2": {
+      "key": "splits.json/cds/genept/aa2",
+      "metric": "test_r2_macro",
+      "point": 0.059483494609594345,
+      "chance_median": -0.06886740028858185,
+      "chance95": [
+        -0.07844341266900301,
+        -0.05960284471511841
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa2_len": {
+      "key": "splits.json/cds/genept/aa2_len",
+      "metric": "test_r2_macro",
+      "point": 0.06051141023635864,
+      "chance_median": -0.06909123435616493,
+      "chance95": [
+        -0.07858086489140988,
+        -0.05979383597150445
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa3": {
+      "key": "splits.json/cds/genept/aa3",
+      "metric": "test_r2_macro",
+      "point": 0.08018061518669128,
+      "chance_median": -0.1174774169921875,
+      "chance95": [
+        -0.12825108803808688,
+        -0.1061568995937705
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa3_len": {
+      "key": "splits.json/cds/genept/aa3_len",
+      "metric": "test_r2_macro",
+      "point": 0.08063731342554092,
+      "chance_median": -0.117551039904356,
+      "chance95": [
+        -0.12839076519012452,
+        -0.10626008845865727
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/codon": {
+      "key": "splits.json/cds/genept/codon",
+      "metric": "test_r2_macro",
+      "point": 0.03771740570664406,
+      "chance_median": -0.10926222056150436,
+      "chance95": [
+        -0.12142411824315787,
+        -0.0971196847036481
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/dnabert2_specialmean": {
+      "key": "splits.json/cds/genept/dnabert2_specialmean",
+      "metric": "test_r2_macro",
+      "point": 0.06516900658607483,
+      "chance_median": -0.08141965419054031,
+      "chance95": [
+        -0.09152180533856154,
+        -0.07069547045975924
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/enformer_trunk_center": {
+      "key": "splits.json/tss/genept/enformer_trunk_center",
+      "metric": "test_r2_macro",
+      "point": 0.013977468945086002,
+      "chance_median": -0.07396620512008667,
+      "chance95": [
+        -0.08313268404453993,
+        -0.06514401324093341
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/enformer_trunk_global": {
+      "key": "splits.json/tss/genept/enformer_trunk_global",
+      "metric": "test_r2_macro",
+      "point": 0.005553519818931818,
+      "chance_median": -0.056406162679195404,
+      "chance95": [
+        -0.06396814323961734,
+        -0.04928595293313265
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/enformer_tss_4mer": {
+      "key": "splits.json/tss/genept/enformer_tss_4mer",
+      "metric": "test_r2_macro",
+      "point": -0.019440654665231705,
+      "chance_median": -0.05245009623467922,
+      "chance95": [
+        -0.05880060466006398,
+        -0.045273825805634264
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/esm2_150m": {
+      "key": "splits.json/cds/genept/esm2_150m",
+      "metric": "test_r2_macro",
+      "point": 0.15788577497005463,
+      "chance_median": -0.17621077597141266,
+      "chance95": [
+        -0.19179903268814086,
+        -0.16187999583780766
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/esm2_650m": {
+      "key": "splits.json/cds/genept/esm2_650m",
+      "metric": "test_r2_macro",
+      "point": 0.17597945034503937,
+      "chance_median": -0.2307235300540924,
+      "chance95": [
+        -0.24711401313543319,
+        -0.21523838639259338
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/gc": {
+      "key": "splits.json/cds/genept/gc",
+      "metric": "test_r2_macro",
+      "point": -0.021187877282500267,
+      "chance_median": -0.027007676661014557,
+      "chance95": [
+        -0.02891866802237928,
+        -0.02529898495413363
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/gena_lm_meanD": {
+      "key": "splits.json/cds/genept/gena_lm_meanD",
+      "metric": "test_r2_macro",
+      "point": 0.048762161284685135,
+      "chance_median": -0.10123668611049652,
+      "chance95": [
+        -0.11350238919258118,
+        -0.09034863207489252
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/hyena_dna_meanD": {
+      "key": "splits.json/cds/genept/hyena_dna_meanD",
+      "metric": "test_r2_macro",
+      "point": 0.029011325910687447,
+      "chance_median": -0.09923187643289566,
+      "chance95": [
+        -0.10948645677417516,
+        -0.0883088918402791
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/kmer": {
+      "key": "splits.json/cds/genept/kmer",
+      "metric": "test_r2_macro",
+      "point": 0.03200363740324974,
+      "chance_median": -0.06855681166052818,
+      "chance95": [
+        -0.07740297615528106,
+        -0.05959887253120542
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/kmer6": {
+      "key": "splits.json/cds/genept/kmer6",
+      "metric": "test_r2_macro",
+      "point": 0.038671184331178665,
+      "chance_median": -0.11159831658005714,
+      "chance95": [
+        -0.12318103574216366,
+        -0.10104318298399449
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/kmer6_len": {
+      "key": "splits.json/cds/genept/kmer6_len",
+      "metric": "test_r2_macro",
+      "point": 0.03932177275419235,
+      "chance_median": -0.11179464682936668,
+      "chance95": [
+        -0.12347233165055513,
+        -0.10121211539953948
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/kmer_len": {
+      "key": "splits.json/cds/genept/kmer_len",
+      "metric": "test_r2_macro",
+      "point": 0.033481527119874954,
+      "chance_median": -0.06844919547438622,
+      "chance95": [
+        -0.07734748870134353,
+        -0.05958759523928166
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/nt_v2_specialmean": {
+      "key": "splits.json/cds/genept/nt_v2_specialmean",
+      "metric": "test_r2_macro",
+      "point": 0.04259210824966431,
+      "chance_median": -0.1259591430425644,
+      "chance95": [
+        -0.13788907043635845,
+        -0.11350207366049289
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/tss_dnabert2_meanmean": {
+      "key": "splits.json/tss/genept/tss_dnabert2_meanmean",
+      "metric": "test_r2_macro",
+      "point": 0.0035689950454980135,
+      "chance_median": -0.05878928117454052,
+      "chance95": [
+        -0.06582118477672338,
+        -0.05088464077562094
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/tss_dnabert2_tssanchored": {
+      "key": "splits.json/tss/genept/tss_dnabert2_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.011154145002365112,
+      "chance_median": -0.050228554755449295,
+      "chance95": [
+        -0.05648587830364704,
+        -0.04363942239433528
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/tss_gena_lm_meanmean": {
+      "key": "splits.json/tss/genept/tss_gena_lm_meanmean",
+      "metric": "test_r2_macro",
+      "point": -0.010338817723095417,
+      "chance_median": -0.056806424632668495,
+      "chance95": [
+        -0.0640229320153594,
+        -0.04881050335243344
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/tss_gena_lm_tssanchored": {
+      "key": "splits.json/tss/genept/tss_gena_lm_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.01671561598777771,
+      "chance_median": -0.028873179107904434,
+      "chance95": [
+        -0.03128949431702495,
+        -0.026484795194119216
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/tss_hyena_dna_maxmean": {
+      "key": "splits.json/tss/genept/tss_hyena_dna_maxmean",
+      "metric": "test_r2_macro",
+      "point": -0.019412914291024208,
+      "chance_median": -0.03368283435702324,
+      "chance95": [
+        -0.03758263858035207,
+        -0.029471478005871177
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/tss_hyena_dna_tssanchored": {
+      "key": "splits.json/tss/genept/tss_hyena_dna_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.02279774285852909,
+      "chance_median": -0.026412224397063255,
+      "chance95": [
+        -0.027623635763302446,
+        -0.025211331993341447
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/tss_nt_v2_meanmean": {
+      "key": "splits.json/tss/genept/tss_nt_v2_meanmean",
+      "metric": "test_r2_macro",
+      "point": -0.004514009691774845,
+      "chance_median": -0.05961229465901852,
+      "chance95": [
+        -0.06759937927126884,
+        -0.05162426242604852
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/tss_nt_v2_tssanchored": {
+      "key": "splits.json/tss/genept/tss_nt_v2_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.004334941040724516,
+      "chance_median": -0.0929735042154789,
+      "chance95": [
+        -0.10396920684725046,
+        -0.08362569771707058
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 459,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/dnabert2_specialmean": {
+      "key": "splits_tss_disjoint.json/cds/family5/dnabert2_specialmean",
+      "metric": "test_macro_f1",
+      "point": 0.6375672366984627,
+      "chance_median": 0.1973672377855006,
+      "chance95": [
+        0.16189283990987502,
+        0.23673813696108928
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/enformer_trunk_center": {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_trunk_center",
+      "metric": "test_macro_f1",
+      "point": 0.4114125230411694,
+      "chance_median": 0.19245382131579575,
+      "chance95": [
+        0.15969843681343165,
+        0.23172213923902976
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/enformer_trunk_global": {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_trunk_global",
+      "metric": "test_macro_f1",
+      "point": 0.4126914143789301,
+      "chance_median": 0.19164581164413252,
+      "chance95": [
+        0.15927904837924986,
+        0.2307366380672568
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/enformer_tss_4mer": {
+      "key": "splits_tss_disjoint.json/tss/family5/enformer_tss_4mer",
+      "metric": "test_macro_f1",
+      "point": 0.28144693687239986,
+      "chance_median": 0.1919212357665167,
+      "chance95": [
+        0.16035353421298285,
+        0.22760869596555147
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/gena_lm_clsmean": {
+      "key": "splits_tss_disjoint.json/cds/family5/gena_lm_clsmean",
+      "metric": "test_macro_f1",
+      "point": 0.6067357570530398,
+      "chance_median": 0.19771129278918448,
+      "chance95": [
+        0.160590369372373,
+        0.23774407143324908
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/hyena_dna_meanG": {
+      "key": "splits_tss_disjoint.json/cds/family5/hyena_dna_meanG",
+      "metric": "test_macro_f1",
+      "point": 0.6518380536788368,
+      "chance_median": 0.1967992294688839,
+      "chance95": [
+        0.16290123301826923,
+        0.2348727528515829
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/kmer": {
+      "key": "splits_tss_disjoint.json/cds/family5/kmer",
+      "metric": "test_macro_f1",
+      "point": 0.54973623319914,
+      "chance_median": 0.19890500432191777,
+      "chance95": [
+        0.16655378485497652,
+        0.23730519405062164
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/nt_v2_specialmean": {
+      "key": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+      "metric": "test_macro_f1",
+      "point": 0.693555859714189,
+      "chance_median": 0.19769839938271216,
+      "chance95": [
+        0.16373316177104422,
+        0.23812364847391557
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/tss_dnabert2_meanG": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_meanG",
+      "metric": "test_macro_f1",
+      "point": 0.25766774513713153,
+      "chance_median": 0.18514857433164883,
+      "chance95": [
+        0.15707925482364224,
+        0.2223225713202744
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/tss_dnabert2_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_dnabert2_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.28117760851460094,
+      "chance_median": 0.194885692047867,
+      "chance95": [
+        0.1633992329378671,
+        0.2336191763323948
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/tss_gena_lm_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_meanmean",
+      "metric": "test_macro_f1",
+      "point": 0.3396627491847998,
+      "chance_median": 0.19013377195330428,
+      "chance95": [
+        0.15797670924385343,
+        0.22945525826472088
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/tss_gena_lm_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_gena_lm_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.3665114084128213,
+      "chance_median": 0.19644188434857035,
+      "chance95": [
+        0.165616592082029,
+        0.23501245812895816
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/tss_hyena_dna_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_hyena_dna_meanmean",
+      "metric": "test_macro_f1",
+      "point": 0.26396098994921535,
+      "chance_median": 0.19176951566944944,
+      "chance95": [
+        0.16097388944108876,
+        0.23034694751889606
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/tss_hyena_dna_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_hyena_dna_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.2760035177744709,
+      "chance_median": 0.1887052532239218,
+      "chance95": [
+        0.1604866164961679,
+        0.22588693913706523
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/tss_nt_v2_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+      "metric": "test_macro_f1",
+      "point": 0.30035742035742036,
+      "chance_median": 0.18569386169386168,
+      "chance95": [
+        0.15374514374514375,
+        0.22492658637658638
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/family5/tss_nt_v2_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_tssanchored",
+      "metric": "test_macro_f1",
+      "point": 0.35082117707062066,
+      "chance_median": 0.19507647444638504,
+      "chance95": [
+        0.163715227565351,
+        0.23400716360562018
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/dnabert2_specialmean": {
+      "key": "splits_tss_disjoint.json/cds/genept/dnabert2_specialmean",
+      "metric": "test_r2_macro",
+      "point": 0.048333246260881424,
+      "chance_median": -0.0763339102268219,
+      "chance95": [
+        -0.08571554031223058,
+        -0.06753813289105892
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/enformer_trunk_center": {
+      "key": "splits_tss_disjoint.json/tss/genept/enformer_trunk_center",
+      "metric": "test_r2_macro",
+      "point": -0.0020830377470701933,
+      "chance_median": -0.0791780985891819,
+      "chance95": [
+        -0.08816074207425117,
+        -0.07062766142189503
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/enformer_trunk_global": {
+      "key": "splits_tss_disjoint.json/tss/genept/enformer_trunk_global",
+      "metric": "test_r2_macro",
+      "point": -0.0060059321112930775,
+      "chance_median": -0.05827135778963566,
+      "chance95": [
+        -0.06467124000191689,
+        -0.05174347162246704
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/enformer_tss_4mer": {
+      "key": "splits_tss_disjoint.json/tss/genept/enformer_tss_4mer",
+      "metric": "test_r2_macro",
+      "point": -0.03428565338253975,
+      "chance_median": -0.06654739379882812,
+      "chance95": [
+        -0.07347722742706538,
+        -0.059659271501004696
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/gena_lm_meanD": {
+      "key": "splits_tss_disjoint.json/cds/genept/gena_lm_meanD",
+      "metric": "test_r2_macro",
+      "point": 0.026789924129843712,
+      "chance_median": -0.09844917058944702,
+      "chance95": [
+        -0.10851492192596197,
+        -0.08932888284325599
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/hyena_dna_meanD": {
+      "key": "splits_tss_disjoint.json/cds/genept/hyena_dna_meanD",
+      "metric": "test_r2_macro",
+      "point": 0.014679874293506145,
+      "chance_median": -0.09510420635342598,
+      "chance95": [
+        -0.10454158782958985,
+        -0.08613914288580418
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/kmer": {
+      "key": "splits_tss_disjoint.json/cds/genept/kmer",
+      "metric": "test_r2_macro",
+      "point": 0.01396311353892088,
+      "chance_median": -0.07096470519900322,
+      "chance95": [
+        -0.07855819743126631,
+        -0.06357188615947962
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/nt_v2_meanG": {
+      "key": "splits_tss_disjoint.json/cds/genept/nt_v2_meanG",
+      "metric": "test_r2_macro",
+      "point": 0.025215474888682365,
+      "chance_median": -0.11575156822800636,
+      "chance95": [
+        -0.12672219350934028,
+        -0.10584497340023517
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/tss_dnabert2_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_dnabert2_meanmean",
+      "metric": "test_r2_macro",
+      "point": -0.011393665336072445,
+      "chance_median": -0.0468845721334219,
+      "chance95": [
+        -0.05314421383664012,
+        -0.04083087490871549
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/tss_dnabert2_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_dnabert2_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.024023311212658882,
+      "chance_median": -0.07201176881790161,
+      "chance95": [
+        -0.07988303005695344,
+        -0.06390716098248958
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/tss_gena_lm_clsmean": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_gena_lm_clsmean",
+      "metric": "test_r2_macro",
+      "point": -0.02005712501704693,
+      "chance_median": -0.05874646455049515,
+      "chance95": [
+        -0.06561852935701609,
+        -0.052431976050138475
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/tss_gena_lm_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_gena_lm_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.030107030645012856,
+      "chance_median": -0.08623185381293297,
+      "chance95": [
+        -0.09448891431093216,
+        -0.07749747764319181
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/tss_hyena_dna_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_hyena_dna_meanmean",
+      "metric": "test_r2_macro",
+      "point": -0.037268247455358505,
+      "chance_median": -0.07364868372678757,
+      "chance95": [
+        -0.0817494748160243,
+        -0.06590909305959941
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/tss_hyena_dna_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_hyena_dna_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.057345833629369736,
+      "chance_median": -0.10831492394208908,
+      "chance95": [
+        -0.11748820524662733,
+        -0.09902428984642028
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/tss_nt_v2_meanmean": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_nt_v2_meanmean",
+      "metric": "test_r2_macro",
+      "point": -0.013091583736240864,
+      "chance_median": -0.049607839435338974,
+      "chance95": [
+        -0.05595780871808529,
+        -0.04356411313638091
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits_tss_disjoint.json/genept/tss_nt_v2_tssanchored": {
+      "key": "splits_tss_disjoint.json/tss/genept/tss_nt_v2_tssanchored",
+      "metric": "test_r2_macro",
+      "point": -0.015557508915662766,
+      "chance_median": -0.07082732021808624,
+      "chance95": [
+        -0.078510888107121,
+        -0.06258138660341502
+      ],
+      "p_above_chance": 0.000999000999000999,
+      "n_test": 465,
+      "n_iters": 1000,
+      "seed": 42
+    }
+  },
+  "within_family": {
+    "splits.json/genept/aa1": {
+      "key": "splits.json/cds/genept/aa1",
+      "metric": "within_family_r2",
+      "point": -0.027509249220431502,
+      "ci95": [
+        -0.04850357296351942,
+        -0.017986107032272592
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.022009655833244324,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa1_len": {
+      "key": "splits.json/cds/genept/aa1_len",
+      "metric": "within_family_r2",
+      "point": -0.025646909824554958,
+      "ci95": [
+        -0.046722146426534376,
+        -0.015889561744588474
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.023820258677005768,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa2": {
+      "key": "splits.json/cds/genept/aa2",
+      "metric": "within_family_r2",
+      "point": 0.013310178079945405,
+      "ci95": [
+        -0.00591262553428449,
+        0.02247989902034422
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.059483494609594345,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa2_len": {
+      "key": "splits.json/cds/genept/aa2_len",
+      "metric": "within_family_r2",
+      "point": 0.014395401626922115,
+      "ci95": [
+        -0.004653234019200113,
+        0.023661881192270688
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.06051141023635864,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa3": {
+      "key": "splits.json/cds/genept/aa3",
+      "metric": "within_family_r2",
+      "point": 0.03416823175776543,
+      "ci95": [
+        0.014418247603670444,
+        0.044804985676244934
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.08018061518669128,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/aa3_len": {
+      "key": "splits.json/cds/genept/aa3_len",
+      "metric": "within_family_r2",
+      "point": 0.034666186698258196,
+      "ci95": [
+        0.014878782649702134,
+        0.045313303946366575
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.08063731342554092,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/codon": {
+      "key": "splits.json/cds/genept/codon",
+      "metric": "within_family_r2",
+      "point": -0.008675904145822729,
+      "ci95": [
+        -0.02789259748616468,
+        0.0010968501203684165
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.03771740570664406,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/dnabert2_specialmean": {
+      "key": "splits.json/cds/genept/dnabert2_specialmean",
+      "metric": "within_family_r2",
+      "point": 0.01689576211588657,
+      "ci95": [
+        -0.0076637263047689115,
+        0.03205914234950298
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.06516900658607483,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/esm2_150m": {
+      "key": "splits.json/cds/genept/esm2_150m",
+      "metric": "within_family_r2",
+      "point": 0.11726361077795965,
+      "ci95": [
+        0.09861918350708652,
+        0.129561618899056
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.15788577497005463,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/esm2_650m": {
+      "key": "splits.json/cds/genept/esm2_650m",
+      "metric": "within_family_r2",
+      "point": 0.13673069644913616,
+      "ci95": [
+        0.1155055068516382,
+        0.15078905292474284
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.17597945034503937,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/gc": {
+      "key": "splits.json/cds/genept/gc",
+      "metric": "within_family_r2",
+      "point": -0.07792363139678764,
+      "ci95": [
+        -0.10035062762958781,
+        -0.065572717248286
+      ],
+      "point_in_ci": true,
+      "r2_macro": -0.021187877282500267,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/gena_lm_meanD": {
+      "key": "splits.json/cds/genept/gena_lm_meanD",
+      "metric": "within_family_r2",
+      "point": 0.0020489469028725227,
+      "ci95": [
+        -0.019340301694162617,
+        0.013144973279060569
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.048762161284685135,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/hyena_dna_meanD": {
+      "key": "splits.json/cds/genept/hyena_dna_meanD",
+      "metric": "within_family_r2",
+      "point": -0.019580817132220946,
+      "ci95": [
+        -0.040996061025797156,
+        -0.008180180044636403
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.029011325910687447,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/kmer": {
+      "key": "splits.json/cds/genept/kmer",
+      "metric": "within_family_r2",
+      "point": -0.016032817343634355,
+      "ci95": [
+        -0.03728725249785619,
+        -0.005126582602588825
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.03200363740324974,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/kmer6": {
+      "key": "splits.json/cds/genept/kmer6",
+      "metric": "within_family_r2",
+      "point": -0.009522167590200055,
+      "ci95": [
+        -0.03070149072347473,
+        0.0018811515420831247
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.038671184331178665,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/kmer6_len": {
+      "key": "splits.json/cds/genept/kmer6_len",
+      "metric": "within_family_r2",
+      "point": -0.008813807937252017,
+      "ci95": [
+        -0.030037206989818686,
+        0.0025936612704969735
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.03932177275419235,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/kmer_len": {
+      "key": "splits.json/cds/genept/kmer_len",
+      "metric": "within_family_r2",
+      "point": -0.014499738415625164,
+      "ci95": [
+        -0.03566875763501328,
+        -0.003505673749643669
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.033481527119874954,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    },
+    "splits.json/genept/nt_v2_specialmean": {
+      "key": "splits.json/cds/genept/nt_v2_specialmean",
+      "metric": "within_family_r2",
+      "point": -0.002794855612560869,
+      "ci95": [
+        -0.022855451186344924,
+        0.007564870069793482
+      ],
+      "point_in_ci": true,
+      "r2_macro": 0.04259210824966431,
+      "n_test": 459,
+      "n_groups": 385,
+      "n_iters": 1000,
+      "seed": 42
+    }
+  },
+  "seed_replication": {
+    "splits_seed1.json": {
+      "T1 encoder > nucleotide k-mer": {
+        "metric": "test_macro_f1",
+        "a": "splits_seed1.json/cds/family5/gena_lm_meanG",
+        "b": "splits_seed1.json/cds/family5/kmer",
+        "delta_point": 0.031303479384931165,
+        "delta_ci95": [
+          -0.035059965620406815,
+          0.09756576340325408
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.83,
+        "p_one_sided": 0.17082917082917082,
+        "n_test": 455,
+        "n_groups": 421,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0,
+        "edges": [
+          false,
+          false
+        ]
+      },
+      "T2 encoder > amino-acid k-mer": {
+        "metric": "test_macro_f1",
+        "a": "splits_seed1.json/cds/family5/gena_lm_meanG",
+        "b": "splits_seed1.json/cds/family5/aa2",
+        "delta_point": -0.07718093154516581,
+        "delta_ci95": [
+          -0.13712015926972632,
+          -0.013512985103816134
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.008,
+        "p_one_sided": 0.9920079920079921,
+        "n_test": 455,
+        "n_groups": 421,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0,
+        "edges": [
+          false,
+          false
+        ]
+      },
+      "T3 ESM-2 650M > encoder": {
+        "metric": "test_macro_f1",
+        "a": "splits_seed1.json/cds/family5/esm2_650m",
+        "b": "splits_seed1.json/cds/family5/gena_lm_meanG",
+        "delta_point": 0.3358706228139954,
+        "delta_ci95": [
+          0.27613562802574243,
+          0.39954503214310494
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 1.0,
+        "p_one_sided": 0.000999000999000999,
+        "n_test": 455,
+        "n_groups": 421,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0,
+        "edges": [
+          false,
+          false
+        ]
+      }
+    },
+    "splits_seed7.json": {
+      "T1 encoder > nucleotide k-mer": {
+        "metric": "test_macro_f1",
+        "a": "splits_seed7.json/cds/family5/nt_v2_specialmean",
+        "b": "splits_seed7.json/cds/family5/kmer",
+        "delta_point": 0.045127367281617814,
+        "delta_ci95": [
+          -0.02216955736395427,
+          0.11929375805251827
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.903,
+        "p_one_sided": 0.0979020979020979,
+        "n_test": 452,
+        "n_groups": 421,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0,
+        "edges": [
+          false,
+          false
+        ]
+      },
+      "T2 encoder > amino-acid k-mer": {
+        "metric": "test_macro_f1",
+        "a": "splits_seed7.json/cds/family5/nt_v2_specialmean",
+        "b": "splits_seed7.json/cds/family5/aa3",
+        "delta_point": -0.08780617261142643,
+        "delta_ci95": [
+          -0.16214240544061684,
+          -0.020595520188904273
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.007,
+        "p_one_sided": 0.993006993006993,
+        "n_test": 452,
+        "n_groups": 421,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0,
+        "edges": [
+          false,
+          false
+        ]
+      },
+      "T3 ESM-2 650M > encoder": {
+        "metric": "test_macro_f1",
+        "a": "splits_seed7.json/cds/family5/esm2_650m",
+        "b": "splits_seed7.json/cds/family5/nt_v2_specialmean",
+        "delta_point": 0.25953361239330797,
+        "delta_ci95": [
+          0.2022295108885375,
+          0.3227436796766965
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 1.0,
+        "p_one_sided": 0.000999000999000999,
+        "n_test": 452,
+        "n_groups": 421,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0,
+        "edges": [
+          false,
+          false
+        ]
+      }
+    },
+    "splits_seed123.json": {
+      "T1 encoder > nucleotide k-mer": {
+        "metric": "test_macro_f1",
+        "a": "splits_seed123.json/cds/family5/nt_v2_specialmean",
+        "b": "splits_seed123.json/cds/family5/kmer6",
+        "delta_point": 0.06591429235152912,
+        "delta_ci95": [
+          -0.0007704781503492623,
+          0.1349577667788654
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.974,
+        "p_one_sided": 0.026973026973026972,
+        "n_test": 460,
+        "n_groups": 424,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0,
+        "edges": [
+          false,
+          false
+        ]
+      },
+      "T2 encoder > amino-acid k-mer": {
+        "metric": "test_macro_f1",
+        "a": "splits_seed123.json/cds/family5/nt_v2_specialmean",
+        "b": "splits_seed123.json/cds/family5/aa3",
+        "delta_point": -0.061326270455616894,
+        "delta_ci95": [
+          -0.12085408747608911,
+          -0.000631241035260387
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.025,
+        "p_one_sided": 0.975024975024975,
+        "n_test": 460,
+        "n_groups": 424,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0,
+        "edges": [
+          false,
+          false
+        ]
+      },
+      "T3 ESM-2 650M > encoder": {
+        "metric": "test_macro_f1",
+        "a": "splits_seed123.json/cds/family5/esm2_650m",
+        "b": "splits_seed123.json/cds/family5/nt_v2_specialmean",
+        "delta_point": 0.2298252702894864,
+        "delta_ci95": [
+          0.16886302284266524,
+          0.2861810360661512
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 1.0,
+        "p_one_sided": 0.000999000999000999,
+        "n_test": 460,
+        "n_groups": 424,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0,
+        "edges": [
+          false,
+          false
+        ]
+      }
+    }
+  },
+  "sensitivity": {
+    "inputs": {
+      "gene_table": "57ac00b6fec95af03982e0249768328d25fa9a111c5702bb3627bfe7c8a27a68",
+      "hgnc": "1182d184baa6b8dfc26e3eb2b573531bb0a06de231d9510a66cf6526f824fd76"
+    },
+    "label_noise": {
+      "task": "family5",
+      "n_genes": 387,
+      "tests": {
+        "T1 encoder > nucleotide k-mer": {
+          "metric": "test_macro_f1",
+          "a": "splits.json/cds/family5/nt_v2_meanG",
+          "b": "splits.json/cds/family5/kmer6",
+          "delta_point": 0.046781377242911315,
+          "delta_ci95": [
+            -0.024532249131311613,
+            0.11920459949118535
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 0.901,
+          "p_one_sided": 0.0999000999000999,
+          "n_test": 375,
+          "n_groups": 342,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 84
+        },
+        "T2 encoder > amino-acid k-mer": {
+          "metric": "test_macro_f1",
+          "a": "splits.json/cds/family5/nt_v2_meanG",
+          "b": "splits.json/cds/family5/aa3",
+          "delta_point": -0.07562958577401069,
+          "delta_ci95": [
+            -0.13988213718008946,
+            -0.005978418641117931
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 0.016,
+          "p_one_sided": 0.984015984015984,
+          "n_test": 375,
+          "n_groups": 342,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 84
+        },
+        "T3 ESM-2 650M > encoder": {
+          "metric": "test_macro_f1",
+          "a": "splits.json/cds/family5/esm2_650m",
+          "b": "splits.json/cds/family5/nt_v2_meanG",
+          "delta_point": 0.2554737097697414,
+          "delta_ci95": [
+            0.19159770320325387,
+            0.3234398900494362
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 1.0,
+          "p_one_sided": 0.000999000999000999,
+          "n_test": 375,
+          "n_groups": 342,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 84
+        },
+        "T4 CDS > TSS (same encoder)": {
+          "metric": "test_macro_f1",
+          "a": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+          "b": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+          "delta_point": 0.42030950146670876,
+          "delta_ci95": [
+            0.3308381958172584,
+            0.5030766752361326
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 1.0,
+          "p_one_sided": 0.000999000999000999,
+          "n_test": 386,
+          "n_groups": 240,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 79
+        }
+      },
+      "intervals": {
+        "splits.json/family5/aa3": {
+          "key": "splits.json/cds/family5/aa3",
+          "metric": "test_macro_f1",
+          "point": 0.7760259264096276,
+          "ci95": [
+            0.708099381224856,
+            0.8329920595673402
+          ],
+          "point_in_ci": true,
+          "n_test": 375,
+          "n_groups": 342,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 84,
+          "kappa_point": 0.7680818825566653,
+          "kappa_ci95": [
+            0.7098706437049548,
+            0.8217521212797361
+          ]
+        },
+        "splits.json/family5/esm2_650m": {
+          "key": "splits.json/cds/family5/esm2_650m",
+          "metric": "test_macro_f1",
+          "point": 0.9558700504053583,
+          "ci95": [
+            0.9269338491606898,
+            0.9803525101167209
+          ],
+          "point_in_ci": true,
+          "n_test": 375,
+          "n_groups": 342,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 84,
+          "kappa_point": 0.9435212611074854,
+          "kappa_ci95": [
+            0.9119918198019004,
+            0.9726345884134806
+          ]
+        },
+        "splits.json/family5/kmer6": {
+          "key": "splits.json/cds/family5/kmer6",
+          "metric": "test_macro_f1",
+          "point": 0.6536149633927056,
+          "ci95": [
+            0.585667924364108,
+            0.7147383663161104
+          ],
+          "point_in_ci": true,
+          "n_test": 375,
+          "n_groups": 342,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 84,
+          "kappa_point": 0.6113351599298095,
+          "kappa_ci95": [
+            0.5416717758240905,
+            0.6746566671819808
+          ]
+        },
+        "splits.json/family5/nt_v2_meanG": {
+          "key": "splits.json/cds/family5/nt_v2_meanG",
+          "metric": "test_macro_f1",
+          "point": 0.700396340635617,
+          "ci95": [
+            0.6331054200971777,
+            0.7593255168133933
+          ],
+          "point_in_ci": true,
+          "n_test": 375,
+          "n_groups": 342,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 84,
+          "kappa_point": 0.6588609276938489,
+          "kappa_ci95": [
+            0.5947421938110891,
+            0.7207811963936053
+          ]
+        }
+      }
+    },
+    "label_noise_kinase": {
+      "task": "family5",
+      "n_genes": 150,
+      "tests": {
+        "T1 encoder > nucleotide k-mer": {
+          "metric": "test_macro_f1",
+          "a": "splits.json/cds/family5/nt_v2_meanG",
+          "b": "splits.json/cds/family5/kmer6",
+          "delta_point": 0.05417020463918609,
+          "delta_ci95": [
+            -0.020088665242973536,
+            0.13267174354987457
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 0.919,
+          "p_one_sided": 0.08191808191808192,
+          "n_test": 436,
+          "n_groups": 402,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 23
+        },
+        "T2 encoder > amino-acid k-mer": {
+          "metric": "test_macro_f1",
+          "a": "splits.json/cds/family5/nt_v2_meanG",
+          "b": "splits.json/cds/family5/aa3",
+          "delta_point": -0.06637268039072108,
+          "delta_ci95": [
+            -0.13309665796822748,
+            0.0014718779635275322
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 0.028,
+          "p_one_sided": 0.972027972027972,
+          "n_test": 436,
+          "n_groups": 402,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 23
+        },
+        "T3 ESM-2 650M > encoder": {
+          "metric": "test_macro_f1",
+          "a": "splits.json/cds/family5/esm2_650m",
+          "b": "splits.json/cds/family5/nt_v2_meanG",
+          "delta_point": 0.2535256464928105,
+          "delta_ci95": [
+            0.18767888816260697,
+            0.3162682568754646
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 1.0,
+          "p_one_sided": 0.000999000999000999,
+          "n_test": 436,
+          "n_groups": 402,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 23
+        },
+        "T4 CDS > TSS (same encoder)": {
+          "metric": "test_macro_f1",
+          "a": "splits_tss_disjoint.json/cds/family5/nt_v2_specialmean",
+          "b": "splits_tss_disjoint.json/tss/family5/tss_nt_v2_meanmean",
+          "delta_point": 0.3921671546234024,
+          "delta_ci95": [
+            0.3141328571665817,
+            0.47342321075348115
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 1.0,
+          "p_one_sided": 0.000999000999000999,
+          "n_test": 441,
+          "n_groups": 268,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 24
+        }
+      },
+      "intervals": {
+        "splits.json/family5/aa3": {
+          "key": "splits.json/cds/family5/aa3",
+          "metric": "test_macro_f1",
+          "point": 0.7668196793226734,
+          "ci95": [
+            0.7036964320694394,
+            0.8240519302578176
+          ],
+          "point_in_ci": true,
+          "n_test": 436,
+          "n_groups": 402,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 23,
+          "kappa_point": 0.767672513815716,
+          "kappa_ci95": [
+            0.7123974320153295,
+            0.8201646137074047
+          ]
+        },
+        "splits.json/family5/esm2_650m": {
+          "key": "splits.json/cds/family5/esm2_650m",
+          "metric": "test_macro_f1",
+          "point": 0.9539726454247628,
+          "ci95": [
+            0.9226627659488589,
+            0.9770517485759718
+          ],
+          "point_in_ci": true,
+          "n_test": 436,
+          "n_groups": 402,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 23,
+          "kappa_point": 0.945102911056643,
+          "kappa_ci95": [
+            0.912619285936628,
+            0.9717671697080776
+          ]
+        },
+        "splits.json/family5/kmer6": {
+          "key": "splits.json/cds/family5/kmer6",
+          "metric": "test_macro_f1",
+          "point": 0.6462767942927662,
+          "ci95": [
+            0.5775441101604515,
+            0.7023250685441595
+          ],
+          "point_in_ci": true,
+          "n_test": 436,
+          "n_groups": 402,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 23,
+          "kappa_point": 0.6106782131093682,
+          "kappa_ci95": [
+            0.5469718092311567,
+            0.6729582954373029
+          ]
+        },
+        "splits.json/family5/nt_v2_meanG": {
+          "key": "splits.json/cds/family5/nt_v2_meanG",
+          "metric": "test_macro_f1",
+          "point": 0.7004469989319523,
+          "ci95": [
+            0.6328629236472484,
+            0.76335276035698
+          ],
+          "point_in_ci": true,
+          "n_test": 436,
+          "n_groups": 402,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 23,
+          "kappa_point": 0.6697475701714072,
+          "kappa_ci95": [
+            0.6077899766688065,
+            0.7310310643269471
+          ]
+        }
+      }
+    },
+    "template": {
+      "task": "genept",
+      "n_genes": 901,
+      "tests": {
+        "genept: encoder > nt_kmer": {
+          "metric": "test_r2_macro",
+          "a": "splits.json/cds/genept/dnabert2_specialmean",
+          "b": "splits.json/cds/genept/kmer6",
+          "delta_point": 0.024378957226872444,
+          "delta_ci95": [
+            0.018232304183766247,
+            0.031242139358073472
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 1.0,
+          "p_one_sided": 0.000999000999000999,
+          "n_test": 404,
+          "n_groups": 372,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 55
+        },
+        "genept: encoder > aa_kmer": {
+          "metric": "test_r2_macro",
+          "a": "splits.json/cds/genept/dnabert2_specialmean",
+          "b": "splits.json/cds/genept/aa3",
+          "delta_point": -0.022174831479787827,
+          "delta_ci95": [
+            -0.032445643469691275,
+            -0.012217531912028791
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 0.0,
+          "p_one_sided": 1.0,
+          "n_test": 404,
+          "n_groups": 372,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 55
+        },
+        "genept: esm2_650m > encoder": {
+          "metric": "test_r2_macro",
+          "a": "splits.json/cds/genept/esm2_650m",
+          "b": "splits.json/cds/genept/dnabert2_specialmean",
+          "delta_point": 0.11917940154671669,
+          "delta_ci95": [
+            0.1039717385545373,
+            0.13478818954899907
+          ],
+          "point_in_ci": true,
+          "p_a_gt_b": 1.0,
+          "p_one_sided": 0.000999000999000999,
+          "n_test": 404,
+          "n_groups": 372,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 55
+        }
+      },
+      "intervals": {
+        "splits.json/genept/aa3": {
+          "key": "splits.json/cds/genept/aa3",
+          "metric": "test_r2_macro",
+          "point": 0.06715182214975357,
+          "ci95": [
+            0.052217066008597615,
+            0.07627851441502571
+          ],
+          "point_in_ci": true,
+          "n_test": 404,
+          "n_groups": 372,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 55
+        },
+        "splits.json/genept/dnabert2_specialmean": {
+          "key": "splits.json/cds/genept/dnabert2_specialmean",
+          "metric": "test_r2_macro",
+          "point": 0.044976990669965744,
+          "ci95": [
+            0.03355697439983487,
+            0.051317565888166425
+          ],
+          "point_in_ci": true,
+          "n_test": 404,
+          "n_groups": 372,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 55
+        },
+        "splits.json/genept/esm2_650m": {
+          "key": "splits.json/cds/genept/esm2_650m",
+          "metric": "test_r2_macro",
+          "point": 0.16415639221668243,
+          "ci95": [
+            0.14411572068929673,
+            0.17816073037683963
+          ],
+          "point_in_ci": true,
+          "n_test": 404,
+          "n_groups": 372,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 55
+        },
+        "splits.json/genept/kmer6": {
+          "key": "splits.json/cds/genept/kmer6",
+          "metric": "test_r2_macro",
+          "point": 0.0205980334430933,
+          "ci95": [
+            0.008215952827595175,
+            0.026558536663651464
+          ],
+          "point_in_ci": true,
+          "n_test": 404,
+          "n_groups": 372,
+          "n_iters": 1000,
+          "seed": 42,
+          "n_short_class": 0,
+          "n_excluded": 55
+        }
+      }
+    }
+  },
+  "pooling_3x": {
+    "family5/dnabert2": {
+      "Ends+Mean > Mean x3 (3x C)": {
+        "metric": "test_macro_f1",
+        "a": "splits.json/cds/family5/dnabert2_meanD",
+        "b": "splits.json/cds/family5/dnabert2_meanmean3",
+        "delta_point": -0.02114140615044613,
+        "delta_ci95": [
+          -0.0621461362711915,
+          0.01952939433839179
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.162,
+        "p_one_sided": 0.8381618381618382,
+        "n_test": 459,
+        "n_groups": 425,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "Ends+Mean > Mean": {
+        "metric": "test_macro_f1",
+        "a": "splits.json/cds/family5/dnabert2_meanD",
+        "b": "splits.json/cds/family5/dnabert2_meanmean",
+        "delta_point": -0.007535596502797004,
+        "delta_ci95": [
+          -0.04544354686799681,
+          0.028320894469695993
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.355,
+        "p_one_sided": 0.6453546453546454,
+        "n_test": 459,
+        "n_groups": 425,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "picks": {
+        "meanD": 0.001,
+        "meanmean": 0.01,
+        "meanmean3": 0.01
+      },
+      "edges": {
+        "meanD": false,
+        "meanmean": false,
+        "meanmean3": false
+      },
+      "agreement_with_mean_x3": 0.8671023965141612
+    },
+    "family5/nt_v2": {
+      "Ends+Mean > Mean x3 (3x C)": {
+        "metric": "test_macro_f1",
+        "a": "splits.json/cds/family5/nt_v2_meanD",
+        "b": "splits.json/cds/family5/nt_v2_meanmean3",
+        "delta_point": -0.0005038218776484138,
+        "delta_ci95": [
+          -0.026123502229643526,
+          0.028147140078164067
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.491,
+        "p_one_sided": 0.5094905094905094,
+        "n_test": 459,
+        "n_groups": 425,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "Ends+Mean > Mean": {
+        "metric": "test_macro_f1",
+        "a": "splits.json/cds/family5/nt_v2_meanD",
+        "b": "splits.json/cds/family5/nt_v2_meanmean",
+        "delta_point": 0.037777698093693246,
+        "delta_ci95": [
+          -0.00035741923663204213,
+          0.07983227899635306
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.974,
+        "p_one_sided": 0.026973026973026972,
+        "n_test": 459,
+        "n_groups": 425,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "picks": {
+        "meanD": 0.1,
+        "meanmean": 1000.0,
+        "meanmean3": 0.1
+      },
+      "edges": {
+        "meanD": false,
+        "meanmean": false,
+        "meanmean3": false
+      },
+      "agreement_with_mean_x3": 0.9760348583877996
+    },
+    "family5/gena_lm": {
+      "Ends+Mean > Mean x3 (3x C)": {
+        "metric": "test_macro_f1",
+        "a": "splits.json/cds/family5/gena_lm_meanD",
+        "b": "splits.json/cds/family5/gena_lm_meanmean3",
+        "delta_point": 0.08595974040853649,
+        "delta_ci95": [
+          0.01708708806428436,
+          0.1534485243354887
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.995,
+        "p_one_sided": 0.005994005994005994,
+        "n_test": 459,
+        "n_groups": 425,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "Ends+Mean > Mean": {
+        "metric": "test_macro_f1",
+        "a": "splits.json/cds/family5/gena_lm_meanD",
+        "b": "splits.json/cds/family5/gena_lm_meanmean",
+        "delta_point": 0.09129230765227359,
+        "delta_ci95": [
+          0.019566753333320527,
+          0.1555377396838356
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.995,
+        "p_one_sided": 0.005994005994005994,
+        "n_test": 459,
+        "n_groups": 425,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "picks": {
+        "meanD": 0.001,
+        "meanmean": 1000.0,
+        "meanmean3": 100.0
+      },
+      "edges": {
+        "meanD": false,
+        "meanmean": false,
+        "meanmean3": false
+      },
+      "agreement_with_mean_x3": 0.7429193899782135
+    },
+    "family5/hyena_dna": {
+      "Ends+Mean > Mean x3 (3x C)": {
+        "metric": "test_macro_f1",
+        "a": "splits.json/cds/family5/hyena_dna_meanD",
+        "b": "splits.json/cds/family5/hyena_dna_meanmean3",
+        "delta_point": -0.015880729626596146,
+        "delta_ci95": [
+          -0.04541889947576346,
+          0.013929493560246425
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.138,
+        "p_one_sided": 0.8621378621378621,
+        "n_test": 459,
+        "n_groups": 425,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "Ends+Mean > Mean": {
+        "metric": "test_macro_f1",
+        "a": "splits.json/cds/family5/hyena_dna_meanD",
+        "b": "splits.json/cds/family5/hyena_dna_meanmean",
+        "delta_point": 0.008674469722711131,
+        "delta_ci95": [
+          -0.021238579666650544,
+          0.03903458360147549
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.699,
+        "p_one_sided": 0.3016983016983017,
+        "n_test": 459,
+        "n_groups": 425,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "picks": {
+        "meanD": 1.0,
+        "meanmean": 1.0,
+        "meanmean3": 1.0
+      },
+      "edges": {
+        "meanD": false,
+        "meanmean": false,
+        "meanmean3": false
+      },
+      "agreement_with_mean_x3": 0.9564270152505446
+    },
+    "genept/dnabert2": {
+      "Ends+Mean > Mean x3 (3x C)": {
+        "metric": "test_r2_macro",
+        "a": "splits.json/cds/genept/dnabert2_meanD",
+        "b": "splits.json/cds/genept/dnabert2_meanmean3",
+        "delta_point": 0.0005436539649963379,
+        "delta_ci95": [
+          -0.0008571787737309932,
+          0.002142474520951509
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.786,
+        "p_one_sided": 0.21478521478521478,
+        "n_test": 459,
+        "n_groups": 385,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "Ends+Mean > Mean": {
+        "metric": "test_r2_macro",
+        "a": "splits.json/cds/genept/dnabert2_meanD",
+        "b": "splits.json/cds/genept/dnabert2_meanmean",
+        "delta_point": -0.0011730939149856567,
+        "delta_ci95": [
+          -0.003487762063741684,
+          0.0011013222858309744
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.149,
+        "p_one_sided": 0.8511488511488512,
+        "n_test": 459,
+        "n_groups": 385,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "picks": {
+        "meanD": 10000.0,
+        "meanmean": 10000.0,
+        "meanmean3": 10000.0
+      },
+      "edges": {
+        "meanD": false,
+        "meanmean": false,
+        "meanmean3": false
+      }
+    },
+    "genept/nt_v2": {
+      "Ends+Mean > Mean x3 (3x C)": {
+        "metric": "test_r2_macro",
+        "a": "splits.json/cds/genept/nt_v2_meanD",
+        "b": "splits.json/cds/genept/nt_v2_meanmean3",
+        "delta_point": 0.00018732622265815735,
+        "delta_ci95": [
+          -0.0002868054900318384,
+          0.0006706852000206708
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.773,
+        "p_one_sided": 0.22777222777222778,
+        "n_test": 459,
+        "n_groups": 385,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "Ends+Mean > Mean": {
+        "metric": "test_r2_macro",
+        "a": "splits.json/cds/genept/nt_v2_meanD",
+        "b": "splits.json/cds/genept/nt_v2_meanmean",
+        "delta_point": -0.0010079778730869293,
+        "delta_ci95": [
+          -0.003249115962535143,
+          0.0010871360078454006
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.17,
+        "p_one_sided": 0.8301698301698301,
+        "n_test": 459,
+        "n_groups": 385,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "picks": {
+        "meanD": 10000.0,
+        "meanmean": 1000.0,
+        "meanmean3": 10000.0
+      },
+      "edges": {
+        "meanD": false,
+        "meanmean": false,
+        "meanmean3": false
+      }
+    },
+    "genept/gena_lm": {
+      "Ends+Mean > Mean x3 (3x C)": {
+        "metric": "test_r2_macro",
+        "a": "splits.json/cds/genept/gena_lm_meanD",
+        "b": "splits.json/cds/genept/gena_lm_meanmean3",
+        "delta_point": 0.0009522512555122375,
+        "delta_ci95": [
+          -6.067501381039619e-05,
+          0.0022010648623108863
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.96,
+        "p_one_sided": 0.04095904095904096,
+        "n_test": 459,
+        "n_groups": 385,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "Ends+Mean > Mean": {
+        "metric": "test_r2_macro",
+        "a": "splits.json/cds/genept/gena_lm_meanD",
+        "b": "splits.json/cds/genept/gena_lm_meanmean",
+        "delta_point": 0.006419934332370758,
+        "delta_ci95": [
+          0.004487293632701039,
+          0.008671661443077027
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 1.0,
+        "p_one_sided": 0.000999000999000999,
+        "n_test": 459,
+        "n_groups": 385,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "picks": {
+        "meanD": 10000.0,
+        "meanmean": 10000.0,
+        "meanmean3": 10000.0
+      },
+      "edges": {
+        "meanD": false,
+        "meanmean": false,
+        "meanmean3": false
+      }
+    },
+    "genept/hyena_dna": {
+      "Ends+Mean > Mean x3 (3x C)": {
+        "metric": "test_r2_macro",
+        "a": "splits.json/cds/genept/hyena_dna_meanD",
+        "b": "splits.json/cds/genept/hyena_dna_meanmean3",
+        "delta_point": 8.31708312034607e-05,
+        "delta_ci95": [
+          -0.00017267907969653606,
+          0.0003622879041358828
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.713,
+        "p_one_sided": 0.28771228771228774,
+        "n_test": 459,
+        "n_groups": 385,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "Ends+Mean > Mean": {
+        "metric": "test_r2_macro",
+        "a": "splits.json/cds/genept/hyena_dna_meanD",
+        "b": "splits.json/cds/genept/hyena_dna_meanmean",
+        "delta_point": 0.0027606599032878876,
+        "delta_ci95": [
+          0.0004917694255709648,
+          0.004887899570167064
+        ],
+        "point_in_ci": true,
+        "p_a_gt_b": 0.993,
+        "p_one_sided": 0.007992007992007992,
+        "n_test": 459,
+        "n_groups": 385,
+        "n_iters": 1000,
+        "seed": 42,
+        "n_short_class": 0
+      },
+      "picks": {
+        "meanD": 1000.0,
+        "meanmean": 1000.0,
+        "meanmean3": 1000.0
+      },
+      "edges": {
+        "meanD": false,
+        "meanmean": false,
+        "meanmean3": false
+      }
+    }
+  },
+  "null_bands": {
+    "splits.json/family5/esm2_650m": {
+      "split": "splits.json",
+      "task": "family5",
+      "source": "esm2_650m",
+      "metric": "test_macro_f1",
+      "band95": [
+        0.15448745027139205,
+        0.246767571719348
+      ],
+      "median": 0.19947644153168648,
+      "n": 200,
+      "medians": {
+        "test_kappa": 0.01323302109696639,
+        "test_accuracy": 0.37254901960784315
+      },
+      "n_refit_nonconverged": 33,
+      "n_edge": {
+        "plateau": 0,
+        "limit": 0,
+        "nonconverged": 46
+      }
+    },
+    "splits.json/family5/kmer": {
+      "split": "splits.json",
+      "task": "family5",
+      "source": "kmer",
+      "metric": "test_macro_f1",
+      "band95": [
+        0.14051539426344692,
+        0.20754802214274576
+      ],
+      "median": 0.16691001467016509,
+      "n": 200,
+      "medians": {
+        "test_kappa": -0.014699887121087496,
+        "test_accuracy": 0.4749455337690632
+      },
+      "n_refit_nonconverged": 1,
+      "n_edge": {
+        "plateau": 0,
+        "limit": 0,
+        "nonconverged": 35
+      }
+    },
+    "splits.json/genept/kmer": {
+      "split": "splits.json",
+      "task": "genept",
+      "source": "kmer",
+      "metric": "test_r2_macro",
+      "band95": [
+        -0.026767436228692532,
+        -0.024708776967599988
+      ],
+      "median": -0.026709984987974167,
+      "n": 200,
+      "medians": {},
+      "n_refit_nonconverged": 0,
+      "n_edge": {
+        "plateau": 124,
+        "limit": 0,
+        "nonconverged": 0
+      }
+    },
+    "splits_tss_disjoint.json/family5/enformer_tss_4mer": {
+      "split": "splits_tss_disjoint.json",
+      "task": "family5",
+      "source": "enformer_tss_4mer",
+      "metric": "test_macro_f1",
+      "band95": [
+        0.14091273822573747,
+        0.20017220023578286
+      ],
+      "median": 0.1674950867529408,
+      "n": 200,
+      "medians": {
+        "test_kappa": -0.006530297223367065,
+        "test_accuracy": 0.4774193548387097
+      },
+      "n_refit_nonconverged": 11,
+      "n_edge": {
+        "plateau": 0,
+        "limit": 0,
+        "nonconverged": 67
+      }
+    },
+    "splits_tss_disjoint.json/genept/enformer_tss_4mer": {
+      "split": "splits_tss_disjoint.json",
+      "task": "genept",
+      "source": "enformer_tss_4mer",
+      "metric": "test_r2_macro",
+      "band95": [
+        -0.03234951961785555,
+        -0.031745842471718785
+      ],
+      "median": -0.031954025849699974,
+      "n": 200,
+      "medians": {},
+      "n_refit_nonconverged": 0,
+      "n_edge": {
+        "plateau": 149,
+        "limit": 0,
+        "nonconverged": 0
+      }
+    }
+  }
+}

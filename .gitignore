@@ -15,15 +15,29 @@ data/dataset.parquet
 data/dataset_nt_v2.parquet
 data/gene_table.parquet
 
+# E5 TSS parquets — large (1.3 GB total; ~31 MB each). Availability via the Zenodo
+# DOI (Austin's deposit), NOT git history. Result JSONs + scripts stay committable;
+# the parquets regenerate from build_tss_anchored_datasets.py / the npz cache.
+data/dataset_tss_*.parquet
+
 # Phase 4b per-chunk reduction caches — large, fully regeneratable from
 # `scripts/run_multi_pool_extract.py --encoder {dnabert2,nt_v2}`
 data/chunk_reductions_dnabert2/
 data/chunk_reductions_nt_v2/
 data/chunk_reductions_gena_lm/
 data/chunk_reductions_hyena_dna/
+data/chunk_reductions_v2_*/
 data/tss_chunk_reductions_*/
 data/enformer_windows/
 data/enformer_features/
+data/enformer_features_v2/
+# Canonical-TSS windows (Phase 1B), rebuilt by scripts/build_tss_windows.py;
+# the manifest data/tss_windows.tsv is tracked and pins every window's sha256.
+data/tss_windows_e*/
+# ESM-2 per-gene embedding caches — large, regeneratable from scripts/run_esm2.py
+data/esm2_150m_embeddings/
+data/esm2_650m_embeddings/
+data/esm2_*_embeddings_v2/
 
 # Pitch deck PDF — kept locally, not authoritative source
 Genomics Project (1).pdf
@@ -40,3 +54,13 @@ data/annotation/
 data/sequences_protein/
 data/tss_masked_windows/
 data/cluster_work/
+
+# CONFIDENTIAL — this is a PUBLIC repo. Peer reviews, rebuttal strategy, and the
+# session handoff stay local: never commit reviews, review analysis, or local paths.
+docs/reviews/
+MINA.md
+STATUS.md
+
+# Runtime logs/outputs (contain local absolute paths)
+logs/
+outputs/

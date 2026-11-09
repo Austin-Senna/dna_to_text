@@ -1,105 +1,57 @@
 #!/usr/bin/env python3
 """Generate LaTeX table-body fragments for the dna_to_text_paper manuscript
-from the homology-split metrics.
+from the camera-ready records.
 
-The manuscript keeps its own ``\\begin{table}`` / ``\\processtable{caption}`` /
-``\\begin{tabular*}`` / header / source-note wrappers; this script only writes
-the data rows (and ``\\multicolumn`` section separators) that go between the
-header ``\\midrule`` and the closing ``\\botrule``. The paper ``\\input``s each
-fragment. Re-run to refresh every number; nothing is hand-transcribed.
+The manuscript keeps its own ``\\begin{table}`` / caption / source-note
+wrappers; this script writes each self-contained tabular (and the two appendix
+longtables) that the paper ``\\input``s. Re-run to refresh every number; nothing
+is hand-transcribed.
 
     uv run scripts/build_paper_tables.py
 
-Primary split: homology-aware MMseqs2, 40% identity (``data/metrics_homology.json``).
-Alpha for ridge is selected by validation macro-R^2 (``select_by == "r2"``).
+Inputs: ``data/v2`` through ``linear_trainer.records`` (one commit, the policy
+purge, G7/G2) and ``data/v2/statistics.json`` (intervals, paired tests, null
+bands; ``scripts/build_statistics.py``). Primary splits: the 40% homology split
+for CDS, the genomic-interval-disjoint split for TSS. Every pick (pool, C or
+alpha, nucleotide and amino-acid k, the best encoder) is made on validation
+scores only; test metrics are reported, never ranked. A missing cell raises.
+
+Selection sensitivity (Phase 6; decided Oct 2: accept and disclose). Every
+fragment is built three times: from the canonical records, then with each
+perturbation in ``data/v2/selection_sensitive.json`` (6 threads, another OpenBLAS
+kernel) replayed onto them, as its metric deltas, its C or alpha, its builder-pick
+flips, and the statistics points that are functions of those records. A printed
+number whose text differs in either replay carries ``\\sens{}``. Bootstrap
+brackets and p-values come from the canonical predictions and are not replayed.
 """
 from __future__ import annotations
 
+import copy
 import json
+import re
 from pathlib import Path
 
+from data_loader.model_registry import encoder_pools
+from data_loader.pool_names import POOL_DISPLAY, display_label
+from linear_trainer import records as R
+from linear_trainer import stats
+
 ROOT = Path(__file__).resolve().parent.parent
-DATA = ROOT / "data"
 OUT = ROOT / "dna_to_text_paper" / "paper" / "tables"
 
-POOLS = ["meanmean", "specialmean", "maxmean", "clsmean", "meanD", "meanG"]
-ENCODERS = ["dnabert2", "nt_v2", "gena_lm", "hyena_dna"]
-ENC_DISPLAY = {
-    "dnabert2": "DNABERT-2",
-    "nt_v2": "NT-v2",
-    "gena_lm": "GENA-LM",
-    "hyena_dna": "HyenaDNA",
-}
-# composition + protein-LM single-cell sources, in display order
-COMPOSITION = [
-    ("kmer", "CDS 4-mer"),
-    ("kmer6", "CDS 6-mer"),
-    ("codon", "Codon"),
-    ("aa1", "AA 1-mer"),
-    ("aa2", "AA 2-mer"),
-    ("aa3", "AA 3-mer"),
-]
-ESM = [("esm2_650m", "ESM-2 650M")]
-# Subset shown in the main best-cell tables; CDS 6-mer stays in the appendix
-# full matrices only. (GC+length is dropped from the study entirely.)
-MAIN_COMPOSITION = [c for c in COMPOSITION if c[0] != "kmer6"]
-# regression baseline model name -> raw source id
-BASELINE_MODEL = {
-    "kmer_baseline_4": "kmer",
-    "kmer_baseline_6": "kmer6",
-    "codon_baseline": "codon",
-    "gc_baseline": "gc",
-    "aa_baseline_1": "aa1",
-    "aa_baseline_2": "aa2",
-    "aa_baseline_3": "aa3",
-}
-CDS_4MER = "kmer"
-TSS_4MER = "enformer_tss_4mer"  # the 4-mer-on-TSS-window baseline (misleading raw name)
-
-
-def load(name: str):
-    return json.loads((DATA / name).read_text())
-
-
-# ---------- source parsing ----------
-def split_enc_pool(rest: str):
-    """rest like 'nt_v2_meanD' -> ('nt_v2','meanD')."""
-    for enc in ENCODERS:
-        if rest == enc:
-            return enc, "base"
-        if rest.startswith(enc + "_"):
-            return enc, rest[len(enc) + 1 :]
-    return None, None
-
-
-def parse_source(raw: str) -> dict:
-    """Map a raw source id to display metadata."""
-    if raw == TSS_4MER:
-        return dict(cat="tss-baseline", enc=None, pool=None, ctx="TSS", display="TSS 4-mer")
-    if raw.startswith("tss_"):
-        enc, pool = split_enc_pool(raw[4:])
-        return dict(cat="dna-lm", enc=enc, pool=pool, ctx="TSS", display=ENC_DISPLAY[enc])
-    for rid, disp in ESM:
-        if raw == rid:
-            return dict(cat="protein-lm", enc=raw, pool=None, ctx="CDS", display=disp)
-    for rid, disp in COMPOSITION:
-        if raw == rid:
-            cat = "aa-comp" if rid.startswith("aa") else "dna-comp"
-            return dict(cat=cat, enc=raw, pool=None, ctx="CDS", display=disp)
-    enc, pool = split_enc_pool(raw)
-    if enc is not None:
-        return dict(cat="dna-lm", enc=enc, pool=pool, ctx="CDS", display=ENC_DISPLAY[enc])
-    raise ValueError(f"unknown source id: {raw}")
-
-
-def reg_raw(rec: dict) -> str:
-    """Raw source id for a regression record."""
-    model = rec.get("model")
-    if model == "linear_probe":
-        return rec["dataset"].replace("dataset_", "").replace(".parquet", "")
-    if model in BASELINE_MODEL:
-        return BASELINE_MODEL[model]
-    raise ValueError(f"unknown regression model: {model}")
+CDS, TSS, RAND = "splits.json", "splits_tss_disjoint.json", "splits_random.json"
+SEEDS = (1, 7, 123)
+ENCODERS = list(R.ENCODERS)
+ENC_DISPLAY = {"dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "gena_lm": "GENA-LM", "hyena_dna": "HyenaDNA"}
+NT_DISPLAY = {"kmer": "CDS 4-mer", "kmer6": "CDS 6-mer"}
+AA = [("aa1", "AA 1-mer"), ("aa2", "AA 2-mer"), ("aa3", "AA 3-mer")]
+COMPOSITION = [("kmer", "CDS 4-mer"), ("kmer6", "CDS 6-mer"), ("codon", "Codon"), *AA]
+TSS_4MER = "enformer_tss_4mer"
+ENF_WHOLE, ENF_CENTRE = "enformer_trunk_global", "enformer_trunk_center"
+F1, K, ACC, R2, COS = "test_macro_f1", "test_kappa", "test_accuracy", "test_r2_macro", "test_mean_cosine"
+SENS = R.V2 / "selection_sensitive.json"
+PERTURBATIONS = ("threads", "kernel")
+MARK = r"\sens{}"                       # defined in the paper's header.tex
 
 
 # ---------- formatting ----------
@@ -111,8 +63,8 @@ def sgn(x, d=4):
     return f"{x:+.{d}f}"
 
 
-def tt(s):
-    return r"\texttt{" + s + "}" if s and s != "base" else "---"
+def pool_name(s):
+    return POOL_DISPLAY[s] if s and s != "base" else "---"
 
 
 def bold(s):
@@ -124,991 +76,885 @@ def alpha_str(a):
     return str(int(a)) if a >= 1 else ("%g" % a)
 
 
+def _ci(pair, dp=3):
+    return f"[{f(pair[0], dp)}, {f(pair[1], dp)}]"
+
+
 # Per-table tabular wrapper specs. Each fragment is a SELF-CONTAINED tabular so
 # no alignment (\\, \midrule, \multicolumn, \botrule) ever spans the \input edge
 # -- those primitives do cross-boundary lookahead and misfire otherwise. The
 # paper keeps the caption + source-note via \processtable{cap}{\input{..}}{note}.
 SPECS = {
     "family5_main": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7.5}{8.8}\selectfont",
-                         width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llrrrr@{}",
-                         header=r"Source & Pool & F1 & $\Delta$F1 & $\kappa$ & Acc."),
-    "ridge_main": dict(setup=r"\setlength{\tabcolsep}{2.5pt}",
-                       width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llrrr@{}",
-                       header=r"Source & Pool & $R^2$ & $\Delta$ & Cos."),
+                         width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llcrcr@{}",
+                         header=r"Source & Pool & F1 [95\% CI] & $\Delta$F1 & $\kappa$ [95\% CI] & Acc."),
+    "ridge_main": dict(setup=r"\setlength{\tabcolsep}{2.5pt}\fontsize{7.5}{8.8}\selectfont",
+                       width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llcrr@{}",
+                       header=r"Source & Pool & $R^2$ [95\% CI] & $\Delta$ & Cos."),
     "cds_tss": dict(setup=r"\setlength{\tabcolsep}{2.5pt}\fontsize{8}{9.5}\selectfont",
                     width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrrr@{}",
                     header=r"Source & F1 & $\Delta$F1 & $\kappa$ & $R^2$ & $\Delta R^2$"),
-    "protein_comparison": dict(setup=r"\setlength{\tabcolsep}{3pt}",
-                               width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
-                               header=r"Source & Macro-F1 & $\kappa$ & GenePT $R^2$"),
-    "leakage": dict(setup=r"\setlength{\tabcolsep}{3pt}",
-                    width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
-                    header=r"Source & Random F1 & Homology F1 & $\Delta$"),
     "split_comparison": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7.5}{9}\selectfont",
                              width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr|rrr@{}",
-                             header=r"Source & F1 (rand) & F1 (hom) & $\Delta$F1 & $R^2$ (rand) & $R^2$ (hom) & $\Delta R^2$"),
-    "split_comparison_full": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.5}\selectfont",
-                                  width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
-                                  header=r"Source & F1 (rand) & F1 (hom) & $R^2$ (rand) & $R^2$ (hom)"),
-    "s_pooling_full": dict(setup=r"\setlength{\tabcolsep}{1pt}\fontsize{5}{6}\selectfont",
-                           width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llrrrr@{}",
-                           header=r"Encoder & Pooling & Macro-F1 & $\kappa$ & $\Delta\kappa$ & Accuracy"),
-    "s_regression_full": dict(setup=r"\setlength{\tabcolsep}{1pt}\fontsize{5}{6}\selectfont",
-                              width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llrrrr@{}",
-                              header=r"Feature source & Pooling & $R^2$ macro & $\Delta$ & Mean cosine & $\alpha$"),
-    "s_pooling_full_random": dict(setup=r"\setlength{\tabcolsep}{1pt}\fontsize{5}{6}\selectfont",
-                                  width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llrrr@{}",
-                                  header=r"Encoder & Pooling & Macro-F1 & $\Delta$F1 & Accuracy"),
-    "s_regression_full_random": dict(setup=r"\setlength{\tabcolsep}{1pt}\fontsize{5}{6}\selectfont",
-                                     width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}llrrrr@{}",
-                                     header=r"Feature source & Pooling & $R^2$ macro & $\Delta$ & Mean cosine & $\alpha$"),
+                             header=r"Source & F1 (rand) & F1 (prim.) & $\Delta$F1 & $R^2$ (rand) & $R^2$ (prim.) & $\Delta R^2$"),
     "s_seed_sensitivity": dict(setup="", width=r"0.9\columnwidth",
                                cols=r"@{\extracolsep{\fill}}lrr@{}",
-                               header=r"Cell & Macro-F1 (4 seeds) & GenePT $R^2$ (4 seeds)"),
-    "s_homology70": dict(setup="", width=r"0.9\columnwidth",
-                         cols=r"@{\extracolsep{\fill}}lrrr@{}",
-                         header=r"Cell & Macro-F1 & $\kappa$ & GenePT $R^2$"),
-    "s_cds_tss_paired": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{6.5}{7.5}\selectfont",
-                             width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lccr@{}",
-                             header=r"Encoder & $\Delta$Macro-F1 [95\% CI] & $\Delta R^2$ [95\% CI] & $P(\textrm{CDS}{>}\textrm{TSS})$"),
-    "s_headline_ci_cls": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
-                              width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llcc@{}",
-                              header=r"Source & Pool & Macro-F1 [95\% CI] & $\kappa$ [95\% CI]"),
-    "s_headline_ci_reg": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
-                              width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}llc@{}",
-                              header=r"Source & Pool & GenePT $R^2$ [95\% CI]"),
+                               header=r"Cell & Macro-F1 (4 splits) & GenePT $R^2$ (4 splits)"),
+    "s_tss_disjoint": dict(setup=r"\setlength{\tabcolsep}{3pt}",
+                           width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrr@{}",
+                           header=r"Source & Homology F1 & Disjoint F1 & $\Delta$"),
+    "s_paired_diff": dict(setup=r"\setlength{\tabcolsep}{2pt}\fontsize{7}{8.4}\selectfont",
+                          width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lcr@{}",
+                          header=r"Comparison & $\Delta$ [95\% CI] & $p$"),
+    "s_tss_anchored": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
+                           width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrccr@{}",
+                           header=r"Model & Whole window & TSS-Anchored [95\% CI] & $\Delta$ [95\% CI] & Chunk comp."),
+    "s_split_population": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
+                               width=r"0.9\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrrr@{}",
+                               header=r"Partition & Genes & Singleton & Median & In $\geq$10 & ORs / GPCRs"),
+    "s_ridge_robust": dict(setup=r"\setlength{\tabcolsep}{3pt}\fontsize{7.5}{9}\selectfont",
+                           width=r"\columnwidth", cols=r"@{\extracolsep{\fill}}lrrrr@{}",
+                           header=r"Method & Macro-$R^2$ & Pooled-$R^2$ & Retr.@5 & Med.\ rank"),
 }
 
 
-def write(key: str, body: str):
-    OUT.mkdir(parents=True, exist_ok=True)
+def tabular(key: str, body: str) -> str:
     s = SPECS[key]
-    block = (
+    return (
         "{" + s["setup"] + r"\begin{tabular*}{" + s["width"] + "}{" + s["cols"] + r"}\toprule" + "\n"
         + s["header"] + r" \\\midrule" + "\n"
         + body.rstrip() + "\n"
         + r"\botrule" + "\n"
         + r"\end{tabular*}}" + "\n"
     )
-    (OUT / f"{key}.tex").write_text(block)
-    print(f"wrote {key}.tex ({block.count(chr(10))} lines)")
 
 
-# ---------- load + index ----------
-M = load("metrics_homology.json")
-M70 = load("metrics_homology70.json")
-SEED = load("seed_sensitivity/summary.json")
-BOOT = load("bootstrap_metrics.json")
-RAND = load("metrics.json")  # random-stratified split: DNA encoders + 4-mer + TSS
-RANDC = load("metrics_random_comparators.json")  # composition + ESM-2 on random split
-ENFH = load("metrics_enformer_homology.json")  # Enformer re-probed on the homology split
-
-# classification index: feature_source -> record (non-shuffled), plus shuffled
-CLS = {}
-CLS_SHUF = None
-for r in M:
-    if r.get("task") != "family5":
-        continue
-    if r.get("shuffled_labels"):
-        CLS_SHUF = r
-    else:
-        CLS[r["feature_source"]] = r
-
-# regression index: raw source -> record
-REG = {}
-for r in M:
-    if r.get("task") is not None:
-        continue
-    REG[reg_raw(r)] = r
-
-# random-split indices for the appendix mirror tables. DNA-encoder cells come
-# from metrics.json; composition + ESM from metrics_random_comparators.json
-# (iterated last so the comparator re-run wins on shared keys, e.g. the 4-mer).
-# Note: cached random DNA-LM runs lack test_kappa, so the random classification
-# mirror reports macro-F1 (+ delta over the random 4-mer) and accuracy only.
-CLS_RAND = {}
-for r in list(RAND) + list(RANDC):
-    if r.get("task") == "family5" and not r.get("shuffled_labels"):
-        CLS_RAND[r["feature_source"]] = r
-REG_RAND = {}
-for r in list(RAND) + list(RANDC):
-    if r.get("task") is not None:
-        continue
-    if r.get("model") == "linear_probe" and not r.get("dataset"):
-        continue  # stray summary row with no dataset
-    try:
-        REG_RAND[reg_raw(r)] = r
-    except (KeyError, ValueError):
-        continue  # anti-baselines / rows we don't tabulate here
+# ---------- selection-sensitivity marks ----------
+NUM = re.compile(r"[+-]?\d+\.\d+")
 
 
-def cls_best_pool(enc, ctx="CDS"):
-    """Best-macro-F1 pool record for an encoder in a context."""
-    prefix = ("tss_" if ctx == "TSS" else "") + enc + "_"
-    cells = [(fsrc, rec) for fsrc, rec in CLS.items() if fsrc.startswith(prefix)]
-    if not cells:
-        return None, None
-    fsrc, rec = max(cells, key=lambda kv: kv[1]["test_macro_f1"])
-    return fsrc.split("_")[-1], rec
+class StructureChanged(RuntimeError):
+    """A replay changed a fragment outside its numbers (a label, a row)."""
 
 
-def reg_best_pool(enc, ctx="CDS"):
-    prefix = ("tss_" if ctx == "TSS" else "") + enc + "_"
-    cells = [(s, rec) for s, rec in REG.items() if s.startswith(prefix)]
-    if not cells:
-        return None, None
-    s, rec = max(cells, key=lambda kv: kv[1]["test_r2_macro"])
-    return s.split("_")[-1], rec
+class NotReplayable(RuntimeError):
+    """A statistics point touches a moved cell but is not a function of its record."""
+
+
+def mark_unstable(canon: str, variants: list[str]) -> str:
+    """``canon`` with MARK after every number whose text differs in some variant."""
+    parts, nums = NUM.split(canon), NUM.findall(canon)
+    moved = [False] * len(nums)
+    for v in variants:
+        if NUM.split(v) != parts:
+            pairs = zip(canon.splitlines(), v.splitlines())
+            line = next((a for a, b in pairs if NUM.sub("#", a) != NUM.sub("#", b)), "(the line count)")
+            raise StructureChanged(f"a replay changes more than numbers: {line!r}")
+        moved = [m or a != b for m, a, b in zip(moved, nums, NUM.findall(v))]
+    out = [parts[0]]
+    for n, m, p in zip(nums, moved, parts[1:]):
+        out += [n + MARK if m else n, p]
+    return "".join(out)
+
+
+def _hp_field(rec: dict) -> str:
+    return "C" if rec["task"] == "family5" else "alpha"
+
+
+def perturb_records(recs: dict[str, dict], sides: dict[str, dict]) -> dict[str, dict]:
+    """``recs`` with one perturbation's moved cells replayed (copies; the input is untouched)."""
+    out = dict(recs)
+    for key in sides.keys() & recs.keys():
+        side, r = sides[key], copy.deepcopy(recs[key])
+        if r[_hp_field(r)] != side["hp"][0]:
+            raise R.MixedRecords(f"{key}: the sensitivity list was built against {_hp_field(r)}="
+                                 f"{side['hp'][0]}, the records have {r[_hp_field(r)]}")
+        r[_hp_field(r)] = side["hp"][1]
+        for m, d in side["metric_deltas"].items():
+            if d is None:
+                raise NotReplayable(f"{key}: {m} exists in one run only")
+            if m.startswith("unpurged."):
+                r["unpurged"][m.removeprefix("unpurged.")] += d
+            else:
+                r[m] += d
+        out[key] = r
+    return out
+
+
+# A builder-pick name as scripts/diff_records.py::_picks writes it.
+PICK_NAME = re.compile(r"(?P<split>[^/ ]+)/(cds|tss)/(family5|genept) (best encoder|nt k-mer|aa k-mer|"
+                       r"nt k-mer\+len|aa k-mer\+len|(dnabert2|nt_v2|gena_lm|hyena_dna) "
+                       r"(pool|anchored-chunk composition))")
+
+
+def check_replayable(sens: dict, perturbation: str, loaded: set[str], ridge: dict) -> None:
+    """Refuse a replay the tables would carry only in part (review of Oct 2):
+    a moved cell in no loaded records file, a pick name the builder never asks
+    for, a flipped pick on a primary split (statistics.json fixes its compared
+    pairs, so they cannot follow it), or a moved cell behind ridge_robust.json."""
+    for c in sens["cells"]:
+        if c[perturbation] and c["key"] not in loaded:
+            raise NotReplayable(f"{c['key']}: moved under {perturbation} but in no records file loaded here")
+    for d in sens["builder_picks"][perturbation]:
+        m = PICK_NAME.fullmatch(d["pick"])
+        if not m:
+            raise NotReplayable(f"{d['pick']!r} is not a pick name the tables ask for")
+        if m["split"] in (CDS, TSS):
+            raise NotReplayable(f"{d['pick']}: a primary-split pick behind statistics.json flipped; "
+                                "its paired tests compare the canonical pick")
+    moved = {c["key"] for c in sens["cells"] if c[perturbation]}
+    if hit := moved & {r["key"] for r in ridge["rows"]}:
+        raise NotReplayable(f"{hit}: moved, and ridge_robust.json is not replayed")
+
+
+def _metric(rec: dict) -> str:
+    return F1 if rec["task"] == "family5" else R2
+
+
+def perturb_stats(stats_: dict, before: dict[str, dict], after: dict[str, dict]) -> dict:
+    """``stats_`` with every point that is a function of a moved record replayed:
+    interval points (and kappa) and paired-difference points. Null bands are
+    rebuilt separately; an entry on a moved cell that is not a - b (or the
+    record's own value) raises."""
+    moved = {k for k in after if after[k] is not before.get(k)}
+    out = copy.deepcopy(stats_)
+
+    def check(have, want, what):
+        if abs(have - want) > 1e-9:
+            raise NotReplayable(f"{what}: {have} is not a function of the records ({want})")
+
+    def visit(node, path):
+        if isinstance(node, list):
+            for i, v in enumerate(node):
+                visit(v, f"{path}[{i}]")
+            return
+        if not isinstance(node, dict):
+            return
+        if node.get("key") in moved and "point" in node:
+            b, a = before[node["key"]], after[node["key"]]
+            m = node.get("metric", _metric(b))
+            check(node["point"], b[m], path)
+            node["point"] = a[m]
+            if "kappa_point" in node:
+                check(node["kappa_point"], b[K], path)
+                node["kappa_point"] = a[K]
+        if "delta_point" in node and isinstance(node.get("a"), str) and {node["a"], node["b"]} & moved:
+            m = node.get("metric", _metric(before[node["a"]]))
+            check(node["delta_point"], before[node["a"]][m] - before[node["b"]][m], path)
+            node["delta_point"] = after[node["a"]][m] - after[node["b"]][m]
+        for k, v in node.items():
+            if path or k != "null_bands":
+                visit(v, f"{path}/{k}")
+
+    visit(out, "")
+    return out
+
+
+def perturbed_bands(bands: dict, split: str, null: dict[str, dict], sides: dict[str, dict]) -> dict:
+    """The split's null bands rebuilt from its replayed null records, for every
+    cell with a moved shuffle; each rebuilt cell must first reproduce its stored band."""
+    pert = perturb_records(null, sides)
+    by: dict[tuple, list[str]] = {}
+    for k, r in null.items():
+        by.setdefault((r["task"], r["feature_source"]), []).append(k)
+    out = {}
+    for (task, src), keys in by.items():
+        name = f"{split}/{task}/{src}"
+        if not set(keys) & sides.keys():
+            continue
+        n = bands[name]["n"]
+        if stats.null_band([null[k] for k in keys], n) != bands[name]:
+            raise NotReplayable(f"{name}: the stored null band does not rebuild from its records")
+        out[name] = stats.null_band([pert[k] for k in keys], n)
+    return out
+
+
+# ---------- records ----------
+class Split:
+    """The records of one split file, by arm and task. ``sides`` replays one
+    perturbation's moved cells; ``picks`` maps a builder-pick name (as
+    ``scripts/diff_records.py`` names it) to its (canonical, perturbed) value."""
+
+    def __init__(self, name: str, sides: dict[str, dict] | None = None,
+                 picks: dict[str, tuple[str, str]] | None = None):
+        self.name = name
+        self.canon = R.load(name)
+        self.recs = perturb_records(self.canon, sides or {})
+        self.picks = picks or {}
+
+    def _pick(self, name: str, got: str) -> str:
+        flip = self.picks.get(f"{self.name}/{name}")
+        if flip is None:
+            return got
+        if got != flip[0]:
+            raise R.MixedRecords(f"{self.name}/{name}: the sensitivity list flips {flip[0]}, "
+                                 f"the records pick {got}")
+        return flip[1]
+
+    def cells(self, arm: str, task: str) -> dict[str, dict]:
+        return R.cells(self.recs, arm, task)
+
+    def cell(self, arm: str, task: str, src: str) -> dict:
+        by = self.cells(arm, task)
+        if src not in by:
+            raise R.MissingRecord(f"{self.name}: no {arm}/{task} record for {src}")
+        return by[src]
+
+    def best_pool(self, enc: str, arm: str, task: str) -> str:
+        return self._pick(f"{arm}/{task} {enc} pool", R.best_pool(self.cells(arm, task), enc, arm))
+
+    def best(self, enc: str, arm: str, task: str) -> dict:
+        return self.cell(arm, task, self.best_pool(enc, arm, task))
+
+    def nt(self, task: str) -> str:
+        return self._pick(f"cds/{task} nt k-mer", R.best_nt_kmer(self.cells("cds", task)))
+
+    def aa(self, task: str) -> str:
+        return self._pick(f"cds/{task} aa k-mer", R.best_aa(self.cells("cds", task)))
+
+    def best_encoder(self, arm: str, task: str) -> str:
+        return self._pick(f"{arm}/{task} best encoder", R.best_encoder(self.cells(arm, task), arm))
+
+    def anchored_composition(self, enc: str, task: str) -> str:
+        return self._pick(f"tss/{task} {enc} anchored-chunk composition",
+                          R.pick(self.cells("tss", task), [f"tss_{enc}_chunk4mergc", f"tss_{enc}_chunk6mer"]))
+
+
+HOM = DIS = RND = None                  # set by load_records()
+SEED_SPLITS: dict[int, tuple[Split, Split]] = {}
+STATS: dict = {}
+
+
+def _read_sens() -> dict:
+    return json.loads(SENS.read_text())
+
+
+def load_records(perturbation: str | None = None) -> None:
+    """Read every records file the tables use, and the statistics built from them;
+    with ``perturbation``, replay that side of the selection-sensitive list onto both."""
+    global HOM, DIS, RND, STATS
+    sides, picks = {}, {}
+    if perturbation:
+        sens = _read_sens()
+        R.check_inputs(sens)                  # the deltas apply to these records files
+        sides = {c["key"]: c[perturbation] for c in sens["cells"] if c[perturbation]}
+        picks = {d["pick"]: (d["a"], d["b"]) for d in sens["builder_picks"][perturbation]}
+    HOM, DIS, RND = (Split(n, sides, picks) for n in (CDS, TSS, RAND))
+    SEED_SPLITS.clear()
+    SEED_SPLITS.update({s: (Split(f"splits_seed{s}.json", sides, picks),
+                            Split(f"splits_tss_disjoint_seed{s}.json", sides, picks)) for s in SEEDS})
+    STATS = json.loads((R.V2 / "statistics.json").read_text())
+    R.check_inputs(STATS)                 # no records file rewritten since statistics.json
+    if STATS["n_iters"] != 1000:          # the captions say 1,000 resamples
+        raise ValueError(f"statistics.json has {STATS['n_iters']} resamples, the captions say 1,000")
+    # G7: every file the tables combine, and the statistics, from one commit and protocol.
+    if STATS["stamp"] != R.stamp_of(HOM.recs, DIS.recs, RND.recs,
+                                    *(s.recs for pair in SEED_SPLITS.values() for s in pair)):
+        raise R.MixedRecords("statistics.json was built from other records than the tables read")
+    if perturbation:
+        if sens["sources"][perturbation]["a"] != STATS["stamp"]["git_sha"]:
+            raise R.MixedRecords(f"selection_sensitive.json diffs {perturbation} against "
+                                 f"{sens['sources'][perturbation]['a'][:7]}, not the canonical records")
+        splits = [HOM, DIS, RND, *(s for pair in SEED_SPLITS.values() for s in pair)]
+        before = {k: r for s in splits for k, r in s.canon.items()}
+        after = {k: r for s in splits for k, r in s.recs.items()}
+        nulls = {split: R.load(split, null=True) for split in (CDS, TSS)}
+        check_replayable(sens, perturbation, before.keys() | {k for n in nulls.values() for k in n},
+                         json.loads((R.V2 / "ridge_robust.json").read_text()))
+        STATS = perturb_stats(STATS, before, after)
+        for split, null in nulls.items():
+            STATS["null_bands"].update(perturbed_bands(STATS["null_bands"], split, null, sides))
+
+
+def interval(split: str, task: str, src: str) -> dict:
+    return STATS["intervals"][f"{split}/{task}/{src}"]
+
+
+def band(split: str, task: str, src: str) -> dict:
+    return STATS["null_bands"][f"{split}/{task}/{src}"]
+
+
+def pool_of(src: str) -> str:
+    return src.rsplit("_", 1)[1]
+
+
+def src_label(src: str) -> str:
+    """'NT-v2 (Ends + Mean)'-style label for an encoder_pool source id."""
+    return f"{ENC_DISPLAY[R.encoder_of(src)]} ({POOL_DISPLAY[pool_of(src)]})"
+
+
+def null_row_cls(split: str) -> tuple[str, dict]:
+    b = band(split, "family5", "kmer" if split == CDS else TSS_4MER)
+    return "Shuffled labels (median of 200)", b
 
 
 # ===================================================================
 # Table 1: best 5-way family classification cell (main text, 3 dp)
-# Columns: Source & Pool & F1 & kappa & Dkappa & Acc.
 # ===================================================================
-def build_family5_main():
-    base_f1 = CLS[CDS_4MER]["test_macro_f1"]
-    rows = []  # (display, pool_tex, f1, df1, kappa, acc, is_control)
-    rows.append(("Shuffled labels", "---", CLS_SHUF["test_macro_f1"],
-                 CLS_SHUF["test_macro_f1"] - base_f1, CLS_SHUF["test_kappa"],
-                 CLS_SHUF["test_accuracy"], True))
-    for rid, disp in MAIN_COMPOSITION:
-        r = CLS[rid]
-        rows.append((disp, "---", r["test_macro_f1"], r["test_macro_f1"] - base_f1,
-                     r["test_kappa"], r["test_accuracy"], False))
-    for enc in ENCODERS:
-        pool, r = cls_best_pool(enc)
-        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_macro_f1"], r["test_macro_f1"] - base_f1,
-                     r["test_kappa"], r["test_accuracy"], False))
-    # bold per-column max among non-controls; ESM-2 added below as upper bound
-    body = render_main_rows(rows, dp=3, cols=("f1", "df1", "kappa", "acc"),
-                            rule_after=1 + len(MAIN_COMPOSITION))
-    esm = CLS["esm2_650m"]
-    esm_row = (f"ESM-2 650M & --- & {f(esm['test_macro_f1'], 3)} & {sgn(esm['test_macro_f1'] - base_f1, 3)} "
-               f"& {f(esm['test_kappa'], 3)} & {f(esm['test_accuracy'], 3)} \\\\")
-    return body + "\n" + r"\midrule" + "\n" + esm_row
-
-
-def render_main_rows(rows, dp, cols, rule_after=None):
-    # rows: (display, pool, f1, df1, kappa, acc, is_control)
-    # rule_after: insert a \midrule after this many leading (baseline) rows.
-    vals = {c: [] for c in cols}
-    for (disp, pool, v_f1, v_df1, v_k, v_acc, ctrl) in rows:
-        m = dict(f1=v_f1, df1=v_df1, kappa=v_k, acc=v_acc)
-        for c in cols:
-            vals[c].append((m[c], ctrl))
-    best = {c: max((v for v, ctrl in vals[c] if not ctrl)) for c in cols}
+def render_main_rows(rows, dp, rule_after=None):
+    # rows: (display, pool, f1, df1, kappa, acc, is_control); None prints '---'
+    cols = ("f1", "df1", "kappa", "acc")
+    best = {c: max(m[c] for m in (dict(zip(cols, r[2:6])) for r in rows if not r[6])) for c in cols}
     out = []
-    for i, (disp, pool, v_f1, v_df1, v_k, v_acc, ctrl) in enumerate(rows):
-        m = dict(f1=v_f1, df1=v_df1, kappa=v_k, acc=v_acc)
+    for i, (disp, pool, *vals, ctrl) in enumerate(rows):
+        m = dict(zip(cols, vals))
         cells = []
-        for c in ("f1", "df1", "kappa", "acc"):
+        for c in cols:
+            if m[c] is None:
+                cells.append("---")
+                continue
             txt = sgn(m[c], dp) if c == "df1" else f(m[c], dp)
-            if (not ctrl) and m[c] == best[c]:
-                txt = bold(txt)
-            cells.append(txt)
-        out.append(f"{disp} & {pool} & {cells[0]} & {cells[1]} & {cells[2]} & {cells[3]} \\\\")
+            cells.append(bold(txt) if (not ctrl and m[c] == best[c]) else txt)
+        out.append(f"{disp} & {pool} & " + " & ".join(cells) + r" \\")
         if rule_after is not None and i == rule_after - 1:
             out.append(r"\midrule")
     return "\n".join(out)
 
 
+def _composition_rows(task: str) -> list[tuple[str, str]]:
+    nt = HOM.nt(task)
+    return [(nt, NT_DISPLAY[nt]), ("codon", "Codon"), *AA]
+
+
+def build_family5_main():
+    """Figure 2's cells with their cluster-bootstrap CIs (macro-F1 and kappa), delta to the
+    nucleotide floor, and accuracy; the shuffled-label row carries its null band."""
+    base = HOM.cell("cds", "family5", HOM.nt("family5"))[F1]
+    disp, b = null_row_cls(CDS)
+    comp = _composition_rows("family5")
+    rows = []  # (display, pool, src or None, record)
+    for rid, d in comp:
+        rows.append((d, "---", rid, HOM.cell("cds", "family5", rid)))
+    for enc in ENCODERS:
+        src = HOM.best_pool(enc, "cds", "family5")
+        rows.append((ENC_DISPLAY[enc], pool_name(pool_of(src)), src, HOM.cell("cds", "family5", src)))
+    best = {m: max(r[3][m] for r in rows) for m in (F1, K, ACC)}
+
+    def cell(r, m, txt):
+        return bold(txt) if r[m] == best[m] else txt
+
+    def line(d, pool, src, r):
+        c = interval(CDS, "family5", src)
+        if abs(c["point"] - r[F1]) > 1e-9 or abs(c["kappa_point"] - r[K]) > 1e-9:
+            raise R.MixedRecords(f"{src}: interval point is not the cell value")
+        f1 = cell(r, F1, f"{f(r[F1],3)} {_ci(c['ci95'])}")
+        return (f"{d} & {pool} & {f1} & {sgn(r[F1] - base, 3)} & "
+                f"{cell(r, K, f'{f(r[K],3)} {_ci(c['kappa_ci95'])}')} & {cell(r, ACC, f(r[ACC], 3))} \\\\")
+
+    out = [f"{disp} & --- & {f(b['median'],3)} {_ci(b['band95'])} & {sgn(b['median'] - base, 3)} & "
+           f"{f(b['medians'][K],3)} & {f(b['medians'][ACC],3)} \\\\", r"\midrule"]
+    for i, (d, pool, src, r) in enumerate(rows):
+        out.append(line(d, pool, src, r))
+        if i == len(comp) - 1:
+            out.append(r"\midrule")
+    esm = HOM.cell("cds", "family5", "esm2_650m")
+    ce = interval(CDS, "family5", "esm2_650m")
+    out += [r"\midrule", f"ESM-2 650M & --- & {f(esm[F1],3)} {_ci(ce['ci95'])} & {sgn(esm[F1] - base, 3)} & "
+            f"{f(esm[K],3)} {_ci(ce['kappa_ci95'])} & {f(esm[ACC],3)} \\\\"]
+    return "\n".join(out)
+
+
 # ===================================================================
 # Table 2: best Ridge-to-GenePT cell (main text, 3 dp)
-# Columns: Source & Pool & R^2 & Delta & Cos.
-# (no shuffled-Y control in homology data)
 # ===================================================================
 def build_ridge_main():
-    base_r2 = REG[CDS_4MER]["test_r2_macro"]
-    rows = []  # (display, pool, r2, delta, cos)
-    for rid, disp in MAIN_COMPOSITION:
-        r = REG[rid]
-        rows.append((disp, "---", r["test_r2_macro"], r["test_r2_macro"] - base_r2,
-                     r["test_mean_cosine"]))
+    base = HOM.cell("cds", "genept", HOM.nt("genept"))[R2]
+    rows = []
+    comp = _composition_rows("genept")
+    for rid, d in comp:
+        r = HOM.cell("cds", "genept", rid)
+        rows.append((d, "---", r[R2], r[R2] - base, r[COS]))
     for enc in ENCODERS:
-        pool, r = reg_best_pool(enc)
-        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_r2_macro"],
-                     r["test_r2_macro"] - base_r2, r["test_mean_cosine"]))
-    # bold per-column max among non-controls; ESM-2 added below as upper bound
-    best_r2 = max(r[2] for r in rows)
-    best_cos = max(r[4] for r in rows)
+        src = HOM.best_pool(enc, "cds", "genept")
+        r = HOM.cell("cds", "genept", src)
+        rows.append((ENC_DISPLAY[enc], pool_name(pool_of(src)), r[R2], r[R2] - base, r[COS]))
+    best_r2, best_cos = max(r[2] for r in rows), max(r[4] for r in rows)
+    srcs = [rid for rid, _ in comp] + [HOM.best_pool(enc, "cds", "genept") for enc in ENCODERS]
     out = []
-    for i, (disp, pool, r2, delta, cos) in enumerate(rows):
-        r2t = bold(f(r2, 3)) if r2 == best_r2 else f(r2, 3)
+    for i, ((disp, pool, r2, delta, cos), src) in enumerate(zip(rows, srcs)):
+        c = interval(CDS, "genept", src)
+        if abs(c["point"] - r2) > 1e-9:
+            raise R.MixedRecords(f"{src}: interval point {c['point']} is not the cell {r2}")
+        r2t = f"{f(r2, 3)} {_ci(c['ci95'])}"
+        r2t = bold(r2t) if r2 == best_r2 else r2t
         cost = bold(f(cos, 3)) if cos == best_cos else f(cos, 3)
-        out.append(f"{disp} & {pool} & {r2t} & {sgn(delta,3)} & {cost} \\\\")
-        if i == len(MAIN_COMPOSITION) - 1:
+        out.append(f"{disp} & {pool} & {r2t} & {sgn(delta, 3)} & {cost} \\\\")
+        if i == len(comp) - 1:
             out.append(r"\midrule")
-    esm = REG["esm2_650m"]
-    esm_row = (f"ESM-2 650M & --- & {f(esm['test_r2_macro'], 3)} "
-               f"& {sgn(esm['test_r2_macro'] - base_r2, 3)} & {f(esm['test_mean_cosine'], 3)} \\\\")
+    esm = HOM.cell("cds", "genept", "esm2_650m")
+    ce = interval(CDS, "genept", "esm2_650m")
+    esm_row = f"ESM-2 650M & --- & {f(esm[R2], 3)} {_ci(ce['ci95'])} & {sgn(esm[R2] - base, 3)} & {f(esm[COS], 3)} \\\\"
     return "\n".join(out) + "\n" + r"\midrule" + "\n" + esm_row
 
 
 # ===================================================================
-# Table 3: substrate ablation CDS vs TSS (main text)
-# Columns: Source & F1 & DF1 & kappa & R^2 & DR^2.
-# Headline metric is macro-F1 (matches the best-pool/C selection criterion);
-# kappa is reported as a secondary column. TSS 4-mer R^2 from the
-# enformer_tss_4mer regression record; TSS DR^2 stays '---' because the TSS
-# 4-mer R^2 is itself below noise (<0), so a within-TSS R^2 delta would be
-# anchored to a sub-zero baseline; absolute TSS R^2 (all at noise) is reported
-# instead (regression deltas are within CDS only, per Methods).
-# Enformer: a single best-F1 variant (trunk_center) is reported across
-# F1/kappa/R^2 so the columns never mix variants.
+# Table A3: substrate ablation CDS vs TSS (Figure 4's values). Every row on the
+# disjoint split, so CDS and TSS score the same test genes; Δ is within each block
+# against its own 4-mer. Enformer: its whole-window mean.
 # ===================================================================
 def build_cds_tss():
-    out = []
-    # --- CDS ---
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{Coding sequence (CDS)}}\\")
-    base_f1 = CLS[CDS_4MER]["test_macro_f1"]
-    base_k = CLS[CDS_4MER]["test_kappa"]
-    base_r2 = REG[CDS_4MER]["test_r2_macro"]
-    out.append(f"\\quad 4-mer & {f(base_f1,3)} & {sgn(0,3)} & {f(base_k,3)} & {f(base_r2,3)} & {sgn(0,3)} \\\\")
-    cds_rows = []
-    for enc in ENCODERS:
-        _, kc = cls_best_pool(enc, "CDS")
-        _, rc = reg_best_pool(enc, "CDS")
-        f1 = kc["test_macro_f1"]; k = kc["test_kappa"]; r2 = rc["test_r2_macro"]
-        cds_rows.append((enc, f1, f1 - base_f1, k, r2, r2 - base_r2))
-    bf = max(r[1] for r in cds_rows); br2 = max(r[4] for r in cds_rows)
-    for enc, f1, df1, k, r2, dr2 in cds_rows:
-        name = ENC_DISPLAY[enc]
-        f1t = bold(f(f1, 3)) if f1 == bf else f(f1, 3)
-        df1t = bold(sgn(df1, 3)) if f1 == bf else sgn(df1, 3)
-        r2t = bold(f(r2, 3)) if r2 == br2 else f(r2, 3)
-        dr2t = bold(sgn(dr2, 3)) if r2 == br2 else sgn(dr2, 3)
-        if enc == "nt_v2":
-            name = bold(name)
-        out.append(f"\\quad {name} & {f1t} & {df1t} & {f(k,3)} & {r2t} & {dr2t} \\\\")
-    out.append(r"\midrule")
-    # --- TSS ---
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
-    tb_f1 = CLS[TSS_4MER]["test_macro_f1"]
-    tb_k = CLS[TSS_4MER]["test_kappa"]
-    tb_r2 = REG[TSS_4MER]["test_r2_macro"]
-    out.append(f"\\quad 4-mer & {f(tb_f1,3)} & {sgn(0,3)} & {f(tb_k,3)} & {f(tb_r2,3)} & {sgn(0,3)} \\\\")
-    tss_rows = []
-    for enc in ENCODERS:
-        _, kc = cls_best_pool(enc, "TSS")
-        _, rc = reg_best_pool(enc, "TSS")
-        f1 = kc["test_macro_f1"]; k = kc["test_kappa"]; r2 = rc["test_r2_macro"]
-        tss_rows.append((enc, f1, f1 - tb_f1, k, r2, r2 - tb_r2))
-    bf = max(r[1] for r in tss_rows)
-    for enc, f1, df1, k, r2, dr2 in tss_rows:
-        name = ENC_DISPLAY[enc]
-        f1t = bold(f(f1, 3)) if f1 == bf else f(f1, 3)
-        df1t = bold(sgn(df1, 3)) if f1 == bf else sgn(df1, 3)
-        if enc == "nt_v2":
-            name = bold(name)
-        out.append(f"\\quad {name} & {f1t} & {df1t} & {f(k,3)} & {f(r2,3)} & {sgn(dr2,3)} \\\\")
-    enf_cls = max((r for r in ENFH if r.get("task") == "family5"),
-                  key=lambda r: r["test_macro_f1"])
-    enf_var = enf_cls["feature_source"]  # e.g. enformer_trunk_center
-    enf_reg = next(r for r in ENFH if r.get("task") is None and enf_var in (r.get("dataset") or ""))
-    enf_f1 = enf_cls["test_macro_f1"]; enf_k = enf_cls["test_kappa"]; enf_r2 = enf_reg["test_r2_macro"]
-    out.append(f"\\quad Enformer$^\\dagger$ & {f(enf_f1,3)} & {sgn(enf_f1-tb_f1,3)} & {f(enf_k,3)} & {f(enf_r2,3)} & {sgn(enf_r2-tb_r2,3)} \\\\")
-    return "\n".join(out)
-
-
-# ===================================================================
-# Table A1: full classification matrix (appendix, 4 dp), grouped CDS / TSS
-# ===================================================================
-def build_pooling_full():
-    out = []
-    base_k = CLS[CDS_4MER]["test_kappa"]
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{Coding sequence (CDS)}}\\")
-
-    def row(disp, pool, r):
-        return (f"{disp} & {pool} & {f(r['test_macro_f1'])} & {f(r['test_kappa'])} "
-                f"& {sgn(r['test_kappa']-base_k)} & {f(r['test_accuracy'])} \\\\")
-
-    out.append(row("Shuffled labels", "---", CLS_SHUF))
-    for rid, disp in COMPOSITION:
-        out.append(row(disp, "baseline" if rid == "kmer" else "---", CLS[rid]))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            fsrc = f"{enc}_{pool}"
-            if fsrc in CLS:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), CLS[fsrc]))
-    out.append(r"\midrule")
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{Protein language model (translated CDS)}}\\")
-    for rid, disp in ESM:
-        out.append(row(disp, "---", CLS[rid]))
-    out.append(r"\midrule")
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
-    tbk = CLS[TSS_4MER]["test_kappa"]
-
-    def trow(disp, pool, r):
-        return (f"{disp} & {pool} & {f(r['test_macro_f1'])} & {f(r['test_kappa'])} "
-                f"& {sgn(r['test_kappa']-tbk)} & {f(r['test_accuracy'])} \\\\")
-
-    out.append(trow("TSS 4-mer", "baseline", CLS[TSS_4MER]))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            fsrc = f"tss_{enc}_{pool}"
-            if fsrc in CLS:
-                out.append(trow(ENC_DISPLAY[enc], tt(pool), CLS[fsrc]))
-    return "\n".join(out)
-
-
-# ===================================================================
-# Table A2: full regression matrix (appendix, 4 dp), grouped CDS / TSS
-# Columns: Feature source & Pooling & R^2 macro & Delta & Mean cosine & alpha.
-# TSS has no 4-mer regression baseline -> Delta '---' for TSS rows.
-# ===================================================================
-def build_regression_full():
-    out = []
-    base_r2 = REG[CDS_4MER]["test_r2_macro"]
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{Coding sequence (CDS)}}\\")
-
-    def row(disp, pool, r, delta=True):
-        d = sgn(r["test_r2_macro"] - base_r2) if delta else "---"
-        return (f"{disp} & {pool} & {f(r['test_r2_macro'])} & {d} "
-                f"& {f(r['test_mean_cosine'])} & {alpha_str(r['alpha'])} \\\\")
-
-    for rid, disp in COMPOSITION:
-        out.append(row(disp, "baseline" if rid == "kmer" else "---", REG[rid]))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            s = f"{enc}_{pool}"
-            if s in REG:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), REG[s]))
-    out.append(r"\midrule")
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{Protein language model (translated CDS)}}\\")
-    for rid, disp in ESM:
-        out.append(row(disp, "---", REG[rid]))
-    out.append(r"\midrule")
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
-    out.append(row("TSS 4-mer", "baseline", REG[TSS_4MER], delta=False))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            s = f"tss_{enc}_{pool}"
-            if s in REG:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), REG[s], delta=False))
-    return "\n".join(out)
-
-
-# ===================================================================
-# Table A3: split-seed sensitivity (appendix)
-# seed 42 = primary metrics; seeds 1/7/123 = summary.json. Range over the four.
-# Columns: cell & macro-F1 range & R^2 range.
-# ===================================================================
-def build_seed_sensitivity():
-    seeds = ["1", "7", "123"]
-    # (display, cls_source, reg_source)
-    cells = [
-        ("ESM-2 650M", "esm2_650m", "esm2_650m"),
-        ("Best DNA-LM", "nt_v2_meanG", "dnabert2_meanD"),
-        ("AA-composition", "aa2", "aa3"),
-        ("TSS (DNABERT-2)", "tss_dnabert2_meanmean", "tss_dnabert2_meanmean"),
-    ]
-    out = []
-    for disp, cs, rs in cells:
-        f1s = [CLS[cs]["test_macro_f1"]] + [SEED[s]["cls"][cs] for s in seeds]
-        r2s = [REG[rs]["test_r2_macro"]] + [SEED[s]["reg"][rs] for s in seeds]
-        out.append(f"{disp} & {f(min(f1s),3)}--{f(max(f1s),3)} "
-                   f"& {f(min(r2s),3)}--{f(max(r2s),3)} \\\\")
-    return "\n".join(out)
-
-
-# ===================================================================
-# Table A4: 70%-identity supplementary split (appendix)
-# Columns: cell & macro-F1 & kappa & R^2 (R^2 blank for cls-only rows handled).
-# Built from the 11 cells re-probed at 70% id.
-# ===================================================================
-def build_homology70():
-    cls70 = {}
-    reg70 = {}
-    for r in M70:
-        if r.get("task"):
-            cls70[r["feature_source"]] = r
-        else:
-            reg70[reg_raw(r)] = r
-    # (display, cls_source, reg_source)
-    cells = [
-        ("ESM-2 650M", "esm2_650m", "esm2_650m"),
-        ("Best DNA-LM", "nt_v2_meanG", "dnabert2_meanD"),
-        ("AA-composition", "aa2", "aa3"),
-        ("CDS 4-mer", "kmer", None),
-        ("TSS (DNABERT-2)", "tss_dnabert2_meanmean", "tss_dnabert2_meanmean"),
-    ]
-    out = []
-    for disp, cs, rs in cells:
-        c = cls70[cs]
-        r2 = f(reg70[rs]["test_r2_macro"], 3) if rs and rs in reg70 else "---"
-        out.append(f"{disp} & {f(c['test_macro_f1'],3)} & {f(c['test_kappa'],3)} & {r2} \\\\")
-    return "\n".join(out)
-
-
-# ===================================================================
-# Table A5: CDS-vs-TSS paired bootstrap CIs (appendix)
-# Columns: Encoder & DF1 [95% CI] & DR^2 [95% CI] & P(CDS>TSS).
-# ===================================================================
-def build_cds_tss_paired():
-    pc = BOOT["paired"]["classification"]
-    pr = BOOT["paired"]["regression"]
-    rows = [(ENC_DISPLAY[e], f"{e} CDS - TSS") for e in ENCODERS]
-    rows.append(("4-mer (control)", "kmer CDS - TSS 4mer"))
-    out = []
-    for disp, key in rows:
-        c = pc[key]; r = pr[key]
-        f1 = f"{sgn(c['delta_macro_f1_point'],3)} [{sgn(c['delta_macro_f1_ci95'][0],3)}, {sgn(c['delta_macro_f1_ci95'][1],3)}]"
-        r2 = f"{sgn(r['delta_r2_macro_point'],3)} [{sgn(r['delta_r2_macro_ci95'][0],3)}, {sgn(r['delta_r2_macro_ci95'][1],3)}]"
-        p = f"{c['frac_A_gt_B_f1']:.3f}"
-        out.append(f"{disp} & {f1} & {r2} & {p} \\\\")
-    return "\n".join(out)
-
-
-# ===================================================================
-# Tables A6/A7: headline-cell 95% bootstrap CIs (appendix). Makes good the
-# Methods promise that every headline cell carries a test-set CI, without
-# crowding the main best-cell tables. The POINT estimate in each row is the
-# canonical recorded value (identical to the main tables); the bracket is the
-# 1,000-iteration test-set bootstrap from data/bootstrap_metrics.json (which
-# refits the probe, so its own point may differ by <0.01 -- every recorded
-# point falls inside the reported interval). Pools mirror the main best-cell
-# tables exactly (classification by macro-F1, regression by R^2).
-# ===================================================================
-def _ci(pair, dp=3):
-    return f"[{f(pair[0], dp)}, {f(pair[1], dp)}]"
-
-
-def build_headline_ci_cls():
-    bc = BOOT["classification"]
-    # (display, pool_tex, point_f1, point_kappa, boot_key)
-    rows = [("Shuffled labels", "---", CLS_SHUF["test_macro_f1"],
-             CLS_SHUF["test_kappa"], "shuffled")]
-    for rid, disp in MAIN_COMPOSITION:
-        r = CLS[rid]
-        rows.append((disp, "---", r["test_macro_f1"], r["test_kappa"], rid))
-    rule1 = len(rows)  # \midrule after shuffled + composition
-    for enc in ENCODERS:
-        pool, r = cls_best_pool(enc)
-        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_macro_f1"],
-                     r["test_kappa"], f"{enc}_{pool}"))
-    rule2 = len(rows)  # \midrule before ESM-2 upper bound
-    e = CLS["esm2_650m"]
-    rows.append(("ESM-2 650M", "---", e["test_macro_f1"], e["test_kappa"], "esm2_650m"))
-    out = []
-    for i, (disp, pool, f1, kap, key) in enumerate(rows):
-        f1c = f"{f(f1, 3)} {_ci(bc[key]['macro_f1_ci95'])}"
-        kc = f"{f(kap, 3)} {_ci(bc[key]['kappa_ci95'])}"
-        out.append(f"{disp} & {pool} & {f1c} & {kc} \\\\")
-        if i + 1 in (rule1, rule2):
-            out.append(r"\midrule")
-    return "\n".join(out)
-
-
-def build_headline_ci_reg():
-    br = BOOT["regression"]
+    """Figure 4's CDS and whole-window values: every row on the disjoint split, so CDS
+    and TSS score the same test genes (the CDS rows were homology-split cells until
+    the Oct 3 audit, which the caption's "full values for Figure 4" did not hold for)."""
+    out = [r"\multicolumn{6}{@{}l}{\textbf{Coding sequence (CDS)}}\\"]
+    nt_c, nt_r = DIS.cell("cds", "family5", "kmer"), DIS.cell("cds", "genept", "kmer")
+    out.append(f"\\quad 4-mer & {f(nt_c[F1],3)} & {sgn(0,3)} & {f(nt_c[K],3)} & {f(nt_r[R2],3)} & {sgn(0,3)} \\\\")
     rows = []
-    for rid, disp in MAIN_COMPOSITION:
-        rows.append((disp, "---", REG[rid]["test_r2_macro"], rid))
-    rule1 = len(rows)
     for enc in ENCODERS:
-        pool, r = reg_best_pool(enc)
-        rows.append((ENC_DISPLAY[enc], tt(pool), r["test_r2_macro"], f"{enc}_{pool}"))
-    rule2 = len(rows)
-    rows.append(("ESM-2 650M", "---", REG["esm2_650m"]["test_r2_macro"], "esm2_650m"))
-    out = []
-    for i, (disp, pool, r2, key) in enumerate(rows):
-        r2c = f"{f(r2, 3)} {_ci(br[key]['r2_macro_ci95'])}"
-        out.append(f"{disp} & {pool} & {r2c} \\\\")
-        if i + 1 in (rule1, rule2):
-            out.append(r"\midrule")
-    return "\n".join(out)
-
-
-# ===================================================================
-# Table (sec 3.5): protein-LM comparison (main text, 3 dp)
-# ESM-2 vs the best DNA encoder vs the composition floor, both readouts.
-# Columns: Source & Macro-F1 & kappa & GenePT R^2.
-# ===================================================================
-def build_protein_comparison():
-    k4, r4 = CLS[CDS_4MER], REG[CDS_4MER]
-    aa_cls = max(["aa1", "aa2", "aa3"], key=lambda s: CLS[s]["test_macro_f1"])
-    aa_reg = max(["aa1", "aa2", "aa3"], key=lambda s: REG[s]["test_r2_macro"])
-    dna_cls = max(ENCODERS, key=lambda e: cls_best_pool(e)[1]["test_macro_f1"])
-    dna_reg = max(ENCODERS, key=lambda e: reg_best_pool(e)[1]["test_r2_macro"])
-    rows = [
-        ("CDS 4-mer", k4["test_macro_f1"], k4["test_kappa"], r4["test_r2_macro"]),
-        ("AA composition", CLS[aa_cls]["test_macro_f1"], CLS[aa_cls]["test_kappa"],
-         REG[aa_reg]["test_r2_macro"]),
-        ("Best DNA encoder", cls_best_pool(dna_cls)[1]["test_macro_f1"],
-         cls_best_pool(dna_cls)[1]["test_kappa"], reg_best_pool(dna_reg)[1]["test_r2_macro"]),
-        ("ESM-2 650M", CLS["esm2_650m"]["test_macro_f1"], CLS["esm2_650m"]["test_kappa"],
-         REG["esm2_650m"]["test_r2_macro"]),
-    ]
-    bf1 = max(r[1] for r in rows); bk = max(r[2] for r in rows); br = max(r[3] for r in rows)
-    out = []
-    for lbl, f1, kp, r2 in rows:
-        f1t = bold(f(f1, 3)) if f1 == bf1 else f(f1, 3)
-        kt = bold(f(kp, 3)) if kp == bk else f(kp, 3)
-        rt = bold(f(r2, 3)) if r2 == br else f(r2, 3)
-        out.append(f"{lbl} & {f1t} & {kt} & {rt} \\\\")
-    return "\n".join(out)
-
-
-# ===================================================================
-# Table (sec 3.x): homology leakage -- random vs homology split (main text)
-# Best-pool macro-F1 per encoder, CDS and TSS, both splits + delta.
-# (kappa is incomplete in the random metrics; macro-F1 is on both splits.)
-# ===================================================================
-def _best_f1_family5(metrics, enc, tss=False):
-    cells = []
-    for r in metrics:
-        if r.get("task") != "family5" or r.get("shuffled_labels"):
-            continue
-        fs = r["feature_source"]
-        is_tss = fs.startswith("tss_")
-        if tss != is_tss:
-            continue
-        core = fs[4:] if is_tss else fs
-        if core == enc or core.startswith(enc + "_"):
-            cells.append(r)
-    return max(cells, key=lambda r: r["test_macro_f1"])["test_macro_f1"] if cells else None
-
-
-def _kmer_f1(metrics, *names):
-    for fs in names:
-        c = [r for r in metrics if r.get("task") == "family5" and r["feature_source"] == fs]
-        if c:
-            return c[0]["test_macro_f1"]
-    return None
-
-
-def build_leakage():
-    out = []
-
-    def section(label, baseline_rand, baseline_hom, tss):
-        out.append(r"\multicolumn{4}{@{}l}{\textbf{" + label + r"}}\\")
-        rows = [("4-mer", baseline_rand, baseline_hom)]
-        for enc in ENCODERS:
-            rows.append((ENC_DISPLAY[enc], _best_f1_family5(RAND, enc, tss),
-                         _best_f1_family5(M, enc, tss)))
-        for name, rv, hv in rows:
-            out.append(f"\\quad {name} & {f(rv,3)} & {f(hv,3)} & {sgn(hv-rv,3)} \\\\")
-
-    # random CDS 4-mer from the comparator re-run (RANDC, 0.662) to match the
-    # split-comparison table; RAND's legacy 4-mer (0.672) differs by protocol.
-    section(r"Coding sequence (CDS)", _kmer_f1(RANDC, "kmer"), _kmer_f1(M, "kmer"), False)
+        c, r = DIS.best(enc, "cds", "family5"), DIS.best(enc, "cds", "genept")
+        rows.append((enc, c[F1], c[F1] - nt_c[F1], c[K], r[R2], r[R2] - nt_r[R2]))
+    bf, br = max(r[1] for r in rows), max(r[4] for r in rows)
+    for enc, f1, df1, k, r2, dr2 in rows:
+        out.append(f"\\quad {ENC_DISPLAY[enc]} & {bold(f(f1,3)) if f1 == bf else f(f1,3)} "
+                   f"& {bold(sgn(df1,3)) if f1 == bf else sgn(df1,3)} & {f(k,3)} "
+                   f"& {bold(f(r2,3)) if r2 == br else f(r2,3)} & {bold(sgn(dr2,3)) if r2 == br else sgn(dr2,3)} \\\\")
     out.append(r"\midrule")
-    section(r"TSS-centred window (196{,}608\,bp)",
-            _kmer_f1(RAND, "enformer_tss_4mer", "tss_kmer"),
-            _kmer_f1(M, "enformer_tss_4mer", "tss_kmer"), True)
+    out.append(r"\multicolumn{6}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
+    t_c, t_r = DIS.cell("tss", "family5", TSS_4MER), DIS.cell("tss", "genept", TSS_4MER)
+    out.append(f"\\quad 4-mer & {f(t_c[F1],3)} & {sgn(0,3)} & {f(t_c[K],3)} & {f(t_r[R2],3)} & {sgn(0,3)} \\\\")
+    rows = []
+    for enc in ENCODERS:
+        c, r = DIS.best(enc, "tss", "family5"), DIS.best(enc, "tss", "genept")
+        rows.append((enc, c[F1], c[F1] - t_c[F1], c[K], r[R2], r[R2] - t_r[R2]))
+    bf = max(r[1] for r in rows)
+    for enc, f1, df1, k, r2, dr2 in rows:
+        out.append(f"\\quad {ENC_DISPLAY[enc]} & {bold(f(f1,3)) if f1 == bf else f(f1,3)} "
+                   f"& {bold(sgn(df1,3)) if f1 == bf else sgn(df1,3)} & {f(k,3)} & {f(r2,3)} & {sgn(dr2,3)} \\\\")
+    e_c, e_r = DIS.cell("tss", "family5", ENF_WHOLE), DIS.cell("tss", "genept", ENF_WHOLE)
+    out.append(f"\\quad Enformer (whole window) & {f(e_c[F1],3)} & {sgn(e_c[F1]-t_c[F1],3)} & {f(e_c[K],3)} "
+               f"& {f(e_r[R2],3)} & {sgn(e_r[R2]-t_r[R2],3)} \\\\")
     return "\n".join(out)
 
 
 # ===================================================================
-# Random vs homology split comparison (CDS), classification + regression.
-# DNA encoders/4-mer come from metrics.json; composition + ESM from
-# metrics_random_comparators.json; homology from metrics_homology.json.
+# Random vs primary split comparison: each split re-selects its own pools and k
+# on its own validation set (CDS: random vs homology; TSS: random vs disjoint).
 # ===================================================================
-def _cls_f1(metrics, src):
-    if src in ENCODERS:
-        cells = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
-                 and not r["feature_source"].startswith("tss_")
-                 and (r["feature_source"] == src or r["feature_source"].startswith(src + "_"))]
-        return max(cells, key=lambda r: r["test_macro_f1"])["test_macro_f1"] if cells else None
-    cells = [r for r in metrics if r.get("task") == "family5" and not r.get("shuffled_labels")
-             and r.get("feature_source") == src]
-    return cells[0]["test_macro_f1"] if cells else None
+CMP_DISPLAY = {"codon": "Codon", "aa2": "AA 2-mer", "aa3": "AA 3-mer", "esm2_650m": "ESM-2 650M",
+               **ENC_DISPLAY}
+SPLIT_CDS = [["nt", "codon", "aa2", "aa3"], ["nt_v2", "dnabert2", "gena_lm", "hyena_dna"], ["esm2_650m"]]
 
 
-def _reg_r2(metrics, src):
-    recs = [r for r in metrics if r.get("task") is None]
-    if src in ENCODERS:
-        cells = [r for r in recs if r.get("model") == "linear_probe"
-                 and not str(r.get("dataset", "")).startswith("dataset_tss_")
-                 and (str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "") == src
-                      or str(r.get("dataset", "")).replace("dataset_", "").replace(".parquet", "").startswith(src + "_"))]
-        return max(cells, key=lambda r: r["test_r2_macro"])["test_r2_macro"] if cells else None
-    for r in recs:
-        try:
-            if reg_raw(r) == src:
-                return r["test_r2_macro"]
-        except Exception:
-            continue
-    return None
+def _value(split: Split, arm: str, task: str, name: str) -> float:
+    m = F1 if task == "family5" else R2
+    if name in ENCODERS:
+        return split.best(name, arm, task)[m]
+    if name == "nt":
+        return split.cell(arm, task, split.nt(task))[m]
+    return split.cell(arm, task, name)[m]
 
 
-def _reg_r2_tss(metrics, enc):
-    """Best-pool Ridge R^2 for an encoder on the TSS window."""
-    cells = [r for r in metrics if r.get("task") is None and r.get("model") == "linear_probe"
-             and str(r.get("dataset", "")).startswith("dataset_tss_")
-             and (str(r.get("dataset", "")).replace("dataset_tss_", "").replace(".parquet", "") == enc
-                  or str(r.get("dataset", "")).replace("dataset_tss_", "").replace(".parquet", "").startswith(enc + "_"))]
-    return max(cells, key=lambda r: r["test_r2_macro"])["test_r2_macro"] if cells else None
+def _nt_label() -> str:
+    """'CDS 4-mer' when every split and task picks the same k, else the picks."""
+    picks = {(name, t): sp.nt(t) for name, sp in (("rand", RND), ("hom", HOM))
+             for t in ("family5", "genept")}
+    if len(set(picks.values())) == 1:
+        return NT_DISPLAY[next(iter(picks.values()))]
+    k = {v: v.removeprefix("kmer") or "4" for v in picks.values()}
+    return "CDS k-mer (" + ", ".join(f"{n} {t[0].upper()}{k[v]}" for (n, t), v in picks.items()) + ")"
 
 
-def _rand_cls(src):
-    v = _cls_f1(RANDC, src)
-    return v if v is not None else _cls_f1(RAND, src)
-
-
-def _rand_reg(src):
-    v = _reg_r2(RANDC, src)
-    return v if v is not None else _reg_r2(RAND, src)
-
-
-CMP_DISPLAY = {"kmer": "CDS 4-mer", "kmer6": "CDS 6-mer", "codon": "Codon", "gc": "GC + length",
-               "aa1": "AA 1-mer", "aa2": "AA 2-mer", "aa3": "AA 3-mer",
-               "dnabert2": "DNABERT-2", "nt_v2": "NT-v2", "gena_lm": "GENA-LM", "hyena_dna": "HyenaDNA",
-               "esm2_150m": "ESM-2 150M", "esm2_650m": "ESM-2 650M"}
-CMP_HEADLINE = ["kmer", "aa2", "aa3", "codon", "nt_v2", "dnabert2", "esm2_650m"]
-CMP_FULL = ["kmer", "kmer6", "codon", "aa1", "aa2", "aa3",
-            "dnabert2", "nt_v2", "gena_lm", "hyena_dna", "esm2_650m"]
-
-
-def _split_comparison(srcs):
-    out = []
-    for src in srcs:
-        rf, hf, rr, hr = _rand_cls(src), _cls_f1(M, src), _rand_reg(src), _reg_r2(M, src)
-
-        def pair(rv, hv):
-            return (f(rv, 3) + " & " + f(hv, 3)) if (rv is not None and hv is not None) else "--- & ---"
-
-        out.append(f"{CMP_DISPLAY[src]} & {pair(rf, hf)} & {pair(rr, hr)} \\\\")
-    return "\n".join(out)
-
-
-# CDS section: composition / all four DNA encoders / protein-LM reference,
-# separated by rules (no per-class labels) under one "Coding sequence" header.
-SPLIT_CDS = [
-    ["kmer", "codon", "aa2", "aa3"],
-    ["nt_v2", "dnabert2", "gena_lm", "hyena_dna"],
-    ["esm2_650m"],
-]
-
-
-def _enf_split(metrics, kind):
-    """Enformer \\texttt{trunk\\_center} cell (same variant as Table~3); kind in {'f1','r2'}."""
-    var = "enformer_trunk_center"
-    if kind == "f1":
-        c = [r for r in metrics if r.get("task") == "family5" and r.get("feature_source") == var]
-        return c[0]["test_macro_f1"] if c else None
-    c = [r for r in metrics if r.get("task") is None and var in str(r.get("dataset", ""))]
-    return c[0]["test_r2_macro"] if c else None
+def primary(arm: str) -> Split:
+    """The arm's primary split: homology for CDS, disjoint for TSS. On the homology
+    split TSS windows overlap across partitions, unmasked by design (G25)."""
+    return {"cds": HOM, "tss": DIS}[arm]
 
 
 def build_split_comparison():
-    # Grouped rows with explicit leakage deltas (hom - rand). CDS classes from the
-    # user spec, plus a TSS-window section so the homology-driven TSS collapse
-    # (cited in the abstract/discussion) is shown rather than only asserted.
     def trip(rv, hv):
-        return (f"{f(rv,3)} & {f(hv,3)} & {sgn(hv-rv,3)}"
-                if rv is not None and hv is not None else "--- & --- & ---")
+        return f"{f(rv,3)} & {f(hv,3)} & {sgn(hv-rv,3)}"
+
     out = [r"\multicolumn{7}{@{}l}{\textbf{Coding sequence (CDS)}}\\"]
     for bi, block in enumerate(SPLIT_CDS):
         if bi:
             out.append(r"\midrule")
         for src in block:
-            f1 = trip(_rand_cls(src), _cls_f1(M, src))
-            r2 = trip(_rand_reg(src), _reg_r2(M, src))
-            out.append(f"\\quad {CMP_DISPLAY[src]} & {f1} & {r2} \\\\")
+            name = _nt_label() if src == "nt" else CMP_DISPLAY[src]
+            out.append(f"\\quad {name} & "
+                       f"{trip(_value(RND, 'cds', 'family5', src), _value(primary('cds'), 'cds', 'family5', src))} & "
+                       f"{trip(_value(RND, 'cds', 'genept', src), _value(primary('cds'), 'cds', 'genept', src))} \\\\")
     out.append(r"\midrule")
-    out.append(r"\multicolumn{7}{@{}l}{\textbf{TSS window (196{,}608\,bp)}}\\")
-    out.append(f"\\quad TSS 4-mer & {trip(_kmer_f1(RAND, 'enformer_tss_4mer', 'tss_kmer'), _kmer_f1(M, 'enformer_tss_4mer', 'tss_kmer'))}"
-               f" & {trip(_reg_r2(RAND, 'enformer_tss_4mer'), _reg_r2(M, 'enformer_tss_4mer'))} \\\\")
-    out.append(r"\midrule")
-    for enc in ENCODERS:
-        out.append(f"\\quad {ENC_DISPLAY[enc]} & {trip(_best_f1_family5(RAND, enc, True), _best_f1_family5(M, enc, True))}"
-                   f" & {trip(_reg_r2_tss(RAND, enc), _reg_r2_tss(M, enc))} \\\\")
-    out.append(r"\midrule")
-    out.append(f"\\quad Enformer & {trip(_enf_split(RAND, 'f1'), _enf_split(ENFH, 'f1'))}"
-               f" & {trip(_enf_split(RAND, 'r2'), _enf_split(ENFH, 'r2'))} \\\\")
-    return "\n".join(out)
-
-
-def build_split_comparison_full():
-    return _split_comparison(CMP_FULL)
-
-
-# ===================================================================
-# Random-split mirrors of the homology appendix matrices (A1/A2).
-# Same layout, computed on the random-stratified split. Classification
-# reports macro-F1 (random DNA-LM runs have no cached kappa); regression
-# mirrors the homology grid exactly.
-# ===================================================================
-def build_pooling_full_random():
-    out = []
-    base_f1 = CLS_RAND["kmer"]["test_macro_f1"]
-    out.append(r"\multicolumn{5}{l}{\textbf{Coding sequence (CDS)}}\\")
-
-    def row(disp, pool, r):
-        return (f"{disp} & {pool} & {f(r['test_macro_f1'])} "
-                f"& {sgn(r['test_macro_f1'] - base_f1)} & {f(r['test_accuracy'])} \\\\")
-
-    for rid, disp in COMPOSITION:
-        if rid in CLS_RAND:
-            out.append(row(disp, "baseline" if rid == "kmer" else "---", CLS_RAND[rid]))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            fsrc = f"{enc}_{pool}"
-            if fsrc in CLS_RAND:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), CLS_RAND[fsrc]))
-    out.append(r"\midrule")
-    out.append(r"\multicolumn{5}{l}{\textbf{Protein language model (translated CDS)}}\\")
-    for rid, disp in ESM:
-        if rid in CLS_RAND:
-            out.append(row(disp, "---", CLS_RAND[rid]))
-    out.append(r"\midrule")
-    out.append(r"\multicolumn{5}{l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
-    tbf = CLS_RAND[TSS_4MER]["test_macro_f1"]
-
-    def trow(disp, pool, r):
-        return (f"{disp} & {pool} & {f(r['test_macro_f1'])} "
-                f"& {sgn(r['test_macro_f1'] - tbf)} & {f(r['test_accuracy'])} \\\\")
-
-    out.append(trow("TSS 4-mer", "baseline", CLS_RAND[TSS_4MER]))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            fsrc = f"tss_{enc}_{pool}"
-            if fsrc in CLS_RAND:
-                out.append(trow(ENC_DISPLAY[enc], tt(pool), CLS_RAND[fsrc]))
-    return "\n".join(out)
-
-
-def build_regression_full_random():
-    out = []
-    base_r2 = REG_RAND["kmer"]["test_r2_macro"]
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{Coding sequence (CDS)}}\\")
-
-    def row(disp, pool, r, delta=True):
-        d = sgn(r["test_r2_macro"] - base_r2) if delta else "---"
-        cos = r.get("test_mean_cosine")
-        cos = f(cos) if cos is not None else "---"
-        return (f"{disp} & {pool} & {f(r['test_r2_macro'])} & {d} "
-                f"& {cos} & {alpha_str(r.get('alpha'))} \\\\")
-
-    for rid, disp in COMPOSITION:
-        if rid in REG_RAND:
-            out.append(row(disp, "baseline" if rid == "kmer" else "---", REG_RAND[rid]))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            s = f"{enc}_{pool}"
-            if s in REG_RAND:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), REG_RAND[s]))
-    out.append(r"\midrule")
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{Protein language model (translated CDS)}}\\")
-    for rid, disp in ESM:
-        if rid in REG_RAND:
-            out.append(row(disp, "---", REG_RAND[rid]))
-    out.append(r"\midrule")
-    out.append(r"\multicolumn{6}{@{}l}{\textbf{TSS-centred window (196{,}608\,bp)}}\\")
-    for enc in ENCODERS:
-        for pool in POOLS:
-            s = f"tss_{enc}_{pool}"
-            if s in REG_RAND:
-                out.append(row(ENC_DISPLAY[enc], tt(pool), REG_RAND[s], delta=False))
+    out.append(r"\multicolumn{7}{@{}l}{\textbf{TSS window (196{,}608\,bp; primary = genomic-interval-disjoint split)}}\\")
+    for src, name in [(TSS_4MER, "TSS 4-mer"), *((e, ENC_DISPLAY[e]) for e in ENCODERS),
+                      (ENF_WHOLE, "Enformer (whole window)")]:
+        if src == ENCODERS[0] or src == ENF_WHOLE:
+            out.append(r"\midrule")
+        out.append(f"\\quad {name} & "
+                   f"{trip(_value(RND, 'tss', 'family5', src), _value(primary('tss'), 'tss', 'family5', src))} & "
+                   f"{trip(_value(RND, 'tss', 'genept', src), _value(primary('tss'), 'tss', 'genept', src))} \\\\")
     return "\n".join(out)
 
 
 # ===================================================================
-# Combined full-width matrices (appendix longtables): the homology-aware
-# split section stacked above its random-stratified mirror -- one big table
-# per readout. Random DNA-LM runs have no cached kappa, shown as '---'.
-# write_raw emits just the rows (+ section headers) for \input into a longtable.
+# Appendix longtables: every cell, primary split (left) beside the random
+# split (right). CDS on the homology split, TSS on the disjoint split.
 # ===================================================================
-def write_raw(key, body):
-    OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / f"{key}.tex").write_text(body.rstrip() + "\n")
-    print(f"wrote {key}.tex (full longtable)")
-
-
 def _cell_order():
-    """Canonical (kind, ...) stream shared by both readouts: context sub-headers
-    plus one entry per encoder-pooling / baseline cell, in display order. The same
-    key indexes the homology (CLS/REG) and random (CLS_RAND/REG_RAND) tables."""
-    yield ("ctx", "Coding sequence (CDS)")
+    yield ("ctx", "Coding sequence (CDS; primary = homology-aware split)", "cds")
     for rid, disp in COMPOSITION:
-        yield ("row", disp, "---", rid)
+        yield ("row", disp, "---", rid, "cds")
     yield ("rule",)
     for enc in ENCODERS:
-        for pool in POOLS:
-            yield ("row", ENC_DISPLAY[enc], tt(pool), f"{enc}_{pool}")
-    yield ("rule",)  # ESM-2 set off by a rule, like Table 6 (no sub-header)
-    for rid, disp in ESM:
-        yield ("row", disp, "---", rid)
-    yield ("ctx", r"TSS-centred window (196{,}608\,bp)")
-    yield ("row", "TSS 4-mer", "---", TSS_4MER)
+        for pool in encoder_pools(enc, "CDS"):
+            yield ("row", ENC_DISPLAY[enc], pool_name(pool), f"{enc}_{pool}", "cds")
+    yield ("rule",)
+    yield ("row", "ESM-2 650M", "---", "esm2_650m", "cds")
+    yield ("ctx", r"TSS-centred window (196{,}608\,bp; primary = genomic-interval-disjoint split)", "tss")
+    yield ("row", "TSS 4-mer", "---", TSS_4MER, "tss")
     yield ("rule",)
     for enc in ENCODERS:
-        for pool in POOLS:
-            yield ("row", ENC_DISPLAY[enc], tt(pool), f"tss_{enc}_{pool}")
-    yield ("rule",)  # supervised Enformer TSS comparator, set off like Table 6
-    yield ("row", "Enformer", "---", "enformer_trunk_center")
+        for pool in encoder_pools(enc, "TSS"):
+            yield ("row", ENC_DISPLAY[enc], pool_name(pool), f"tss_{enc}_{pool}", "tss")
+    yield ("rule",)
+    yield ("row", "Enformer (whole window)", "---", ENF_WHOLE, "tss")
 
 
-def _side_by_side(homidx, randidx, mcells):
-    """Body rows for a side-by-side matrix: Enc|Pool|<hom metrics> | Enc|Pool|<rand metrics>."""
+def _side_by_side(task, mcells):
     out, first = [], True
     for item in _cell_order():
-        kind = item[0]
-        if kind == "ctx":
+        if item[0] == "ctx":
             if not first:
                 out.append(r"\midrule")
-            out.append(r"\multicolumn{10}{l}{\textbf{" + item[1] + r"}}\\")
+            out.append(r"\multicolumn{8}{l}{\textbf{" + item[1] + r"}}\\")
             first = False
-        elif kind == "rule":
+        elif item[0] == "rule":
             out.append(r"\midrule")
         else:
-            _, disp, pool, key = item
-            h, r = homidx.get(key), randidx.get(key)
-            if h is None and r is None:
-                continue
-            out.append(f"{disp} & {pool} & {mcells(h)} & {disp} & {pool} & {mcells(r)} \\\\")
+            _, disp, pool, key, arm = item
+            primary = HOM if arm == "cds" else DIS
+            h, r = primary.cell(arm, task, key), RND.cell(arm, task, key)
+            out.append(f"{disp} & {pool} & {mcells(h)} & {mcells(r)} \\\\")
     return "\n".join(out)
 
 
-def _side_longtable(caption, label, names, body):
-    """Complete full-width page-breaking longtable with two side-by-side 5-column
-    blocks (homology | random). Generated whole so the \\input sits at top level."""
-    hdr = (r"\multicolumn{5}{c}{\textbf{Homology-aware split}} & "
-           r"\multicolumn{5}{c}{\textbf{Random-stratified split}} \\" + "\n"
-           + names + " & " + names + r" \\")
+def _side_longtable(caption, label, metrics, body):
+    hdr = (r" & & \multicolumn{3}{c}{\textbf{Primary split}} & "
+           r"\multicolumn{3}{c}{\textbf{Random-stratified split}} \\" + "\n"
+           + "Source & Pooling & " + metrics + " & " + metrics + r" \\")
     return "\n".join([
         r"{\scriptsize",
-        r"\setlength{\tabcolsep}{4pt}\setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}\setlength{\LTcapwidth}{\textwidth}",
-        r"\begin{longtable}{@{}llrrr@{\hspace{0.9em}\vrule width 1.1pt\hspace{0.9em}}llrrr@{}}",
+        r"\setlength{\tabcolsep}{3.25pt}\setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}\setlength{\LTcapwidth}{\textwidth}",
+        r"\begin{longtable}{@{}llrrr@{\hspace{0.9em}\vrule width 1.1pt\hspace{0.9em}}rrr@{}}",
         r"\caption{" + caption + r"\label{" + label + r"}}\\",
-        r"\toprule",
-        hdr,
-        r"\midrule",
-        r"\endfirsthead",
-        r"\multicolumn{10}{l}{\emph{\tablename~\thetable\ -- continued}}\\",
-        r"\toprule",
-        hdr,
-        r"\midrule",
-        r"\endhead",
-        r"\midrule \multicolumn{10}{r}{\emph{continued on next page}}\\",
-        r"\endfoot",
-        r"\bottomrule",
-        r"\endlastfoot",
+        r"\toprule", hdr, r"\midrule", r"\endfirsthead",
+        r"\multicolumn{8}{l}{\emph{\tablename~\thetable\ -- continued}}\\",
+        r"\toprule", hdr, r"\midrule", r"\endhead",
+        r"\midrule \multicolumn{8}{r}{\emph{continued on next page}}\\", r"\endfoot",
+        r"\bottomrule", r"\endlastfoot",
         body,
         r"\end{longtable}}",
     ])
 
 
-def _pool_section(idx):
-    def crow(disp, pool, r):
-        k = r.get("test_kappa")
-        kt = f(k) if k is not None else "---"
-        return f"{disp} & {pool} & {f(r['test_macro_f1'])} & {kt} & {f(r['test_accuracy'])} \\\\"
-    o = [r"\multicolumn{5}{l}{\textit{Coding sequence (CDS)}}\\"]
-    for rid, disp in COMPOSITION:
-        if rid in idx:
-            o.append(crow(disp, "---", idx[rid]))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            fsrc = f"{enc}_{pool}"
-            if fsrc in idx:
-                o.append(crow(ENC_DISPLAY[enc], tt(pool), idx[fsrc]))
-    if any(rid in idx for rid, _ in ESM):
-        o.append(r"\midrule")
-        o.append(r"\multicolumn{5}{l}{\textit{Protein language model (translated CDS)}}\\")
-        for rid, disp in ESM:
-            if rid in idx:
-                o.append(crow(disp, "---", idx[rid]))
-    o.append(r"\midrule")
-    o.append(r"\multicolumn{5}{l}{\textit{TSS-centred window (196{,}608\,bp)}}\\")
-    if TSS_4MER in idx:
-        o.append(crow("TSS 4-mer", "---", idx[TSS_4MER]))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            fsrc = f"tss_{enc}_{pool}"
-            if fsrc in idx:
-                o.append(crow(ENC_DISPLAY[enc], tt(pool), idx[fsrc]))
-    return o
-
-
 def build_pooling_combined():
-    def mc(rec):
-        if rec is None:
-            return "--- & --- & ---"
-        k = rec.get("test_kappa")
-        kt = f(k) if k is not None else "---"
-        acc = rec.get("test_accuracy")
-        at = f(acc) if acc is not None else "---"
-        return f"{f(rec['test_macro_f1'])} & {kt} & {at}"
-    enf = next((r for r in ENFH if r.get("task") == "family5"
-                and r.get("feature_source") == "enformer_trunk_center"), None)
     return _side_longtable(
-        r"Encoder-pooling cells for 5-way family classification, CDS and TSS: "
-        r"homology-aware split (left) versus random-stratified split (right). "
-        r"Random DNA-LM runs have no cached $\kappa$ (shown ``---''); the "
-        r"supervised Enformer comparator (\texttt{trunk\_center}) closes the "
-        r"TSS block.",
-        "tab:s-pooling-full",
-        r"Source & Pooling & Macro-F1 & $\kappa$ & Accuracy",
-        _side_by_side({**CLS, "enformer_trunk_center": enf}, CLS_RAND, mc))
-
-
-def _reg_section(idx):
-    def rrow(disp, pool, r):
-        cos = r.get("test_mean_cosine")
-        cos = f(cos) if cos is not None else "---"
-        a = r.get("alpha")
-        at = alpha_str(a) if a is not None else "---"
-        return f"{disp} & {pool} & {f(r['test_r2_macro'])} & {cos} & {at} \\\\"
-    o = [r"\multicolumn{5}{l}{\textit{Coding sequence (CDS)}}\\"]
-    for rid, disp in COMPOSITION:
-        if rid in idx:
-            o.append(rrow(disp, "---", idx[rid]))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            s = f"{enc}_{pool}"
-            if s in idx:
-                o.append(rrow(ENC_DISPLAY[enc], tt(pool), idx[s]))
-    if any(rid in idx for rid, _ in ESM):
-        o.append(r"\midrule")
-        o.append(r"\multicolumn{5}{l}{\textit{Protein language model (translated CDS)}}\\")
-        for rid, disp in ESM:
-            if rid in idx:
-                o.append(rrow(disp, "---", idx[rid]))
-    o.append(r"\midrule")
-    o.append(r"\multicolumn{5}{l}{\textit{TSS-centred window (196{,}608\,bp)}}\\")
-    if TSS_4MER in idx:
-        o.append(rrow("TSS 4-mer", "---", idx[TSS_4MER]))
-    for enc in ENCODERS:
-        for pool in POOLS:
-            s = f"tss_{enc}_{pool}"
-            if s in idx:
-                o.append(rrow(ENC_DISPLAY[enc], tt(pool), idx[s]))
-    return o
+        r"Every cell for 5-way family classification: the primary split (left; CDS on the "
+        r"homology-aware split, TSS on the genomic-interval-disjoint split) versus the "
+        r"random-stratified split (right). Each split selects $C$ on its own validation set.",
+        "tab:s-pooling-full", r"Macro-F1 & $\kappa$ & Accuracy",
+        _side_by_side("family5", lambda r: f"{f(r[F1])} & {f(r[K])} & {f(r[ACC])}"))
 
 
 def build_regression_combined():
-    def mc(rec):
-        if rec is None:
-            return "--- & --- & ---"
-        cos = rec.get("test_mean_cosine")
-        cos = f(cos) if cos is not None else "---"
-        a = rec.get("alpha")
-        at = alpha_str(a) if a is not None else "---"
-        return f"{f(rec['test_r2_macro'])} & {cos} & {at}"
-    enf = next((r for r in ENFH if r.get("task") is None
-                and "enformer_trunk_center" in (r.get("dataset") or "")), None)
     return _side_longtable(
-        r"Ridge-to-GenePT cells, CDS and TSS: homology-aware split (left) "
-        r"versus random-stratified split (right). The supervised Enformer "
-        r"comparator (\texttt{trunk\_center}) closes the TSS block.",
-        "tab:s-regression-full",
-        r"Source & Pooling & $R^2$ macro & Mean cosine & $\alpha$",
-        _side_by_side({**REG, "enformer_trunk_center": enf}, REG_RAND, mc))
+        r"Every Ridge-to-GenePT cell: the primary split (left; CDS on the homology-aware "
+        r"split, TSS on the genomic-interval-disjoint split) versus the random-stratified "
+        r"split (right). Each split selects $\alpha$ on its own validation set.",
+        "tab:s-regression-full", r"$R^2$ macro & Mean cosine & $\alpha$",
+        _side_by_side("genept", lambda r: f"{f(r[R2])} & {f(r[COS])} & {alpha_str(r['alpha'])}"))
+
+
+# ===================================================================
+# Split-seed sensitivity: the primary split plus three re-seeded cluster
+# assignments; each re-selects its own pools and k. Range over the four.
+# ===================================================================
+def build_seed_sensitivity():
+    def ranges(get):
+        vals = [get(HOM, DIS)] + [get(c, t) for c, t in SEED_SPLITS.values()]
+        return f"${f(min(vals),3)}$--${f(max(vals),3)}$"     # math minus: "-0.013---0.010" drops one
+
+    def best_dna(split, task):
+        return split.cell("cds", task, split.best_encoder("cds", task))[F1 if task == "family5" else R2]
+
+    def best_aa(split, task):
+        return split.cell("cds", task, split.aa(task))[F1 if task == "family5" else R2]
+
+    rows = [
+        ("ESM-2 650M", lambda c, t: c.cell("cds", "family5", "esm2_650m")[F1],
+         lambda c, t: c.cell("cds", "genept", "esm2_650m")[R2]),
+        ("Best DNA encoder", lambda c, t: best_dna(c, "family5"), lambda c, t: best_dna(c, "genept")),
+        ("AA composition", lambda c, t: best_aa(c, "family5"), lambda c, t: best_aa(c, "genept")),
+        ("TSS (DNABERT-2)", lambda c, t: t.best("dnabert2", "tss", "family5")[F1],
+         lambda c, t: t.best("dnabert2", "tss", "genept")[R2]),
+    ]
+    return "\n".join(f"{disp} & {ranges(fc)} & {ranges(fr)} \\\\" for disp, fc, fr in rows)
+
+
+# ===================================================================
+# CDS-vs-TSS paired cluster-bootstrap CIs (disjoint split: same test genes).
+# P* is the share of resamples with CDS > TSS (not a posterior probability).
+# ===================================================================
+
+
+# ===================================================================
+# Headline cluster-bootstrap CIs. The point is the recorded value; the
+# bracket is the 1,000-resample cluster bootstrap of the stored predictions.
+# ===================================================================
+
+
+
+
+# ===================================================================
+# TSS on the homology split (window overlap allowed) vs the disjoint split.
+# Each split re-selects its pools. The floor is each split's null band median.
+# ===================================================================
+def build_tss_disjoint():
+    # The TSS null band runs on the disjoint split only (decided Oct 1).
+    db = band(TSS, "family5", TSS_4MER)
+    out = [f"Shuffled labels (median of 200) & --- & {f(db['median'],3)} & --- \\\\"]
+    for src, name in [(TSS_4MER, "TSS 4-mer")]:
+        h, d = HOM.cell("tss", "family5", src)[F1], DIS.cell("tss", "family5", src)[F1]
+        out.append(f"{name} & {f(h,3)} & {f(d,3)} & {sgn(d-h,3)} \\\\")
+    out.append(r"\midrule")
+    for enc in ENCODERS:
+        h, d = HOM.best(enc, "tss", "family5")[F1], DIS.best(enc, "tss", "family5")[F1]
+        out.append(f"{ENC_DISPLAY[enc]} & {f(h,3)} & {f(d,3)} & {sgn(d-h,3)} \\\\")
+    out.append(r"\midrule")
+    for src, disp in ((ENF_WHOLE, "Enformer (whole window)"), (ENF_CENTRE, "Enformer (central 2{,}048\\,bp)")):
+        h, d = HOM.cell("tss", "family5", src)[F1], DIS.cell("tss", "family5", src)[F1]
+        out.append(f"{disp} & {f(h,3)} & {f(d,3)} & {sgn(d-h,3)} \\\\")
+    return "\n".join(out)
+
+
+# ===================================================================
+# E5: TSS-Anchored vs whole-window pooling, both splits. Whole-window and
+# anchored cells carry their cluster-bootstrap CIs; an anchored cell is bold when
+# the paired anchored - whole-window interval lies above 0 (a reliable gain; a
+# significant loss is not bold, since bold reads as a win); the last column is the
+# validation-selected composition (4-mer+GC or 6-mer) of the same anchored chunk.
+# ===================================================================
+def _paired(split_name: str, label: str, a: dict, b: dict) -> dict:
+    """The paired test of A - B, which must compare exactly the displayed cells and
+    centre on their difference (G8, G26)."""
+    d = STATS["exploratory"][f"{split_name} family5: {label}"]
+    if (d["a"], d["b"]) != (a["key"], b["key"]):
+        raise R.MixedRecords(f"{label}: the paired test compares {d['a']} and {d['b']}, "
+                             f"the table shows {a['key']} and {b['key']}")
+    if abs(d["delta_point"] - (a[F1] - b[F1])) > 1e-9:
+        raise R.MixedRecords(f"{label}: paired point {d['delta_point']} is not the table's "
+                             f"difference {a[F1] - b[F1]}")
+    return d
+
+
+def _delta_cell(d: dict) -> str:
+    lo, hi = d["delta_ci95"]
+    return f"{sgn(d['delta_point'], 3)} [{sgn(lo, 3)}, {sgn(hi, 3)}]"
+
+
+def build_tss_anchored():
+    """Every cell carries its cluster-bootstrap CI; an anchored cell is bold when the
+    paired anchored - whole-window interval lies above 0 (G26)."""
+    out = []
+    for split, name, title in ((HOM, CDS, "Homology-aware split"),
+                               (DIS, TSS, "Genomic-interval-disjoint split")):
+        if out:
+            out.append(r"\midrule")
+        out.append(r"\multicolumn{5}{@{}l}{\textbf{" + title + r"}}\\")
+        by = split.cells("tss", "family5")
+
+        def whole_txt(rec):
+            c = interval(name, "family5", rec["key"].rsplit("/", 1)[-1])
+            if abs(c["point"] - rec[F1]) > 1e-9:
+                raise R.MixedRecords(f"{rec['key']}: interval point {c['point']} is not the cell {rec[F1]}")
+            return f"{f(rec[F1],3)} {_ci(c['ci95'])}"
+
+        def anchored_txt(src, d):
+            c = interval(name, "family5", src)
+            txt = f"{f(c['point'],3)} {_ci(c['ci95'])}"
+            return bold(txt) if d["delta_ci95"][0] > 0 else txt
+
+        four = by["enformer_tss_4mer"]
+        out.append(f"TSS 4-mer & {whole_txt(four)} & --- & --- & --- \\\\")
+        for enc in ENCODERS:
+            whole_rec = split.best(enc, "tss", "family5")
+            comp = by[split.anchored_composition(enc, "family5")][F1]
+            d = _paired(name, f"{enc} anchored > whole-window", by[f"tss_{enc}_tssanchored"], whole_rec)
+            out.append(f"{ENC_DISPLAY[enc]} & {whole_txt(whole_rec)} & "
+                       f"{anchored_txt(f'tss_{enc}_tssanchored', d)} & {_delta_cell(d)} & {f(comp,3)} \\\\")
+        g_rec = split.cell("tss", "family5", ENF_WHOLE)
+        d = _paired(name, "Enformer centre > whole", by[ENF_CENTRE], g_rec)
+        out.append(f"Enformer & {whole_txt(g_rec)} & {anchored_txt(ENF_CENTRE, d)} & "
+                   f"{_delta_cell(d)} & --- \\\\")
+    return "\n".join(out)
+
+
+# ===================================================================
+# Paired differences: the four primary tests (Holm-adjusted p) and the
+# exploratory comparisons (one-sided p, unadjusted).
+# ===================================================================
+def _diff_line(disp, d, p):
+    lo, hi = d["delta_ci95"]
+    return f"\\quad {disp} & {sgn(d['delta_point'],3)} [{sgn(lo,3)}, {sgn(hi,3)}] & {p:.3f} \\\\"
+
+
+def _key_label(key):
+    src = key.rsplit("/", 1)[1]
+    if src.endswith("_len"):          # Rule 3 control: composition + CDS length
+        return _key_label(key.removesuffix("_len")) + " + length"
+    if src in dict(COMPOSITION) or src in NT_DISPLAY:
+        return dict(COMPOSITION)[src]
+    if src.startswith("esm2_"):
+        return "ESM-2 " + src.split("_")[1].upper()
+    return src_label(src.removeprefix("tss_")) + (" (TSS)" if src.startswith("tss_") else "")
+
+
+def _pair_label(d):
+    """'A $-$ B'; when one side is a TSS cell, the other is labelled (CDS) too (T4)."""
+    tss = [k.split("/")[1] == "tss" for k in (d["a"], d["b"])]       # key: split/arm/task/source
+    a, b = (_key_label(k) + (" (CDS)" if tss[0] != tss[1] and not t else "")
+            for k, t in zip((d["a"], d["b"]), tss))
+    return f"{a} $-$ {b}"
+
+
+def build_paired_diff():
+    line, name = _diff_line, _pair_label
+    conf = STATS["confirmatory"]
+    out = [r"\multicolumn{3}{@{}l}{\textbf{Primary, macro-F1 (Holm-adjusted $p$)}}\\"]
+    for k, d in conf.items():
+        where = " (disjoint split)" if k.startswith("T4") else ""
+        out.append(line(f"{name(d)}{where}", d, d["p_holm"]))
+    out.append(r"\midrule")
+    out.append(r"\multicolumn{3}{@{}l}{\textbf{Exploratory, GenePT $R^2$ (unadjusted $p$)}}\\")
+    ex = STATS["exploratory"]
+    for k in ("aa3 > aa2", "aa_kmer > nt_kmer", "encoder > nt_kmer", "encoder > aa_kmer",
+              "esm2_650m > aa_kmer", "esm2_650m > encoder"):
+        d = ex[f"{CDS} genept: {k}"]
+        out.append(line(name(d), d, d["p_one_sided"]))
+    # CDS - TSS per encoder on the disjoint split (same held-out genes), both metrics
+    pairs = [(ENC_DISPLAY[e], f"{e} CDS > TSS") for e in ENCODERS] + [("4-mer (control)", "kmer CDS > TSS 4-mer (control)")]
+    for task, metric in (("family5", "macro-F1"), ("genept", "GenePT $R^2$")):
+        out.append(r"\midrule")
+        out.append(rf"\multicolumn{{3}}{{@{{}}l}}{{\textbf{{CDS $-$ TSS window, same genes, disjoint split, {metric} (unadjusted $p$)}}}}\\")
+        for disp, key in pairs:
+            d = ex[f"{TSS} {task}: {key}"]
+            out.append(line(disp, d, d["p_one_sided"]))
+    out.append(r"\midrule")
+    out.append(_sensitivity_rows())
+    return "\n".join(out)
+
+
+def _sensitivity_rows():
+    """The sensitivity blocks (Ends-rule control, length controls, label-noise masks), unadjusted p."""
+    out = [r"\multicolumn{3}{@{}l}{\textbf{Ends + Mean $-$ Mean $\times 3$ at $3\times C$, macro-F1 (unadjusted $p$)}}\\"]
+
+
+# ===================================================================
+# D5: Ends + Mean at matched regularisation, and the headline tests with each
+# disclosed defect masked from scoring. Exploratory, unadjusted p.
+# ===================================================================
+    p3 = STATS["pooling_3x"]
+    for e in ENCODERS:
+        d = p3[f"family5/{e}"]["Ends+Mean > Mean x3 (3x C)"]
+        out.append(_diff_line(ENC_DISPLAY[e], d, d["p_one_sided"]))
+    out.append(r"\midrule")
+    out.append(r"\multicolumn{3}{@{}l}{\textbf{Encoder $-$ composition with log CDS length, macro-F1}}\\")
+    for k in ("nt_kmer+len", "aa_kmer+len"):
+        d = STATS["exploratory"][f"{CDS} family5: encoder > {k}"]
+        out.append(_diff_line(_pair_label(d), d, d["p_one_sided"]))
+    for name, title, metric in (("label_noise", "noisy TF labels", "macro-F1"),
+                                ("label_noise_kinase", "non-protein-kinase labels", "macro-F1"),
+                                ("template", "templated summaries", "GenePT $R^2$")):
+        tests = STATS["sensitivity"][name]["tests"]
+        if any(d.get("n_excluded", 0) == 0 for d in tests.values()):
+            raise ValueError(f"{name}: a masked test excluded no scored genes; the mask is empty there")
+        cds = {d["n_excluded"] for k, d in tests.items() if not k.startswith("T4")}
+        dis = {d["n_excluded"] for k, d in tests.items() if k.startswith("T4")}
+        if len(cds) != 1 or len(dis) > 1:
+            raise ValueError(f"{name}: the masked tests exclude different numbers of genes: {cds}, {dis}")
+        n = f"{cds.pop()} test genes" + (f", {dis.pop()} disjoint" if dis else "")
+        out.append(r"\midrule")
+        out.append(rf"\multicolumn{{3}}{{@{{}}l}}{{\textbf{{Without {title} ({n}), {metric}}}}}\\")
+        for k, d in tests.items():
+            where = " (disjoint split)" if k.startswith("T4") else ""
+            out.append(_diff_line(f"{_pair_label(d)}{where}", d, d["p_one_sided"]))
+    return "\n".join(out)
+
+
+# ===================================================================
+# Who the test sets are (Rule 3): cluster-size profile and olfactory receptors
+# per partition, from data/v2/counts.json (scripts/build_counts.py).
+# ===================================================================
+def build_split_population():
+    counts = json.loads((R.V2 / "counts.json").read_text())
+    for name in (CDS, TSS):                       # built from the split files on disk now
+        if counts["inputs"][name] != R._sha(R.REPO_ROOT / "data" / name):
+            raise R.MixedRecords(f"counts.json was built from another {name}; rerun scripts/build_counts.py")
+    pop = counts["split_population"]
+    out = []
+    for name, title in ((CDS, "Homology-aware split (CDS primary)"),
+                        (TSS, "Genomic-interval-disjoint split (TSS primary)")):
+        if out:
+            out.append(r"\midrule")
+        out.append(r"\multicolumn{6}{@{}l}{\textbf{" + title + r"}}\\")
+        for part in ("train", "val", "test"):
+            r = pop[name][part]
+            out.append(f"\\quad {part.capitalize()} & {r['n']:,} & {r['singleton_share']*100:.0f}\\% "
+                       f"& {r['median_cluster_size']:.0f} & {r['share_in_clusters_ge10']*100:.0f}\\% "
+                       f"& {r['olfactory']} / {r['gpcr']} \\\\".replace(",", "{,}"))
+    return "\n".join(out)
+
+
+# ===================================================================
+# Rotation-invariant Ridge metrics (R2-W4), rescored from stored predictions.
+# ===================================================================
+def build_ridge_robust():
+    rr = json.loads((R.V2 / "ridge_robust.json").read_text())
+    R.check_inputs(rr)
+    if rr["stamp"] != STATS["stamp"]:                                   # G7
+        raise R.MixedRecords("ridge_robust.json was rescored from other records; re-run "
+                             "scripts/ridge_robust_metrics.py")
+    return "\n".join(
+        f"{display_label(r['label'])} & {f(r['macro_r2'],3)} "
+        f"& {f(r['pooled_r2'],3)} & {r['top5']*100:.1f}\\% & {r['median_rank']:.0f} \\\\"
+        for r in rr["rows"])
+
+
+# (key, builder, longtable): a longtable fragment is written whole, the rest as a tabular.
+FRAGMENTS = [
+    ("family5_main", build_family5_main, False),
+    ("ridge_main", build_ridge_main, False),
+    ("cds_tss", build_cds_tss, False),
+    ("split_comparison", build_split_comparison, False),
+    ("pooling_combined", build_pooling_combined, True),
+    ("regression_combined", build_regression_combined, True),
+    ("s_seed_sensitivity", build_seed_sensitivity, False),
+    ("s_tss_disjoint", build_tss_disjoint, False),
+    ("s_paired_diff", build_paired_diff, False),
+    ("s_ridge_robust", build_ridge_robust, False),
+    ("s_tss_anchored", build_tss_anchored, False),
+    ("s_split_population", build_split_population, False),
+]
+
+
+def build_fragments() -> dict[str, str]:
+    return {key: fn().rstrip() + "\n" if raw else tabular(key, fn()) for key, fn, raw in FRAGMENTS}
+
+
+def build_marked() -> dict[str, str]:
+    """Every fragment from the canonical records, marked where a replay moves a number."""
+    variants = []
+    for p in PERTURBATIONS:
+        load_records(p)
+        variants.append(build_fragments())
+    load_records()
+    return {k: mark_unstable(text, [v[k] for v in variants]) for k, text in build_fragments().items()}
 
 
 def main():
-    write("family5_main", build_family5_main())
-    write("ridge_main", build_ridge_main())
-    write("cds_tss", build_cds_tss())
-    write("split_comparison", build_split_comparison())
-    write_raw("pooling_combined", build_pooling_combined())
-    write_raw("regression_combined", build_regression_combined())
-    write("s_seed_sensitivity", build_seed_sensitivity())
-    write("s_cds_tss_paired", build_cds_tss_paired())
-    write("s_headline_ci_cls", build_headline_ci_cls())
-    write("s_headline_ci_reg", build_headline_ci_reg())
+    OUT.mkdir(parents=True, exist_ok=True)
+    for key, text in build_marked().items():
+        (OUT / f"{key}.tex").write_text(text)
+        print(f"wrote {key}.tex ({text.count(chr(10))} lines, {text.count(MARK)} marked)")
     print("\nAll fragments written to", OUT)
 
 

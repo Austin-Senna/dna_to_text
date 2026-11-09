@@ -1,0 +1,16 @@
+{
+  "manifest": "tss_windows.tsv",
+  "manifest_sha256": "10d3ec1f607e639f491a00752014b93042da91b86c5592b08c5242bb8083dc05",
+  "gtf": "Homo_sapiens.GRCh38.115.gtf.gz",
+  "gtf_sha256": "2f8e31578c3aa2f35646927c4a3b3b0dcf0321e57c0ebd3ecc81afcbc836d1a8",
+  "ensembl_release": 115,
+  "partition": [
+    "target_cds",
+    "target_utr",
+    "target_exon_noncoding",
+    "target_intron",
+    "neighbor_exon",
+    "neighbor_intron",
+    "intergenic"
+  ]
+}

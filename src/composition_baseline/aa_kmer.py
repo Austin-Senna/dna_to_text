@@ -1,10 +1,10 @@
 """Translated amino-acid k-mer composition baseline.
 
-Translates the CDS to protein (standard table, stop-truncated) and counts
-amino-acid k-mers over the 20-letter alphabet: k=1 -> 20-dim, k=2 -> 400-dim,
-k=3 -> 8000-dim. L1-normalised. k-mers containing the unknown placeholder
-('X', from non-ACGT codons) are skipped. This control asks whether the
-encoded protein's residue composition alone recovers family labels.
+Translates the CDS to protein at full length (standard table; internal stops
+become 'X', G5) and counts amino-acid k-mers over the 20-letter alphabet: k=1 ->
+20-dim, k=2 -> 400-dim, k=3 -> 8000-dim. L1-normalised. k-mers containing 'X'
+(an internal stop or a non-ACGT codon) are skipped. This control asks whether
+the encoded protein's residue composition alone recovers family labels.
 """
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ def featurize_aa_kmer(sequence: str, k: int = 2) -> np.ndarray:
     if k < 1:
         raise ValueError("k must be >= 1")
     dim = 20 ** k
-    protein = translate_cds(sequence, to_stop=True)
+    protein = translate_cds(sequence, mode="through")
     if len(protein) < k:
         return np.zeros(dim, dtype=np.float32)
 

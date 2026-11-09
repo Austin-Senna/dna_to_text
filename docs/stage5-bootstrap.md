@@ -1,19 +1,35 @@
-# Stage 5: Bootstrap Test-Set Confidence Intervals
+# Stage 5: Test-Set Uncertainty and Primary Tests
 
-`scripts/bootstrap_test_uncertainty.py` produces 95% percentile confidence
-intervals for every headline metric reported in the paper, plus per-class F1
-for the family-classification cells. Output is cached at
-`data/bootstrap_metrics.json` and rendered into the abstract, Methods §Probes,
-and Results §3.1–§3.2.
+`scripts/build_statistics.py` produces every interval, paired test and null
+band the paper reports. It fits nothing: it rescores the test predictions that
+the Stage 3 and 4 cells stored, with the functions in
+`src/linear_trainer/stats.py`, and writes `data/v2/statistics.json`.
 
 ## Pipeline placement
 
-This is Stage 5 of the repository pipeline. Run it after the Stage 3 probe and
-baseline metrics are available, and after the Stage 4 TSS context branch if
-you want the full report-supporting cache set present. The command
-does not rebuild encoder embeddings; it consumes the cached feature datasets,
-`data/metrics.json`, `data/splits.json`, and CDS sequence cache, then writes
-`data/bootstrap_metrics.json`.
+Run it after `scripts/recompute_all.sh all` has run every probe cell and null
+band from a committed tree. It reads the records in `data/v2/` through
+`linear_trainer.records` and refuses to start unless:
+
+- `data/v2/run_complete.json` says one whole-manifest run wrote them, at one
+  commit and protocol;
+- `data/v2/reproduction.json` says the independent reimplementation
+  (`scripts/reproduce_headline.py`) matched these exact records files. It refits
+  the ten headline cells from the raw features and split files without importing
+  the pipeline, re-derives the purge, the picks and the resampling groups, and
+  runs its own bootstrap; T1-T4 must then agree with it (same cells, point and
+  groups; interval and p within Monte Carlo tolerance);
+- every records file is from the same commit and protocol, and that protocol is
+  `protocol.V2` (a trial fitted at another thread count is refused);
+- each split file on disk matches the hash its records carry.
+
+The sensitivity block also reads the Stage 1 gene table and HGNC groups
+(`data/gene_table.parquet`, `data/hgnc/hgnc_complete_set.tsv`; not tracked), and
+stops if the noisy-TF (noisy-kinase) mask hits a scored gene whose stored label
+is not TF (kinase).
+
+The stored predictions live in `outputs/predictions/v2/` (not tracked); each
+record names its file and hash.
 
 Sample input and output shapes are tracked in
 `samples/stage5_bootstrap_input.json` and
@@ -23,127 +39,195 @@ Sample input and output shapes are tracked in
 
 | File | What it does |
 | --- | --- |
-| `scripts/bootstrap_test_uncertainty.py` | Refit headline probes, bootstrap held-out test metrics, and write confidence intervals. |
-| `data/bootstrap_metrics.json` | Cached 1,000-run bootstrap output used by the report. |
-| `data/metrics.json` | Source of recorded probe metrics and selected hyperparameters. |
-| `data/splits.json` | Frozen split membership used to identify train/validation/test genes. |
-| `data/sequences/` | CDS FASTA cache used to rebuild 4-mer cells during bootstrap. |
-| `samples/stage5_bootstrap_input.json` | Tiny summary of bootstrap inputs and settings. |
-| `samples/stage5_bootstrap_output.json` | Tiny excerpt of bootstrap confidence interval output. |
+| `scripts/build_statistics.py` | Picks the headline cells on validation, runs the intervals, the primary (T1-T4) and exploratory paired tests and the null bands, writes `data/v2/statistics.json`. |
+| `src/linear_trainer/stats.py` | Cluster bootstrap, paired bootstrap, Holm adjustment and null bands over stored predictions. |
+| `src/data_loader/label_audit.py` | The sensitivity subsets as rules: noisy TF labels, kinase-labelled genes that are not protein kinases, and templated GenePT summaries. |
+| `scripts/reproduce_headline.py` | The independent reimplementation (Rule 3): numpy, pandas and scikit-learn only, no repo imports; writes `data/v2/reproduction.json`, which `build_statistics.py` requires. `scripts/recompute_all.sh all` runs it at the end of an unsharded pass. |
+| `scripts/build_counts.py` | Single-chunk shares per encoder, the subsets' sizes (each with its denominator) and the per-partition test-population profile; writes `data/v2/counts.json` (`build_paper_tables.py` reads the profile for `s_split_population.tex`). |
+| `src/linear_trainer/records.py` | Loads and checks the `data/v2/` records; the validation-only picks (`best_pool`, `best_encoder`, `best_nt_kmer`, `best_aa`). |
+| `data/v2/statistics.json` | The output (committed with the canonical records). |
+| `outputs/predictions/v2/<split stem>/` | Stored test predictions, one content-addressed `.npz` per record (not tracked). |
 
 ## What it does
 
-For each headline cell (12 total: 6 classification + 6 regression):
+For every cell it reports:
 
-1. **Refit** the probe at the recorded best hyperparameter on `train + val`,
-   matching the original protocol exactly. Hyperparameters come from the
-   latest matching entry in `data/metrics.json`.
-2. **Predict** once on the held-out test split.
-3. **Resample** the test split 1,000 times with replacement, recompute the
-   metric on each resample, and take the 2.5th / 97.5th percentiles as the
-   95% CI.
+1. **Load** the record's stored test predictions and verify them against the
+   record's sha256. A refit could land on a different model (another machine,
+   thread count or `max_iter`), so nothing is refitted.
+2. **Drop** the genes the evaluation purge masks from scoring, and check that
+   the rest reproduce the record's test value exactly. The script stops
+   otherwise.
+3. **Resample** whole groups of test genes 1,000 times with replacement, and
+   take the 2.5th and 97.5th percentiles as the 95% interval. Genes that
+   share sequence are not independent, so the groups are 40% protein clusters
+   for CDS cells on the homology-type splits, and window-and-protein groups
+   for every TSS cell and every cell on a disjoint split, each joined with
+   every Rule-A protein pair (two genes of different clusters can still be a
+   pair) and, for GenePT cells, with the genes that share a summary template.
+   Resampling is not stratified by family, so the intervals are conservative.
 
-Resampling is **stratified by family** for classification (so each bootstrap
-draw has the same per-class size as the real test set) and **i.i.d. by gene**
-for regression.
+**Paired tests** resample both cells of a comparison with the same groups on
+the same scored genes. They report the difference A - B, its 95% interval
+and a one-sided p-value for A > B.
 
-Per-class F1 is computed once on the full test predictions — no bootstrap.
+**Primary family:** four family5 macro-F1 tests, Holm-adjusted together. The paper calls them primary, not
+confirmatory: they were fixed after earlier results on the same test genes. The `confirmatory` key in
+`statistics.json` keeps its name.
+Each side other than ESM-2 650M (a fixed model) is the validation-selected cell.
+
+| Test | Comparison | Split |
+| --- | --- | --- |
+| T1 | best DNA encoder vs nucleotide k-mer (k chosen on validation) | CDS primary |
+| T2 | best DNA encoder vs amino-acid k-mer (k chosen on validation) | CDS primary |
+| T3 | ESM-2 650M vs best DNA encoder | CDS primary |
+| T4 | best encoder on CDS vs the same encoder on TSS | TSS primary (disjoint) |
+
+A primary-test cell whose pick sits at a search limit, whose fit or train+val
+refit did not converge, that predicts a single class, or that scores fewer than
+15 test genes of some family after the purge stops the build.
+Every other paired test is exploratory and unadjusted.
+
+**Null bands** replace a single shuffled-label run as "chance": the 2.5-97.5%
+range over 200 label-shuffled runs of one cell, each with its full selection
+loop. They cover the 4-mer on each primary split and task (the TSS 4-mer on the
+TSS primary), plus ESM-2 650M on family5 on the CDS primary.
+
+**Sensitivity subsets** (exploratory) rerun tests with one disclosed defect
+masked from scoring, on the stored predictions (nothing is refitted). The gene
+sets are rules in `src/data_loader/label_audit.py`:
+
+- `label_noise`: T1-T4 and the family5 headline intervals without the TF-labelled
+  genes that are TFs only through a non-C2H2 zinc-finger group (387 genes).
+- `label_noise_kinase`: the same without the kinase-labelled genes that are not
+  protein kinases (150 genes): every kinase-named HGNC group they belong to holds
+  scaffolds, phosphatases, activators, regulatory subunits or complex partners
+  (92 genes), or kinases of small molecules (58 genes).
+- `template`: the GenePT comparisons (best encoder vs the nucleotide and amino-acid
+  k-mers, ESM-2 650M vs the best encoder) and their intervals without the genes
+  whose summary text is shared with another gene (901 genes; the largest group is
+  347 olfactory receptors).
+
+Each reports `n_excluded`, the number of scored test genes the mask removed.
+
+**Pooling at matched regularisation** (`pooling_3x`, exploratory): for each
+encoder and task on the CDS primary, Ends + Mean against `<encoder>_meanmean3`
+(Mean copied three times, which equals Mean at 3x C and equals Ends + Mean for
+single-chunk genes) and against Mean on its own grid. Family5 rows also report
+the share of scored test genes on which Ends + Mean and the control agree.
+
+**From the Rule 3 audit** (exploratory, unadjusted):
+
+- `exploratory` also tests the best encoder against composition plus log CDS
+  length (`<k-mer>_len` sources, k chosen on validation among them): the
+  k-mer vectors are L1-normalised, while the encoders see length through their
+  chunking.
+- `chance`: for every interval cell, its stored predictions scored against
+  permuted test labels (1,000 permutations): the chance level for that
+  predictor's own output mix, and `p_above_chance`.
+- `within_family`: GenePT R^2 on the CDS primary with each family's mean target
+  (from train + val) subtracted from target and prediction, with its interval.
+  The GenePT text names the gene symbol, which often names the family.
+- `seed_replication`: T1-T3 rerun on each re-seeded CDS split. The seeds re-deal
+  only the small clusters (the largest stay in train at every seed).
+
+The gene counts the text states (single-chunk shares with their denominators,
+the three subsets' sizes, and the per-partition test-population profile) come
+from `scripts/build_counts.py`, which writes `data/v2/counts.json`.
+
+Every family5 record also carries `n_test_scored_by_class`, the scored test genes
+per family after the purge; the primary-test floor of 15 reads it.
 
 ## What it is not
 
-The bootstrap captures **test-composition sampling uncertainty only**. It
-does not reflect:
+The intervals capture test-composition sampling uncertainty only. They do not
+reflect:
 
-- Hyperparameter sensitivity (no re-sweep of `C` or `α`).
-- Train/val split-seed variability (the split is fixed).
-- Encoder-side variability (embeddings are taken as given).
-
-The report Methods section states this scope explicitly.
-
-## Cells covered
-
-### Classification (`HEADLINE_CLS`)
-
-| Cell name | Dataset | C | Notes |
-|---|---|---|---|
-| `kmer` | 4-mer baseline | 1000.0 | k-mers re-featurised from CDS at runtime |
-| `dnabert2_meanD` | DNABERT-2, meanD pooling | 10.0 | |
-| `nt_v2_meanD` | NT-v2, meanD pooling | 1.0 | headline encoder |
-| `gena_lm_clsmean` | GENA-LM, clsmean pooling | 1.0 | |
-| `hyena_dna_meanG` | HyenaDNA, meanG pooling | 10.0 | |
-| `shuffled` | NT-v2 with shuffled labels | 100.0 | sanity-check anti-baseline |
-
-Reported metrics: macro-F1 + Cohen's κ (both point estimate and CI), plus
-per-class F1 across {tf, gpcr, kinase, ion, immune}.
-
-### Regression (`HEADLINE_REG`)
-
-| Cell name | Dataset | α | Notes |
-|---|---|---|---|
-| `kmer` | 4-mer baseline | 0.01 | |
-| `dnabert2_meanG` | DNABERT-2, meanG pooling | 10.0 | headline encoder for regression |
-| `nt_v2_meanmean` | NT-v2, meanmean pooling | 10.0 | |
-| `gena_lm_meanmean` | GENA-LM, meanmean pooling | 100.0 | |
-| `hyena_dna_specialmean` | HyenaDNA, specialmean pooling | 1.0 | |
-| `shuffled_y` | NT-v2 with shuffled GenePT vectors | 1000.0 | anti-baseline |
-
-Reported metric: macro-R² across the 1,536 GenePT dimensions (point estimate
-and CI).
+- hyperparameter sensitivity (the selection is not re-run);
+- train/validation split variability (the seed splits are reported separately);
+- encoder-side variability (the embeddings are taken as given).
 
 ## Running it
 
 ```bash
-uv run python scripts/bootstrap_test_uncertainty.py
+uv run python scripts/build_statistics.py
 ```
 
 Optional flags:
 
-- `--n-iters N` — number of bootstrap iterations (default `1000`).
-- `--seed S` — RNG seed for reproducibility (default `42`).
-- `--out PATH` — override output path (default `data/bootstrap_metrics.json`).
-
-The 4-mer cells re-featurise CDS sequences from `data/sequences/` at runtime;
-all encoder cells load embeddings from `data/dataset_<encoder>_<pooling>.parquet`.
+- `--n-iters N`: number of bootstrap iterations (default `1000`). The paper
+  table builder refuses any other value.
+- `--out PATH`: override the output path (default `data/v2/statistics.json`).
 
 ## Output schema
 
 ```json
 {
+  "stamp": {"git_sha": "...", "protocol_hash": "..."},
+  "inputs": {"metrics_splits.json": "<sha256>", "...": "..."},
   "n_iters": 1000,
   "seed": 42,
-  "classification": {
-    "<cell_name>": {
-      "n_test": 487,
-      "macro_f1_point": 0.82,
-      "macro_f1_ci95": [0.77, 0.87],
-      "kappa_point": 0.79,
-      "kappa_ci95": [0.74, 0.83],
-      "per_class_f1": {"tf": 0.93, "gpcr": 0.94, ...},
-      "n_iters": 1000
-    },
-    ...
+  "confirmatory": {
+    "T1 encoder > nucleotide k-mer": {
+      "a": "<cell key>", "b": "<cell key>",
+      "delta_point": 0.0, "delta_ci95": [0.0, 0.0],
+      "p_one_sided": 0.0, "p_holm": 0.0,
+      "n_test": 0, "n_groups": 0, "edges": [false, false]
+    }
   },
-  "regression": {
-    "<cell_name>": {
-      "n_test": 487,
-      "r2_macro_point": 0.21,
-      "r2_macro_ci95": [0.18, 0.24],
-      "n_iters": 1000
+  "intervals": {
+    "splits.json/family5/<source>": {
+      "point": 0.0, "ci95": [0.0, 0.0], "kappa_ci95": [0.0, 0.0],
+      "n_test": 0, "n_groups": 0, "n_short_class": 0
+    }
+  },
+  "exploratory": {"<split> <task>: <A> > <B>": {"delta_point": 0.0, "...": "..."}},
+  "null_bands": {
+    "splits.json/family5/kmer": {
+      "median": 0.0, "band95": [0.0, 0.0], "n": 200,
+      "n_refit_nonconverged": 0, "n_edge": {"plateau": 0, "limit": 0, "nonconverged": 0}
+    }
+  },
+  "sensitivity": {
+    "inputs": {"gene_table": "<sha256>", "hgnc": "<sha256>"},
+    "label_noise": {
+      "task": "family5", "n_genes": 387,
+      "tests": {"T1 encoder > nucleotide k-mer": {"delta_point": 0.0, "n_excluded": 0, "...": "..."}},
+      "intervals": {"splits.json/family5/<source>": {"point": 0.0, "n_excluded": 0, "...": "..."}}
     },
-    ...
+    "label_noise_kinase": {"task": "family5", "n_genes": 150, "tests": {}, "intervals": {}},
+    "template": {"task": "genept", "n_genes": 901, "tests": {}, "intervals": {}}
+  },
+  "chance": {
+    "splits.json/family5/<source>": {
+      "point": 0.0, "chance_median": 0.0, "chance95": [0.0, 0.0], "p_above_chance": 0.0
+    }
+  },
+  "within_family": {
+    "splits.json/genept/<source>": {"point": 0.0, "ci95": [0.0, 0.0], "r2_macro": 0.0, "n_groups": 0}
+  },
+  "seed_replication": {
+    "splits_seed1.json": {"T1 encoder > nucleotide k-mer": {"delta_point": 0.0, "...": "..."}}
+  },
+  "pooling_3x": {
+    "family5/<encoder>": {
+      "Ends+Mean > Mean x3 (3x C)": {"delta_point": 0.0, "delta_ci95": [0.0, 0.0], "...": "..."},
+      "Ends+Mean > Mean": {"delta_point": 0.0, "...": "..."},
+      "picks": {"meanD": 0.0, "meanmean": 0.0, "meanmean3": 0.0},
+      "edges": {"meanD": null, "meanmean": null, "meanmean3": null},
+      "agreement_with_mean_x3": 0.0
+    }
   }
 }
 ```
 
-## What the results show
+The paper tables (`scripts/build_paper_tables.py`), prose numbers (`scripts/build_numbers.py`) and figures read this file,
+and refuse it if any records file has changed since it was written.
 
-- **NT-v2 vs 4-mer (classification):** CIs are non-overlapping on both
-  macro-F1 and κ. The encoder gain is not a test-split artifact.
-- **DNABERT-2 vs 4-mer (regression):** CIs are non-overlapping on R².
-- **Per-class F1:** the encoder advantage is concentrated in the minority
-  classes — immune +0.33, ion +0.29 over the 4-mer baseline — rather than
-  spread evenly across families.
+## Where the numbers live
 
-The `shuffled` and `shuffled_y` rows act as anti-baselines: their CIs
-straddle chance for classification (~0.20 macro-F1) and zero for
-regression, confirming the protocol is working.
+This page states no results. The intervals, tests and bands are in the committed
+`data/v2/statistics.json`, and the point estimates in `data/v2/metrics_*.json`.
+To regenerate them, run `scripts/recompute_all.sh all` (see its header), then this
+script and the other builders in `docs/stage7-paper-figures-tables.md`. The gene
+counts above come from `data/v2/counts.json`.

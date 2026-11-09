@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Two paired-UMAP comparison figures for the Results section (no embedded
-figure titles -- the LaTeX caption is the title; small per-panel labels stay,
-since the caption cannot identify individual panels).
+"""The paired-UMAP figure for the appendix (no embedded figure title -- the
+LaTeX caption is the title; small per-panel labels stay, since the caption
+cannot identify individual panels).
 
-  umap_cds_vs_tss.png  -- NT-v2 CDS (meanG) beside NT-v2 TSS-window (meanmean):
+  umap_cds_vs_tss.png  -- NT-v2 CDS beside NT-v2 TSS-window, each at its
+        validation-selected pooling (CDS on the homology split, TSS on the
+        disjoint split, read from the camera-ready records in data/v2):
         the family clusters present on coding sequence dissolve on the
-        196,608 bp regulatory window (substrate collapse, sec 3.4).
-  umap_cds_vs_esm.png  -- NT-v2 CDS (meanG) beside ESM-2 650M (translated CDS):
-        the frozen DNA encoder versus the protein-LM upper bound (sec 3.6).
+        196,608 bp regulatory window (Appendix Figure A1, cited from sec 3.4).
+
+The NT-v2 vs ESM-2 650M pair was cut from the paper on May 31 (paper
+``b67ebea``) and is no longer built.
 
 Run: uv run scripts/build_umap_compare.py
 """
@@ -23,6 +26,8 @@ import numpy as np
 import pandas as pd
 import umap
 from matplotlib.lines import Line2D
+
+from linear_trainer import records as R
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -76,11 +81,13 @@ def _figure(left, right, fname):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    cds = (_coords("dataset_nt_v2_meanG.parquet"), "NT-v2 CDS")
-    tss = (_coords("dataset_tss_nt_v2_meanmean.parquet"), "NT-v2 TSS window")
-    esm = (_coords("dataset_esm2_650m.parquet"), "ESM-2 650M (protein)")
+    hom, dis = R.load("splits.json"), R.load("splits_tss_disjoint.json")
+    R.stamp_of(hom, dis)                                       # G7: one run
+    cds_pick = R.best_pool(R.cells(hom, "cds", "family5"), "nt_v2", "cds")
+    tss_pick = R.best_pool(R.cells(dis, "tss", "family5"), "nt_v2", "tss")
+    cds = (_coords(f"dataset_{cds_pick}.parquet"), "NT-v2 CDS")
+    tss = (_coords(f"dataset_{tss_pick}.parquet"), "NT-v2 TSS window")
     _figure(cds, tss, "umap_cds_vs_tss.png")
-    _figure(cds, esm, "umap_cds_vs_esm.png")
 
 
 if __name__ == "__main__":

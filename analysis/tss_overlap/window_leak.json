@@ -1,0 +1,27 @@
+{
+  "splits.json": {
+    "cross_split_pairs": 918,
+    "pairs_test_train": 399,
+    "pairs_train_val": 409,
+    "pairs_test_val": 110,
+    "n_test": 487,
+    "test_overlapping_trainval": 229,
+    "test_overlapping_train": 187,
+    "test_overlapping_val": 92,
+    "frac_test_overlapping_trainval": 0.4702258726899384,
+    "trainval_genes_overlapping_test": 449
+  },
+  "splits_tss_disjoint.json": {
+    "cross_split_pairs": 0,
+    "pairs_test_train": 0,
+    "pairs_train_val": 0,
+    "pairs_test_val": 0,
+    "n_test": 486,
+    "test_overlapping_trainval": 0,
+    "test_overlapping_train": 0,
+    "test_overlapping_val": 0,
+    "frac_test_overlapping_trainval": 0.0,
+    "trainval_genes_overlapping_test": 0
+  },
+  "window_manifest_sha256": "10d3ec1f607e639f491a00752014b93042da91b86c5592b08c5242bb8083dc05"
+}

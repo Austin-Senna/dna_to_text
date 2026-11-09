@@ -1,0 +1,234 @@
+{
+  "homology": {
+    "enformer_cells": {
+      "enformer_trunk_global": {
+        "C": 0.1,
+        "macro_f1_point": 0.35651050321952066,
+        "macro_f1_ci95": [
+          0.2949365853611954,
+          0.41234395425854065
+        ],
+        "per_class_f1": {
+          "gpcr": 0.2903225806451613,
+          "immune": 0.5,
+          "ion": 0.08888888888888889,
+          "kinase": 0.2236024844720497,
+          "tf": 0.6797385620915033
+        }
+      },
+      "enformer_trunk_center": {
+        "C": 1.0,
+        "macro_f1_point": 0.40101314727123877,
+        "macro_f1_ci95": [
+          0.3447420070015933,
+          0.4524551328476456
+        ],
+        "per_class_f1": {
+          "gpcr": 0.35384615384615387,
+          "immune": 0.47619047619047616,
+          "ion": 0.2,
+          "kinase": 0.27411167512690354,
+          "tf": 0.7009174311926606
+        }
+      }
+    },
+    "paired": [
+      {
+        "split": "homology",
+        "part": "enformer",
+        "a": "enformer_trunk_center",
+        "C_a": 1.0,
+        "b": "enformer_trunk_global",
+        "C_b": 0.1,
+        "delta_macro_f1_point": 0.04450264405171811,
+        "delta_macro_f1_ci95": [
+          -0.023889512062415515,
+          0.10795669044383195
+        ],
+        "frac_a_gt_b_f1": 0.905,
+        "n_common": 487,
+        "n_iters": 1000
+      },
+      {
+        "split": "homology",
+        "part": "whole_window",
+        "a": "tss_dnabert2_meanmean",
+        "C_a": 1000.0,
+        "b": "enformer_trunk_global",
+        "C_b": 0.1,
+        "delta_macro_f1_point": -0.04705606555270958,
+        "delta_macro_f1_ci95": [
+          -0.11002686780623061,
+          0.01461904764918399
+        ],
+        "frac_a_gt_b_f1": 0.066,
+        "n_common": 487,
+        "n_iters": 1000
+      },
+      {
+        "split": "homology",
+        "part": "whole_window",
+        "a": "tss_nt_v2_meanmean",
+        "C_a": 1000.0,
+        "b": "enformer_trunk_global",
+        "C_b": 0.1,
+        "delta_macro_f1_point": -0.04664942134658423,
+        "delta_macro_f1_ci95": [
+          -0.10196824541769671,
+          0.004822626780785478
+        ],
+        "frac_a_gt_b_f1": 0.04,
+        "n_common": 487,
+        "n_iters": 1000
+      },
+      {
+        "split": "homology",
+        "part": "whole_window",
+        "a": "tss_gena_lm_clsmean",
+        "C_a": 1000.0,
+        "b": "enformer_trunk_global",
+        "C_b": 0.1,
+        "delta_macro_f1_point": -0.10708068319767028,
+        "delta_macro_f1_ci95": [
+          -0.16402288957451347,
+          -0.054089505768264934
+        ],
+        "frac_a_gt_b_f1": 0.0,
+        "n_common": 487,
+        "n_iters": 1000
+      },
+      {
+        "split": "homology",
+        "part": "whole_window",
+        "a": "tss_hyena_dna_meanD",
+        "C_a": 1000.0,
+        "b": "enformer_trunk_global",
+        "C_b": 0.1,
+        "delta_macro_f1_point": -0.09068552923825113,
+        "delta_macro_f1_ci95": [
+          -0.15477815296106215,
+          -0.026694006829635745
+        ],
+        "frac_a_gt_b_f1": 0.003,
+        "n_common": 487,
+        "n_iters": 1000
+      }
+    ]
+  },
+  "disjoint": {
+    "enformer_cells": {
+      "enformer_trunk_global": {
+        "C": 0.1,
+        "macro_f1_point": 0.31875729965352606,
+        "macro_f1_ci95": [
+          0.26305433438135406,
+          0.37482246300153893
+        ],
+        "per_class_f1": {
+          "gpcr": 0.2037037037037037,
+          "immune": 0.15384615384615385,
+          "ion": 0.23076923076923078,
+          "kinase": 0.3125,
+          "tf": 0.692967409948542
+        }
+      },
+      "enformer_trunk_center": {
+        "C": 0.1,
+        "macro_f1_point": 0.3784353119138012,
+        "macro_f1_ci95": [
+          0.32255898728091587,
+          0.43272541903364664
+        ],
+        "per_class_f1": {
+          "gpcr": 0.36363636363636365,
+          "immune": 0.14634146341463414,
+          "ion": 0.3333333333333333,
+          "kinase": 0.3490566037735849,
+          "tf": 0.6998087954110899
+        }
+      }
+    },
+    "paired": [
+      {
+        "split": "disjoint",
+        "part": "enformer",
+        "a": "enformer_trunk_center",
+        "C_a": 0.1,
+        "b": "enformer_trunk_global",
+        "C_b": 0.1,
+        "delta_macro_f1_point": 0.05967801226027514,
+        "delta_macro_f1_ci95": [
+          -0.0001273090003169229,
+          0.12048155371035549
+        ],
+        "frac_a_gt_b_f1": 0.973,
+        "n_common": 487,
+        "n_iters": 1000
+      },
+      {
+        "split": "disjoint",
+        "part": "whole_window",
+        "a": "tss_dnabert2_meanmean",
+        "C_a": 1000.0,
+        "b": "enformer_trunk_global",
+        "C_b": 0.1,
+        "delta_macro_f1_point": -0.07171981917164522,
+        "delta_macro_f1_ci95": [
+          -0.1385277223992124,
+          -0.002339020036025675
+        ],
+        "frac_a_gt_b_f1": 0.024,
+        "n_common": 487,
+        "n_iters": 1000
+      },
+      {
+        "split": "disjoint",
+        "part": "whole_window",
+        "a": "tss_nt_v2_maxmean",
+        "C_a": 100.0,
+        "b": "enformer_trunk_global",
+        "C_b": 0.1,
+        "delta_macro_f1_point": -0.03995096414089089,
+        "delta_macro_f1_ci95": [
+          -0.11515680751193302,
+          0.029878549185349986
+        ],
+        "frac_a_gt_b_f1": 0.127,
+        "n_common": 487,
+        "n_iters": 1000
+      },
+      {
+        "split": "disjoint",
+        "part": "whole_window",
+        "a": "tss_gena_lm_meanG",
+        "C_a": 10.0,
+        "b": "enformer_trunk_global",
+        "C_b": 0.1,
+        "delta_macro_f1_point": -0.11348627449933454,
+        "delta_macro_f1_ci95": [
+          -0.17736155043765794,
+          -0.04792862860948292
+        ],
+        "frac_a_gt_b_f1": 0.0,
+        "n_common": 487,
+        "n_iters": 1000
+      },
+      {
+        "split": "disjoint",
+        "part": "whole_window",
+        "a": "tss_hyena_dna_meanG",
+        "C_a": 10.0,
+        "b": "enformer_trunk_global",
+        "C_b": 0.1,
+        "delta_macro_f1_point": -0.05375072264166014,
+        "delta_macro_f1_ci95": [
+          -0.12011883928335643,
+          0.014060817591421337
+        ],
+        "frac_a_gt_b_f1": 0.071,
+        "n_common": 487,
+        "n_iters": 1000
+      }
+    ]
+  }
+}

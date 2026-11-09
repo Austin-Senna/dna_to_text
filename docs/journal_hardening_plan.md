@@ -1,5 +1,7 @@
 # Journal-hardening plan (pre-submission, Bioinformatics-tier)
 
+> **Superseded (Oct 2026).** This May plan is kept as history. The camera-ready pipeline replaced the scripts it names: every probe cell runs through `scripts/recompute_all.sh`, and the statistics come from `scripts/build_statistics.py` (see `README.md`).
+
 Source issues: repo `MINA.md` (#1, #2, #3, #4, #10). Branch: `revision/journal-hardening`.
 
 ## Locked decisions (2026-05-26)

@@ -80,10 +80,16 @@ class EncoderRegistryTests(unittest.TestCase):
                 return type("Out", (), {"last_hidden_state": hidden})
 
         reductions = embed_sequence_multi_pool(
-            "ACGT", Model(), Tokenizer(), "cpu", max_content_tokens=4, stride=1
+            "ACGT", Model(), Tokenizer(), "cpu", max_content_tokens=4, stride=1,
+            boundary_tokens=False,
         )
-
-        self.assertEqual(set(reductions), {"mean", "special_mean", "max"})
+        # DNA only: special_mean would equal mean and there is no CLS.
+        self.assertEqual(set(reductions), {"mean", "max"})
+        with self.assertRaises(ValueError):
+            embed_sequence_multi_pool(
+                "ACGT", Model(), Tokenizer(), "cpu", max_content_tokens=4, stride=1,
+                boundary_tokens=True,
+            )
 
     def test_multi_pool_allows_models_without_attention_mask_argument(self):
         import torch
@@ -105,7 +111,8 @@ class EncoderRegistryTests(unittest.TestCase):
                 return type("Out", (), {"last_hidden_state": hidden})
 
         reductions = embed_sequence_multi_pool(
-            "AC", Model(), Tokenizer(), "cpu", max_content_tokens=2, stride=1
+            "AC", Model(), Tokenizer(), "cpu", max_content_tokens=2, stride=1,
+            boundary_tokens=True,
         )
 
         self.assertEqual(reductions["mean"].shape, (1, 3))
@@ -178,26 +185,7 @@ class EncoderRegistryTests(unittest.TestCase):
         self.assertIs(_select_backbone(backbone), backbone)
 
 
-class EnformerWindowTests(unittest.TestCase):
-    def test_tss_window_is_centered_on_strand_specific_tss(self):
-        from data_loader.enformer_windows import centered_window
-
-        self.assertEqual(
-            centered_window(seq_region_name="1", start=1000, end=2000, strand=1, length=11),
-            ("1", 995, 1005),
-        )
-        self.assertEqual(
-            centered_window(seq_region_name="2", start=1000, end=2000, strand=-1, length=11),
-            ("2", 1995, 2005),
-        )
-
-    def test_tss_window_clips_to_start_of_chromosome(self):
-        from data_loader.enformer_windows import centered_window
-
-        self.assertEqual(
-            centered_window(seq_region_name="X", start=3, end=50, strand=1, length=10),
-            ("X", 1, 10),
-        )
+# Window geometry (strand, centring, edge padding) is tested in test_tss_windows.py.
 
 
 class FeatureTests(unittest.TestCase):
@@ -209,16 +197,16 @@ class FeatureTests(unittest.TestCase):
         self.assertAlmostEqual(float(features.sum()), 1.0)
 
 
-class RegressionTableTests(unittest.TestCase):
-    def test_regression_table_dataset_names_match_probe_outputs(self):
-        from scripts.build_regression_table import _dataset_name
-
-        self.assertIsNone(_dataset_name("kmer"))
-        self.assertEqual(_dataset_name("dnabert2"), "dataset.parquet")
-        self.assertEqual(_dataset_name("nt_v2"), "dataset_nt_v2.parquet")
-        self.assertEqual(_dataset_name("gena_lm_meanD"), "dataset_gena_lm_meanD.parquet")
-        self.assertEqual(_dataset_name("hyena_dna_meanG"), "dataset_hyena_dna_meanG.parquet")
-
-
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_centermean_is_a_tss_only_pool():
+    """centermean is the E5 template, not a CDS sweep pool (it leaked in at caf37dc)."""
+    from data_loader.pooling_aggregator import POOLING_VARIANTS, TSS_POOLING_VARIANTS
+    import train_logistic_probe as tlp
+
+    assert "centermean" not in POOLING_VARIANTS
+    assert "centermean" in TSS_POOLING_VARIANTS
+    assert "dnabert2_centermean" not in tlp.DATASET_PATHS
+    assert "tss_dnabert2_centermean" in tlp.DATASET_PATHS

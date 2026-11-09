@@ -1,34 +1,33 @@
 {
-  "description": "Small excerpt of data/bootstrap_metrics.json.",
+  "description": "Shape of data/v2/statistics.json (one entry per block; values are placeholders, not results).",
   "stage": "5",
-  "output_path": "data/bootstrap_metrics.json",
+  "output_path": "data/v2/statistics.json",
   "n_iters": 1000,
   "seed": 42,
-  "classification": {
-    "nt_v2_meanD": {
-      "n_test": 487,
-      "macro_f1_point": 0.8217501798862885,
-      "macro_f1_ci95": [
-        0.7703437947582884,
-        0.8678608106688873
-      ],
-      "kappa_point": 0.8147213712180372,
-      "kappa_ci95": [
-        0.7711213241703302,
-        0.854667233825005
-      ],
+  "confirmatory": {
+    "T1 encoder > nucleotide k-mer": {
+      "metric": "test_macro_f1",
+      "delta_point": null,
+      "delta_ci95": [null, null],
+      "p_one_sided": null,
+      "p_holm": null,
       "n_iters": 1000
     }
   },
-  "regression": {
-    "dnabert2_meanG": {
-      "n_test": 487,
-      "r2_macro_point": 0.21035631000995636,
-      "r2_macro_ci95": [
-        0.18498972468078137,
-        0.23152391016483306
-      ],
+  "intervals": {
+    "splits.json/family5/kmer": {
+      "metric": "test_macro_f1",
+      "point": null,
+      "ci95": [null, null],
+      "kappa_ci95": [null, null],
       "n_iters": 1000
+    }
+  },
+  "null_bands": {
+    "splits.json/family5/kmer": {
+      "median": null,
+      "band95": [null, null],
+      "n": 200
     }
   }
 }
