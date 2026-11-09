@@ -20,7 +20,7 @@ A missing cell raises.
   tss_context.png, tss_context_r2.png  -- TSS arm, macro-F1 (main text) and Ridge-to-GenePT
         R^2 (appendix), all on the disjoint split so the CDS and TSS bars score the
         same test genes: per model, CDS vs TSS whole-window vs TSS-Anchored,
-        Enformer pooled to match, plus the anchored chunk's best composition
+        Enformer pooled to match, plus the anchored chunk's selected composition
         baseline (sec 3.4).
   split_bars.png  -- random vs primary split, macro-F1, CDS (homology) and TSS
         (disjoint) panels, every encoder, each split re-selected on its own
@@ -238,7 +238,7 @@ def fig_tss_context():
               Patch(facecolor="#777", alpha=0.75, edgecolor="#222", linewidth=0.9,
                     label="TSS-Anchored (Enformer: central 2,048 bp)"),
               plt.Line2D([], [], marker="D", color="#222", ls="", markersize=5,
-                         label="best composition of the anchored chunk")]
+                         label="selected composition of the anchored chunk")]
     # (file, series, ylabel, ylim, label format, label offset): the macro-F1 panel is the
     # main-text figure; the R^2 panel goes to the appendix, every TSS cell being below zero.
     panels = [("tss_context.png", (cds, whole, anchored, comp), "5-way family macro-F1", (0, 0.95), "{:.2f}", 0.008),

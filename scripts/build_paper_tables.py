@@ -729,8 +729,8 @@ def build_tss_disjoint():
 # ===================================================================
 # E5: TSS-Anchored vs whole-window pooling, both splits. Whole-window and
 # anchored cells carry their cluster-bootstrap CIs; an anchored cell is bold when
-# the paired anchored - whole-window interval excludes 0 (caption: "Bold: the
-# paired difference's 95% CI excludes 0"); the last column is the
+# the paired anchored - whole-window interval lies above 0 (a reliable gain; a
+# significant loss is not bold, since bold reads as a win); the last column is the
 # validation-selected composition (4-mer+GC or 6-mer) of the same anchored chunk.
 # ===================================================================
 def _paired(split_name: str, label: str, a: dict, b: dict) -> dict:
@@ -753,7 +753,7 @@ def _delta_cell(d: dict) -> str:
 
 def build_tss_anchored():
     """Every cell carries its cluster-bootstrap CI; an anchored cell is bold when the
-    paired anchored - whole-window interval excludes 0 on either side (G26)."""
+    paired anchored - whole-window interval lies above 0 (G26)."""
     out = []
     for split, name, title in ((HOM, CDS, "Homology-aware split"),
                                (DIS, TSS, "Genomic-interval-disjoint split")):
@@ -771,8 +771,7 @@ def build_tss_anchored():
         def anchored_txt(src, d):
             c = interval(name, "family5", src)
             txt = f"{f(c['point'],3)} {_ci(c['ci95'])}"
-            lo, hi = d["delta_ci95"]
-            return bold(txt) if (lo > 0 or hi < 0) else txt
+            return bold(txt) if d["delta_ci95"][0] > 0 else txt
 
         four = by["enformer_tss_4mer"]
         out.append(f"TSS 4-mer & {whole_txt(four)} & --- & --- & --- \\\\")
@@ -827,8 +826,8 @@ def build_paired_diff():
     out.append(r"\midrule")
     out.append(r"\multicolumn{3}{@{}l}{\textbf{Exploratory, GenePT $R^2$ (unadjusted $p$)}}\\")
     ex = STATS["exploratory"]
-    for k in ("aa3 > aa2", "aa_kmer > nt_kmer", "encoder > aa_kmer", "esm2_650m > aa_kmer",
-              "esm2_650m > encoder"):
+    for k in ("aa3 > aa2", "aa_kmer > nt_kmer", "encoder > nt_kmer", "encoder > aa_kmer",
+              "esm2_650m > aa_kmer", "esm2_650m > encoder"):
         d = ex[f"{CDS} genept: {k}"]
         out.append(line(name(d), d, d["p_one_sided"]))
     # CDS - TSS per encoder on the disjoint split (same held-out genes), both metrics

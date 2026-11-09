@@ -41,7 +41,7 @@ class _Split:
         return f"tss_{enc}_chunk4mergc"
 
 
-def _anchored_fixture(monkeypatch, lo, delta=0.1):
+def _anchored_fixture(monkeypatch, lo, delta=0.1, hi=0.2):
     """Every anchored cell 0.40 against a whole window of 0.30; each paired test
     has interval [lo, 0.2] and point ``delta``."""
     per, expl = {}, {}
@@ -53,12 +53,12 @@ def _anchored_fixture(monkeypatch, lo, delta=0.1):
                 by[src] = {"key": f"{split}/{src}", bt.F1: v, "C_sweep": [{"macro_f1": v, "C": 1.0}]}
             expl[f"{split} family5: {enc} anchored > whole-window"] = {
                 "a": f"{split}/tss_{enc}_tssanchored", "b": f"{split}/tss_{enc}_meanmean",
-                "delta_point": delta, "delta_ci95": [lo, 0.2]}
+                "delta_point": delta, "delta_ci95": [lo, hi]}
         for src, v in ((bt.ENF_WHOLE, 0.3), (bt.ENF_CENTRE, 0.4), ("enformer_tss_4mer", 0.28)):
             by[src] = {"key": f"{split}/{src}", bt.F1: v}
         expl[f"{split} family5: Enformer centre > whole"] = {
             "a": f"{split}/{bt.ENF_CENTRE}", "b": f"{split}/{bt.ENF_WHOLE}",
-            "delta_point": delta, "delta_ci95": [lo, 0.2]}
+            "delta_point": delta, "delta_ci95": [lo, hi]}
     monkeypatch.setattr(bt, "HOM", _Split(per[bt.CDS]))
     monkeypatch.setattr(bt, "DIS", _Split(per[bt.TSS]))
     # every displayed cell carries its own interval: anchored cells at 0.40, whole-window
@@ -71,11 +71,12 @@ def _anchored_fixture(monkeypatch, lo, delta=0.1):
     monkeypatch.setattr(bt, "STATS", {"exploratory": expl, "intervals": intervals})
 
 
-@pytest.mark.parametrize("lo,bolded", [(0.001, True), (-0.001, False)])
-def test_anchored_bolding_follows_the_paired_test(monkeypatch, lo, bolded):
-    """G26: bold only when the paired anchored - whole interval excludes 0, even
-    if the anchored CI alone clears the whole-window point."""
-    _anchored_fixture(monkeypatch, lo)
+@pytest.mark.parametrize("lo,hi,bolded", [(0.001, 0.2, True), (-0.001, 0.2, False), (-0.2, -0.001, False)])
+def test_anchored_bolding_follows_the_paired_test(monkeypatch, lo, hi, bolded):
+    """G26: bold only when the paired anchored - whole interval lies above 0, even
+    if the anchored CI alone clears the whole-window point. A significant loss
+    (interval below 0) is not bold: bold reads as a win."""
+    _anchored_fixture(monkeypatch, lo, hi=hi)
     # Each anchored CI alone clears its whole-window point: the old rule always bolded.
     assert ("\\textbf{0.400" in bt.build_tss_anchored()) is bolded
 
