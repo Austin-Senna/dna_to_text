@@ -23,6 +23,7 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
         shuffled-label median (the random split has no null band)
   rr.<source>.{macro,pooled,top5-pct,median-rank}, rr.chance-top5-pct, rr.n-test   ridge_robust.json
   pool.<enc>.spread, pool.between-encoders.spread   CDS family5 macro-F1 ranges
+  pool.fixed-rule.spread.{min,max}       between-encoder range at one rule, over rules all encoders share
   scored.<split>.<arm>.{n,<family>}      scored test genes per family (family5, after the purge)
   t1-t4.ci-half                          half a primary test's interval width (2 dp)
   n.*, purge.*, pop.*, tss-overlap.*, single-chunk.*, selsens.*   counts; tss-overlap
@@ -30,6 +31,8 @@ splits; ``<task>`` is f5 or gp; sources and labels are lower-case slugs):
         partition, and tss-overlap.scored.* over the test genes left after the purge
   n.family.<fam>, n.clusters, n.shared-cluster   family sizes; 40% protein clusters and the
         genes in a cluster of two or more (counts.json)
+  leak.<split>.test-relative.{n,pct}        test genes sharing a 40% protein cluster with a
+        train or validation gene (rand: the leak; hom: 0 by construction)
   edge.nonconverged                      probe cells whose pick sits next to a fit that
         did not converge, on the grid or in an extension (unshuffled records)
   seed.<cds|tss>.test-shared.{min,max}-pct   test genes any two of the four seed splits
@@ -274,6 +277,23 @@ def _counts(out: Keys) -> None:
     _rebuttal(out)
 
 
+def _split_leakage(out: Keys) -> None:
+    """Test genes whose 40% protein cluster also holds a train or validation gene, per split."""
+    cluster = {}
+    for line in (R.REPO_ROOT / "data" / "clusters" / "homology_id40.tsv").read_text().splitlines():
+        rep, member = line.split()
+        cluster[member] = rep
+    for sk, split_file in (("rand", bt.RAND), ("hom", bt.CDS)):
+        d = json.loads((R.REPO_ROOT / "data" / split_file).read_text())
+        seen = {cluster[g] for g in d["train"] + d["val"]}
+        leaked = sum(cluster[g] in seen for g in d["test"])
+        if sk == "hom" and leaked:
+            raise R.MixedRecords(f"{split_file}: {leaked} test genes share a cluster with training")
+        out[f"leak.{sk}.test-relative.n"] = count(leaked)
+        out[f"leak.{sk}.test-relative.pct"] = f"{100 * leaked / len(d['test']):.0f}"
+        out[f"leak.{sk}.test.n"] = count(len(d["test"]))
+
+
 def _rebuttal(out: Keys) -> None:
     """The values the author response gave the reviewers, for the same appendix."""
     for key, d in json.loads(REBUTTAL.read_text())["values"].items():
@@ -381,6 +401,14 @@ def _derived(out: Keys) -> None:
         out[f"pool.{slug(enc)}.spread"] = bt.f(max(vals) - min(vals), 3)
     picks = [bt.HOM.best(e, "cds", "family5")[bt.F1] for e in bt.ENCODERS]
     out["pool.between-encoders.spread"] = bt.f(max(picks) - min(picks), 3)
+    # between-encoder spread at one fixed rule, over the rules every encoder has
+    by_rule: dict[str, list[float]] = {}
+    for src, rec in bt.HOM.cells("cds", "family5").items():
+        if any(src.startswith(enc + "_") for enc in bt.ENCODERS):
+            by_rule.setdefault(bt.pool_of(src), []).append(rec[bt.F1])
+    shared = [max(v) - min(v) for v in by_rule.values() if len(v) == len(bt.ENCODERS)]
+    out["pool.fixed-rule.spread.min"] = bt.f(min(shared), 3)
+    out["pool.fixed-rule.spread.max"] = bt.f(max(shared), 3)
     for r in rr["rows"]:
         if r["key"].startswith(f"{bt.CDS}/cds/genept/"):
             k = f"rr.{slug(r['key'].rsplit('/', 1)[1])}"
@@ -392,6 +420,7 @@ def collect() -> Keys:
     out = Keys()
     _records(out)
     _statistics(out)
+    _split_leakage(out)
     _derived(out)
     _counts(out)
     _selection_sensitivity(out)

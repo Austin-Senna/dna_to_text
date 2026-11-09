@@ -1,5 +1,5 @@
 {
-  "_doc": "Values the MLCB 2026 author response (2026-08-17, tag mlcb-rebuttal-2026-08-17) gave the reviewers, keyed as reb.<key> for the changes-since-submission appendix. Reconstructed from docs/reviews/mlcb2026/reviews_and_responses.md; the response text itself is not in the repository. Every value here predates the camera-ready recompute and most came from the pipeline the recompute corrected.",
+  "_doc": "Values the MLCB 2026 author response (2026-08-17, tag mlcb-rebuttal-2026-08-17) gave the reviewers, keyed as reb.<key> for the changes-since-submission appendix. Reconstructed from docs/reviews/mlcb2026/reviews_and_responses.md; the response text itself is not in the repository. Only numbers that appear in the response text itself are kept (the GENA-LM anchored and Enformer values quoted in later internal notes were removed 2026-11-08). Every value here predates the camera-ready recompute and most came from the pipeline the recompute corrected.",
   "values": {
     "t1": {
       "value": "+0.094 [+0.030, +0.166]",
@@ -15,26 +15,6 @@
       "value": "+0.034 [+0.029, +0.040]",
       "what": "paired AA 3-mer minus AA 2-mer, GenePT R^2",
       "told_to": "R1.3"
-    },
-    "tss.f5.gena-lm-anchored.hom": {
-      "value": "0.432",
-      "what": "GENA-LM TSS-Anchored, homology split (untrained weights)",
-      "told_to": "R2.3"
-    },
-    "tss.f5.gena-lm-anchored.dis": {
-      "value": "0.414",
-      "what": "GENA-LM TSS-Anchored, disjoint split (untrained weights)",
-      "told_to": "R2.3"
-    },
-    "tss.f5.enformer.dis": {
-      "value": "0.319",
-      "what": "Enformer whole-window mean, disjoint split",
-      "told_to": "R2.3"
-    },
-    "tss.f5.enformer-centre.dis": {
-      "value": "0.378",
-      "what": "Enformer central readout, disjoint split",
-      "told_to": "R2.3"
     },
     "tss.f5.dnabert2.dis": {
       "value": "0.254",
@@ -65,6 +45,21 @@
       "value": "\\ensuremath{-}0.014 [\\ensuremath{-}0.021, \\ensuremath{-}0.007]",
       "what": "paired DNABERT-2 minus AA 3-mer, GenePT R^2 (the response quoted it as AA 3-mer minus DNABERT-2, +0.014 [+0.007, +0.021])",
       "told_to": "R1.3"
+    },
+    "rr.chance-top5-pct": {
+      "value": "1.6",
+      "what": "retrieval@5 shuffled floor, percent",
+      "told_to": "R2.4"
+    },
+    "rr.pooled": {
+      "value": "0.193 / 0.085 / 0.061 / 0.005",
+      "what": "pooled variance-weighted R^2: ESM-2 / DNABERT-2 / NT-v2 / GENA-LM",
+      "told_to": "R2.4"
+    },
+    "tss-overlap.pairs": {
+      "value": "922",
+      "what": "overlapping cross-split TSS window pairs, homology split",
+      "told_to": "R2.5"
     }
   }
 }
