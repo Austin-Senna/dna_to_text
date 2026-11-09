@@ -50,17 +50,33 @@ RUN_KEYS = ("encoder", "model", "revision", "max_content_tokens", "stride", "bou
             "device_name", "torch", "cuda")
 
 
-def chunk_counts(encoder: str) -> tuple[dict[str, int], dict]:
-    """Gene -> number of chunks, from the encoder's v2 cache, and the cache's stamp."""
+def pinned_cds_hashes(manifest: Path = DATA / "cds_manifest.tsv") -> dict[str, str]:
+    """Gene -> sha256 of its pinned CDS sequence (scripts/build_cds_manifest.py)."""
+    with manifest.open() as fh:
+        return {row["ensembl_id"]: row["sha256"] for row in csv.DictReader(fh, delimiter="\t")}
+
+
+def chunk_counts(encoder: str, pinned: dict[str, str] | None = None) -> tuple[dict[str, int], dict]:
+    """Gene -> number of chunks, from the encoder's v2 cache, and the cache's stamp.
+
+    Every cache entry must have been extracted from the gene's pinned CDS: a file whose
+    ``input_sha256`` differs from the manifest, or whose gene is not in it, is stale and
+    stops the count rather than leaking into counts.json.
+    """
     cache = ENCODER_SPECS[encoder].chunk_dir
     files = sorted(cache.glob("*.npz"))
     if not files:
         raise FileNotFoundError(f"no v2 chunk cache at {cache}")
+    pinned = pinned_cds_hashes() if pinned is None else pinned
     counts, runs, digest = {}, set(), hashlib.sha256()
     for f in files:
         with np.load(f, allow_pickle=False) as z:
             n = int(z["mean"].shape[0])
             meta = json.loads(str(z["meta"]))
+        if f.stem not in pinned:
+            raise RuntimeError(f"{f}: gene is not in the CDS manifest; stale cache entry")
+        if meta.get("input_sha256") != pinned[f.stem]:
+            raise RuntimeError(f"{f}: cached input_sha256 does not match the pinned CDS; stale cache entry")
         counts[f.stem] = n
         runs.add(tuple(str(meta.get(k)) for k in RUN_KEYS))
         digest.update(f"{f.stem}\t{n}\t{meta.get('input_sha256')}\n".encode())
