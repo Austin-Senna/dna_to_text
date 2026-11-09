@@ -650,7 +650,11 @@ def build_pooling_combined():
     return _side_longtable(
         r"Every cell for 5-way family classification: the primary split (left; CDS on the "
         r"homology-aware split, TSS on the genomic-interval-disjoint split) versus the "
-        r"random-stratified split (right). Each split selects $C$ on its own validation set.",
+        r"random-stratified split (right). Each split selects $C$ on its own validation set. "
+        r"Mean and Mean (Boundary-including) differ only by the boundary tokens: for NT-v2 and "
+        r"GENA-LM they score alike wherever validation picks the same $C$, and on the primary "
+        r"CDS split validation picked a far larger $C$ for Mean on a nearly flat curve, which "
+        r"costs it on test.",
         "tab:s-pooling-full", r"Macro-F1 & $\kappa$ & Accuracy",
         _side_by_side("family5", lambda r: f"{f(r[F1])} & {f(r[K])} & {f(r[ACC])}"))
 

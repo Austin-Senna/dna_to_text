@@ -14,7 +14,7 @@ A missing cell raises.
         drawn beside the 4-mer's; the paper's Figure 2 (Hayden, Oct 2: the band
         depends on the model, so both are shown).
   pooling_heatmap_family5_column.png  -- encoder x pooling macro-F1 heatmap
-        (sec 3.3), colour centred on the CDS 4-mer floor (red below, green above),
+        (sec 3.3), colour centred on the selected CDS k-mer floor (red below, green above),
         boxes on each encoder's validation-selected rule, n/a for boundary-token
         rules on HyenaDNA.
   tss_context.png, tss_context_r2.png  -- TSS arm, macro-F1 (main text) and Ridge-to-GenePT
@@ -353,16 +353,18 @@ HEATMAP_LABELS = {"meanmean": "Mean", "specialmean": "Mean\n(Boundary-incl.)", "
 def fig_pooling_heatmap():
     """Encoder x pooling macro-F1 heatmap (sec 3.3), homology split.
 
-    Colour is centred on the CDS 4-mer floor (white): green above, red below, darker further away, so the
-    claim that pooling alone can move an encoder across composition is visible
-    directly. Boxes mark each encoder's validation-selected rule; boundary-token
+    Colour is centred on the validation-selected CDS nucleotide k-mer (white): green
+    above, red below, darker further away, so the claim that pooling alone can move
+    an encoder across composition is visible directly. Boxes mark each encoder's validation-selected rule; boundary-token
     rules are n/a for encoders pretrained without such a token.
     """
     from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
     from matplotlib.patches import Rectangle
 
     by = R.cells(HOM, "cds", "family5")
-    floor = by["kmer"]["test_macro_f1"]
+    floor_src = R.best_nt_kmer(by)
+    floor = by[floor_src]["test_macro_f1"]
+    floor_name = "6-mer" if floor_src == "kmer6" else "4-mer"
     vals = np.full((len(ENCODERS), len(POOLS)), np.nan)
     for i, enc in enumerate(ENCODERS):
         for j, pool in enumerate(POOLS):
@@ -371,7 +373,7 @@ def fig_pooling_heatmap():
             vals[i, j] = by[f"{enc}_{pool}"]["test_macro_f1"]
     vmin, vmax = float(np.nanmin(vals)), float(np.nanmax(vals))
     norm = TwoSlopeNorm(vmin=min(vmin, floor - 0.01), vcenter=floor, vmax=max(vmax, floor + 0.01))
-    # Two hues only: lightness carries the distance from the floor (white = 4-mer).
+    # Two hues only: lightness carries the distance from the floor (white = the selected k-mer).
     cmap = LinearSegmentedColormap.from_list("floor_rg", ["#b2182b", "#ffffff", "#1b7837"])
     cmap.set_bad("#e6e6e6")
 
@@ -403,7 +405,7 @@ def fig_pooling_heatmap():
     cbar.set_label("macro-F1", fontsize=9)
     ticks = [t for t in (0.3, 0.4, 0.5) if norm.vmin <= t] + [floor] + [t for t in (0.7,) if t <= norm.vmax]
     cbar.set_ticks(ticks)
-    cbar.set_ticklabels([f"4-mer {t:.3f}" if t == floor else f"{t:.1f}" for t in ticks], fontsize=8)
+    cbar.set_ticklabels([f"{floor_name} {t:.3f}" if t == floor else f"{t:.1f}" for t in ticks], fontsize=8)
     cbar.ax.axhline(floor, color="black", lw=1)
     fig.tight_layout()
     fig.savefig(OUT / "pooling_heatmap_family5_column.png", dpi=180, bbox_inches="tight")
