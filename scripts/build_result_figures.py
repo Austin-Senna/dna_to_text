@@ -17,8 +17,8 @@ A missing cell raises.
         (sec 3.3), colour centred on the CDS 4-mer floor (red below, green above),
         boxes on each encoder's validation-selected rule, n/a for boundary-token
         rules on HyenaDNA.
-  tss_context.png  -- TSS arm in two panels, macro-F1 (left) and Ridge-to-GenePT
-        R^2 (right), all on the disjoint split so the CDS and TSS bars score the
+  tss_context.png, tss_context_r2.png  -- TSS arm, macro-F1 (main text) and Ridge-to-GenePT
+        R^2 (appendix), all on the disjoint split so the CDS and TSS bars score the
         same test genes: per model, CDS vs TSS whole-window vs TSS-Anchored,
         Enformer pooled to match, plus the anchored chunk's best composition
         baseline (sec 3.4).
@@ -228,44 +228,49 @@ def fig_tss_context():
 
     x = np.arange(len(cats))
     w = 0.27
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(13.0, 3.8))
     # R^2 limits follow the data: TSS cells sit below zero, by an amount the records set.
     r2_vals = [v for v in cds_r2 + whole_r2 + anchored_r2 + comp_r2 if np.isfinite(v)]
     lo, hi = min(min(r2_vals), 0.0), max(max(r2_vals), 0.0)
     pad = 0.2 * (hi - lo)
     r2_lim = (lo - pad, hi + pad)
-    panels = [(axL, cds, whole, anchored, comp, "5-way family macro-F1", (0, 0.95), "{:.2f}", 0.008),
-              (axR, cds_r2, whole_r2, anchored_r2, comp_r2, "Ridge-to-GenePT $R^2$", r2_lim, "{:.3f}",
-               0.015 * (r2_lim[1] - r2_lim[0]))]
-    for ax, c, wv, an, cp, ylabel, ylim, fmt, dy in panels:
+    legend = [Patch(facecolor="#777", label="CDS"),
+              Patch(facecolor="#777", alpha=0.4, hatch="//", label="TSS window, whole-window pooling"),
+              Patch(facecolor="#777", alpha=0.75, edgecolor="#222", linewidth=0.9,
+                    label="TSS-Anchored (Enformer: central 2,048 bp)"),
+              plt.Line2D([], [], marker="D", color="#222", ls="", markersize=5,
+                         label="best composition of the anchored chunk")]
+    # (file, series, ylabel, ylim, label format, label offset): the macro-F1 panel is the
+    # main-text figure; the R^2 panel goes to the appendix, every TSS cell being below zero.
+    panels = [("tss_context.png", (cds, whole, anchored, comp), "5-way family macro-F1", (0, 0.95), "{:.2f}", 0.008),
+              ("tss_context_r2.png", (cds_r2, whole_r2, anchored_r2, comp_r2), "Ridge-to-GenePT $R^2$", r2_lim,
+               "{:.3f}", 0.015 * (r2_lim[1] - r2_lim[0]))]
+    for fname, (c, wv, an, cp), ylabel, ylim, fmt, dy in panels:
+        fig, ax = plt.subplots(figsize=(7.4, 4.0))
         ax.bar(x - w, c, w, color=hues, edgecolor="white")
         ax.bar(x, wv, w, color=hues, alpha=0.4, hatch="//", edgecolor="white")
         ax.bar(x + w, an, w, color=hues, alpha=0.75, edgecolor="#222", linewidth=0.9)
         ax.set_ylim(*ylim)
         for xs, vals in ((x - w, c), (x, wv)):
-            _label_bars(ax, xs, vals, fmt=fmt, fontsize=7, dy=dy)
+            _label_bars(ax, xs, vals, fmt=fmt, fontsize=8, dy=dy)
         # the anchored bars share their slot with the chunk-composition diamonds
-        _label_bars(ax, x + w, an, fmt=fmt, fontsize=7, dy=dy, above=[np.nan, *cp, np.nan])
+        _label_bars(ax, x + w, an, fmt=fmt, fontsize=8, dy=dy, above=[np.nan, *cp, np.nan])
         _no_title(ax)
-        ax.set_ylabel(ylabel, fontsize=10)
+        ax.set_ylabel(ylabel, fontsize=11)
         ax.set_xticks(x)
-        ax.set_xticklabels(cats, fontsize=9)
-    axL.scatter(x[1:5] + w, comp, marker="D", s=22, color="#222", zorder=3)
-    axR.scatter(x[1:5] + w, comp_r2, marker="D", s=22, color="#222", zorder=3)
-    _shade_null(axL, band, label=False)
-    axR.axhline(0, color="#555", lw=0.8)
-    fig.legend(handles=[Patch(facecolor="#777", label="CDS"),
-                        Patch(facecolor="#777", alpha=0.4, hatch="//", label="TSS window, whole-window pooling"),
-                        Patch(facecolor="#777", alpha=0.75, edgecolor="#222", linewidth=0.9,
-                              label="TSS-Anchored (Enformer: central 2,048 bp)"),
-                        plt.Line2D([], [], marker="D", color="#222", ls="", markersize=5,
-                                   label="best composition of the anchored chunk"),
-                        Patch(facecolor="#555", alpha=0.15, label=f"TSS 4-mer shuffled-label band ({band[0]:.2f}-{band[1]:.2f})")],
-               fontsize=8.5, frameon=False, loc="upper center", ncol=5, bbox_to_anchor=(0.5, 1.06))
-
-    fig.tight_layout()
-    fig.savefig(OUT / "tss_context.png", dpi=180, bbox_inches="tight")
-    plt.close(fig)
+        ax.set_xticklabels(cats, fontsize=10)
+        ax.scatter(x[1:5] + w, cp, marker="D", s=26, color="#222", zorder=3)
+        handles = list(legend)
+        if fname == "tss_context.png":
+            _shade_null(ax, band, label=False)
+            handles.append(Patch(facecolor="#555", alpha=0.15,
+                                 label=f"TSS 4-mer shuffled-label band ({band[0]:.2f}-{band[1]:.2f})"))
+        else:
+            ax.axhline(0, color="#555", lw=0.8)
+        fig.legend(handles=handles, fontsize=8.5, frameon=False, loc="upper center", ncol=3,
+                   bbox_to_anchor=(0.5, 1.08))
+        fig.tight_layout()
+        fig.savefig(OUT / fname, dpi=180, bbox_inches="tight")
+        plt.close(fig)
     print("tss_context CDS:", [round(v, 3) for v in cds], "whole:", [round(v, 3) for v in whole],
           "anchored:", [round(v, 3) for v in anchored], "comp:", [round(v, 3) for v in comp])
     print("tss_context R2 CDS:", [round(v, 3) for v in cds_r2], "whole:", [round(v, 3) for v in whole_r2],
