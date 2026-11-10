@@ -24,6 +24,11 @@ for _p in (ROOT, ROOT / "tests", ROOT / "scripts", ROOT / "src"):
 
 import pytest  # noqa: E402
 
+# The paper's LaTeX source is a separate (private) repository, cloned beside the code
+# when the paper is being built. Tests that read it skip when it is absent.
+PAPER = ROOT / "dna_to_text_paper" / "paper"
+needs_paper = pytest.mark.skipif(not PAPER.exists(), reason="paper source not present at dna_to_text_paper/paper")
+
 
 def _split_digests() -> dict[str, str]:
     import hashlib

@@ -32,8 +32,8 @@ The stored predictions live in `outputs/predictions/v2/` (not tracked); each
 record names its file and hash.
 
 Sample input and output shapes are tracked in
-`samples/stage5_bootstrap_input.json` and
-`samples/stage5_bootstrap_output.json`.
+`docs/examples/stage5_bootstrap_input.json` and
+`docs/examples/stage5_bootstrap_output.json`.
 
 ## Relevant Files
 
@@ -229,5 +229,5 @@ and refuse it if any records file has changed since it was written.
 This page states no results. The intervals, tests and bands are in the committed
 `data/v2/statistics.json`, and the point estimates in `data/v2/metrics_*.json`.
 To regenerate them, run `scripts/recompute_all.sh all` (see its header), then this
-script and the other builders in `docs/stage7-paper-figures-tables.md`. The gene
+script and the other builders in `docs/stage6-paper-figures-tables.md`. The gene
 counts above come from `data/v2/counts.json`.

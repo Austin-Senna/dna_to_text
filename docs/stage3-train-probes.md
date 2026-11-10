@@ -1,12 +1,12 @@
 # Stage 3: Train Probes and Baselines
 
 Stage 3 builds the train/validation/test splits and trains family-classification
-and Ridge-to-GenePT probes. The paper's tables are built in Stage 7.
+and Ridge-to-GenePT probes. The paper's tables are built in Stage 6.
 
 ## Sample Files
 
-- Input: `samples/stage3_probe_input.csv`
-- Output: `samples/stage3_probe_output.json`
+- Input: `docs/examples/stage3_probe_input.csv`
+- Output: `docs/examples/stage3_probe_output.json`
 
 ## Full Commands
 
@@ -103,8 +103,6 @@ together they give the determinism checks that `scripts/build_selection_sensitiv
 | `scripts/diff_records.py` | Key-aware diff of two runs: picks, gate fields, predictions, metrics and the builder-level picks; exit 0 (same), 1 (differs), 2 (unusable input). |
 | `scripts/train_logistic_probe.py` | Trains multinomial family5 probes and classification baselines. |
 | `scripts/train_probe.py` | Trains Ridge probes from DNA features into GenePT text embeddings. |
-| `scripts/train_baseline.py` | Runs 4-mer Ridge baseline cells. |
-| `scripts/train_anti_baseline.py` | Runs shuffled-GenePT anti-baseline cells for leakage checks. |
 | `src/cluster/mmseqs_cluster.py` | Translates each CDS, runs `mmseqs easy-cluster` and maps every gene to a cluster (a gene with no CDS becomes a singleton). |
 | `src/splits/make_splits.py` | The random stratified splitter and the greedy whole-cluster, family-balanced assigner. |
 | `src/splits/leaks.py` | The evaluation purge: the rules for each split file (`rules_for`) and each cell's masked genes (`purge_for`). |
@@ -117,8 +115,8 @@ together they give the determinism checks that `scripts/build_selection_sensitiv
 | `src/linear_trainer/logistic_probe.py` | Fitted logistic probe (weights plus the scaler it was fitted with). |
 | `src/linear_trainer/probe.py` | Fitted Ridge probe: prediction and serialization. |
 | `src/kmer_baseline/featurizer.py` | 4-mer composition feature extraction. |
-| `samples/stage3_probe_input.csv` | Tiny example of feature rows entering probe training. |
-| `samples/stage3_probe_output.json` | Tiny example of probe metrics and selected hyperparameters. |
+| `docs/examples/stage3_probe_input.csv` | Tiny example of feature rows entering probe training. |
+| `docs/examples/stage3_probe_output.json` | Tiny example of probe metrics and selected hyperparameters. |
 
 ## Outputs
 
@@ -138,4 +136,4 @@ This page states no results. The current numbers live in the records
 tables come from `scripts/build_paper_tables.py`, and its prose numbers
 (`numbers.tex`) from `scripts/build_numbers.py`. To regenerate them, run
 `scripts/recompute_all.sh all` (see its header), then the builders in
-`docs/stage7-paper-figures-tables.md`.
+`docs/stage6-paper-figures-tables.md`.

@@ -85,19 +85,18 @@ def test_dropped_pools_are_not_registered_or_candidates():
     assert "hyena_dna_meanG" in cells
 
 
+
 def _cls(src, val):
     return {"feature_source": src, "task": "family5", "C": 1.0, "test_macro_f1": 0.5,
             "C_sweep": [{"C": 1.0, "macro_f1": val}]}
 
 
 def test_a_hyena_clsmean_decoy_never_wins_a_pick():
-    import poster_may_records as hc      # the May picks, frozen for the poster
     from data_loader.model_registry import encoder_pools
     from linear_trainer import records as R
 
     recs = {f"hyena_dna_{p}": _cls(f"hyena_dna_{p}", 0.4) for p in encoder_pools("hyena_dna")}
     recs["hyena_dna_clsmean"] = _cls("hyena_dna_clsmean", 0.99)
-    assert hc.best(recs, "hyena_dna_") != "hyena_dna_clsmean"
     assert R.best_pool(recs, "hyena_dna", "cds") != "hyena_dna_clsmean"
 
 

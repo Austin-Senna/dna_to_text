@@ -30,15 +30,12 @@ ALLOWLIST = {
     "scripts/check_split_reproduction.py": "writes a scratch split under its tempdir and the cluster TSV",
     "scripts/build_protein_pairs.py": "writes data/leaks/ only",
     "scripts/recompute_all.py": "writes data/v2/ records; passes split files by path",
-    "scripts/per_dim_r2.py": "writes data/v2/per_dim_r2.json and its figure",
     "scripts/ridge_robust_metrics.py": "writes data/v2/ridge_robust.json",
     "scripts/reproduce_headline.py": "reads split files; writes only its reproduction.json",
     "scripts/build_paper_tables.py": "writes LaTeX fragments into the paper submodule",
     "scripts/build_numbers.py": "writes numbers.tex into the paper submodule",
     "scripts/build_tss_windows.py": "writes the window manifest and its meta",
     "src/cluster/mmseqs_cluster.py": "writes the clustering FASTA",
-    "analysis/demo/cross_modal.py": "demo outputs",
-    "analysis/demo/zero_shot.py": "demo outputs",
 }
 
 

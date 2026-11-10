@@ -16,10 +16,13 @@ import numpy as np
 import pytest
 
 import build_fig1 as bf
+from conftest import needs_paper
 from data_loader.model_registry import ENCODER_SPECS
 from linear_trainer import records as R
 
 HTR1A = "ENSG00000178394"
+
+pytestmark = needs_paper  # every guard reads the .drawio, numbers.tex or the stamp
 
 
 @pytest.fixture(scope="module")

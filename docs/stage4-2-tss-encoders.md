@@ -7,8 +7,8 @@ the same family-classification and GenePT-regression targets.
 
 ## Sample Files
 
-- Input: `samples/stage4_2_tss_encoder_input.json`
-- Output: `samples/stage4_2_tss_encoder_output.json`
+- Input: `docs/examples/stage4_2_tss_encoder_input.json`
+- Output: `docs/examples/stage4_2_tss_encoder_output.json`
 
 ## Full Commands
 
@@ -65,15 +65,15 @@ uv run python scripts/build_statistics.py
 | `src/data_loader/enformer_windows.py` | Supplies the canonical-TSS windows through `read_window`, which checks each against the manifest (Stage 4.1). |
 | `src/data_loader/multi_pool.py` | Shared chunked encoder extraction over long TSS windows; caches in `data/tss_chunk_reductions_v2_<encoder>/` carry a meta record and are refused if built from other windows or another revision, or if they are unstamped or mix GPUs or torch builds (a cache made on another machine is accepted). |
 | `src/data_loader/pooling_aggregator.py` | Builds TSS pooling variants: `meanmean`, `maxmean`, `clsmean`, `meanD`, `meanG` (HyenaDNA has no `clsmean`), plus the E5 `centermean` template. |
-| `samples/stage4_2_tss_encoder_input.json` | Tiny example of context-ablation feature sources and commands. |
-| `samples/stage4_2_tss_encoder_output.json` | Tiny excerpt of the CDS-vs-TSS result table. |
+| `docs/examples/stage4_2_tss_encoder_input.json` | Tiny example of context-ablation feature sources and commands. |
+| `docs/examples/stage4_2_tss_encoder_output.json` | Tiny excerpt of the CDS-vs-TSS result table. |
 
 ## Outputs
 
 - `data/dataset_tss_<encoder>_<pool>.parquet` - TSS-window pooling datasets for all four encoders.
 - `data/dataset_tss_<encoder>_{tssanchored,chunk4mergc,chunk6mer}.parquet` - the E5 anchored pools and their chunk-matched composition baselines.
 - `data/dataset_enformer_trunk_global.parquet`, `data/dataset_enformer_trunk_center.parquet` - Enformer trunk features: the whole-window readout, and the central 16 bins (the E5 counterpart). Both run on both tasks.
-- The CDS vs TSS comparison is built in Stage 7 (`cds_tss.tex`, `tss_context.png`) from the `data/v2/` records. `analysis/tables/context_ablation.md` and `analysis/figures/context_ablation_cds_tss_enformer.png` are retired Stage 6 outputs (May protocol, no generator).
+- The CDS vs TSS comparison is built in Stage 6 (`cds_tss.tex`, `tss_context.png`) from the `data/v2/` records.
 
 ## Splits
 
@@ -90,4 +90,4 @@ and in `data/v2/statistics.json`. The paper's tables come from
 `scripts/build_paper_tables.py` (the substrate ablation is `cds_tss.tex`), and its
 prose numbers (`numbers.tex`) from `scripts/build_numbers.py`. To regenerate them,
 run `scripts/recompute_all.sh all` (see its header), then the builders in
-`docs/stage7-paper-figures-tables.md`.
+`docs/stage6-paper-figures-tables.md`.
