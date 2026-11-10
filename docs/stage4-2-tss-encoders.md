@@ -73,7 +73,7 @@ uv run python scripts/build_statistics.py
 - `data/dataset_tss_<encoder>_<pool>.parquet` - TSS-window pooling datasets for all four encoders.
 - `data/dataset_tss_<encoder>_{tssanchored,chunk4mergc,chunk6mer}.parquet` - the E5 anchored pools and their chunk-matched composition baselines.
 - `data/dataset_enformer_trunk_global.parquet`, `data/dataset_enformer_trunk_center.parquet` - Enformer trunk features: the whole-window readout, and the central 16 bins (the E5 counterpart). Both run on both tasks.
-- The CDS vs TSS comparison is built in Stage 7 (`cds_tss.tex`, `tss_context.png`) from the `data/v2/` records. `analysis/tables/context_ablation.md` and `analysis/figures/context_ablation_cds_tss_enformer.png` are retired Stage 6 outputs (May protocol, no generator).
+- The CDS vs TSS comparison is built in Stage 6 (`cds_tss.tex`, `tss_context.png`) from the `data/v2/` records.
 
 ## Splits
 
@@ -90,4 +90,4 @@ and in `data/v2/statistics.json`. The paper's tables come from
 `scripts/build_paper_tables.py` (the substrate ablation is `cds_tss.tex`), and its
 prose numbers (`numbers.tex`) from `scripts/build_numbers.py`. To regenerate them,
 run `scripts/recompute_all.sh all` (see its header), then the builders in
-`docs/stage7-paper-figures-tables.md`.
+`docs/stage6-paper-figures-tables.md`.

@@ -1,7 +1,7 @@
 # Stage 3: Train Probes and Baselines
 
 Stage 3 builds the train/validation/test splits and trains family-classification
-and Ridge-to-GenePT probes. The paper's tables are built in Stage 7.
+and Ridge-to-GenePT probes. The paper's tables are built in Stage 6.
 
 ## Sample Files
 
@@ -136,4 +136,4 @@ This page states no results. The current numbers live in the records
 tables come from `scripts/build_paper_tables.py`, and its prose numbers
 (`numbers.tex`) from `scripts/build_numbers.py`. To regenerate them, run
 `scripts/recompute_all.sh all` (see its header), then the builders in
-`docs/stage7-paper-figures-tables.md`.
+`docs/stage6-paper-figures-tables.md`.

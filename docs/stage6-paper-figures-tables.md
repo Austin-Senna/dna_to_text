@@ -1,6 +1,6 @@
-# Stage 7: Build Paper Figures and Tables
+# Stage 6: Build Paper Figures and Tables
 
-Stage 7 renders the report-facing figures, LaTeX table fragments and prose numbers
+Stage 6 renders the report-facing figures, LaTeX table fragments and prose numbers
 (`paper/numbers.tex`) that the manuscript (`dna_to_text_paper/`) `\includegraphics` / `\input`s, from the
 camera-ready records in `data/v2/` (read through `linear_trainer.records`) and
 `data/v2/statistics.json`. It writes into the paper's LaTeX source tree (`dna_to_text_paper/`, not part of this repository) and reruns no encoder

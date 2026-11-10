@@ -44,4 +44,4 @@ These files are small, reviewer-readable examples for each stage of the project 
 - Full command: `uv run python scripts/build_statistics.py`
 - Details: `../stage5-bootstrap.md`
 
-Stage 6 (report analysis artifacts) is retired; it has no sample.
+Stage 6 (the paper's figures, tables and numbers) reads the `data/v2/` records and has no sample.
