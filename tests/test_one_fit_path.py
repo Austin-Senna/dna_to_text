@@ -16,9 +16,6 @@ PATTERN = re.compile(r"\bLogisticRegression(CV)?\(|\bRidge(CV)?\(|\bSGD(Classifi
                      r"|from sklearn\.(linear_model|svm) import|import sklearn\.(linear_model|svm)")
 SCANNED = ("scripts", "src", "analysis")
 ALLOWLIST = {
-    "scripts/train_mlp_probe.py": "out of scope: MLP probe, not a linear probe",
-    "analysis/demo/cross_modal.py": "out of scope: demo, not a paper number",
-    "analysis/demo/zero_shot.py": "out of scope: demo, not a paper number",
     # Rule 3: a second fit path on purpose, written without this one, so a bug in
     # one can't hide in both. It produces no paper number, only reproduction.json.
     "scripts/reproduce_headline.py": "independent check: the Rule 3 reimplementation",

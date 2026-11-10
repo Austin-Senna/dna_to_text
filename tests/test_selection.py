@@ -49,20 +49,6 @@ def _cls(src, val):
     return {"feature_source": src, "task": "family5", "C_sweep": [{"C": 1.0, "macro_f1": val}]}
 
 
-def test_a_decoy_pool_never_joins_the_headline_pick():
-    import poster_may_records as hc      # the May picks, frozen for the poster
-    recs = {"tss_dnabert2_meanmean": _cls("tss_dnabert2_meanmean", 0.5),
-            "tss_dnabert2_tssanchored": _cls("tss_dnabert2_tssanchored", 0.9),
-            "tss_dnabert2_centermean": _cls("tss_dnabert2_centermean", 0.8)}
-    assert hc.best(recs, "tss_dnabert2_") == "tss_dnabert2_meanmean"
-
-
-def test_tied_pools_pick_the_same_cell_in_any_record_order():
-    import poster_may_records as hc      # the May picks, frozen for the poster
-    a, b = _cls("nt_v2_meanD", 0.6), _cls("nt_v2_meanmean", 0.6)
-    forward = hc.best({"nt_v2_meanD": a, "nt_v2_meanmean": b}, "nt_v2_")
-    backward = hc.best({"nt_v2_meanmean": b, "nt_v2_meanD": a}, "nt_v2_")
-    assert forward == backward == "nt_v2_meanmean"
 
 
 def _by_source(arm="cds", val=None):
@@ -109,7 +95,7 @@ def test_the_records_picks_never_read_a_test_metric():
 
 
 @pytest.mark.parametrize("script", ["build_paper_tables.py", "build_result_figures.py",
-                                    "build_statistics.py", "build_umap_compare.py"])
+                                    "build_statistics.py"])
 def test_the_builders_have_no_pick_of_their_own(script):
     """Every pick in a builder goes through linear_trainer.records (G14), which
     refuses a partial candidate set."""
@@ -127,13 +113,3 @@ def _decoys():
             decoys.append({"model": "linear_probe", "dataset": ds, "test_r2_macro": 0.99,
                            "alpha_sweep": [{"alpha": 1.0, "r2": 0.99, "mean_cosine": 0.9}]})
     return decoys
-
-
-def test_the_poster_accessors_ignore_decoy_pools():
-    import poster_may_records as brf      # the May accessors, frozen for the poster
-    m, decoyed = brf.M, brf.M + _decoys()
-    for enc in ("dnabert2", "nt_v2", "gena_lm", "hyena_dna"):
-        for tss in (False, True):
-            assert brf._best_cls(decoyed, enc, tss) == brf._best_cls(m, enc, tss)
-            assert brf._best_reg_enc_ctx(decoyed, enc, tss) == brf._best_reg_enc_ctx(m, enc, tss)
-        assert brf._best_reg_enc(decoyed, enc) == brf._best_reg_enc(m, enc)

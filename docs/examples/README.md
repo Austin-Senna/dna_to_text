@@ -20,7 +20,7 @@ These files are small, reviewer-readable examples for each stage of the project 
 
 - Input: `stage3_probe_input.csv`
 - Output: `stage3_probe_output.json`
-- Full commands: `scripts/train_logistic_probe.py`, `scripts/train_probe.py`, and baseline/anti-baseline scripts
+- Full commands: `scripts/train_logistic_probe.py` and `scripts/train_probe.py`
 - Details: `../stage3-train-probes.md`
 
 ## Stage 4.1: Derive TSS Windows

@@ -15,8 +15,7 @@ data/               Splits (primary, seed and robustness), cluster assignments, 
                     evaluation-purge pair table (data/leaks/), window and CDS manifests,
                     the pooled feature parquets, and data/v2/: the camera-ready records
                     of every probe cell and the bootstrap statistics the paper reports.
-analysis/           Generated diagnostics: the TSS-window audits (analysis/tss_overlap/)
-                    and the per-dimension R^2 distribution.
+analysis/           Generated diagnostics: the TSS-window audits (analysis/tss_overlap/).
 docs/examples/      Small input/output examples for each pipeline stage.
 docs/               Stage-level pipeline notes and the Zenodo deposit description.
 tests/              Unit and acceptance tests.
@@ -58,7 +57,6 @@ scripts/recompute_all.sh all        # or shard: scripts/recompute_all.sh all --s
 uv run python scripts/build_statistics.py
 uv run python scripts/ridge_robust_metrics.py
 uv run python scripts/build_counts.py
-uv run python scripts/per_dim_r2.py
 ```
 
 `scripts/reproduce_headline.py` is an independent minimal reimplementation (NumPy, pandas, scikit-learn) of the headline cells; `recompute_all.sh` runs it last and writes `data/v2/reproduction.json`.

@@ -86,15 +86,11 @@ Everything intermediate is cached so reruns are cheap:
 # 1. inspect GenePT structure
 python scripts/prepare_data.py --analyze-only
 
-# 2. preview families (no data fetched)
-python scripts/inspect_families.py
-
-# 3. tiny smoke test end-to-end
+# 2. tiny smoke test end-to-end
 python scripts/prepare_data.py --limit 5
 python scripts/run_encoder.py --device mps    # or cuda / cpu
-python scripts/inspect_data.py
 
-# 4. full run
+# 3. full run
 python scripts/prepare_data.py
 python scripts/run_encoder.py --device mps
 ```

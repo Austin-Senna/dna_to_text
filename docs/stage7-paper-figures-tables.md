@@ -14,7 +14,6 @@ uv run scripts/build_statistics.py       # intervals, paired tests, null bands -
 uv run scripts/ridge_robust_metrics.py   # rotation-invariant Ridge metrics -> data/v2/ridge_robust.json
 uv run scripts/build_counts.py           # single-chunk shares, label noise, templated summaries, seed overlap, translations -> data/v2/counts.json
 uv run scripts/build_result_figures.py   # Results figures -> dna_to_text_paper/paper/figures/
-uv run scripts/build_umap_compare.py     # UMAP figures -> dna_to_text_paper/paper/figures/
 uv run scripts/build_selection_sensitive.py  # the moved cells under both perturbations -> data/v2/selection_sensitive.json
 uv run scripts/build_paper_tables.py     # LaTeX table fragments -> dna_to_text_paper/paper/tables/
 uv run scripts/build_numbers.py          # every prose number -> dna_to_text_paper/paper/numbers.tex
@@ -37,7 +36,6 @@ refitted at 6 threads or on another BLAS kernel carries a dagger (`\sens{}`, def
 | File | What it does |
 | --- | --- |
 | `scripts/build_result_figures.py` | Results figures: comparator macro-F1 / GenePT R^2 (3.1/3.2), encoder x pooling heatmap (3.3), CDS-vs-TSS substrate ablation (3.4), random split against each arm's primary split (3.5: `split_bars.png`, Figure 5, macro-F1 for every encoder on CDS (homology) and the TSS window (disjoint); GenePT R^2 per split is in Table A4). `comparator_f1_bands.png` (the 4-mer and ESM-2 650M shuffled-label bands) is the paper's Figure 2. |
-| `scripts/build_umap_compare.py` | UMAP of the validation-selected NT-v2 CDS and TSS features (Appendix Figure A1). |
 | `scripts/build_statistics.py` | Cluster-bootstrap intervals, paired tests (Holm over the four primary tests, T1-T4), null bands; requires `data/v2/run_complete.json` and a complete, passing `data/v2/reproduction.json` for the same records, and cross-checks T1-T4 against it. |
 | `scripts/build_counts.py` | The gene counts the text states, each with its denominator: single-chunk share per encoder (from the v2 chunk caches), noisy TF and kinase labels and templated GenePT summaries (`src/data_loader/label_audit.py`), the test genes each pair of seed splits shares (CDS and TSS), and the irregular translations in `data/translation_exceptions.tsv`. |
 | `scripts/ridge_robust_metrics.py` | Rescores stored GenePT predictions: pooled R^2 and retrieval; control row = the 200-shuffle null band. |
@@ -45,7 +43,6 @@ refitted at 6 threads or on another BLAS kernel carries a dagger (`\sens{}`, def
 | `scripts/build_selection_sensitive.py` | Merges the two `diff_records.py` reports into the moved-cell list, with every metric delta and the sha256 of the canonical records it applies to. |
 | `scripts/build_numbers.py` | Writes `paper/numbers.tex`: every number the prose states, under a key named for what it measures, replayed through both perturbations like the tables. Computes the homology split's TSS-window overlap itself from the current split and window manifest. Reads the TSS-window composition from `scripts/tss_overlap.py`'s audit table and refuses one built from another window manifest, GTF or gene set. Keys the seed overlap and translation counts from `counts.json` (refusing one built from other seed splits or another translation list), the N-padded TSS windows from the manifest, and the submission's printed values (`subm.*`) from `data/submitted_values.json`. `--check` is the submission gate. Tests: `tests/test_build_numbers.py`, `tests/test_selection_marks.py`. |
 | `scripts/build_fig1.py` | Figure 1 (study design) is Austin's hand-drawn `paper/figures/dna_to_text_detailed.drawio`. The builder owns its panel A gene counts and chunk lengths, panel B chunk settings, and panel C scores (cells located by id), fills them from `numbers.tex` and, for chunk length W (content tokens) and overlap, from `src/data_loader/model_registry.py`, renders `mina_fig1.png` with the pinned headless draw.io image at export scale 0.95 (byte-deterministic; the export hangs above about 1,760 px wide) and writes `mina_fig1.stamp` (the .drawio and PNG digests). Everything else in the drawing is edited by hand, then the builder re-renders. Tests: `tests/test_fig1.py` (cells match `numbers.tex`, panel A's W column matches the registry, stamp matches both files, no result decimal typed outside the builder's cells, and panel B's worked example is HTR1A's real CDS, its one DNABERT-2 chunk at the registry's window and stride, and that chunk's cached embedding). |
-| `scripts/build_poster_figures.py` | Poster PDFs into `poster/figures/` from the frozen May accessors in `scripts/poster_may_records.py` (not for the paper). GENA-LM's CDS cells come from `data/metrics_poster_gena_lm.json` (rerun after the weight-loading fix), and the TSS panel uses the disjoint split. |
 
 ## Inputs
 

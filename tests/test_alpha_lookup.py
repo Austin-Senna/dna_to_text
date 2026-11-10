@@ -12,11 +12,6 @@ def no_records(monkeypatch, tmp_path):
     monkeypatch.setattr(R, "V2", tmp_path)
 
 
-def test_per_dim_r2_refuses_missing_records(no_records):
-    import per_dim_r2
-    with pytest.raises(MissingRecord):
-        per_dim_r2.cells()
-
 
 def test_ridge_robust_refuses_missing_records(no_records):
     import ridge_robust_metrics

@@ -103,8 +103,6 @@ together they give the determinism checks that `scripts/build_selection_sensitiv
 | `scripts/diff_records.py` | Key-aware diff of two runs: picks, gate fields, predictions, metrics and the builder-level picks; exit 0 (same), 1 (differs), 2 (unusable input). |
 | `scripts/train_logistic_probe.py` | Trains multinomial family5 probes and classification baselines. |
 | `scripts/train_probe.py` | Trains Ridge probes from DNA features into GenePT text embeddings. |
-| `scripts/train_baseline.py` | Runs 4-mer Ridge baseline cells. |
-| `scripts/train_anti_baseline.py` | Runs shuffled-GenePT anti-baseline cells for leakage checks. |
 | `src/cluster/mmseqs_cluster.py` | Translates each CDS, runs `mmseqs easy-cluster` and maps every gene to a cluster (a gene with no CDS becomes a singleton). |
 | `src/splits/make_splits.py` | The random stratified splitter and the greedy whole-cluster, family-balanced assigner. |
 | `src/splits/leaks.py` | The evaluation purge: the rules for each split file (`rules_for`) and each cell's masked genes (`purge_for`). |
