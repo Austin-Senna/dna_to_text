@@ -3,7 +3,7 @@
 Stage 7 renders the report-facing figures, LaTeX table fragments and prose numbers
 (`paper/numbers.tex`) that the manuscript (`dna_to_text_paper/`) `\includegraphics` / `\input`s, from the
 camera-ready records in `data/v2/` (read through `linear_trainer.records`) and
-`data/v2/statistics.json`. It writes into the paper submodule and reruns no encoder
+`data/v2/statistics.json`. It writes into the paper's LaTeX source tree (`dna_to_text_paper/`, not part of this repository) and reruns no encoder
 extraction or probes. Every pick is made on validation scores only.
 
 ## Commands
@@ -27,7 +27,7 @@ The prose never types a result: it prints `\val{key}` from `numbers.tex` (key fa
 `scripts/build_numbers.py`'s docstring). Data counts are keyed too (genes, families, clusters,
 partition sizes). Two kinds stay typed: design constants (the 1,536-d GenePT vector, the 196,608 bp
 window, the 2,048 bp centre, 70/15/15) and the curation table and Limitations counts that come from
-the frozen HGNC snapshot and GenePT pickle (re-derivation in `docs/notes/gene_scope_analysis.md`).
+the frozen HGNC snapshot and GenePT pickle.
 `--check` enforces only result decimals; a new typed count needs one of these two reasons. A printed digit that moves when the frozen protocol is
 refitted at 6 threads or on another BLAS kernel carries a dagger (`\sens{}`, defined in
 `paper/header.tex`), in the tables and in the prose alike.

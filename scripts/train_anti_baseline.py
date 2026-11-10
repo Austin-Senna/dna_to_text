@@ -1,7 +1,6 @@
 """Anti-baseline: fit the Ridge probe on shuffled-y pairs, evaluate on real test.
 
-Pipeline-leak sanity gate from the original framework note archived at
-docs/archive/project-history/framework.md. If the scrambled fit still scores
+Pipeline-leak sanity gate. If the scrambled fit still scores
 non-trivially on real test data (R^2 clearly above zero, or cosine close to
 the probe's), the real probe's numbers are suspect and something is joining Y
 to X wrong upstream. Same cell as train_probe.py, with train+val targets

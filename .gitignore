@@ -39,13 +39,10 @@ data/esm2_150m_embeddings/
 data/esm2_650m_embeddings/
 data/esm2_*_embeddings_v2/
 
-# Pitch deck PDF — kept locally, not authoritative source
-Genomics Project (1).pdf
 tss_windows_cache.tar.gz
 ntv2_tss_*outputs.tar.gz
 dist/
 
-# Local snapshot of Austin's data/ tree — large; restore source if caches are lost
 data.zip
 
 # Journal-hardening tooling/artifacts — provisioned locally, not committed
@@ -55,8 +52,7 @@ data/sequences_protein/
 data/tss_masked_windows/
 data/cluster_work/
 
-# CONFIDENTIAL — this is a PUBLIC repo. Peer reviews, rebuttal strategy, and the
-# session handoff stay local: never commit reviews, review analysis, or local paths.
+# Local-only notes (this is a public repo)
 docs/reviews/
 MINA.md
 STATUS.md
@@ -64,3 +60,4 @@ STATUS.md
 # Runtime logs/outputs (contain local absolute paths)
 logs/
 outputs/
+Genomics Project (1).pdf

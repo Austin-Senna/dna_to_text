@@ -1,7 +1,7 @@
 [project]
 name = "dna_to_text"
 version = "0.1.0"
-description = "Cross-modal alignment between DNABERT-2 and GenePT embedding spaces"
+description = "MINA: linear-probe benchmark for frozen DNA encoders"
 requires-python = ">=3.11"
 dependencies = [
     "transformers>=4.40",
