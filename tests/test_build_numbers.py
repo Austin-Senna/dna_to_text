@@ -10,6 +10,7 @@ import pytest
 
 import build_numbers as bn
 import build_paper_tables as bt
+from conftest import needs_paper
 from data_loader.model_registry import ENCODER_SPECS
 from linear_trainer import records as R
 
@@ -267,6 +268,7 @@ def test_translation_and_padding_keys_match_their_files(numbers):
     assert numbers["tss-pad.max-bp"] == bn.count(max(padded))
 
 
+@needs_paper
 def test_table_a3_cds_and_tss_rows_score_the_same_genes(numbers):
     """Table A3 is Figure 4's values: CDS and TSS rows both on the disjoint split, so
     each encoder's CDS minus TSS is the paired CDS-over-TSS delta on the same genes.
@@ -329,6 +331,7 @@ def extraction_mismatches(appendix: str) -> list[str]:
     return out
 
 
+@needs_paper
 def test_the_extraction_paragraph_prints_the_registrys_chunks():
     appendix = (bn.PAPER / "appendix.tex").read_text()
     assert extraction_mismatches(appendix) == []
@@ -358,6 +361,7 @@ def composition_mismatches(appendix: str) -> list[str]:
     return out
 
 
+@needs_paper
 def test_the_dataset_composition_table_counts_the_split_file():
     appendix = (bn.PAPER / "appendix.tex").read_text()
     assert composition_mismatches(appendix) == []

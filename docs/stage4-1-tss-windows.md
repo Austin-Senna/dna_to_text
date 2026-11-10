@@ -6,8 +6,8 @@ computed from pinned Ensembl files, not downloaded as a dataset.
 
 ## Sample Files
 
-- Input: `samples/stage4_1_tss_windows_input.json`
-- Output: `samples/stage4_1_tss_windows_output.json`
+- Input: `docs/examples/stage4_1_tss_windows_input.json`
+- Output: `docs/examples/stage4_1_tss_windows_output.json`
 
 ## Full Commands
 

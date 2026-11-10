@@ -32,8 +32,8 @@ The stored predictions live in `outputs/predictions/v2/` (not tracked); each
 record names its file and hash.
 
 Sample input and output shapes are tracked in
-`samples/stage5_bootstrap_input.json` and
-`samples/stage5_bootstrap_output.json`.
+`docs/examples/stage5_bootstrap_input.json` and
+`docs/examples/stage5_bootstrap_output.json`.
 
 ## Relevant Files
 

@@ -1,6 +1,6 @@
 # Documentation
 
-Stage-level pipeline notes, one per stage of the pipeline described in the top-level `README.md`, plus the Zenodo deposit description. The sample inputs and outputs in `../samples/` follow the same stages.
+Stage-level pipeline notes, one per stage of the pipeline described in the top-level `README.md`, plus the Zenodo deposit description. The sample inputs and outputs in `examples/` follow the same stages.
 
 - `stage1-curate-genes.md` - curate genes, join GenePT/HGNC, and fetch CDS.
 - `stage2-encode-cds.md` - run CDS encoders and build pooling datasets.

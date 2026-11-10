@@ -47,6 +47,7 @@ Where to start depends on what you want to check:
   it uses the repository's `.venv`) checks every stamped file in a clean copy of the repository, rebuilds
   every stamped parquet from the caches, and checks them again. The composition features need the
   encoders' tokenizers, which it fetches from Hugging Face at the pinned revisions.
+- **Packing**: `scripts/build_deposit.py` writes the tarballs, `deposit_manifest.json` and `SHA256SUMS` from a clean tree, choosing every file by a rule that can fail rather than by globbing `data/`.
 - **Extraction (Stages 2 and 4)** needs a GPU. Ours ran on an AWS g5.xlarge (NVIDIA A10G, driver 595.91.07,
   torch 2.11.0+cu130, CUDA 13.0, Python 3.13.13). Model revisions are pinned in
   `src/data_loader/model_registry.py`, and every cache file records its model, revision, input sequence

@@ -6,8 +6,8 @@ reductions, and materializes pooling variants used by the probes.
 
 ## Sample Files
 
-- Input: `samples/stage2_cds_input.fasta`
-- Output: `samples/stage2_encoder_output.json`
+- Input: `docs/examples/stage2_cds_input.fasta`
+- Output: `docs/examples/stage2_encoder_output.json`
 
 ## Full Commands
 
@@ -53,8 +53,8 @@ initialisation, so GENA-LM features extracted before commit `7a0c6e1` came from 
 | `src/data_loader/hyena_dna_encoder.py` | HyenaDNA model loading and embedding helpers. |
 | `src/data_loader/multi_pool.py` | Shared per-chunk embedding loop for pooling variants. |
 | `src/data_loader/pooling_aggregator.py` | Converts per-chunk reductions into fixed-length pooling variants. |
-| `samples/stage2_cds_input.fasta` | Tiny CDS FASTA example entering encoder extraction. |
-| `samples/stage2_encoder_output.json` | Tiny example of pooled feature metadata and vector shape. |
+| `docs/examples/stage2_cds_input.fasta` | Tiny CDS FASTA example entering encoder extraction. |
+| `docs/examples/stage2_encoder_output.json` | Tiny example of pooled feature metadata and vector shape. |
 
 ## Outputs
 

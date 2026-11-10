@@ -7,8 +7,8 @@ corpus.
 
 ## Sample Files
 
-- Input: `samples/stage1_curated_genes_input.csv`
-- Output: `samples/stage1_curated_genes_output.csv`
+- Input: `docs/examples/stage1_curated_genes_input.csv`
+- Output: `docs/examples/stage1_curated_genes_output.csv`
 
 ## Full Command
 
@@ -23,10 +23,11 @@ uv run python scripts/prepare_data.py
 | `scripts/prepare_data.py` | CLI entrypoint for building the curated gene table and fetching CDS sequences. |
 | `src/data_loader/dataset_loader.py` | Loads GenePT and HGNC, defines family regex rules, joins symbols, and assigns each gene to one family. |
 | `src/data_loader/label_audit.py` | The disclosed label and target defects as rules: TF labels that come only from non-C2H2 zinc-finger groups, kinase labels that come only from HGNC kinase groups holding no protein kinase, and genes whose GenePT summary text is shared with another gene (masked in the Stage 5 sensitivity tests). |
-| `src/data_loader/sequence_fetcher.py` | Fetches and caches canonical CDS FASTA from Ensembl REST. |
+| `src/data_loader/sequence_fetcher.py` | Fetches and caches canonical CDS FASTA from Ensembl REST; every read is checked against the manifest below. |
+| `scripts/build_cds_manifest.py` | Writes `data/cds_manifest.tsv`: transcript version and sha256 per gene, so a CDS cache rebuilt from a later Ensembl release or edited by hand is refused instead of silently embedded. |
 | `src/data_loader/pipeline.md` | Older detailed note on the HGNC/GenePT/Ensembl join and cache layout. |
-| `samples/stage1_curated_genes_input.csv` | Tiny example of starting gene/family requests. |
-| `samples/stage1_curated_genes_output.csv` | Tiny example of curated rows after HGNC/GenePT/Ensembl resolution. |
+| `docs/examples/stage1_curated_genes_input.csv` | Tiny example of starting gene/family requests. |
+| `docs/examples/stage1_curated_genes_output.csv` | Tiny example of curated rows after HGNC/GenePT/Ensembl resolution. |
 | `data/gene_table.parquet` | Full curated corpus produced by this stage. |
 | `data/sequences/` | Ignored local CDS FASTA cache used by later stages. |
 

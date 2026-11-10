@@ -17,7 +17,7 @@ data/               Splits (primary, seed and robustness), cluster assignments, 
                     of every probe cell and the bootstrap statistics the paper reports.
 analysis/           Generated diagnostics: the TSS-window audits (analysis/tss_overlap/)
                     and the per-dimension R^2 distribution.
-samples/            Small input/output examples for each pipeline stage.
+docs/examples/      Small input/output examples for each pipeline stage.
 docs/               Stage-level pipeline notes and the Zenodo deposit description.
 tests/              Unit and acceptance tests.
 ```

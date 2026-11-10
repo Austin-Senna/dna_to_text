@@ -7,8 +7,8 @@ the same family-classification and GenePT-regression targets.
 
 ## Sample Files
 
-- Input: `samples/stage4_2_tss_encoder_input.json`
-- Output: `samples/stage4_2_tss_encoder_output.json`
+- Input: `docs/examples/stage4_2_tss_encoder_input.json`
+- Output: `docs/examples/stage4_2_tss_encoder_output.json`
 
 ## Full Commands
 
@@ -65,8 +65,8 @@ uv run python scripts/build_statistics.py
 | `src/data_loader/enformer_windows.py` | Supplies the canonical-TSS windows through `read_window`, which checks each against the manifest (Stage 4.1). |
 | `src/data_loader/multi_pool.py` | Shared chunked encoder extraction over long TSS windows; caches in `data/tss_chunk_reductions_v2_<encoder>/` carry a meta record and are refused if built from other windows or another revision, or if they are unstamped or mix GPUs or torch builds (a cache made on another machine is accepted). |
 | `src/data_loader/pooling_aggregator.py` | Builds TSS pooling variants: `meanmean`, `maxmean`, `clsmean`, `meanD`, `meanG` (HyenaDNA has no `clsmean`), plus the E5 `centermean` template. |
-| `samples/stage4_2_tss_encoder_input.json` | Tiny example of context-ablation feature sources and commands. |
-| `samples/stage4_2_tss_encoder_output.json` | Tiny excerpt of the CDS-vs-TSS result table. |
+| `docs/examples/stage4_2_tss_encoder_input.json` | Tiny example of context-ablation feature sources and commands. |
+| `docs/examples/stage4_2_tss_encoder_output.json` | Tiny excerpt of the CDS-vs-TSS result table. |
 
 ## Outputs
 

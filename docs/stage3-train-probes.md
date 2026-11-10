@@ -5,8 +5,8 @@ and Ridge-to-GenePT probes. The paper's tables are built in Stage 7.
 
 ## Sample Files
 
-- Input: `samples/stage3_probe_input.csv`
-- Output: `samples/stage3_probe_output.json`
+- Input: `docs/examples/stage3_probe_input.csv`
+- Output: `docs/examples/stage3_probe_output.json`
 
 ## Full Commands
 
@@ -117,8 +117,8 @@ together they give the determinism checks that `scripts/build_selection_sensitiv
 | `src/linear_trainer/logistic_probe.py` | Fitted logistic probe (weights plus the scaler it was fitted with). |
 | `src/linear_trainer/probe.py` | Fitted Ridge probe: prediction and serialization. |
 | `src/kmer_baseline/featurizer.py` | 4-mer composition feature extraction. |
-| `samples/stage3_probe_input.csv` | Tiny example of feature rows entering probe training. |
-| `samples/stage3_probe_output.json` | Tiny example of probe metrics and selected hyperparameters. |
+| `docs/examples/stage3_probe_input.csv` | Tiny example of feature rows entering probe training. |
+| `docs/examples/stage3_probe_output.json` | Tiny example of probe metrics and selected hyperparameters. |
 
 ## Outputs
 
