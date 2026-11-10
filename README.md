@@ -29,6 +29,7 @@ Requires Python 3.11 or newer. The camera-ready records were fitted on Python 3.
 
 ```bash
 git clone https://github.com/Austin-Senna/dna_to_text
+cd dna_to_text
 uv sync --frozen
 uv pip install ".[enformer]"   # optional: the Enformer comparator
 ```
@@ -37,18 +38,21 @@ Use `uv run ...` for commands unless `.venv/` is activated.
 
 ## Reproducing the paper's numbers
 
-From the committed records in `data/v2/`:
+The figure, table and number builders read the committed records and statistics in `data/v2/` and write into the paper's LaTeX source at `dna_to_text_paper/paper/`. The paper source is a separate repository, not part of this one; clone it to `dna_to_text_paper/` at the repository root first, or these commands stop on the missing files.
 
 ```bash
-uv run python scripts/build_statistics.py        # cluster-bootstrap intervals, paired tests, null bands
-uv run python scripts/build_selection_sensitive.py
+uv run python scripts/build_selection_sensitive.py  # cells that move under another thread count or BLAS kernel
 uv run python scripts/build_result_figures.py    # figures
 uv run python scripts/build_paper_tables.py      # LaTeX table fragments
 uv run python scripts/build_numbers.py --check   # every number the prose prints
 uv run python scripts/build_fig1.py --check      # Figure 1's numbers; without --check it re-renders (Docker)
 ```
 
-The figure, table and number builders write into the paper's LaTeX source tree at `dna_to_text_paper/paper/`, which is not part of this repository.
+Recomputing the statistics behind those tables (`data/v2/statistics.json`: cluster-bootstrap intervals, paired tests, null bands, label-noise sensitivity) rescores the stored test predictions, so it needs `mina_inputs.tar.gz`, `mina_predictions_v2.tar.gz` and `mina_predictions_v2_nt_v2.tar.gz` from the deposit unpacked at the repository root:
+
+```bash
+uv run python scripts/build_statistics.py
+```
 
 Refitting every probe cell from the deposit (CPU, resumable; records land in `data/v2/`, stored predictions in `outputs/predictions/v2/`):
 
@@ -84,7 +88,10 @@ for enc in dnabert2 nt_v2 gena_lm hyena_dna; do
   uv run python scripts/run_multi_pool_extract.py --encoder $enc
   uv run python scripts/build_pooling_datasets.py --encoder $enc
 done
-uv run python scripts/run_esm2.py
+for size in 150m 650m; do
+  uv run python scripts/run_esm2.py --size "$size"
+  uv run python scripts/build_esm2_datasets.py --size "$size"
+done
 
 # Stage 3: splits (seed 42, then seeds 1, 7, 123)
 uv run python scripts/make_splits.py
