@@ -2,11 +2,11 @@
 
 Code and records for **MINA: Do frozen DNA encoders beat sequence composition? A homology-aware linear-probe benchmark**, by Austin Senna Wijaya and Hayden Leung (Columbia University).
 
-- **Paper:** [`dna_to_text.pdf`](dna_to_text.pdf), the camera-ready version. The PMLR proceedings version is forthcoming.
+- **Paper:** [`bioRxiv`](https://www.biorxiv.org/content/10.64898/2026.05.25.727711), the camera-ready version. The PMLR proceedings version is forthcoming.
 - **Data:** the Zenodo deposit, [doi:10.5281/zenodo.23031890](https://doi.org/10.5281/zenodo.23031890).
 - **Talk:** the MLCB 2026 spotlight, [livestream from 7:09:28](https://www.youtube.com/watch?v=InMKK32qHXs&t=25768s).
 - **Slides and poster:** [`presentations/`](presentations/), the spotlight slides and the MLCB 2026 poster (PDF).
-- **Code behind every number in the paper:** the tag [`mlcb2026-camera-ready`](https://github.com/Austin-Senna/dna_to_text/tree/mlcb2026-camera-ready).
+- **Code behind every number in the paper:** the tag [`mlcb2026-camera-ready`](https://github.com/Austin-Senna/dna_to_text/tree//mlcb2026-camera-ready-repo).
 
 MINA asks what the frozen embeddings of four DNA encoders (DNABERT-2, Nucleotide Transformer v2, GENA-LM, HyenaDNA) make linearly accessible about the protein a gene encodes, on 3,244 human genes from five HGNC families. Two linear probes read each embedding: 5-way family classification and ridge regression onto the gene's GenePT text-summary embedding. Every score is anchored by nucleotide and translated amino-acid composition, with ESM-2 as a protein-level upper bound and Enformer as a supervised comparator on TSS windows, and the evaluation varies three choices the paper shows matter as much as the encoder: the pooling rule, the substrate (CDS or a 196,608 bp TSS window) and the split (homology-aware, interval-disjoint or random).
 
