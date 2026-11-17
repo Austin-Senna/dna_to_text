@@ -5,6 +5,7 @@ Code and records for **MINA: Do frozen DNA encoders beat sequence composition? A
 - **Paper:** [`dna_to_text.pdf`](dna_to_text.pdf), the camera-ready version. The PMLR proceedings version is forthcoming.
 - **Data:** the Zenodo deposit, [doi:10.5281/zenodo.23031890](https://doi.org/10.5281/zenodo.23031890).
 - **Talk:** the MLCB 2026 spotlight, [livestream from 7:09:28](https://www.youtube.com/watch?v=InMKK32qHXs&t=25768s).
+- **Slides and poster:** [`presentations/`](presentations/), the spotlight slides and the MLCB 2026 poster (PDF).
 - **Code behind every number in the paper:** the tag [`mlcb2026-camera-ready`](https://github.com/Austin-Senna/dna_to_text/tree/mlcb2026-camera-ready).
 
 MINA asks what the frozen embeddings of four DNA encoders (DNABERT-2, Nucleotide Transformer v2, GENA-LM, HyenaDNA) make linearly accessible about the protein a gene encodes, on 3,244 human genes from five HGNC families. Two linear probes read each embedding: 5-way family classification and ridge regression onto the gene's GenePT text-summary embedding. Every score is anchored by nucleotide and translated amino-acid composition, with ESM-2 as a protein-level upper bound and Enformer as a supervised comparator on TSS windows, and the evaluation varies three choices the paper shows matter as much as the encoder: the pooling rule, the substrate (CDS or a 196,608 bp TSS window) and the split (homology-aware, interval-disjoint or random).
@@ -24,6 +25,7 @@ analysis/           Generated diagnostics: the TSS-window audits (analysis/tss_o
 docs/examples/      Small input/output examples for each pipeline stage.
 docs/               Stage-level pipeline notes and the Zenodo deposit description.
 tests/              Unit and acceptance tests.
+presentations/      The MLCB 2026 poster and spotlight slides (PDF).
 ```
 
 The input sequences, the gene table, per-chunk feature caches, Enformer and ESM-2 features and the stored test predictions are not in git. They are deposited on Zenodo ([doi:10.5281/zenodo.23031890](https://doi.org/10.5281/zenodo.23031890)); every tarball unpacks at the repository root, and `docs/zenodo_deposit.md` lists them. With the deposit unpacked, every step after embedding extraction runs on CPU.
