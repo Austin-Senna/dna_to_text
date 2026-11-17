@@ -1,6 +1,6 @@
-# MINA: a linear-probe benchmark for frozen DNA encoders
+# MINA: a linear-probe benchmark for frozen DNA encoders (MLCB 2026 Spotlight)
 
-Code and records for **MINA: Do frozen DNA encoders beat sequence composition? A homology-aware linear-probe benchmark**, by Austin Senna Wijaya and Hayden Leung (Columbia University), a spotlight at MLCB 2026.
+Code and records for **MINA: Do frozen DNA encoders beat sequence composition? A homology-aware linear-probe benchmark**, by Austin Senna Wijaya and Hayden Leung (Columbia University).
 
 - **Paper:** [`dna_to_text.pdf`](dna_to_text.pdf), the camera-ready version. The PMLR proceedings version is forthcoming.
 - **Data:** the Zenodo deposit, [doi:10.5281/zenodo.23031890](https://doi.org/10.5281/zenodo.23031890).
